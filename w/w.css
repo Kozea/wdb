@@ -1,0 +1,46 @@
+h1 {
+  font-variant: small-caps;
+  color: #444;
+}
+
+h1 small {
+  display: block;
+  color: #ccc;
+  font-size: .5em;
+}
+
+#traceback {
+  font-family: serif;
+}
+
+.traceinfo {
+  font-size: .75em;
+}
+
+.traceline {
+  padding: .25em;
+  background-color: #fcfcff;
+}
+
+.traceline:nth-child(odd) {
+  background-color: #eeefff;
+}
+
+.tracefun {
+  font-weight: bold;
+}
+
+.tracefile {
+  color: #555;
+  text-decoration: underline;
+}
+
+#source {
+  height: 500px;
+  overflow: auto;
+}
+
+.eval {
+  width: 100%;
+  border: 1px solid #ddd;
+}
