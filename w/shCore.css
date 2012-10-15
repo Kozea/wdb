@@ -92,7 +92,7 @@
   width: 100% !important;
   height: 100% !important;
   border: none !important;
-  background: white !important;
+  /* background: white !important; */
   padding-left: 1em !important;
   overflow: hidden !important;
   white-space: pre !important;

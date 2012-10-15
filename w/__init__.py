@@ -134,11 +134,14 @@ class w(object):
 
     def w_get_eval(self, who=None, whose=None, where=None):
         frame = self.tracebacks[int(whose)]['frames'][int(where)]
-        out = sys.stdout
+        print who
         out = sys.stdout
         sys.stdout = StringIO()
         code = compile(who, '<w>', 'single')
-        exec code in frame['globals'], frame['locals']
+        env = {}
+        env.update(frame['globals'])
+        env.update(frame['locals'])
+        exec code in env, frame['locals']
         sys.stdout.seek(0)
         read = sys.stdout.read()
         sys.stdout = out
