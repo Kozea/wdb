@@ -34,7 +34,7 @@
     $('body').append(source);
     get_file = function(file, lno) {
       return function() {
-        return $.ajax('', {
+        return $.ajax('/', {
           dataType: 'json',
           data: {
             __w__: '__w__',
@@ -57,7 +57,7 @@
       };
     };
     get_eval = function(code, id, frame_level, $traceline) {
-      return $.ajax('', {
+      return $.ajax('/', {
         dataType: 'json',
         data: {
           __w__: '__w__',
@@ -67,9 +67,12 @@
           where: frame_level
         }
       }).success(function(data) {
-        var file, pre;
+        var a, file, pre;
         pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + code.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'));
-        $traceline.find('.eval-results').append(pre);
+        if (data.exception) {
+          a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre);
+        }
+        $traceline.find('.eval-results').append(a || pre);
         $traceline.find('.eval').val('').attr('data-index', -1).attr('rows', 1).css({
           color: 'black'
         });

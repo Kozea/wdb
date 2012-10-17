@@ -23,7 +23,7 @@ $ ->
     $('body').append(source)
 
     get_file = (file, lno) ->
-        -> $.ajax('',
+        -> $.ajax('/',
         dataType: 'json',
         data:
             __w__: '__w__',
@@ -39,7 +39,7 @@ $ ->
             ), 100)
             
     get_eval = (code, id, frame_level, $traceline) ->
-        $.ajax('',
+        $.ajax('/',
             dataType: 'json',
             data:
                 __w__: '__w__',
@@ -49,7 +49,9 @@ $ ->
                 where: frame_level
             ).success((data) ->
                 pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + code.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'))
-                $traceline.find('.eval-results').append pre
+                if data.exception
+                    a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre)
+                $traceline.find('.eval-results').append a or pre
                 $traceline.find('.eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
                 file = $traceline.find('.tracefile').text()
                 if not (file of cmd_hist)
@@ -57,6 +59,7 @@ $ ->
                 cmd_hist[file].unshift code
                 persist()
                 SyntaxHighlighter.highlight (brush: 'python', gutter: false), pre.get(0)
+
             ).fail((data) ->
                 $traceline.find('.eval').css color: 'red'
                 setTimeout (-> 
