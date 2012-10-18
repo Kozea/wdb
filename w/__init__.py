@@ -2,10 +2,8 @@ from sys import exc_info
 from urlparse import parse_qs
 from json import dumps, JSONEncoder
 from linecache import getlines, getline, checkcache
-from StringIO import StringIO
 from utils import capture_output
 import os
-import sys
 
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
@@ -26,28 +24,6 @@ class w(object):
         with open(os.path.join(RES_PATH, 'w.html')) as f:
             return f.read()
 
-    @property
-    def js(self):
-        js_files = ['jquery.min', 'XRegExp', 'shCore', 'shBrushPython', 'w']
-        js = []
-        for file in js_files:
-            with open(os.path.join(
-                    RES_PATH,
-                    file + '.js')) as f:
-                js.append(f.read())
-        return '\n'.join(js)
-
-    @property
-    def css(self):
-        css_files = ['shCore', 'shThemeDefault', 'w']
-        css = []
-        for file in css_files:
-            with open(os.path.join(
-                    RES_PATH,
-                    file + '.css')) as f:
-                css.append(f.read())
-        return '\n'.join(css)
-
     def __init__(self, app):
         self.app = app
         self.tracebacks = []
@@ -60,19 +36,22 @@ class w(object):
         else:
             return self.handled_request(environ, start_response)
 
-    def get_trace(self, type_, value, tb):
+    def get_trace(self, type_, value, tb, w_code=None):
         frames = []
         n = 0
-        # tb = tb.tb_next  # Remove w stack line
+        tb = tb.tb_next  # Remove w stack line
         while tb:
             frame = tb.tb_frame
             lno = tb.tb_lineno
             code = frame.f_code
             function_name = code.co_name
             filename = code.co_filename
-            checkcache(filename)
-            line = getline(filename, lno, frame.f_globals)
-            line = line and line.strip()
+            if filename == '<w>' and w_code:
+                line = w_code
+            else:
+                checkcache(filename)
+                line = getline(filename, lno, frame.f_globals)
+                line = line and line.strip()
             frames.append({
                 'file': code.co_filename,
                 'function': function_name,
@@ -84,9 +63,10 @@ class w(object):
             })
             tb = tb.tb_next
             n += 1
+
         return {
             'type': type_.__name__,
-            'value': ' '.join(value).title(),
+            'value': str(value).title(),
             'frames': frames,
             'locals': locals(),
             'globals': globals()
@@ -115,9 +95,7 @@ class w(object):
             trace['id'] = len(self.tracebacks)
             self.tracebacks.append(trace)
             yield self.html.format(
-                trace=dumps(trace, cls=ReprEncoder),
-                js=self.js,
-                css=self.css)
+                trace=dumps(trace, cls=ReprEncoder))
 
     def debugger_request(self, environ, start_response, qs):
         qs = {key: value[0] if len(value) else None
@@ -128,6 +106,10 @@ class w(object):
             mime = 'text/json'
         elif type_ == 'html':
             mime = 'text/html'
+        elif type_ == 'js':
+            mime = 'text/javascript'
+        elif type_ == 'css':
+            mime = 'text/css'
 
         start_response('200 OK', [
             ('Content-Type', mime)])
@@ -149,7 +131,8 @@ class w(object):
                 exec code in env, frame['locals']
             except Exception as e:
                 exec_info = exc_info()
-                trace = self.get_trace(*exec_info)
+                trace = self.get_trace(*exec_info, w_code=who)
+                print who
                 trace['id'] = len(self.tracebacks)
                 self.tracebacks.append(trace)
                 return {'result': e, 'exception': trace['id']}, 'json'
@@ -159,6 +142,8 @@ class w(object):
     def w_get_sub_exception(self, which=None):
         trace = self.tracebacks[int(which)]
         return self.html.format(
-            trace=dumps(trace, cls=ReprEncoder),
-            js=self.js,
-            css=self.css), 'html'
+            trace=dumps(trace, cls=ReprEncoder)), 'html'
+
+    def w_get_resource(self, which=None):
+        with open(os.path.join(RES_PATH, which)) as f:
+            return f.read(), which.split('.')[-1]

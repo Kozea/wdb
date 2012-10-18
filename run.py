@@ -5,13 +5,32 @@ from w import w
 app = Flask(__name__)
 
 
+def make_error():
+    import whatever
+
+
+def relay_error():
+    make_error()
+
+
+def bad_recur(n):
+    1 / n
+    return bad_recur(n - 1)
+
+
 @app.route("/")
-def _():
+def bad_function():
     a = 2
     b = -2
     c = 1 / (a + b) < 0
     print c <b> a
+    relay_error()
     return "Hello World!"
+
+
+@app.route("/long")
+def long_trace():
+    return bad_recur(10)
 
 from log_colorizer import make_colored_stream_handler
 handler = make_colored_stream_handler()
@@ -40,3 +59,4 @@ else:
 
 app.wsgi_app = w(app.wsgi_app)
 app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True)
+# 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char

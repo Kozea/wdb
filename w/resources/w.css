@@ -1,3 +1,8 @@
+body, html {
+   height:100%;
+   overflow: hidden;
+}
+
 h1 {
   font-variant: small-caps;
   color: #444;
@@ -9,8 +14,48 @@ h1 small {
   font-size: .5em;
 }
 
+#source {
+  overflow: hidden;
+  width: 70%;
+  float: left;
+}
+
+#sourcecode {
+  overflow: auto;
+  height: 50%;
+}
+
+#interpreter {
+  overflow: auto;
+  height: 50%;
+}
+
+#eval {
+  width: 95%;
+  font-size: 16px;
+  vertical-align: middle;
+  /* border: none; */
+  background-color: transparent;
+  padding-left: 0;
+}
+
+
+#prompt {
+  padding: .2em 0 .2em 1em;
+  font-size: 1em;
+  font-family: Consolas, 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
+}
+
+#prompt:before {
+  content: ">>> ";
+}
+
 #traceback {
+  overflow-y: auto;
   font-family: serif;
+  float: right;
+  width: 30%;
+  height: 100%;
 }
 
 .traceinfo {
@@ -18,6 +63,7 @@ h1 small {
 }
 
 .traceline {
+  -webkit-transition: 750ms;
   padding: .25em;
   background-color: #fcfcff;
   border-left: 10px solid #eeefff;
@@ -26,6 +72,14 @@ h1 small {
 .traceline:nth-child(odd) {
   background-color: #eeefff;
   border-left: 10px solid #fcfcff;
+}
+
+.traceline.selected {
+  border-color: #ffccdd;
+}
+
+.traceline:hover {
+  border-color: #ffcdcd;
 }
 
 .tracefun {
@@ -37,27 +91,7 @@ h1 small {
   text-decoration: underline;
 }
 
-#source {
-  height: 500px;
-  overflow: auto;
-}
-
-.eval {
-  width: 95%;
-  font-size: 16px;
-  vertical-align: middle;
-  border: none;
-  background-color: transparent;
-  padding-left: 0;
-}
-
-
-.eval-prompt {
-  padding: .2em 0 .2em 1em;
-  font-size: 1em;
-  font-family: Consolas, 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
-}
-
-.eval-prompt:before {
-  content: ">>> ";
+code {
+  word-break: break-all;
+  white-space: pre-wrap;
 }
