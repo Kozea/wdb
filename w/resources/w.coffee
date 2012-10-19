@@ -1,5 +1,6 @@
 file_cache = {}
 
+
 persistable = 'localStorage' of window and window.localStorage
 if persistable and localStorage['__w_cmd_hist']
     try
@@ -14,8 +15,18 @@ persist = ->
         return
     localStorage['__w_cmd_hist'] = JSON.stringify cmd_hist
 
-SyntaxHighlighter.defaults.toolbar = false;
-SyntaxHighlighter.defaults['quick-code'] = false;
+$.SyntaxHighlighter.loadedExtras = true
+$.SyntaxHighlighter.init(
+    debug: true,
+    lineNumbers: false,
+    highlight: false,
+    load: false)
+
+code = (code, classes=[]) ->
+    code = $('<code class="language">' + code + '</code>')
+    for cls in classes
+        code.addClass(cls)
+    code
 
 select = (frame) ->
     select_frame = (frame) ->
@@ -23,10 +34,20 @@ select = (frame) ->
         $('#trace-' + frame.level).addClass('selected')
         $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
         
-    if file_cache[__w.id][frame.level]
+    scrollTo = (lno) ->
+        $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
+        $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
+        
+
+    if frame.file == $('#sourcecode').attr('title')
         select_frame frame
-        $('#sourcecode').html(file_cache[__w.id][frame.level])
-        $('#sourcecode').scrollTop($('.line.number' + frame.lno).position().top - $('#sourcecode').innerHeight() / 2)
+        scrollTo frame.lno
+        
+    else if file_cache[__w.id][frame.file]
+        select_frame frame
+        $('#sourcecode').html(file_cache[__w.id][frame.file])
+        $('#sourcecode').attr('title', frame.file)
+        scrollTo frame.lno
     else
         $.ajax('/',
             dataType: 'json',
@@ -36,38 +57,37 @@ select = (frame) ->
                 which: frame.file
         ).done((data) ->
             select_frame frame
-            pre = $ '<pre>'
-            $('#sourcecode').empty().append pre
-            pre.html data.file
-            setTimeout (->
-                SyntaxHighlighter.highlight((brush: 'python', highlight: [frame.lno]), pre.get(0))
-                $('#sourcecode').scrollTop($('.line.number' + frame.lno).position().top - $('#sourcecode').innerHeight() / 2)
-                file_cache[__w.id][frame.level] = $('#sourcecode').html()
-            ), 100
+            $('#sourcecode').empty().append nh = code(data.file, ['linenums'])
+            nh.syntaxHighlight()
+            $('#sourcecode').attr('title', frame.file)
+            scrollTo frame.lno
+            file_cache[__w.id][frame.file] = $('#sourcecode').html()
         )
 
-execute = (code, id, frame_level) ->
+execute = (snippet, id, frame_level) ->
     $.ajax('/',
         dataType: 'json',
         data:
             __w__: '__w__',
             what: 'eval',
-            who: code,
+            who: snippet,
             whose: id,
             where: frame_level
         ).done((data) ->
-            pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + code.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'))
-            if data.exception
-                a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre)
-            $('#scrollback').prepend a or pre
+            # pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + snippet.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'))
+            # if data.exception
+                # a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre)
+            $('#scrollback').append nh = code(snippet, ['prompted'])
+            nh.syntaxHighlight()
+            $('#scrollback').append nh = code(data.result)
+            nh.syntaxHighlight()
             $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
             file = $('.selected .tracefile').text()
             if not (file of cmd_hist)
                 cmd_hist[file] = []
-            cmd_hist[file].unshift code
+            cmd_hist[file].unshift snippet
             persist()
-            SyntaxHighlighter.highlight (brush: 'python', gutter: false), pre.get(0)
-
+            $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
         ).fail((data) ->
             $('#eval').css color: 'red'
             setTimeout (-> 
@@ -86,8 +106,8 @@ $ ->
     $prompt.append($eval)
     
     $interpreter = $('<div>').attr('id', 'interpreter')
-    $interpreter.append($prompt)
     $interpreter.append($scrollback)
+    $interpreter.append($prompt)
     
     $sourcecode = $('<div>').attr('id', 'sourcecode')
 
@@ -105,25 +125,36 @@ $ ->
             .addClass('traceline')
             .attr('id', 'trace-' + frame.level)
             .attr('data-level', frame.level)
+
+        $tracefile = $('<span>').addClass('tracefile').text(frame.file)
+        $tracelno = $('<span>').addClass('tracelno').text(frame.lno)
+        $tracefun = $('<span>').addClass('tracefun').text(frame.function)
+        
+        $tracefilelno = $('<div>')
+            .addClass('tracefilelno')
+            .append($tracefile)
+            .append($tracelno)
             
-        $traceinfo = $('<div>')
-            .addClass('traceinfo')
-            .append($('<span>').addClass('tracefile').text(frame.file))
-            .append($('<span>').addClass('tracetxt').text(': '))
-            .append($('<span>').addClass('tracelno').text(frame.lno))
-            .append($('<span>').addClass('tracetxt').text(' in '))
-            .append($('<span>').addClass('tracefun').text(frame.function))
+        $tracefunfun = $('<div>')
+            .addClass('tracefunfun')
+            .append($tracefun)
             
+        if frame.file.indexOf('site-packages') > 0
+            suffix = frame.file.split('site-packages').slice(-1)[0]
+            $tracefile.text(suffix)
+            $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr(title: frame.file))
+
         $tracecode = $('<div>')
             .addClass('tracecode')
-            .append($('<pre>').addClass('code').text(frame.code))
+            .append(code(frame.code))
 
-        $traceline.append $traceinfo
+        $traceline.append $tracefilelno
         $traceline.append $tracecode
+        $traceline.append $tracefunfun
         $traceback.prepend $traceline
 
     $('.traceline').each(->
-        SyntaxHighlighter.highlight (brush: 'python', gutter: false), $(@).find('.tracecode .code').get(0)
+        $(@).find('code').syntaxHighlight()
     ).on('click', ->
         select __w.frames[$(@).attr('data-level')] 
     )

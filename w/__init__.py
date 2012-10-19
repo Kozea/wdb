@@ -3,6 +3,7 @@ from urlparse import parse_qs
 from json import dumps, JSONEncoder
 from linecache import getlines, getline, checkcache
 from utils import capture_output
+from cgi import escape
 import os
 
 RES_PATH = os.path.join(
@@ -117,7 +118,7 @@ class w(object):
 
     def w_get_file(self, which=None):
         checkcache(which)
-        return {'file': ''.join(getlines(which))}, 'json'
+        return {'file': escape(''.join(getlines(which)))}, 'json'
 
     def w_get_eval(self, who=None, whose=None, where=None):
         frame = self.tracebacks[int(whose)]['frames'][int(where)]
@@ -145,5 +146,6 @@ class w(object):
             trace=dumps(trace, cls=ReprEncoder)), 'html'
 
     def w_get_resource(self, which=None):
+        which = which.strip('/')
         with open(os.path.join(RES_PATH, which)) as f:
             return f.read(), which.split('.')[-1]
