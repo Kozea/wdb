@@ -57,7 +57,7 @@ class w(object):
                 'file': code.co_filename,
                 'function': function_name,
                 'lno': lno,
-                'code': line,
+                'code': escape(line),
                 'level': n,
                 'locals': frame.f_locals,
                 'globals': frame.f_globals
@@ -138,7 +138,7 @@ class w(object):
                 self.tracebacks.append(trace)
                 return {'result': e, 'exception': trace['id']}, 'json'
 
-        return {'result': '\n'.join(out) + '\n'.join(err)}, 'json'
+        return {'result': escape('\n'.join(out) + '\n'.join(err))}, 'json'
 
     def w_get_sub_exception(self, which=None):
         trace = self.tracebacks[int(which)]

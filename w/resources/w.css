@@ -32,10 +32,9 @@ h1 small {
 }
 
 #eval {
-  width: 95%;
-  font-size: 16px;
+  width: 94%;
   vertical-align: middle;
-  /* border: none; */
+  border: 1px solid #ccc;
   background-color: transparent;
   padding-left: 0;
 }
@@ -43,7 +42,7 @@ h1 small {
 
 #prompt {
   padding: .2em 0;
-  font-size: 1em;
+  font-size: 14px;
   font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
 }
 
