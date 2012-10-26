@@ -1,13 +1,14 @@
 # *-* coding: utf-8 *-*
+from bdb import Bdb
+from cgi import escape
+from json import dumps, loads, JSONEncoder
+from linecache import checkcache, getlines
+from log_colorizer import get_color_logger
+from random import randint
 from sys import exc_info
 from urlparse import parse_qs
-from json import dumps, JSONEncoder
-from linecache import getlines, getline, checkcache
-from utils import capture_output
+from utils import capture_output, get_trace, tb_to_stack
 from websocket import WebSocket
-from cgi import escape
-from random import randint
-from log_colorizer import get_color_logger
 import os
 import sys
 
@@ -77,42 +78,11 @@ class W(object):
         else:
             return self.first_request(environ, start_response, qs)
 
-    def get_trace(self, type_, value, tb, w_code=None):
-        frames = []
-        n = 0
-        tb = tb.tb_next  # Remove w stack line
-        while tb:
-            frame = tb.tb_frame
-            lno = tb.tb_lineno
-            code = frame.f_code
-            function_name = code.co_name
-            filename = code.co_filename
-            if filename == '<w>' and w_code:
-                line = w_code
-            else:
-                checkcache(filename)
-                line = getline(filename, lno, frame.f_globals)
-                line = line and line.strip()
-            frames.append({
-                'file': code.co_filename,
-                'function': function_name,
-                'flno': code.co_firstlineno,
-                'lno': lno,
-                'code': escape(line),
-                'level': n,
-                'locals': frame.f_locals,
-                'globals': frame.f_globals
-            })
-            tb = tb.tb_next
-            n += 1
-
-        return {
-            'type': type_.__name__,
-            'value': str(value).title(),
-            'frames': frames,
-            'locals': locals(),
-            'globals': globals()
-        }
+    def push_trace(self, stack, current, exc_name, exc_desc, w_code=None):
+        trace = get_trace(stack, current, exc_name, exc_desc, w_code)
+        trace['id'] = len(self.tracebacks)
+        self.tracebacks.append(trace)
+        return trace
 
     def handled_request(self, environ, start_response):
         appiter = None
@@ -126,16 +96,16 @@ class W(object):
             if hasattr(appiter, 'close'):
                 appiter.close()
 
-            exec_info = exc_info()
             try:
                 start_response('500 INTERNAL SERVER ERROR', [
                                ('Content-Type', 'text/html')])
             except:
                 pass
 
-            trace = self.get_trace(*exec_info)
-            trace['id'] = len(self.tracebacks)
-            self.tracebacks.append(trace)
+            type_, value, tb = exc_info()
+            stack = tb_to_stack(tb)
+            trace = self.push_trace(
+                stack,  stack[-1][0], type_.__name__, str(value).title())
             yield self.html.format(
                 trace=dumps(trace, cls=ReprEncoder))
 
@@ -176,10 +146,11 @@ class W(object):
                 env.update(frame['locals'])
                 exec code in env, frame['locals']
             except Exception as e:
-                exec_info = exc_info()
-                trace = self.get_trace(*exec_info, w_code=who)
-                trace['id'] = len(self.tracebacks)
-                self.tracebacks.append(trace)
+                type_, value, tb = exc_info()
+                stack = tb_to_stack(tb)
+                trace = self.push_trace(
+                    stack, stack[-1][0], type_.__name__,
+                    str(value).title(), w_code=who)
                 return {'result': e, 'exception': trace['id']}, 'json'
 
         return {'result': escape('\n'.join(out) + '\n'.join(err))}, 'json'
@@ -195,9 +166,6 @@ class W(object):
             return f.read(), which.split('.')[-1]
 
 
-from bdb import Bdb
-
-
 class Hat(Bdb):
 
     def __init__(self, w, skip=None):
@@ -211,81 +179,51 @@ class Hat(Bdb):
             self.ws.wait_for_connect()
             self.connected = True
 
+    def interaction(self, frame, tb=None):
+        stack, i = self.get_stack(frame, tb)
+        trace = self.w.push_trace(stack, frame, 'W', 'TF')
+        self.ws.send(dumps(trace, cls=ReprEncoder))
+        while True:
+            op = self.ws.receive()
+            log.info(op)
+            if op.startswith('get+'):
+                data = loads(op.split('get+')[1])
+                response, type_ = getattr(
+                    self.w, 'w_get_' + data.pop('what'))(**data)
+                if type_ == 'json':
+                    self.ws.send(dumps(response, cls=ReprEncoder))
+                else:
+                    self.ws.send(response)
+            else:
+                {
+                    'STEP': self.set_step,
+                    'NEXT': self.set_next,
+                    'RETURN': self.set_return,
+                    'CONTINUE': self.set_continue,
+                    'QUIT': self.set_quit
+                }[op]()
+                break
+
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
         # if self.stop_here(frame):
-            # self.handle_connection()
-            # self.setup(frame)
-            # sys.exit(1)
+        #     self.handle_connection()
+        #     self.interaction(frame)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",
         if self.stop_here(frame):
             self.handle_connection()
-
-            self.setup(frame)
-            self.print_stack_trace()
-            self.ws.send(self.get_stack_trace())
-            op = self.ws.receive()
-            log.info(op)
-            {
-                'STEP': self.set_step,
-                'NEXT': self.set_next,
-                'RETURN': self.set_return,
-                'UNTIL': self.set_until,
-                'CONTINUE': self.set_continue,
-                'QUIT': self.set_quit
-            }[op]()
+            self.interaction(frame)
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
         # if self.stop_here(frame):
-            # sys.exit(1)
-        # frame.f_locals['__return__'] = return_value
+        #     frame.f_locals['__return__'] = return_value
+        #     self.handle_connection()
+        #     self.interaction(frame)
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
-        # if self.stop_here(frame):
-            # sys.exit(1)
-        # print "USER_EXCEPTION"
-        # exc_type, exc_value, exc_traceback = exc_info
-        # frame.f_locals['__exception__'] = exc_type, exc_value
-        # if type(exc_type) == type(''):
-            # exc_type_name = exc_type
-        # else:
-            # exc_type_name = exc_type.__name__
-
-    def setup(self, frame, traceback=None):
-        self.stack, self.curindex = self.get_stack(frame, traceback)
-        self.curframe = self.stack[self.curindex][0]
-        self.curframe_locals = self.curframe.f_locals
-
-    def print_stack_trace(self):
-        try:
-            for frame_lineno in self.stack:
-                self.print_stack_entry(frame_lineno)
-        except KeyboardInterrupt:
-            pass
-
-    def print_stack_entry(self, frame_lineno, prompt_prefix='\n->'):
-        frame, lineno = frame_lineno
-        if frame is self.curframe:
-            print '>',
-        else:
-            print ' ',
-        print self.format_stack_entry(frame_lineno,
-                                      prompt_prefix)
-
-    def get_stack_trace(self):
-        return '\n'.join(self.get_stack_entry(frame_lineno)
-                         for frame_lineno in self.stack)
-
-    def get_stack_entry(self, frame_lineno, prompt_prefix='\n->'):
-        frame, lineno = frame_lineno
-        s = ''
-        if frame is self.curframe:
-            s += '>'
-        return s + self.format_stack_entry(frame_lineno,
-                                           prompt_prefix)

@@ -22,6 +22,24 @@ $.SyntaxHighlighter.init(
     highlight: false,
     load: false)
 
+get = (data, done, fail) ->
+    if not ws
+        data.__w__ = '__w__'
+        rq = $.ajax('/',
+            dataType: 'json',
+            data: data
+        )
+        if done
+            rq.done done
+        if fail
+            rq.fail fail
+    else
+        ws.send('get+' + JSON.stringify(data))
+        msg_ = ws.onmessage
+        ws.onmessage = (data) ->
+            ws.onmessage = msg_
+            done(JSON.parse(data.data))
+
 code = (code, classes=[]) ->
     code = $('<code class="language">' + code + '</code>')
     for cls in classes
@@ -36,7 +54,7 @@ select = (frame) ->
         
     scrollTo = (lno) ->
         $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-        $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
+        $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 0)
         
 
     if frame.file == $('#sourcecode').attr('title')
@@ -49,31 +67,26 @@ select = (frame) ->
         $('#sourcecode').attr('title', frame.file)
         scrollTo frame.lno
     else
-        $.ajax('/',
-            dataType: 'json',
-            data:
-                __w__: '__w__',
-                what: 'file',
-                which: frame.file
-        ).done((data) ->
-            select_frame frame
-            $('#sourcecode').empty().append nh = code(data.file, ['linenums'])
-            nh.syntaxHighlight()
-            $('#sourcecode').attr('title', frame.file)
-            scrollTo frame.lno
-            file_cache[__w.id][frame.file] = $('#sourcecode').html()
+        get((
+            what: 'file',
+            which: frame.file),
+            ((data) ->
+                select_frame frame
+                $('#sourcecode').empty().append nh = code(data.file, ['linenums'])
+                nh.syntaxHighlight()
+                $('#sourcecode').attr('title', frame.file)
+                scrollTo frame.lno
+                file_cache[__w.id][frame.file] = $('#sourcecode').html()
+            )
         )
 
 execute = (snippet, id, frame_level) ->
-    $.ajax('/',
-        dataType: 'json',
-        data:
-            __w__: '__w__',
-            what: 'eval',
-            who: snippet,
-            whose: id,
-            where: frame_level
-        ).done((data) ->
+    get((
+        what: 'eval',
+        who: snippet,
+        whose: id,
+        where: frame_level),
+        ((data) ->  # done
             # pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + snippet.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'))
             # if data.exception
                 # a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre)
@@ -88,14 +101,16 @@ execute = (snippet, id, frame_level) ->
             cmd_hist[file].unshift snippet
             persist()
             $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
-        ).fail((data) ->
+        ),
+        ((data) ->  # fail
             $('#eval').css color: 'red'
             setTimeout (-> 
                 $('#eval').css color: 'black'), 1000
         )
+    )
 
 
-$ ->
+@w_load = ->
     $('body').append($('<h1>').text(__w.type).append($('<small>').text(__w.value)))
     file_cache[__w.id] = {}
     $scrollback = $('<div>').attr('id', 'scrollback')
@@ -125,6 +140,8 @@ $ ->
             .addClass('traceline')
             .attr('id', 'trace-' + frame.level)
             .attr('data-level', frame.level)
+        if frame.current
+            $traceline.addClass('current')
 
         $tracefile = $('<span>').addClass('tracefile').text(frame.file)
         $tracelno = $('<span>').addClass('tracelno').text(frame.lno)
@@ -209,6 +226,6 @@ $ ->
                             .attr('rows', to_set.split('\n').length)
                         false
 
-    $('.traceline').first().click()
+    $('.traceline.current').click()
     $('#eval').focus()
         

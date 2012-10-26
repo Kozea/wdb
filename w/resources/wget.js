@@ -22,13 +22,19 @@
       return console.log("close " + m);
     };
     ws.onmessage = function(m) {
-      return console.log("message " + m.data);
+      _this.__w = JSON.parse(m.data);
+      $('body').html('');
+      return w_load();
     };
     ws.onerror = function(m) {
       return console.log("error " + m);
     };
-    return ws.onopen = function(m) {
+    ws.onopen = function(m) {
       return console.log("open " + m);
+    };
+    return _this.onbeforeunload = function() {
+      ws.send('QUIT');
+      return void 0;
     };
   });
 
