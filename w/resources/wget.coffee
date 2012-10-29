@@ -1,12 +1,15 @@
 $ =>
+    @loaded = false
     $.ajax(location.href,
         data:
             __h__: "__at__"
-    ).done((data) ->
+    ).done((data) =>
+        @loaded = true
         document.open()
         document.write data
         document.close()
-    ).fail (data) ->
+    ).fail (data) =>
+        @loaded = true
         document.open()
         document.write data.responseText
         document.close()

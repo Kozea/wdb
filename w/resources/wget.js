@@ -4,15 +4,18 @@
 
   $(function() {
     var ws;
+    _this.loaded = false;
     $.ajax(location.href, {
       data: {
         __h__: "__at__"
       }
     }).done(function(data) {
+      _this.loaded = true;
       document.open();
       document.write(data);
       return document.close();
     }).fail(function(data) {
+      _this.loaded = true;
       document.open();
       document.write(data.responseText);
       return document.close();

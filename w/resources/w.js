@@ -34,7 +34,7 @@
 
   get = function(data, done, fail) {
     var msg_, rq;
-    if (!ws) {
+    if (this.loaded) {
       data.__w__ = '__w__';
       rq = $.ajax('/', {
         dataType: 'json',

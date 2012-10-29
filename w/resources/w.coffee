@@ -1,6 +1,5 @@
 file_cache = {}
 
-
 persistable = 'localStorage' of window and window.localStorage
 if persistable and localStorage['__w_cmd_hist']
     try
@@ -23,7 +22,7 @@ $.SyntaxHighlighter.init(
     load: false)
 
 get = (data, done, fail) ->
-    if not ws
+    if @loaded
         data.__w__ = '__w__'
         rq = $.ajax('/',
             dataType: 'json',
