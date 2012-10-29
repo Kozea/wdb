@@ -17,6 +17,14 @@ RES_PATH = os.path.join(
 log = get_color_logger('w')
 
 
+class NoReceiverInPlace(Exception):
+    pass
+
+
+class What(Exception):
+    pass
+
+
 class ReprEncoder(JSONEncoder):
     def default(self, obj):
         try:
@@ -42,8 +50,12 @@ class M(type):
 
     @property
     def tf(cls):
-        log.info('Setting trace')
-        Hat(cls._inst_).set_trace(sys._getframe().f_back)
+        if cls._inst_.receiver_in_place:
+            log.info('Setting trace')
+            Hat(cls._inst_).set_trace(sys._getframe().f_back)
+        else:
+            log.info('Reloading with receiver')
+            raise NoReceiverInPlace
 
 
 class W(object):
@@ -64,6 +76,7 @@ class W(object):
         self.app = app
         self.tracebacks = []
         tries = 1
+        self.receiver_in_place = False
         self.ws = WebSocket('localhost', randint(10000, 60000))
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
@@ -71,15 +84,19 @@ class W(object):
 
     def __call__(self, environ, start_response):
         qs = parse_qs(environ.get('QUERY_STRING', ''))
+        from pprint import pprint
+        pprint(environ)
         if qs.get('__w__', []) == ['__w__']:
             return self.debugger_request(environ, start_response, qs)
-        elif qs.get('__h__', []) == ['__at__']:
+        elif (not qs.get('__w', []) == ['tf__'] or
+              environ.get('HTTP_W_TYPE') == 'Get'):
             return self.handled_request(environ, start_response)
         else:
+            self.receiver_in_place = True
             return self.first_request(environ, start_response, qs)
 
-    def push_trace(self, stack, current, exc_name, exc_desc, w_code=None):
-        trace = get_trace(stack, current, exc_name, exc_desc, w_code)
+    def push_trace(self, stack, exc_name, exc_desc, w_code=None, current=None):
+        trace = get_trace(stack, exc_name, exc_desc, w_code, current)
         trace['id'] = len(self.tracebacks)
         self.tracebacks.append(trace)
         return trace
@@ -92,22 +109,40 @@ class W(object):
                 yield item
             if hasattr(appiter, 'close'):
                 appiter.close()
-        except:
+            self.receiver_in_place = False
+        except NoReceiverInPlace:
+            if hasattr(appiter, 'close'):
+                appiter.close()
+
+            start_response('303 SEE OTHER', [
+                ('Content-Type', 'text/html'),
+                ('Location', '%s?__w=tf__' % environ.get('PATH_INFO'))])
+            yield (
+                '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
+                '<title>Redirecting...</title>\n'
+                '<h1>Redirecting...</h1>\n'
+                '<p>You should be redirected automatically to target '
+                '<a href="%s?__w=tf__">URL</a>.  If not click the link.' %
+                environ.get('PATH_INFO'))
+        except Exception as e:
             if hasattr(appiter, 'close'):
                 appiter.close()
 
             try:
                 start_response('500 INTERNAL SERVER ERROR', [
-                               ('Content-Type', 'text/html')])
+                    ('Content-Type', 'text/html')])
             except:
                 pass
 
             type_, value, tb = exc_info()
             stack = tb_to_stack(tb)
+            if isinstance(e, What):
+                stack.pop(-1)
             trace = self.push_trace(
-                stack,  stack[-1][0], type_.__name__, str(value).title())
+                stack, type_.__name__, str(value).title())
             yield self.html.format(
                 trace=dumps(trace, cls=ReprEncoder))
+            self.receiver_in_place = False
 
     def first_request(self, environ, start_response, qs):
         start_response('200 OK', [('Content-Type', 'text/html')])
@@ -131,11 +166,11 @@ class W(object):
             ('Content-Type', mime)])
         yield response
 
-    def w_get_file(self, which=None):
+    def w_get_file(self, which=None, **kwargs):
         checkcache(which)
         return {'file': escape(''.join(getlines(which)))}, 'json'
 
-    def w_get_eval(self, who=None, whose=None, where=None):
+    def w_get_eval(self, who=None, whose=None, where=None, **kwargs):
         frame = self.tracebacks[int(whose)]['frames'][int(where)]
 
         with capture_output() as (out, err):
@@ -149,18 +184,18 @@ class W(object):
                 type_, value, tb = exc_info()
                 stack = tb_to_stack(tb)
                 trace = self.push_trace(
-                    stack, stack[-1][0], type_.__name__,
+                    stack, type_.__name__,
                     str(value).title(), w_code=who)
                 return {'result': e, 'exception': trace['id']}, 'json'
 
         return {'result': escape('\n'.join(out) + '\n'.join(err))}, 'json'
 
-    def w_get_sub_exception(self, which=None):
+    def w_get_sub_exception(self, which=None, **kwargs):
         trace = self.tracebacks[int(which)]
         return self.html.format(
             trace=dumps(trace, cls=ReprEncoder)), 'html'
 
-    def w_get_resource(self, which=None):
+    def w_get_resource(self, which=None, **kwargs):
         which = which.strip('/')
         with open(os.path.join(RES_PATH, which)) as f:
             return f.read(), which.split('.')[-1]
@@ -181,7 +216,7 @@ class Hat(Bdb):
 
     def interaction(self, frame, tb=None):
         stack, i = self.get_stack(frame, tb)
-        trace = self.w.push_trace(stack, frame, 'W', 'TF')
+        trace = self.w.push_trace(stack, 'W', 'TF', current=frame)
         self.ws.send(dumps(trace, cls=ReprEncoder))
         while True:
             op = self.ws.receive()

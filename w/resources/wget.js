@@ -4,18 +4,18 @@
 
   $(function() {
     var ws;
-    _this.loaded = false;
+    _this.ajaws = true;
     $.ajax(location.href, {
-      data: {
-        __h__: "__at__"
+      headers: {
+        "W-Type": 'Get'
       }
     }).done(function(data) {
-      _this.loaded = true;
+      _this.ajaws = false;
       document.open();
       document.write(data);
       return document.close();
     }).fail(function(data) {
-      _this.loaded = true;
+      _this.ajaws = false;
       document.open();
       document.write(data.responseText);
       return document.close();
@@ -36,7 +36,11 @@
       return console.log("open " + m);
     };
     return _this.onbeforeunload = function() {
-      ws.send('QUIT');
+      try {
+        ws.send('QUIT');
+      } catch (e) {
+        ({});
+      }
       return void 0;
     };
   });

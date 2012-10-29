@@ -1,15 +1,17 @@
 $ =>
-    @loaded = false
+    @ajaws = true
     $.ajax(location.href,
-        data:
-            __h__: "__at__"
+        headers:
+            "W-Type": 'Get'
     ).done((data) =>
-        @loaded = true
+        @ajaws = false
+        # $('body').replaceWith(data);
         document.open()
         document.write data
         document.close()
     ).fail (data) =>
-        @loaded = true
+        @ajaws = false
+        # $('body').replaceWith(data.responseText);
         document.open()
         document.write data.responseText
         document.close()
@@ -26,5 +28,8 @@ $ =>
         # ws.close()
 
     @onbeforeunload = ->
-        ws.send('QUIT')
+        try
+            ws.send('QUIT')
+        catch e
+            {}
         undefined

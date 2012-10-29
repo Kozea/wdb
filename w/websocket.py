@@ -174,7 +174,7 @@ class WebSocket(object):
         log.debug('Handshaken')
 
     def receive(self):
-        log.debug('Receiveng')
+        log.debug('Receiving')
         packet = WsPacket(self.peer)
         log.debug('Received packet')
         if packet.close:

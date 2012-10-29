@@ -34,7 +34,7 @@
 
   get = function(data, done, fail) {
     var msg_, rq;
-    if (this.loaded) {
+    if (!this.ajaws) {
       data.__w__ = '__w__';
       rq = $.ajax('/', {
         dataType: 'json',
@@ -82,7 +82,7 @@
       $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other');
       return $('#sourcecode').animate({
         scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()
-      }, 0);
+      }, 1000);
     };
     if (frame.file === $('#sourcecode').attr('title')) {
       select_frame(frame);

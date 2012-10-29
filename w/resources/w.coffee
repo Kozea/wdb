@@ -22,7 +22,7 @@ $.SyntaxHighlighter.init(
     load: false)
 
 get = (data, done, fail) ->
-    if @loaded
+    if not @ajaws
         data.__w__ = '__w__'
         rq = $.ajax('/',
             dataType: 'json',
@@ -53,7 +53,7 @@ select = (frame) ->
         
     scrollTo = (lno) ->
         $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-        $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 0)
+        $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
         
 
     if frame.file == $('#sourcecode').attr('title')

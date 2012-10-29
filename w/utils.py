@@ -24,15 +24,17 @@ def capture_output():
 
 def tb_to_stack(tb):
     stack = []
-    tb = tb.tb_next  # Remove w stack line
+    # tb = tb.tb_next  # Remove w stack line
     while tb:
         stack.append((tb.tb_frame, tb.tb_lineno))
         tb = tb.tb_next
     return stack
 
 
-def get_trace(stack, current, exc_name, exc_desc, w_code=None):
+def get_trace(stack, exc_name, exc_desc, w_code=None, current=None):
     frames = []
+    if not current and len(stack):
+        current = stack[-1][0]
 
     for i, (frame, lno) in enumerate(stack):
         code = frame.f_code
