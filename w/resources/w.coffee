@@ -1,4 +1,5 @@
 file_cache = {}
+done_fun = null
 
 persistable = 'localStorage' of window and window.localStorage
 if persistable and localStorage['__w_cmd_hist']
@@ -22,19 +23,8 @@ $.SyntaxHighlighter.init(
     load: false)
 
 get = (data, done, fail) ->
-    if not @ajaws
-        data.__w__ = '__w__'
-        rq = $.ajax('/',
-            dataType: 'json',
-            data: data
-        )
-        if done
-            rq.done done
-        if fail
-            rq.fail fail
-    else
-        ws.send('GET|' + JSON.stringify(data))
-        @_done = done
+    ws.send('GET|' + JSON.stringify(data))
+    done_fun = done
 
 code = (code, classes=[]) ->
     code = $('<code class="language">' + code + '</code>')
@@ -116,7 +106,7 @@ execute = (snippet, id, frame_level) ->
     )
 
 
-@w_load = ->
+w_load = ->
     $('body').append($('<h1>').text(__w.type).append($('<small>').text(__w.value)))
     file_cache[__w.id] = {}
     $scrollback = $('<div>').attr('id', 'scrollback')
@@ -235,3 +225,49 @@ execute = (snippet, id, frame_level) ->
     $('.traceline.current').click()
     $('#eval').focus()
         
+$ =>
+    $.ajax(location.href,
+        headers:
+            "W-Type": 'Get'
+    ).done((data) =>
+        # $('body').replaceWith(data);
+        document.open()
+        document.write data
+        document.close()
+    ).fail (data) =>
+        # $('body').replaceWith(data.responseText);
+        document.open()
+        document.write data.responseText
+        document.close()
+
+    @ws = ws = new WebSocket "ws://localhost:" + @__ws_port
+    ws.onclose = (m) -> console.log "close #{m}"
+    ws.onmessage = (m) =>
+        pipe = m.data.indexOf('|')
+        if pipe > -1
+            cmd = m.data.substr(0, pipe)
+            data = m.data.substr(pipe + 1)
+        else
+            cmd = m.data
+
+        switch cmd
+            when 'TRACE'
+                @__w = JSON.parse data
+                $('body').html('')
+                w_load()
+            when 'PING'
+                ws.send('PONG')
+            when 'JSON'
+                done_fun(JSON.parse(data))
+                done_fun = null
+                
+    ws.onerror = (m) -> console.log "WebSocket error", m
+    ws.onopen = (m) ->
+        console.log "WebSocket is open", m
+
+    @onbeforeunload = ->
+        try
+            ws.send('QUIT')
+        catch e
+            {}
+        undefined

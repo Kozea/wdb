@@ -17,14 +17,6 @@ RES_PATH = os.path.join(
 log = get_color_logger('w')
 
 
-class NoReceiverInPlace(Exception):
-    pass
-
-
-class What(Exception):
-    pass
-
-
 class ReprEncoder(JSONEncoder):
     def default(self, obj):
         try:
@@ -50,15 +42,10 @@ class M(type):
 
     @property
     def tf(cls):
-        if cls._inst_.receiver_in_place:
-            log.info('Setting trace')
-            Hat(cls._inst_).set_trace(sys._getframe().f_back)
-        else:
-            log.info('Reloading with receiver')
-            raise NoReceiverInPlace
+        cls._inst_.set_trace(sys._getframe().f_back)
 
 
-class W(object):
+class W(object, Bdb):
     """W debugger main class"""
     __metaclass__ = M
 
@@ -67,18 +54,14 @@ class W(object):
         with open(os.path.join(RES_PATH, 'w.html')) as f:
             return f.read()
 
-    @property
-    def html_get(self):
-        with open(os.path.join(RES_PATH, 'wget.html')) as f:
-            return f.read()
-
-    def __init__(self, app):
+    def __init__(self, app, skip=None):
+        Bdb.__init__(self, skip=skip)
         self.app = app
         self.tracebacks = []
         self.vars = []
         tries = 1
-        self.receiver_in_place = False
         self.ws = WebSocket('localhost', randint(10000, 60000))
+        self.connected = False
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
             self.ws = WebSocket('localhost', randint(10000, 60000))
@@ -87,11 +70,9 @@ class W(object):
         qs = parse_qs(environ.get('QUERY_STRING', ''))
         if qs.get('__w__', []) == ['__w__']:
             return self.debugger_request(environ, start_response, qs)
-        elif (not qs.get('__w', []) == ['tf__'] or
-              environ.get('HTTP_W_TYPE') == 'Get'):
+        elif environ.get('HTTP_W_TYPE') == 'Get':
             return self.handled_request(environ, start_response)
         else:
-            self.receiver_in_place = True
             return self.first_request(environ, start_response, qs)
 
     def push_trace(self, stack, exc_name, exc_desc, w_code=None, current=None):
@@ -109,44 +90,27 @@ class W(object):
                 yield item
             if hasattr(appiter, 'close'):
                 appiter.close()
-            self.receiver_in_place = False
-        except NoReceiverInPlace:
+        except Exception:
             if hasattr(appiter, 'close'):
                 appiter.close()
 
-            start_response('303 SEE OTHER', [
-                ('Content-Type', 'text/html'),
-                ('Location', '%s?__w=tf__' % environ.get('PATH_INFO'))])
-            yield (
-                '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n'
-                '<title>Redirecting...</title>\n'
-                '<h1>Redirecting...</h1>\n'
-                '<p>You should be redirected automatically to target '
-                '<a href="%s?__w=tf__">URL</a>.  If not click the link.' %
-                environ.get('PATH_INFO'))
-        except Exception as e:
-            if hasattr(appiter, 'close'):
-                appiter.close()
-
+            self.handle_connection()
+            type_, value, tb = exc_info()
+            self.interaction(None, type_, value, tb)
             try:
                 start_response('500 INTERNAL SERVER ERROR', [
                     ('Content-Type', 'text/html')])
+                yield (
+                    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">'
+                    '<title>500 Internal Server Error</title>'
+                    '<h1>Internal Server Error</h1>'
+                    '<p>There was an error in your request.</p>')
             except:
                 pass
 
-            type_, value, tb = exc_info()
-            stack = tb_to_stack(tb)
-            if isinstance(e, What):
-                stack.pop(-1)
-            trace = self.push_trace(
-                stack, type_.__name__, str(value).title())
-            yield self.html.format(
-                trace=dumps(trace, cls=ReprEncoder))
-            self.receiver_in_place = False
-
     def first_request(self, environ, start_response, qs):
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html_get.format(port=self.ws.port)
+        yield self.html.format(port=self.ws.port)
 
     def debugger_request(self, environ, start_response, qs):
         qs = {key: value[0] if len(value) else None
@@ -196,15 +160,7 @@ class W(object):
         with open(os.path.join(RES_PATH, which)) as f:
             return f.read(), which.split('.')[-1]
 
-
-class Hat(Bdb):
-
-    def __init__(self, w, skip=None):
-        Bdb.__init__(self, skip=skip)
-        self.ws = w.ws
-        self.connected = False
-        self.w = w
-
+    # WDB
     def handle_connection(self):
         if self.connected:
             self.ws.send('PING')
@@ -219,9 +175,11 @@ class Hat(Bdb):
             self.ws.wait_for_connect()
             self.connected = True
 
-    def interaction(self, frame, tb=None):
+    def interaction(self, frame, type_=None, value=None, tb=None):
         stack, i = self.get_stack(frame, tb)
-        trace = self.w.push_trace(stack, 'W', 'TF', current=frame)
+        exc = type_.__name__ if type_ else 'W'
+        subexc = str(value) if value else 'TF'
+        trace = self.push_trace(stack, exc, subexc, current=frame)
         self.ws.send('TRACE|' + dumps(trace, cls=ReprEncoder))
         while True:
             message = self.ws.receive()
@@ -237,7 +195,7 @@ class Hat(Bdb):
             if cmd == 'GET':
                 data = loads(data)
                 response, type_ = getattr(
-                    self.w, 'w_get_' + data.pop('what'))(**data)
+                    self, 'w_get_' + data.pop('what'))(**data)
                 if type_ == 'json':
                     self.ws.send('JSON|' + dumps(response, cls=ReprEncoder))
                 else:
@@ -245,14 +203,17 @@ class Hat(Bdb):
             elif cmd == 'PING':
                 self.ws.send('PONG')
             elif cmd == 'STEP':
-                self.set_step()
+                if hasattr(self, 'botframe'):
+                    self.set_step()
                 break
             elif cmd == 'CONTINUE':
-                self.set_continue()
+                if hasattr(self, 'botframe'):
+                    self.set_continue()
                 break
             elif cmd == 'QUIT':
-                self.set_quit()
-                self.ws.close()
+                if hasattr(self, 'botframe'):
+                    self.set_quit()
+                    self.ws.close()
                 break
             else:
                 log.warn('Unknown command %s' % cmd)
@@ -260,6 +221,7 @@ class Hat(Bdb):
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
+        log.warn('CALL')
         # if self.stop_here(frame):
         #     self.handle_connection()
         #     self.interaction(frame)
@@ -267,11 +229,13 @@ class Hat(Bdb):
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",
         if self.stop_here(frame):
+            log.warn('LINE')
             self.handle_connection()
             self.interaction(frame)
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
+        log.warn('RETURN')
         # if self.stop_here(frame):
         #     frame.f_locals['__return__'] = return_value
         #     self.handle_connection()
@@ -280,3 +244,5 @@ class Hat(Bdb):
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
+        log.error('Got EXCEPTION %r %r' % (frame, exc_info))
+        sys.exit(0)
