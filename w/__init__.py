@@ -239,9 +239,9 @@ class Hat(Bdb):
                 response, type_ = getattr(
                     self.w, 'w_get_' + data.pop('what'))(**data)
                 if type_ == 'json':
-                    self.ws.send(dumps(response, cls=ReprEncoder))
+                    self.ws.send('JSON|' + dumps(response, cls=ReprEncoder))
                 else:
-                    self.ws.send(response)
+                    self.ws.send('HTML|' + response)
             elif cmd == 'PING':
                 self.ws.send('PONG')
             elif cmd == 'STEP':

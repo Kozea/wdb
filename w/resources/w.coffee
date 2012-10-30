@@ -34,10 +34,7 @@ get = (data, done, fail) ->
             rq.fail fail
     else
         ws.send('GET|' + JSON.stringify(data))
-        msg_ = ws.onmessage
-        ws.onmessage = (data) ->
-            ws.onmessage = msg_
-            done(JSON.parse(data.data))
+        @_done = done
 
 code = (code, classes=[]) ->
     code = $('<code class="language">' + code + '</code>')
@@ -55,6 +52,9 @@ select = (frame) ->
         $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
         $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
         
+
+    if frame.file == '<w>'
+        file_cache[__w.id][frame.file] = 'lol'
 
     if frame.file == $('#sourcecode').attr('title')
         select_frame frame
@@ -80,19 +80,26 @@ select = (frame) ->
         )
 
 execute = (snippet, id, frame_level) ->
+    if snippet.indexOf('.') == 0
+        switch snippet.substr(1)
+            when 's' then @ws.send('STEP')
+            when 'c' then @ws.send('CONTINUE')
+            when 'q' then @ws.send('QUIT')
+        return
     get((
         what: 'eval',
         who: snippet,
         whose: id,
         where: frame_level),
         ((data) ->  # done
-            # pre = $('<pre>').text(' ' + data.result).attr('title', '>>> ' + snippet.replace(/\n/g, '<br>    ').replace(/\s/g, '&nbsp'))
-            # if data.exception
-                # a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception).append(pre)
             $('#scrollback').append nh = code(snippet, ['prompted'])
             nh.syntaxHighlight()
             $('#scrollback').append nh = code(data.result)
             nh.syntaxHighlight()
+            if data.exception
+                a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception)
+                nh.wrap(a)
+            
             $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
             file = $('.selected .tracefile').text()
             if not (file of cmd_hist)

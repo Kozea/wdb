@@ -40,13 +40,16 @@
           return w_load();
         case 'PING':
           return ws.send('PONG');
+        case 'JSON':
+          _this._done(JSON.parse(data));
+          return _this._done = null;
       }
     };
     ws.onerror = function(m) {
-      return console.log("error " + m);
+      return console.log("WebSocket error", m);
     };
     ws.onopen = function(m) {
-      return console.log("open " + m);
+      return console.log("WebSocket is open", m);
     };
     return _this.onbeforeunload = function() {
       try {

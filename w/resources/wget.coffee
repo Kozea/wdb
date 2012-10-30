@@ -33,10 +33,13 @@ $ =>
                 w_load()
             when 'PING'
                 ws.send('PONG')
-    ws.onerror = (m) -> console.log "error #{m}"
+            when 'JSON'
+                @_done(JSON.parse(data))
+                @_done = null
+                
+    ws.onerror = (m) -> console.log "WebSocket error", m
     ws.onopen = (m) ->
-        console.log "open #{m}"
-        # ws.close()
+        console.log "WebSocket is open", m
 
     @onbeforeunload = ->
         try

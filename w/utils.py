@@ -48,8 +48,9 @@ def get_trace(stack, exc_name, exc_desc, w_code=None, current=None):
             checkcache(filename)
             line = getline(filename, lno, frame.f_globals)
             line = line and line.strip()
+
         frames.append({
-            'file': code.co_filename,
+            'file': filename,
             'function': function_name,
             'flno': code.co_firstlineno,
             'lno': lno,

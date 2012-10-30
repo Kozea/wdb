@@ -33,7 +33,7 @@
   });
 
   get = function(data, done, fail) {
-    var msg_, rq;
+    var rq;
     if (!this.ajaws) {
       data.__w__ = '__w__';
       rq = $.ajax('/', {
@@ -48,11 +48,7 @@
       }
     } else {
       ws.send('GET|' + JSON.stringify(data));
-      msg_ = ws.onmessage;
-      return ws.onmessage = function(data) {
-        ws.onmessage = msg_;
-        return done(JSON.parse(data.data));
-      };
+      return this._done = done;
     }
   };
 
@@ -84,6 +80,9 @@
         scrollTop: $('#sourcecode').find('li').eq(lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()
       }, 1000);
     };
+    if (frame.file === '<w>') {
+      file_cache[__w.id][frame.file] = 'lol';
+    }
     if (frame.file === $('#sourcecode').attr('title')) {
       select_frame(frame);
       return scrollTo(frame.lno);
@@ -109,17 +108,34 @@
   };
 
   execute = function(snippet, id, frame_level) {
+    if (snippet.indexOf('.') === 0) {
+      switch (snippet.substr(1)) {
+        case 's':
+          this.ws.send('STEP');
+          break;
+        case 'c':
+          this.ws.send('CONTINUE');
+          break;
+        case 'q':
+          this.ws.send('QUIT');
+      }
+      return;
+    }
     return get({
       what: 'eval',
       who: snippet,
       whose: id,
       where: frame_level
     }, (function(data) {
-      var file, nh;
+      var a, file, nh;
       $('#scrollback').append(nh = code(snippet, ['prompted']));
       nh.syntaxHighlight();
       $('#scrollback').append(nh = code(data.result));
       nh.syntaxHighlight();
+      if (data.exception) {
+        a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception);
+        nh.wrap(a);
+      }
       $('#eval').val('').attr('data-index', -1).attr('rows', 1).css({
         color: 'black'
       });
