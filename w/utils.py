@@ -33,6 +33,8 @@ def tb_to_stack(tb):
 
 def get_trace(stack, exc_name, exc_desc, w_code=None, current=None):
     frames = []
+    vars = []
+
     if not current and len(stack):
         current = stack[-1][0]
 
@@ -53,15 +55,14 @@ def get_trace(stack, exc_name, exc_desc, w_code=None, current=None):
             'lno': lno,
             'code': escape(line),
             'level': i,
-            'locals': frame.f_locals,
-            'globals': frame.f_globals,
             'current': frame == current
         })
-
+        env = {}
+        env.update(frame.f_globals)
+        env.update(frame.f_locals)
+        vars.append(env)
     return {
         'type': exc_name,
         'value': exc_desc,
-        'frames': frames,
-        'locals': locals(),
-        'globals': globals()
-    }
+        'frames': frames
+    }, vars

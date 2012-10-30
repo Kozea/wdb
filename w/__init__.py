@@ -75,6 +75,7 @@ class W(object):
     def __init__(self, app):
         self.app = app
         self.tracebacks = []
+        self.vars = []
         tries = 1
         self.receiver_in_place = False
         self.ws = WebSocket('localhost', randint(10000, 60000))
@@ -84,8 +85,6 @@ class W(object):
 
     def __call__(self, environ, start_response):
         qs = parse_qs(environ.get('QUERY_STRING', ''))
-        from pprint import pprint
-        pprint(environ)
         if qs.get('__w__', []) == ['__w__']:
             return self.debugger_request(environ, start_response, qs)
         elif (not qs.get('__w', []) == ['tf__'] or
@@ -96,9 +95,10 @@ class W(object):
             return self.first_request(environ, start_response, qs)
 
     def push_trace(self, stack, exc_name, exc_desc, w_code=None, current=None):
-        trace = get_trace(stack, exc_name, exc_desc, w_code, current)
+        trace, var = get_trace(stack, exc_name, exc_desc, w_code, current)
         trace['id'] = len(self.tracebacks)
         self.tracebacks.append(trace)
+        self.vars.append(var)
         return trace
 
     def handled_request(self, environ, start_response):
@@ -171,15 +171,11 @@ class W(object):
         return {'file': escape(''.join(getlines(which)))}, 'json'
 
     def w_get_eval(self, who=None, whose=None, where=None, **kwargs):
-        frame = self.tracebacks[int(whose)]['frames'][int(where)]
-
+        env = self.vars[int(whose)][int(where)]
         with capture_output() as (out, err):
             try:
                 code = compile(who, '<w>', 'single')
-                env = {}
-                env.update(frame['globals'])
-                env.update(frame['locals'])
-                exec code in env, frame['locals']
+                exec code in env
             except Exception as e:
                 type_, value, tb = exc_info()
                 stack = tb_to_stack(tb)
@@ -210,6 +206,15 @@ class Hat(Bdb):
         self.w = w
 
     def handle_connection(self):
+        if self.connected:
+            self.ws.send('PING')
+            ret = None
+            try:
+                ret = self.ws.receive()
+            except:
+                log.exception('Ping Failed')
+            self.connected = ret == 'PONG'
+
         if not self.connected:
             self.ws.wait_for_connect()
             self.connected = True
@@ -217,27 +222,40 @@ class Hat(Bdb):
     def interaction(self, frame, tb=None):
         stack, i = self.get_stack(frame, tb)
         trace = self.w.push_trace(stack, 'W', 'TF', current=frame)
-        self.ws.send(dumps(trace, cls=ReprEncoder))
+        self.ws.send('TRACE|' + dumps(trace, cls=ReprEncoder))
         while True:
-            op = self.ws.receive()
-            log.info(op)
-            if op.startswith('get+'):
-                data = loads(op.split('get+')[1])
+            message = self.ws.receive()
+            if '|' in message:
+                pipe = message.index('|')
+                cmd = message[:pipe]
+                data = message[pipe + 1:]
+            else:
+                cmd = message
+                data = ''
+
+            log.info('Cmd %s #Data %d' % (cmd, len(data)))
+            if cmd == 'GET':
+                data = loads(data)
                 response, type_ = getattr(
                     self.w, 'w_get_' + data.pop('what'))(**data)
                 if type_ == 'json':
                     self.ws.send(dumps(response, cls=ReprEncoder))
                 else:
                     self.ws.send(response)
-            else:
-                {
-                    'STEP': self.set_step,
-                    'NEXT': self.set_next,
-                    'RETURN': self.set_return,
-                    'CONTINUE': self.set_continue,
-                    'QUIT': self.set_quit
-                }[op]()
+            elif cmd == 'PING':
+                self.ws.send('PONG')
+            elif cmd == 'STEP':
+                self.set_step()
                 break
+            elif cmd == 'CONTINUE':
+                self.set_continue()
+                break
+            elif cmd == 'QUIT':
+                self.set_quit()
+                self.ws.close()
+                break
+            else:
+                log.warn('Unknown command %s' % cmd)
 
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility

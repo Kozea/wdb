@@ -47,7 +47,7 @@
         return rq.fail(fail);
       }
     } else {
-      ws.send('get+' + JSON.stringify(data));
+      ws.send('GET|' + JSON.stringify(data));
       msg_ = ws.onmessage;
       return ws.onmessage = function(data) {
         ws.onmessage = msg_;

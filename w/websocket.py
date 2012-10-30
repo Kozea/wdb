@@ -1,4 +1,5 @@
 from log_colorizer import get_color_logger
+from StringIO import StringIO
 import array
 import base64
 import hashlib
@@ -12,6 +13,10 @@ OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',
            'close', 'ping', 'pong',
            '?', '?', '?', '?', '?']
+
+
+class WsClosed(Exception):
+    pass
 
 
 class WsHeader(object):
@@ -51,7 +56,6 @@ class WsFrame(object):
         frame = WsFrame()
 
         def unpack(format, bytes):
-            log.debug('Got bytes %r' % bytes)
             return struct.unpack(format, bytes)
 
         header, payload = unpack("BB", get(2))
@@ -63,9 +67,9 @@ class WsFrame(object):
 
         frame.payload_len = payload & 0x7f
         if frame.payload_len == 0x7e:
-            frame.payload_len = unpack('!H', get(2))
+            frame.payload_len, = unpack('!H', get(2))
         elif frame.payload_len == 0x7f:
-            frame.payload_len = unpack('!Q', get(8))
+            frame.payload_len, = unpack('!Q', get(8))
 
         frame.mask = array.array("B", get(4))
         frame.data = array.array("B", get(frame.payload_len))
@@ -109,13 +113,13 @@ class WsFrame(object):
 
 class WsPacket(object):
 
-    def __init__(self, peer, send=None, close=False):
+    def __init__(self, wssocket, send=None, close=False):
         self.close = False
         if not send and not close:  # Receive mode
-            frame = WsFrame.from_socket(peer.recv)
+            frame = WsFrame.from_socket(wssocket._get)
             self.data = frame.data
             while not frame.fin and not frame.type == 'close':
-                frame = WsFrame.from_socket(peer.recv)
+                frame = WsFrame.from_socket(wssocket._get)
                 self.data += frame.data
             if frame.type == 'close':
                 self.close = True
@@ -124,10 +128,10 @@ class WsPacket(object):
 
         elif send:  # Send mode
             self.data = send.encode("utf-8")
-            peer.send(WsFrame.from_data(self.data).data)
+            wssocket._send(WsFrame.from_data(self.data).data)
 
         elif close:
-            peer.send(WsFrame.close().data)
+            wssocket._send(WsFrame.close().data)
 
 
 class WebSocket(object):
@@ -136,6 +140,7 @@ class WebSocket(object):
         log.info('Creating websocket on %s:%d' % (host, port))
         self.host = host
         self.port = port
+        self.stream = StringIO()
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.handshaken = False
@@ -147,6 +152,30 @@ class WebSocket(object):
         else:
             log.debug('Listening on %s:%d' % (host, port))
             self.status = 'OK'
+
+    def _recv(self):
+        packet = self.peer.recv(4096)
+        cur = self.stream.tell()
+        self.stream.read()  # Seek end
+        self.stream.write(packet)
+        self.stream.seek(cur)
+
+    def _get(self, size):
+        message = self.stream.read(size)
+        while len(message) < size:
+            # Stream has been all read, clean it up
+            self.stream.close()
+            del self.stream
+            self.stream = StringIO()
+            self._recv()
+            part = self.stream.read(size - len(message))
+            if part == '':
+                raise WsClosed()
+            message += part
+        return message
+
+    def _send(self, data):
+        self.peer.sendall(data)
 
     def handshake(self, header):
         sha1 = hashlib.sha1()
@@ -170,28 +199,29 @@ class WebSocket(object):
         self.peer, self.info = self.sock.accept()
         log.debug('Handshaking with peer %r' % self.peer)
         header = self.recv_header()
-        self.peer.send(self.handshake(header))
+        self.peer.sendall(self.handshake(header))
         log.debug('Handshaken')
 
     def receive(self):
         log.debug('Receiving')
-        packet = WsPacket(self.peer)
-        log.debug('Received packet')
+        packet = WsPacket(self)
+        log.debug('Received: %s' % packet.data)
         if packet.close:
-            WsPacket(self.peer, close=True)
+            log.debug('Close packet')
+            WsPacket(self, close=True)
             return 'CLOSED'
         return packet.data
 
     def send(self, data):
-        log.debug('Sending packet')
-        WsPacket(self.peer, send=data)
+        log.debug('Sending packet: %s' % data)
+        WsPacket(self, send=data)
         log.debug('Sent')
 
     def close(self):
         log.debug('Try Closing')
-        WsPacket(self.peer, close=True)
+        WsPacket(self, close=True)
         log.debug('Closing')
-        WsPacket(self.peer)
+        WsPacket(self)
         self.peer.close()
         log.debug('Closed')
 

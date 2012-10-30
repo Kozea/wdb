@@ -25,9 +25,22 @@
       return console.log("close " + m);
     };
     ws.onmessage = function(m) {
-      _this.__w = JSON.parse(m.data);
-      $('body').html('');
-      return w_load();
+      var cmd, data, pipe;
+      pipe = m.data.indexOf('|');
+      if (pipe > -1) {
+        cmd = m.data.substr(0, pipe);
+        data = m.data.substr(pipe + 1);
+      } else {
+        cmd = m.data;
+      }
+      switch (cmd) {
+        case 'TRACE':
+          _this.__w = JSON.parse(data);
+          $('body').html('');
+          return w_load();
+        case 'PING':
+          return ws.send('PONG');
+      }
     };
     ws.onerror = function(m) {
       return console.log("error " + m);

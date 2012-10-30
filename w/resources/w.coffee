@@ -33,7 +33,7 @@ get = (data, done, fail) ->
         if fail
             rq.fail fail
     else
-        ws.send('get+' + JSON.stringify(data))
+        ws.send('GET|' + JSON.stringify(data))
         msg_ = ws.onmessage
         ws.onmessage = (data) ->
             ws.onmessage = msg_
