@@ -34,6 +34,14 @@ def bad_function():
     return "Hello World!"
 
 
+@app.route("/wtf/error")
+def wtf_error():
+    W.tf
+    a = 2
+    a / 0
+    return 12
+
+
 @app.route("/wtf")
 def wtf():
     a = 12
