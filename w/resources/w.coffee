@@ -1,6 +1,7 @@
 #### Initializations ####
 
 file_cache = {}
+stop = false
 ws = null
 persistable = 'localStorage' of window and window.localStorage
 if persistable and localStorage['__w_cmd_hist']
@@ -27,17 +28,21 @@ $.SyntaxHighlighter.init(
 #### Loading ####
 $ =>
     # Try getting the original page
-    $.ajax(location.href,
-        headers:
-            "W-Type": 'Get'
-    ).done((data) =>
+    end = (page) ->
+        stop = true
+        if ws
+            ws.send('Quit')
+            ws.close()
         document.open()
-        document.write data
+        document.write page
         document.close()
-    ).fail (data) =>
-        document.open()
-        document.write data.responseText
-        document.close()
+
+    $.ajax(location.href)
+        .done((data) =>
+            end(data))
+        .fail (data) =>
+            if data.responseText
+                end(data.responseText)
 
     # Open a websocket in case of request break
     @_ws = ws = new WebSocket "ws://localhost:" + @__ws_port
@@ -50,8 +55,11 @@ $ =>
         # Start by getting current trace
         register_eval()
         ws.send('Start')
+        $('body').show()
 
     ws.onmessage = (m) =>
+        if stop
+            return
         # Open a websocket in case of request break
         pipe = m.data.indexOf('|')
         if pipe > -1
@@ -71,6 +79,7 @@ $ =>
 
     @onbeforeunload = ->
         try
+            console.log('Try jit quit')
             ws.send('Quit')
         catch e
             {}
@@ -144,7 +153,7 @@ select = (data) ->
         $('#sourcecode').html(file_cache[current_frame.file])
         $('#sourcecode').attr('title', current_frame.file)
     $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-    $('#sourcecode').animate((scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
+    $('#sourcecode').stop().animate((scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 1000)
 
 
 code = (code, classes=[]) ->
@@ -153,14 +162,21 @@ code = (code, classes=[]) ->
         code.addClass(cls)
     code
 
-
+last_cmd = null
 execute = (snippet) ->
+    cmd = (cmd) ->
+            ws.send cmd
+            last_cmd = cmd
+
     if snippet.indexOf('.') == 0
         switch snippet.substr(1)
-            when 's' then ws.send('Step')
-            when 'n' then ws.send('Next')
-            when 'c' then ws.send('Continue')
-            when 'q' then ws.send('Quit')
+            when 's' then cmd('Step')
+            when 'n' then cmd('Next')
+            when 'c' then cmd('Continue')
+            when 'q' then cmd('Quit')
+        return
+    else if snippet == '' and last_cmd
+        cmd last_cmd
         return
     ws.send("Eval|#{snippet}")
 
@@ -189,7 +205,7 @@ print = (data) ->
         # )
 
 echo = (data) ->
-    $('#scrollback').append $('<span>').text(data.message)
+    $('#scrollback').append $('<div>').text(data.message)
 
 register_eval = ->
     $('#eval').on 'keydown', (e) ->

@@ -43,6 +43,7 @@ class M(type):
 
     @property
     def tf(cls):
+        log.info('Setting trace')
         cls._inst_.set_trace(sys._getframe().f_back)
 
 
@@ -72,12 +73,20 @@ class W(object, Bdb):
             log.info('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
-        elif environ.get('HTTP_W_TYPE') == 'Get':
-            log.info('Sending real page (Got header)')
-            return self.handled_request(environ, start_response)
-        else:
-            log.info('Sending fake page')
+        elif 'text/html' in environ.get('HTTP_ACCEPT', ''):
+            log.info('Sending fake page (%s)' % environ['HTTP_ACCEPT'])
             return self.first_request(environ, start_response)
+        else:
+            log.info('Sending real page (%s)[%s]' % (
+                environ.get('HTTP_ACCEPT', ''),  environ.get('HTTP_W_TYPE')))
+            return self.handled_request(environ, start_response)
+
+        # elif environ.get('HTTP_W_TYPE') == 'Get':
+        #     log.info('Sending real page (Got header)')
+        #     return self.handled_request(environ, start_response)
+        # else:
+        #     log.info('Sending fake page')
+        #     return self.first_request(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
         start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
@@ -93,6 +102,7 @@ class W(object, Bdb):
             if hasattr(appiter, 'close'):
                 appiter.close()
         except Exception:
+            log.exception('w')
             if hasattr(appiter, 'close'):
                 appiter.close()
 
@@ -128,9 +138,9 @@ class W(object, Bdb):
     # WDB
     def handle_connection(self):
         if self.connected:
-            self.ws.send('Ping')
             ret = None
             try:
+                self.ws.send('Ping')
                 ret = self.ws.receive()
             except:
                 log.exception('Ping Failed')
@@ -227,14 +237,9 @@ class W(object, Bdb):
                     try:
                         compiled_code = compile(data, '<w>', 'single')
                         exec compiled_code in globals, locals
-                    except Exception as e:
-                        pass
-                        # type_, value, tb = exc_info()
-                        # stack = tb_to_stack(tb)
-                        # trace = self.push_trace(
-                            # stack, type_.__name__,
-                            # str(value).title(), w_code=code)
-                        # return {'result': e, 'exception': trace['id']}, 'json'
+                    except Exception:
+                        type_, value, tb = exc_info()
+                        print '%s: %s' % (type_.__name__, str(value))
                 self.ws.send('Print|%s' % dump({
                     'result': escape('\n'.join(out) + '\n'.join(err))
                 }))
@@ -294,7 +299,7 @@ class W(object, Bdb):
             frame.f_locals['__return__'] = return_value
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
-                'message': '--Return: %s--' % return_value
+                'message': 'Return: %s' % return_value
             }))
             self.interaction(frame, first_step=False)
 
@@ -306,5 +311,6 @@ class W(object, Bdb):
         exception = type_.__name__
         exception_description = str(value)
         self.handle_connection()
-        self.ws.send('Echo|%s' % dump({'message': '--Exception--'}))
+        self.ws.send('Echo|%s' % dump({'message': 'Exception: %s %s' % (
+            exception, exception_description)}))
         self.interaction(frame, tb, True, exception, exception_description)

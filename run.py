@@ -104,5 +104,5 @@ else:
     app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
 app.wsgi_app = W(app.wsgi_app)
-app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True)
+app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=False)
 # 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char

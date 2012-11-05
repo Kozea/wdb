@@ -144,6 +144,7 @@ class WebSocket(object):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.handshaken = False
+            self.sock.settimeout(1)
             self.sock.bind((self.host, self.port))
             self.sock.listen(5)
         except socket.error:
@@ -196,6 +197,7 @@ class WebSocket(object):
         return WsHeader(h)
 
     def wait_for_connect(self):
+        log.debug('Waiting for accept')
         self.peer, self.info = self.sock.accept()
         log.debug('Handshaking with peer %r' % self.peer)
         header = self.recv_header()
