@@ -148,6 +148,10 @@ code:not(.prettyprinted) {
   opacity: 0.5;
 }
 
+ol.linenums li {
+  -webkit-transition: 1s;
+}
+
 li.highlighted-other {
   color: black;
   background-color: #eee !important;

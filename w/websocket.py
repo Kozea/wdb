@@ -8,6 +8,7 @@ import struct
 import sys
 
 log = get_color_logger('w-socket')
+log.setLevel(20)
 
 OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',
@@ -15,7 +16,15 @@ OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?']
 
 
-class WsClosed(Exception):
+class WsError(Exception):
+    pass
+
+
+class WsClosed(WsError):
+    pass
+
+
+class WsBroken(WsError):
     pass
 
 
@@ -144,7 +153,7 @@ class WebSocket(object):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.handshaken = False
-            self.sock.settimeout(1)
+            # self.sock.settimeout(1)
             self.sock.bind((self.host, self.port))
             self.sock.listen(5)
         except socket.error:
@@ -155,7 +164,10 @@ class WebSocket(object):
             self.status = 'OK'
 
     def _recv(self):
-        packet = self.peer.recv(4096)
+        try:
+            packet = self.peer.recv(4096)
+        except:
+            raise WsBroken()
         cur = self.stream.tell()
         self.stream.read()  # Seek end
         self.stream.write(packet)
@@ -163,6 +175,7 @@ class WebSocket(object):
 
     def _get(self, size):
         message = self.stream.read(size)
+
         while len(message) < size:
             # Stream has been all read, clean it up
             self.stream.close()
@@ -176,7 +189,10 @@ class WebSocket(object):
         return message
 
     def _send(self, data):
-        self.peer.sendall(data)
+        try:
+            self.peer.sendall(data)
+        except:
+            raise WsBroken()
 
     def handshake(self, header):
         sha1 = hashlib.sha1()

@@ -48,7 +48,7 @@ def wtf():
     b = 21
     c = a / b
     W.tf
-    d = a - 1
+    d = a - 2
     e = b + a - c + d
     return 'OK! %d' % e
 

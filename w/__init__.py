@@ -1,20 +1,38 @@
 # *-* coding: utf-8 *-*
 from bdb import Bdb
 from cgi import escape
-from json import dumps, loads, JSONEncoder
+from json import dumps, JSONEncoder
+from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
 from random import randint
 from sys import exc_info
-from utils import capture_output, tb_to_stack
-from websocket import WebSocket
+from websocket import WebSocket, WsError
 from mimetypes import guess_type
+from hashlib import sha512
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO  import StringIO
 import os
 import sys
 
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
 log = get_color_logger('w')
+
+
+@contextmanager
+def capture_output():
+    stdout, stderr = sys.stdout, sys.stderr
+    sys.stdout, sys.stderr = StringIO(), StringIO()
+    out, err = [], []
+    try:
+        yield out, err
+    finally:
+        out.extend(sys.stdout.getvalue().splitlines())
+        err.extend(sys.stderr.getvalue().splitlines())
+        sys.stdout, sys.stderr = stdout, stderr
 
 
 class ReprEncoder(JSONEncoder):
@@ -44,6 +62,7 @@ class M(type):
     @property
     def tf(cls):
         log.info('Setting trace')
+        cls._inst_.begun = False
         cls._inst_.set_trace(sys._getframe().f_back)
 
 
@@ -58,6 +77,7 @@ class W(object, Bdb):
 
     def __init__(self, app, skip=None):
         Bdb.__init__(self, skip=skip)
+        self.begun = False
         self.app = app
         self.ws = WebSocket('localhost', randint(10000, 60000))
         self.connected = False
@@ -81,19 +101,13 @@ class W(object, Bdb):
                 environ.get('HTTP_ACCEPT', ''),  environ.get('HTTP_W_TYPE')))
             return self.handled_request(environ, start_response)
 
-        # elif environ.get('HTTP_W_TYPE') == 'Get':
-        #     log.info('Sending real page (Got header)')
-        #     return self.handled_request(environ, start_response)
-        # else:
-        #     log.info('Sending fake page')
-        #     return self.first_request(environ, start_response)
-
     def static_request(self, environ, start_response, filename):
         start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
         with open(os.path.join(RES_PATH, filename)) as f:
             yield f.read()
 
     def handled_request(self, environ, start_response):
+        self.quitting = 0
         appiter = None
         try:
             appiter = self.app(environ, start_response)
@@ -110,7 +124,7 @@ class W(object, Bdb):
             type_, value, tb = exc_info()
             exception = type_.__name__
             exception_description = str(value)
-            self.interaction(None, tb, False, exception, exception_description)
+            self.interaction(None, tb, exception, exception_description)
             try:
                 start_response('500 INTERNAL SERVER ERROR', [
                     ('Content-Type', 'text/html')])
@@ -176,17 +190,34 @@ class W(object, Bdb):
         return stack, frames, current
 
     def interaction(
-            self, frame, tb=None, first_step=True,
+            self, frame, tb=None,
             exception='W', exception_description='TF'):
+        try:
+            self._interaction(
+                frame, tb, exception, exception_description)
+        except WsError:
+            log.exception('Websocket Error during interaction. Starting again')
+            self.handle_connection()
+            self.interaction(
+                frame, tb, exception, exception_description)
+
+    def _interaction(
+            self, frame, tb,
+            exception, exception_description):
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
-        if first_step:
+        if self.begun:
             self.ws.send('Trace|%s' % dump({
                 'trace': trace
             }))
-            self.ws.send('Select|%s' % dump({
-                'frame': current
+            current_file = current['file']
+            self.ws.send('Check|%s' % dump({
+                'name': current_file,
+                'sha512': sha512(self.get_file(current_file)).hexdigest()
             }))
+        else:
+            self.begun = True
+
         while True:
             message = self.ws.receive()
             if '|' in message:
@@ -206,23 +237,33 @@ class W(object, Bdb):
                 self.ws.send('Trace|%s' % dump({
                     'trace': trace
                 }))
-                self.ws.send('Select|%s' % dump({
-                    'frame': current
+                current_file = current['file']
+                self.ws.send('Check|%s' % dump({
+                    'name': current_file,
+                    'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
             elif cmd == 'Select':
                 current_index = int(data)
                 current = trace[current_index]
-                self.ws.send('Select|%s' % dump({
-                    'frame': current
+                current_file = current['file']
+                self.ws.send('Check|%s' % dump({
+                    'name': current_file,
+                    'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
             elif cmd == 'File':
                 current_file = current['file']
                 self.ws.send('File|%s' % dump({
                     'file': self.get_file(current_file),
-                    'name': current_file
+                    'name': current_file,
+                    'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
+                self.ws.send('Select|%s' % dump({
+                    'frame': current
+                }))
+
+            elif cmd == 'NoFile':
                 self.ws.send('Select|%s' % dump({
                     'frame': current
                 }))
@@ -269,7 +310,7 @@ class W(object, Bdb):
 
             elif cmd == 'Quit':
                 if hasattr(self, 'botframe'):
-                    self.set_quit()
+                    self.set_continue()
                     self.ws.close()
                 break
 
@@ -282,8 +323,10 @@ class W(object, Bdb):
         if self.stop_here(frame):
             log.warn('CALL')
             self.handle_connection()
-            self.ws.send('Echo|%s' % dump({'message': '--Call--'}))
-            self.interaction(frame, first_step=False)
+            self.ws.send('Echo|%s' % dump({
+                'for': '__call__',
+                'val': frame.f_code.co_name}))
+            # self.interaction(frame, first_step=False)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",
@@ -299,18 +342,22 @@ class W(object, Bdb):
             frame.f_locals['__return__'] = return_value
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
-                'message': 'Return: %s' % return_value
+                'for': '__return__',
+                'val': return_value
             }))
-            self.interaction(frame, first_step=False)
+            # self.interaction(frame, first_step=False)
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
+        log.error('EXCEPTION', exc_info=exc_info)
         type_, value, tb = exc_info
         frame.f_locals['__exception__'] = type_, value
         exception = type_.__name__
         exception_description = str(value)
         self.handle_connection()
-        self.ws.send('Echo|%s' % dump({'message': 'Exception: %s %s' % (
+        self.ws.send('Echo|%s' % dump({
+            'for': '__exception__',
+            'val': '%s: %s' % (
             exception, exception_description)}))
         self.interaction(frame, tb, True, exception, exception_description)
