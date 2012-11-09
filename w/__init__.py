@@ -206,6 +206,8 @@ class W(object, Bdb):
             exception, exception_description):
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
+        locals = stack[current_index][0].f_locals
+        print type(locals)
         if self.begun:
             self.ws.send('Trace|%s' % dump({
                 'trace': trace
@@ -247,6 +249,7 @@ class W(object, Bdb):
                 current_index = int(data)
                 current = trace[current_index]
                 current_file = current['file']
+                locals = stack[current_index][0].f_locals
                 self.ws.send('Check|%s' % dump({
                     'name': current_file,
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
@@ -272,11 +275,10 @@ class W(object, Bdb):
                 self.ws.send('Trace|%s' % dump(trace, cls=ReprEncoder))
 
             elif cmd == 'Eval':
-                locals = stack[current_index][0].f_locals
                 globals = stack[current_index][0].f_globals
                 with capture_output() as (out, err):
                     try:
-                        compiled_code = compile(data, '<w>', 'single')
+                        compiled_code = compile(data, '<stdin>', 'single')
                         exec compiled_code in globals, locals
                     except Exception:
                         type_, value, tb = exc_info()
@@ -340,12 +342,13 @@ class W(object, Bdb):
         if self.stop_here(frame):
             log.warn('RETURN')
             frame.f_locals['__return__'] = return_value
+            print frame.f_code.co_name
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
                 'for': '__return__',
                 'val': return_value
             }))
-            # self.interaction(frame, first_step=False)
+            self.interaction(frame)
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,

@@ -8,7 +8,6 @@ import struct
 import sys
 
 log = get_color_logger('w-socket')
-log.setLevel(20)
 
 OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',
@@ -231,7 +230,7 @@ class WebSocket(object):
         return packet.data
 
     def send(self, data):
-        log.debug('Sending packet: %s' % data)
+        log.debug('Sending packet: #%d' % len(data))
         WsPacket(self, send=data)
         log.debug('Sent')
 
