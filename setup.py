@@ -21,6 +21,7 @@ options = dict(
     license="GPLv3",
     platforms="Any",
     packages=find_packages(),
+    install_requires=["log_colorizer", ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
