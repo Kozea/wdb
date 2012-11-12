@@ -7,6 +7,7 @@ Description
 -----------
 
 **w** is as for now a proof of concept of an independant web debugger for wsgi project (implemented as a wsgi middleware).
+
 Unlike other web debuggers, **w** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
 
 This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occured.
@@ -30,19 +31,17 @@ This is still far from working perfectly, it has a lot of known issues and can e
 This python thing will probably eat your cat.
 
 
-Usage
------
-
 Instalation:
+------------
 
-```
-    pip install w
+```bash
+    # pip install w
 ```
 
 Usage
 -----
 
-To try it you can simply run the `run.py` script which is a flask application which will be accessible at http://localhost:1984/.
+To try it you can simply run the `run.py` script which is a flask application which will be accessible at <http://localhost:1984/>.
 
 To try it on another wsgi application, use the `W` middleware:
 
