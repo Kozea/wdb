@@ -36,7 +36,7 @@ Usage
 Instalation:
 
 ```
-        pip install w
+    pip install w
 ```
 
 Usage
@@ -47,27 +47,27 @@ To try it you can simply run the `run.py` script which is a flask application wh
 To try it on another wsgi application, use the `W` middleware:
 
 ```python
-        from w import W
-        wsgi_app = Whathever_wsgi_server_lib()
-        my_app = W(wsgi_app)
-        my_app.serve_forever()
+    from w import W
+    wsgi_app = Whathever_wsgi_server_lib()
+    my_app = W(wsgi_app)
+    my_app.serve_forever()
 ```
 
 Using flask:
 
 ```python
-        from w import W
-        app = Flask(__name__)
-        app.wsgi_app = W(app.wsgi_app)
-        app.run()
+    from w import W
+    app = Flask(__name__)
+    app.wsgi_app = W(app.wsgi_app)
+    app.run()
 ```
 
 You can now put some breakpoint in a request code:
 
 ```python
-        do_something()
-        W.tf  # Will break here
-        return
+    do_something()
+    W.tf  # Will break here
+    return
 ```
 
 
@@ -80,12 +80,12 @@ Author
 Licence
 -------
 
-This library is licensed unde GPLv3
+This library is licensed under GPLv3
 
 w - An improbable web debugger through WebSockets
 
 
-    Copyright (C) 2012  Florian Mounier, Kozea
+    w Copyright (C) 2012  Florian Mounier, Kozea
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
