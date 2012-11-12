@@ -34,8 +34,8 @@ This python thing will probably eat your cat.
 Instalation:
 ------------
 
-```bash
-    # pip install w
+```
+    $ pip install w
 ```
 
 Usage
