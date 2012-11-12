@@ -47,7 +47,7 @@ class WsBroken(WsError):
 class WsHeader(object):
     expected_fields = {
         'Host': 'host',
-        'Upgrade': 'upgrade',
+        # 'Upgrade': 'upgrade', # Firefox...
         'Connection': 'connection',
         'Sec-WebSocket-Key': 'key',
         'Sec-WebSocket-Version': 'version',
@@ -66,6 +66,7 @@ class WsHeader(object):
         for line in lines[1:-1]:
             key, value = line.split(': ')
             self._fields[key] = value
+
         for key, name in self.expected_fields.items():
             assert key in self._fields
             setattr(self, name, self._fields[key])

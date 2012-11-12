@@ -50,7 +50,7 @@ $.SyntaxHighlighter.init(
     lineNumbers: false,
     highlight: false,
     load: false)
-
+    
 make_ws = ->
     # Open a websocket in case of request break
     console.log 'Opening new socket'

@@ -223,7 +223,6 @@ class W(object, Bdb):
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
         locals = stack[current_index][0].f_locals
-        print type(locals)
         if self.begun:
             self.ws.send('Trace|%s' % dump({
                 'trace': trace
