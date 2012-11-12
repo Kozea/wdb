@@ -222,6 +222,7 @@ execute = (snippet) ->
         switch snippet.substr(1)
             when 's' then cmd('Step')
             when 'n' then cmd('Next')
+            when 'r' then cmd('Return')
             when 'c' then cmd('Continue')
             when 'q' then cmd('Quit')
         return
@@ -263,18 +264,25 @@ echo = (data) ->
         
 
 register_eval = ->
-    $('#eval').on 'keydown', (e) ->
+    $('body,html').on 'keydown', (e) ->
         if e.ctrlKey
-            if e.keyCode == 38
+            if e.keyCode == 37  # left
+                send('Continue')
+                return false
+            if e.keyCode == 38  # up
                 send('Return')
                 return false
-            if e.keyCode == 39
+            if e.keyCode == 39  # Right
                 send('Next')
                 return false
-            if e.keyCode == 40
+            if e.keyCode == 40  # Down
                 send('Step')
                 return false
             
+    $('#eval').on 'keydown', (e) ->
+        if e.ctrlKey
+            e.stopPropagation()
+            return
         if e.keyCode == 13
             $eval = $(@)
             if not e.shiftKey

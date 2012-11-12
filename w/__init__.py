@@ -291,7 +291,9 @@ class W(object, Bdb):
                 self.ws.send('Trace|%s' % dump(trace, cls=ReprEncoder))
 
             elif cmd == 'Eval':
-                globals = stack[current_index][0].f_globals
+                globals = dict(stack[current_index][0].f_globals)
+                # Hack for function scope eval
+                globals.update(locals)
                 with capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')

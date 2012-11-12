@@ -41,7 +41,7 @@ Instalation:
 Usage
 -----
 
-To try it you can simply run the `run.py` script which is a flask application which will be accessible at <http://localhost:1984/>.
+To try it you can simply run the `run.py` script which is a flask application which will be accessible at <http://localhost:1984/>,  <http://localhost:1984/wtf> for step by step testing.
 
 To try it on another wsgi application, use the `W` middleware:
 
@@ -69,6 +69,18 @@ You can now put some breakpoint in a request code:
     return
 ```
 
+Once you are in a breakpoint or in an exception, you can eval all you want in the prompt under the code.
+Multi-lines are partially supported using `[Shift] + [Enter]`.
+
+As of now the following special commands are supported during breakpoint:
+
+   * `.s or [Ctrl] + [↓]`: Step into
+   * `.n or [Ctrl] + [→]`: Step over (Next)
+   * `.c or [Ctrl] + [↑]`: Step out (Return)
+   * `.c or [Ctrl] + [←]`: Continue
+   * `.q`: Quit
+
+NB: Hotkeys are purposedly not triggered in the eval prompt to avoid conflicts when typing.
 
 Author
 ------

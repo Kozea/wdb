@@ -259,6 +259,9 @@
         case 'n':
           cmd('Next');
           break;
+        case 'r':
+          cmd('Return');
+          break;
         case 'c':
           cmd('Continue');
           break;
@@ -306,9 +309,12 @@
   };
 
   register_eval = function() {
-    return $('#eval').on('keydown', function(e) {
-      var $eval, endPos, filename, index, startPos, to_set, txtarea;
+    $('body,html').on('keydown', function(e) {
       if (e.ctrlKey) {
+        if (e.keyCode === 37) {
+          send('Continue');
+          return false;
+        }
         if (e.keyCode === 38) {
           send('Return');
           return false;
@@ -321,6 +327,13 @@
           send('Step');
           return false;
         }
+      }
+    });
+    return $('#eval').on('keydown', function(e) {
+      var $eval, endPos, filename, index, startPos, to_set, txtarea;
+      if (e.ctrlKey) {
+        e.stopPropagation();
+        return;
       }
       if (e.keyCode === 13) {
         $eval = $(this);
