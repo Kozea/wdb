@@ -17,6 +17,7 @@ options = dict(
     long_description="See http://github.com/Kozea/w",
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
+    url="http://github.com/Kozea/w",
     license="GPLv3",
     platforms="Any",
     packages=find_packages(),
