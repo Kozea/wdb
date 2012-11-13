@@ -1,0 +1,1 @@
+recursive-include wdb/resources *.js *.css
