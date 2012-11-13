@@ -116,14 +116,17 @@ $ =>
         document.write page
         document.close()
 
-    console.log __ws_data
-    $.ajax(location.href,
-        type: if __ws_data then 'POST' else 'GET',
-        data: __ws_data,
-        traditional: true)
-        .done((data) =>
-            end(data))
-        .fail (data) =>
+    if __ws_post
+        xhr = $.ajax(location.href,
+            type: 'POST',
+            data: __ws_post.data,
+            contentType: __ws_post.enctype,
+            traditional: true)
+    else
+        xhr = $.ajax(location.href)
+
+    xhr.done((data) => end(data))
+       .fail (data) =>
             if data.responseText
                 end(data.responseText)
 

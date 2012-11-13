@@ -119,7 +119,7 @@
   };
 
   $(function() {
-    var end;
+    var end, xhr;
     end = function(page) {
       stop = true;
       if (ws) {
@@ -134,12 +134,17 @@
       document.write(page);
       return document.close();
     };
-    console.log(__ws_data);
-    $.ajax(location.href, {
-      type: __ws_data ? 'POST' : 'GET',
-      data: __ws_data,
-      traditional: true
-    }).done(function(data) {
+    if (__ws_post) {
+      xhr = $.ajax(location.href, {
+        type: 'POST',
+        data: __ws_post.data,
+        contentType: __ws_post.enctype,
+        traditional: true
+      });
+    } else {
+      xhr = $.ajax(location.href);
+    }
+    xhr.done(function(data) {
       return end(data);
     }).fail(function(data) {
       if (data.responseText) {

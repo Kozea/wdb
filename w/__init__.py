@@ -154,9 +154,10 @@ class W(object, Bdb):
                 pass
 
     def first_request(self, environ, start_response):
-        data = 'null'
+        post = 'null'
         from pprint import pprint
         if environ.get('REQUEST_METHOD', '') == 'POST':
+            post = {}
             body = ''
             try:
                 length = int(environ.get('CONTENT_LENGTH', '0'))
@@ -164,11 +165,15 @@ class W(object, Bdb):
                 pass
             else:
                 body = environ['wsgi.input'].read(length)
-            data = parse_qs(body)
-            pprint(data)
+            post['enctype'] = environ.get('CONTENT_TYPE', '')
+            if not 'multipart/form-data' in post['enctype']:
+                post['data'] = parse_qs(body)
+            else:
+                post['data'] = body
+            post = dump(post)
         pprint(environ)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html.format(port=self.ws.port, data=data)
+        yield self.html.format(port=self.ws.port, post=post)
 
     def get_file(self, filename):
         checkcache(filename)

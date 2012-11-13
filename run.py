@@ -53,6 +53,18 @@ def post():
             '</form>')
 
 
+@app.route("/multipart/post")
+def multipart_post():
+    return ('<form action="/post/test" method="post"'
+            ' enctype="multipart/form-data">'
+            ' <input type="text" name="key1" value="Val11" />'
+            ' <input type="text" name="key1" value="Val12" />'
+            ' <input type="text" name="key2" value="Val21" />'
+            ' <input type="text" name="key2" value="Val22" />'
+            ' <input type="submit" value="Post" />'
+            '</form>')
+
+
 @app.route("/post/test", methods=('POST',))
 def post_test():
     a = 2
