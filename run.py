@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, request
 import logging
-from w import W
+from wdb import Wdb
 app = Flask(__name__)
 
 
@@ -36,7 +36,8 @@ def bad_function():
 
 @app.route("/wtf/error")
 def wtf_error():
-    W.tf
+    import wdb
+    wdb.set_trace()
     a = 2
     a / 0
     return 12
@@ -68,7 +69,8 @@ def multipart_post():
 @app.route("/post/test", methods=('POST',))
 def post_test():
     a = 2
-    W.tf
+    import wdb
+    wdb.set_trace()
     return 'POST RETURN %r' % request.values
 
 
@@ -77,7 +79,8 @@ def wtf():
     a = 12
     b = 21
     c = a / b
-    W.tf
+    import wdb
+    wdb.set_trace()
     d = a - 2
     e = b + a - c + d
     return 'OK! %d' % e
@@ -133,6 +136,6 @@ else:
     wsreload.monkey_patch_http_server({'url': url}, callback=log)
     app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
-app.wsgi_app = W(app.wsgi_app)
+app.wsgi_app = Wdb(app.wsgi_app)
 app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=False)
 # 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char

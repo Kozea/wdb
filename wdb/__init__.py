@@ -1,7 +1,7 @@
 # *-* coding: utf-8 *-*
-# This file is part of w
+# This file is part of wdb
 #
-# w Copyright (C) 2012  Florian Mounier, Kozea
+# wdb Copyright (C) 2012  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -36,7 +36,7 @@ import sys
 
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
-log = get_color_logger('w')
+log = get_color_logger('wdb')
 
 
 @contextmanager
@@ -61,10 +61,10 @@ class ReprEncoder(JSONEncoder):
 dump = lambda x: dumps(x, cls=ReprEncoder)
 
 
-class M(type):
+class MetaWdb(type):
 
     def __init__(cls, name, bases, dict):
-        super(M, cls).__init__(name, bases, dict)
+        super(MetaWdb, cls).__init__(name, bases, dict)
         cls._inst_ = None
 
     def __call__(cls, *args, **kwargs):
@@ -73,23 +73,22 @@ class M(type):
                 'One debugger is allowed at a time, '
                 '%r already registered' % cls._inst_)
 
-        cls._inst_ = super(M, cls).__call__(*args, **kwargs)
+        cls._inst_ = super(MetaWdb, cls).__call__(*args, **kwargs)
         return cls._inst_
 
-    @property
-    def tf(cls):
+    def tf(cls, frame=None):
         log.info('Setting trace')
         cls._inst_.begun = False
-        cls._inst_.set_trace(sys._getframe().f_back)
+        cls._inst_.set_trace(frame or sys._getframe().f_back)
 
 
-class W(object, Bdb):
-    """W debugger main class"""
-    __metaclass__ = M
+class Wdb(object, Bdb):
+    """Wdb debugger main class"""
+    __metaclass__ = MetaWdb
 
     @property
     def html(self):
-        with open(os.path.join(RES_PATH, 'w.html')) as f:
+        with open(os.path.join(RES_PATH, 'wdb.html')) as f:
             return f.read()
 
     def __init__(self, app, skip=None):
@@ -105,8 +104,8 @@ class W(object, Bdb):
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
-        if path.startswith('/__w/'):
-            filename = path.replace('/__w/', '')
+        if path.startswith('/__wdb/'):
+            filename = path.replace('/__wdb/', '')
             log.info('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
@@ -115,7 +114,7 @@ class W(object, Bdb):
             return self.first_request(environ, start_response)
         else:
             log.info('Sending real page (%s)[%s]' % (
-                environ.get('HTTP_ACCEPT', ''),  environ.get('HTTP_W_TYPE')))
+                environ.get('HTTP_ACCEPT', ''),  environ.get('HTTP_WDB_TYPE')))
             return self.handled_request(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
@@ -133,7 +132,7 @@ class W(object, Bdb):
             if hasattr(appiter, 'close'):
                 appiter.close()
         except Exception:
-            log.exception('w')
+            log.exception('wdb')
             if hasattr(appiter, 'close'):
                 appiter.close()
 
@@ -206,7 +205,7 @@ class W(object, Bdb):
         for i, (frame, lno) in enumerate(stack):
             code = frame.f_code
             filename = code.co_filename
-            if filename == '<w>' and w_code:
+            if filename == '<wdb>' and w_code:
                 line = w_code
             else:
                 checkcache(filename)
@@ -226,7 +225,7 @@ class W(object, Bdb):
 
     def interaction(
             self, frame, tb=None,
-            exception='W', exception_description='TF'):
+            exception='Wdb', exception_description='Set Trace'):
         try:
             self._interaction(
                 frame, tb, exception, exception_description)
@@ -400,3 +399,7 @@ class W(object, Bdb):
             'val': '%s: %s' % (
             exception, exception_description)}))
         self.interaction(frame, tb, True, exception, exception_description)
+
+
+def set_trace(frame=None):
+    Wdb.tf(frame or sys._getframe().f_back)

@@ -1,14 +1,14 @@
-w
-=
+wdb
+===
 
-![](https://raw.github.com/Kozea/w/master/w.png)
+![](https://raw.github.com/Kozea/wdb/master/wdb.png)
 
 Description
 -----------
 
-**w** is as for now a proof of concept of an independant web debugger for wsgi project (implemented as a wsgi middleware).
+**wdb** is as for now a proof of concept of an independant web debugger for wsgi project (implemented as a wsgi middleware).
 
-Unlike other web debuggers, **w** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
+Unlike other web debuggers, **wdb** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
 
 This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occured.
 
@@ -35,7 +35,7 @@ Instalation:
 ------------
 
 ```
-    $ pip install w
+    $ pip install wdb
 ```
 
 Usage
@@ -43,21 +43,21 @@ Usage
 
 To try it you can simply run the `run.py` script which is a flask application which will be accessible at <http://localhost:1984/>,  <http://localhost:1984/wtf> for step by step testing.
 
-To try it on another wsgi application, use the `W` middleware:
+To try it on another wsgi application, use the `Wdb` middleware:
 
 ```python
-    from w import W
+    from wdb import Wdb
     wsgi_app = Whathever_wsgi_server_lib()
-    my_app = W(wsgi_app)
+    my_app = Wdb(wsgi_app)
     my_app.serve_forever()
 ```
 
 Using flask:
 
 ```python
-    from w import W
+    from wdb import Wdb
     app = Flask(__name__)
-    app.wsgi_app = W(app.wsgi_app)
+    app.wsgi_app = Wdb(app.wsgi_app)
     app.run()
 ```
 
@@ -65,7 +65,7 @@ You can now put some breakpoint in a request code:
 
 ```python
     do_something()
-    W.tf  # Will break here
+    import wdb; wdb.set_trace()
     return
 ```
 
@@ -93,10 +93,10 @@ Licence
 
 This library is licensed under GPLv3
 
-w - An improbable web debugger through WebSockets
+wdb - An improbable web debugger through WebSockets
 
 
-    w Copyright (C) 2012  Florian Mounier, Kozea
+    wdb Copyright (C) 2012  Florian Mounier, Kozea
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

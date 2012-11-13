@@ -1,6 +1,6 @@
-# This file is part of w
+# This file is part of wdb
 #
-# w Copyright (C) 2012  Florian Mounier, Kozea
+# wdb Copyright (C) 2012  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -28,10 +28,10 @@ send = (msg) ->
     ws.send msg
 
 persistable = 'localStorage' of window and window.localStorage
-if persistable and localStorage['__w_cmd_hist']
+if persistable and localStorage['__wdb_cmd_hist']
     try
-        cmd_hist = JSON.parse localStorage['__w_cmd_hist']
-        file_cache = JSON.parse localStorage['__w_file_cache']
+        cmd_hist = JSON.parse localStorage['__wdb_cmd_hist']
+        file_cache = JSON.parse localStorage['__wdb_file_cache']
     catch e
         file_cache = {}
         cmd_hist = {}
@@ -42,8 +42,8 @@ else
 persist = ->
     if not persistable
         return
-    localStorage['__w_cmd_hist'] = JSON.stringify cmd_hist
-    localStorage['__w_file_cache'] = JSON.stringify file_cache
+    localStorage['__wdb_cmd_hist'] = JSON.stringify cmd_hist
+    localStorage['__wdb_file_cache'] = JSON.stringify file_cache
 
 $.SyntaxHighlighter.loadedExtras = true
 $.SyntaxHighlighter.init(
@@ -206,7 +206,7 @@ select = (data) ->
     $('#trace-' + current_frame.level).addClass('selected')
     $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
 
-    # if current_frame.file == '<w>'
+    # if current_frame.file == '<wdb>'
         # file_cache[current_frame.file] = current_frame.f_code
 
     if current_frame.file != $('#sourcecode').attr('title')

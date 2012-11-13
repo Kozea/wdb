@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
- W
+wdb
 """
 
 from setuptools import setup, find_packages
@@ -11,13 +11,13 @@ VERSION = "0.6"
 
 
 options = dict(
-    name="w",
+    name="wdb",
     version=VERSION,
     description="An improbable web debugger through WebSockets",
-    long_description="See http://github.com/Kozea/w",
+    long_description="See http://github.com/Kozea/wdb",
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
-    url="http://github.com/Kozea/w",
+    url="http://github.com/Kozea/wdb",
     license="GPLv3",
     platforms="Any",
     packages=find_packages(),

@@ -1,7 +1,7 @@
 # *-* coding: utf-8 *-*
-# This file is part of w
+# This file is part of wdb
 #
-# w Copyright (C) 2012  Florian Mounier, Kozea
+# wdb Copyright (C) 2012  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -24,7 +24,7 @@ import socket
 import struct
 import sys
 
-log = get_color_logger('w-socket')
+log = get_color_logger('wdb-socket')
 
 OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',

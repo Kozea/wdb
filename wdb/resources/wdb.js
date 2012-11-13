@@ -22,10 +22,10 @@
 
   persistable = 'localStorage' in window && window.localStorage;
 
-  if (persistable && localStorage['__w_cmd_hist']) {
+  if (persistable && localStorage['__wdb_cmd_hist']) {
     try {
-      cmd_hist = JSON.parse(localStorage['__w_cmd_hist']);
-      file_cache = JSON.parse(localStorage['__w_file_cache']);
+      cmd_hist = JSON.parse(localStorage['__wdb_cmd_hist']);
+      file_cache = JSON.parse(localStorage['__wdb_file_cache']);
     } catch (e) {
       file_cache = {};
       cmd_hist = {};
@@ -39,8 +39,8 @@
     if (!persistable) {
       return;
     }
-    localStorage['__w_cmd_hist'] = JSON.stringify(cmd_hist);
-    return localStorage['__w_file_cache'] = JSON.stringify(file_cache);
+    localStorage['__wdb_cmd_hist'] = JSON.stringify(cmd_hist);
+    return localStorage['__wdb_file_cache'] = JSON.stringify(file_cache);
   };
 
   $.SyntaxHighlighter.loadedExtras = true;
