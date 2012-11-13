@@ -19,6 +19,7 @@ time = ->
     d = new Date()
     "#{d.getHours()}:#{d.getMinutes()}:#{d.getSeconds()}.#{d.getMilliseconds()}"
 
+started = false
 stop = false
 ws = null
 
@@ -71,7 +72,9 @@ make_ws = ->
         # We are connected, ie: in request break
         console.log "WebSocket is open", m
         # Start by getting current trace
-        register_eval()
+        if not started
+            register_eval()
+            started = true
         send('Start')
         $('body').show()
         $('#eval').focus()
@@ -113,7 +116,11 @@ $ =>
         document.write page
         document.close()
 
-    $.ajax(location.href)
+    console.log __ws_data
+    $.ajax(location.href,
+        type: if __ws_data then 'POST' else 'GET',
+        data: __ws_data,
+        traditional: true)
         .done((data) =>
             end(data))
         .fail (data) =>

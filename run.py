@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask
+from flask import Flask, request
 import logging
 from w import W
 app = Flask(__name__)
@@ -40,6 +40,24 @@ def wtf_error():
     a = 2
     a / 0
     return 12
+
+
+@app.route("/post")
+def post():
+    return ('<form action="/post/test" method="post">'
+            ' <input type="text" name="key1" value="Val11" />'
+            ' <input type="text" name="key1" value="Val12" />'
+            ' <input type="text" name="key2" value="Val21" />'
+            ' <input type="text" name="key2" value="Val22" />'
+            ' <input type="submit" value="Post" />'
+            '</form>')
+
+
+@app.route("/post/test", methods=('POST',))
+def post_test():
+    a = 2
+    W.tf
+    return 'POST RETURN %r' % request.values
 
 
 @app.route("/wtf")

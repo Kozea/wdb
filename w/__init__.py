@@ -26,6 +26,7 @@ from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
+from urlparse import parse_qs
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -153,8 +154,21 @@ class W(object, Bdb):
                 pass
 
     def first_request(self, environ, start_response):
+        data = 'null'
+        from pprint import pprint
+        if environ.get('REQUEST_METHOD', '') == 'POST':
+            body = ''
+            try:
+                length = int(environ.get('CONTENT_LENGTH', '0'))
+            except ValueError:
+                pass
+            else:
+                body = environ['wsgi.input'].read(length)
+            data = parse_qs(body)
+            pprint(data)
+        pprint(environ)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html.format(port=self.ws.port)
+        yield self.html.format(port=self.ws.port, data=data)
 
     def get_file(self, filename):
         checkcache(filename)
