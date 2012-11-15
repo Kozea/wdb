@@ -176,3 +176,10 @@ a.inspect:hover {
   border: 1px solid #e3e3e3;
 }
 
+.long {
+  display: none;
+}
+
+.short.close:after {
+  content: '…"';
+}

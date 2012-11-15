@@ -174,21 +174,20 @@ trace = (data) ->
 
         $tracecode = $('<div>')
             .addClass('tracecode')
-            .append(code(frame.code))
-
+        code($tracecode, frame.code)
         $traceline.append $tracefilelno
         $traceline.append $tracecode
         $traceline.append $tracefunfun
         $('#traceback').prepend $traceline
-    $('.traceline').each(->
-        $(@).find('code').syntaxHighlight()
-    ).on('click', ->
+    # $('.traceline').each(->
+        # $(@).find('code').syntaxHighlight()
+    # )
+    $('.traceline').on('click', ->
         send('Select|' + $(@).attr('data-level'))
     )
 
 file = (data) ->
-    $('#sourcecode').empty().append nh = code(data.file, ['linenums'])
-    nh.syntaxHighlight()
+    code($('#sourcecode').empty(), data.file, ['linenums'])
     $('#sourcecode').attr('title', data.name)
     file_cache[data.name] = file: $('#sourcecode').html(), sha512: data.sha512
     persist()
@@ -217,10 +216,18 @@ select = (data) ->
     $('#sourcecode').stop().animate((scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 100)
 
 
-code = (code, classes=[]) ->
+code = (parent, code, classes=[]) ->
     code = $('<code class="language">' + code + '</code>')
     for cls in classes
         code.addClass(cls)
+    parent.append code
+    code.syntaxHighlight()
+    code.find('span').each ->
+        txt = $(@).text()
+        if txt.length > 128
+            $(@).text ''
+            $(@).append $('<span class="short close">').text(txt.substr(0, 128))
+            $(@).append $('<span class="long">').text(txt.substr(128))
     code
 
 last_cmd = null
@@ -252,10 +259,9 @@ execute = (snippet) ->
 
 print = (data) ->
     snippet = $('#eval').val()
-    $('#scrollback').append nh = code(snippet, ['prompted'])
-    nh.syntaxHighlight()
-    $('#scrollback').append nh = code(data.result)
-    nh.syntaxHighlight()
+    code($('#scrollback'), snippet, ['prompted'])
+    code($('#scrollback'), data.result)
+
     # if data.exception
     #     a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception)
     #     nh.wrap(a)
@@ -275,10 +281,8 @@ print = (data) ->
         # )
 
 echo = (data) ->
-    $('#scrollback').append nh = code(data.for, ['prompted'])
-    nh.syntaxHighlight()
-    $('#scrollback').append nh = code(data.val or '')
-    nh.syntaxHighlight()
+    code($('#scrollback'), data.for, ['prompted'])
+    code($('#scrollback'), data.val or '')
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
         
 
@@ -354,4 +358,8 @@ register_handlers = ->
     $("#scrollback").on('click', 'a.inspect', ->
         ws.send('Inspect|' + $(this).attr('href'))
         false
-    )
+    ).on('click', '.short.close', ->
+        $(@).addClass('open').removeClass('close').next('.long').show('fast')
+    ).on 'click', '.long,.short.open', ->
+        elt = if $(@).hasClass('long') then $(@) else $(@).next('.long')
+        elt.hide('fast').prev('.short').removeClass('open').addClass('close')

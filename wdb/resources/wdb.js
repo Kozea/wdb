@@ -194,23 +194,20 @@
           title: frame.file
         }));
       }
-      $tracecode = $('<div>').addClass('tracecode').append(code(frame.code));
+      $tracecode = $('<div>').addClass('tracecode');
+      code($tracecode, frame.code);
       $traceline.append($tracefilelno);
       $traceline.append($tracecode);
       $traceline.append($tracefunfun);
       $('#traceback').prepend($traceline);
     }
-    return $('.traceline').each(function() {
-      return $(this).find('code').syntaxHighlight();
-    }).on('click', function() {
+    return $('.traceline').on('click', function() {
       return send('Select|' + $(this).attr('data-level'));
     });
   };
 
   file = function(data) {
-    var nh;
-    $('#sourcecode').empty().append(nh = code(data.file, ['linenums']));
-    nh.syntaxHighlight();
+    code($('#sourcecode').empty(), data.file, ['linenums']);
     $('#sourcecode').attr('title', data.name);
     file_cache[data.name] = {
       file: $('#sourcecode').html(),
@@ -247,7 +244,7 @@
     }, 100);
   };
 
-  code = function(code, classes) {
+  code = function(parent, code, classes) {
     var cls, _i, _len;
     if (classes == null) {
       classes = [];
@@ -257,6 +254,17 @@
       cls = classes[_i];
       code.addClass(cls);
     }
+    parent.append(code);
+    code.syntaxHighlight();
+    code.find('span').each(function() {
+      var txt;
+      txt = $(this).text();
+      if (txt.length > 128) {
+        $(this).text('');
+        $(this).append($('<span class="short close">').text(txt.substr(0, 128)));
+        return $(this).append($('<span class="long">').text(txt.substr(128)));
+      }
+    });
     return code;
   };
 
@@ -305,12 +313,10 @@
   };
 
   print = function(data) {
-    var filename, nh, snippet;
+    var filename, snippet;
     snippet = $('#eval').val();
-    $('#scrollback').append(nh = code(snippet, ['prompted']));
-    nh.syntaxHighlight();
-    $('#scrollback').append(nh = code(data.result));
-    nh.syntaxHighlight();
+    code($('#scrollback'), snippet, ['prompted']);
+    code($('#scrollback'), data.result);
     $('#eval').val('').attr('data-index', -1).attr('rows', 1).css({
       color: 'black'
     });
@@ -326,11 +332,8 @@
   };
 
   echo = function(data) {
-    var nh;
-    $('#scrollback').append(nh = code(data["for"], ['prompted']));
-    nh.syntaxHighlight();
-    $('#scrollback').append(nh = code(data.val || ''));
-    nh.syntaxHighlight();
+    code($('#scrollback'), data["for"], ['prompted']);
+    code($('#scrollback'), data.val || '');
     return $('#interpreter').stop(true).animate({
       scrollTop: $('#scrollback').height()
     }, 1000);
@@ -420,6 +423,12 @@
     return $("#scrollback").on('click', 'a.inspect', function() {
       ws.send('Inspect|' + $(this).attr('href'));
       return false;
+    }).on('click', '.short.close', function() {
+      return $(this).addClass('open').removeClass('close').next('.long').show('fast');
+    }).on('click', '.long,.short.open', function() {
+      var elt;
+      elt = $(this).hasClass('long') ? $(this) : $(this).next('.long');
+      return elt.hide('fast').prev('.short').removeClass('open').addClass('close');
     });
   };
 
