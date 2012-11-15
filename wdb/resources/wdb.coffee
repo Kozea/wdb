@@ -60,20 +60,20 @@ make_ws = ->
         console.log "close #{m}"
         if not stop
             setTimeout (=>
-                @ws = ws = make_ws()), 100
+                @ws = ws = make_ws()), 1000
 
     new_ws.onerror = (m) =>
         console.log "WebSocket error", m
         if not stop
             setTimeout (=>
-                @ws = ws = make_ws()), 100
+                @ws = ws = make_ws()), 1000
             
     new_ws.onopen = (m) ->
         # We are connected, ie: in request break
         console.log "WebSocket is open", m
         # Start by getting current trace
         if not started
-            register_eval()
+            register_handlers()
             started = true
         send('Start')
         $('body').show()
@@ -98,6 +98,7 @@ make_ws = ->
             when 'Select' then select data
             when 'Print'  then print  data
             when 'Echo'   then echo   data
+            when 'Dump'   then echo   data
             when 'Ping'   then send('Pong')
     new_ws
 
@@ -229,12 +230,20 @@ execute = (snippet) ->
             last_cmd = cmd
 
     if snippet.indexOf('.') == 0
-        switch snippet.substr(1)
+        space = snippet.indexOf(' ')
+        if space > -1
+            key = snippet.substr(1, space - 1)
+            data = snippet.substr(space + 1)
+        else
+            key = snippet.substr(1)
+            data = ''
+        switch key
             when 's' then cmd('Step')
             when 'n' then cmd('Next')
             when 'r' then cmd('Return')
             when 'c' then cmd('Continue')
             when 'q' then cmd('Quit')
+            when 'p' then cmd('Eval|pprint(' + data + ')')
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -273,7 +282,7 @@ echo = (data) ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
         
 
-register_eval = ->
+register_handlers = ->
     $('body,html').on 'keydown', (e) ->
         if e.ctrlKey
             if e.keyCode == 37  # left
@@ -288,7 +297,7 @@ register_eval = ->
             if e.keyCode == 40  # Down
                 send('Step')
                 return false
-            
+
     $('#eval').on 'keydown', (e) ->
         if e.ctrlKey
             e.stopPropagation()
@@ -341,3 +350,8 @@ register_eval = ->
                             .attr('data-index', index)
                             .attr('rows', to_set.split('\n').length)
                         false
+
+    $("#scrollback").on('click', 'a.inspect', ->
+        ws.send('Inspect|' + $(this).attr('href'))
+        false
+    )

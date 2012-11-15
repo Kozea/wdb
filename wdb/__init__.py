@@ -27,16 +27,29 @@ from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
 from urlparse import parse_qs
+from pprint import pprint, pformat
+from gc import get_objects
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO  import StringIO
 import os
 import sys
+import re
 
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
+
+REPR = re.compile(escape(r'<?\S+\s(object|instance)\sat\s([0-9a-fx]+)>?'))
+
 log = get_color_logger('wdb')
+# log.setLevel(20)
+
+
+def reverse_id(id_):
+    for obj in get_objects():
+        if id(obj) == id_:
+            return obj
 
 
 @contextmanager
@@ -52,13 +65,21 @@ def capture_output():
         sys.stdout, sys.stderr = stdout, stderr
 
 
-class ReprEncoder(JSONEncoder):
-    def default(self, obj):
+def dump(o):
+    out = dumps(o, sort_keys=True)
+
+    def repr_handle(match):
+        repr_ = match.group(0)
         try:
-            return JSONEncoder.default(self, obj)
-        except TypeError:
-            return repr(obj)
-dump = lambda x: dumps(x, cls=ReprEncoder)
+            id_ = int(match.group(2), 16)
+        except:
+            id_ = None
+
+        return (
+            '<a href="%d" class="inspect">%s</a>' % (id_, repr_)
+        ).replace('"', '\\"')
+
+    return REPR.sub(repr_handle, out)
 
 
 class MetaWdb(type):
@@ -78,6 +99,8 @@ class MetaWdb(type):
 
     def tf(cls, frame=None):
         log.info('Setting trace')
+        if not cls._inst_:
+            raise Exception("Can't set trace outside of request")
         cls._inst_.begun = False
         cls._inst_.set_trace(frame or sys._getframe().f_back)
 
@@ -106,15 +129,16 @@ class Wdb(object, Bdb):
         path = environ.get('PATH_INFO', '')
         if path.startswith('/__wdb/'):
             filename = path.replace('/__wdb/', '')
-            log.info('Getting static "%s"' % filename)
+            log.debug('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
         elif 'text/html' in environ.get('HTTP_ACCEPT', ''):
-            log.info('Sending fake page (%s)' % environ['HTTP_ACCEPT'])
+            log.debug('Sending fake page (%s) for %s' % (
+                environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
         else:
-            log.info('Sending real page (%s)[%s]' % (
-                environ.get('HTTP_ACCEPT', ''),  environ.get('HTTP_WDB_TYPE')))
+            log.debug('Sending real page (%s) for %s' % (
+                environ.get('HTTP_ACCEPT', ''), path))
             return self.handled_request(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
@@ -154,7 +178,6 @@ class Wdb(object, Bdb):
 
     def first_request(self, environ, start_response):
         post = 'null'
-        from pprint import pprint
         if environ.get('REQUEST_METHOD', '') == 'POST':
             post = {}
             body = ''
@@ -170,18 +193,12 @@ class Wdb(object, Bdb):
             else:
                 post['data'] = body
             post = dump(post)
-        pprint(environ)
         start_response('200 OK', [('Content-Type', 'text/html')])
         yield self.html.format(port=self.ws.port, post=post)
 
     def get_file(self, filename):
         checkcache(filename)
         return escape(''.join(getlines(filename)))
-
-    def w_get_sub_exception(self, trace_id):
-        trace = self.tracebacks[int(trace_id)]
-        return self.html.format(
-            trace=dumps(trace, cls=ReprEncoder)), 'html'
 
     # WDB
     def handle_connection(self):
@@ -304,13 +321,23 @@ class Wdb(object, Bdb):
                     'frame': current
                 }))
 
+            elif cmd == 'Inspect':
+                thing = reverse_id(int(data))
+                self.ws.send('Dump|%s' % dump({
+                    'for': escape(repr(thing)),
+                    'val': escape(pformat({
+                        key: getattr(thing, key)
+                        for key in dir(thing)}))
+                }))
+
             elif cmd == 'Trace':
-                self.ws.send('Trace|%s' % dump(trace, cls=ReprEncoder))
+                self.ws.send('Trace|%s' % dump(trace))
 
             elif cmd == 'Eval':
                 globals = dict(stack[current_index][0].f_globals)
                 # Hack for function scope eval
                 globals.update(locals)
+                globals.setdefault('pprint', pprint)
                 with capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')

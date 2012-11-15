@@ -161,3 +161,18 @@ li.highlighted, li.highlighted:before {
   color: orangered;
   background-color: #fcd !important;
 }
+
+a.inspect {
+  text-decoration: none;
+}
+
+a.inspect:after {
+  content: ' {…}';
+  color: #aaa;
+}
+
+a.inspect:hover {
+  background-color: #f3f3f3;
+  border: 1px solid #e3e3e3;
+}
+
