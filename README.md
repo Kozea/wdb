@@ -52,8 +52,7 @@ To try it on another wsgi application, use the `Wdb` middleware:
     my_app.serve_forever()
 ```
 
-Using flask:
-++++++++++++
+### Using flask:
 
 ```python
     from wdb import Wdb
@@ -62,8 +61,7 @@ Using flask:
     app.run()
 ```
 
-Using django:
-++++++++++++
+### Using django:
 
 In your `wsgi.py`, add the middleware:
 
@@ -91,8 +89,7 @@ In your `settings.py`, activate exception propagation:
     DEBUG_PROPAGATE_EXCEPTIONS = True
 ```
 
-Breaking
-++++++++
+### Breaking
 
 You can now put some breakpoint in a request code:
 
