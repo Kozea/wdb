@@ -24,7 +24,7 @@ Server request processing is blocked by the websocket and then resumed when the 
 Warning
 -------
 
-This is still far from working perfectly, it has a lot of known issues and can easily break your application but the page debugging does work.
+This is still far from working perfectly, it has a lot of known issues and can easily break your application but the in page debugging does work. You probably will have to kill everything and start again once something went wrong.
 
 *Random disclaimer warning*
 
@@ -53,6 +53,7 @@ To try it on another wsgi application, use the `Wdb` middleware:
 ```
 
 Using flask:
+++++++++++++
 
 ```python
     from wdb import Wdb
@@ -60,6 +61,38 @@ Using flask:
     app.wsgi_app = Wdb(app.wsgi_app)
     app.run()
 ```
+
+Using django:
+++++++++++++
+
+In your `wsgi.py`, add the middleware:
+
+After:
+
+```python
+    # This application object is used by any WSGI server configured to use this
+    # file. This includes Django's development server, if the WSGI_APPLICATION
+    # setting points here.
+    from django.core.wsgi import get_wsgi_application
+    application = get_wsgi_application()
+```
+
+Add this:
+
+```python
+    from wdb import Wdb
+    application = Wdb(application)
+```
+
+In your `settings.py`, activate exception propagation:
+
+```python
+    DEBUG = True
+    DEBUG_PROPAGATE_EXCEPTIONS = True
+```
+
+Breaking
+++++++++
 
 You can now put some breakpoint in a request code:
 
