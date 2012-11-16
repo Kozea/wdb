@@ -65,8 +65,13 @@ def capture_output():
         sys.stdout, sys.stderr = stdout, stderr
 
 
+class ReprEncoder(JSONEncoder):
+    def default(self, obj):
+        return repr(obj)
+
+
 def dump(o):
-    out = dumps(o, sort_keys=True)
+    out = dumps(o, cls=ReprEncoder, sort_keys=True)
 
     def repr_handle(match):
         repr_ = match.group(0)
@@ -404,7 +409,6 @@ class Wdb(object, Bdb):
         if self.stop_here(frame):
             log.warn('RETURN')
             frame.f_locals['__return__'] = return_value
-            print frame.f_code.co_name
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
                 'for': '__return__',
@@ -425,7 +429,7 @@ class Wdb(object, Bdb):
             'for': '__exception__',
             'val': '%s: %s' % (
             exception, exception_description)}))
-        self.interaction(frame, tb, True, exception, exception_description)
+        self.interaction(frame, tb, exception, exception_description)
 
 
 def set_trace(frame=None):
