@@ -129,7 +129,10 @@ class Wdb(object, Bdb):
             return f.read()
 
     def __init__(self, app, skip=None):
-        Bdb.__init__(self, skip=skip)
+        try:
+            Bdb.__init__(self, skip=skip)
+        except TypeError:
+            Bdb.__init__(self)
         self.begun = False
         self.app = app
         self.ws = WebSocket('localhost', randint(10000, 60000))
