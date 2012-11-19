@@ -1,4 +1,5 @@
 # *-* coding: utf-8 *-*
+from __future__ import with_statement
 # This file is part of wdb
 #
 # wdb Copyright (C) 2012  Florian Mounier, Kozea
