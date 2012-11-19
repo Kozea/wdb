@@ -135,12 +135,12 @@ class Wdb(object, Bdb):
             Bdb.__init__(self)
         self.begun = False
         self.app = app
-        self.ws = WebSocket('localhost', randint(10000, 60000))
+        self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
         self.connected = False
         tries = 1
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
-            self.ws = WebSocket('localhost', randint(10000, 60000))
+            self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
