@@ -211,7 +211,7 @@ class Wdb(object, Bdb):
                 post['data'] = body
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html.format(port=self.ws.port, post=post)
+        yield self.html%dict(port=self.ws.port, post=post)
 
     def get_file(self, filename):
         checkcache(filename)
@@ -342,9 +342,9 @@ class Wdb(object, Bdb):
                 thing = reverse_id(int(data))
                 self.ws.send('Dump|%s' % dump({
                     'for': escape(repr(thing)),
-                    'val': escape(pformat({
-                        key: getattr(thing, key)
-                        for key in dir(thing)}))
+                    'val': escape(pformat(dict(
+                        (key, getattr(thing, key))
+                        for key in dir(thing))))
                 }))
 
             elif cmd == 'Trace':
