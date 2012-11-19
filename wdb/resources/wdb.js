@@ -56,7 +56,7 @@
     var new_ws,
       _this = this;
     console.log('Opening new socket');
-    new_ws = new WebSocket("ws://localhost:" + this.__ws_port);
+    new_ws = new WebSocket("ws://"+document.location.hostname+":" + this.__ws_port);
     new_ws.onclose = function(m) {
       console.log("close " + m);
       if (!stop) {
