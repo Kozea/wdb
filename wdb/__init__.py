@@ -31,7 +31,11 @@ from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
-from urlparse import parse_qs
+try:
+    from urlparse import parse_qs
+except ImportError:
+    def parse_qs(qs):
+        return dict([x.split("=") for x in qs.split("&")])
 from pprint import pprint, pformat
 from gc import get_objects
 try:
