@@ -55,7 +55,7 @@ $.SyntaxHighlighter.init(
 make_ws = ->
     # Open a websocket in case of request break
     console.log 'Opening new socket'
-    new_ws = new WebSocket "ws://localhost:" + @__ws_port
+    new_ws = new WebSocket "ws://"+document.location.hostname+":" + @__ws_port
     new_ws.onclose = (m) =>
         console.log "close #{m}"
         if not stop
