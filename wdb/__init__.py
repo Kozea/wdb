@@ -18,7 +18,11 @@ from __future__ import with_statement
 
 from bdb import Bdb
 from cgi import escape
-from json import dumps, JSONEncoder
+try:
+    from json import dumps, JSONEncoder
+except ImportError:
+    from simplejson import dumps, JSONEncoder
+
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
