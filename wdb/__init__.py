@@ -211,7 +211,7 @@ class Wdb(object, Bdb):
                 post['data'] = body
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html%dict(port=self.ws.port, post=post)
+        yield self.html % dict(port=self.ws.port, post=post)
 
     def get_file(self, filename):
         checkcache(filename)
@@ -275,6 +275,8 @@ class Wdb(object, Bdb):
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
         locals = stack[current_index][0].f_locals
+        words = dict(stack[current_index][0].f_globals)
+        words.update(locals)
         if self.begun:
             self.ws.send('Trace|%s' % dump({
                 'trace': trace
@@ -282,6 +284,7 @@ class Wdb(object, Bdb):
             current_file = current['file']
             self.ws.send('Check|%s' % dump({
                 'name': current_file,
+                'words': words.keys(),
                 'sha512': sha512(self.get_file(current_file)).hexdigest()
             }))
         else:
@@ -309,6 +312,7 @@ class Wdb(object, Bdb):
                 current_file = current['file']
                 self.ws.send('Check|%s' % dump({
                     'name': current_file,
+                    'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
@@ -317,8 +321,11 @@ class Wdb(object, Bdb):
                 current = trace[current_index]
                 current_file = current['file']
                 locals = stack[current_index][0].f_locals
+                words = dict(stack[current_index][0].f_globals)
+                words.update(locals)
                 self.ws.send('Check|%s' % dump({
                     'name': current_file,
+                    'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
