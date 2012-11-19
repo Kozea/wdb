@@ -1,4 +1,5 @@
 # *-* coding: utf-8 *-*
+from __future__ import with_statement
 # This file is part of wdb
 #
 # wdb Copyright (C) 2012  Florian Mounier, Kozea
@@ -17,7 +18,11 @@
 
 from bdb import Bdb
 from cgi import escape
-from json import dumps, JSONEncoder
+try:
+    from json import dumps, JSONEncoder
+except ImportError:
+    from simplejson import dumps, JSONEncoder
+
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
@@ -26,7 +31,11 @@ from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
-from urlparse import parse_qs
+try:
+    from urlparse import parse_qs
+except ImportError:
+    def parse_qs(qs):
+        return dict([x.split("=") for x in qs.split("&")])
 from pprint import pprint, pformat
 from gc import get_objects
 try:
@@ -120,15 +129,18 @@ class Wdb(object, Bdb):
             return f.read()
 
     def __init__(self, app, skip=None):
-        Bdb.__init__(self, skip=skip)
+        try:
+            Bdb.__init__(self, skip=skip)
+        except TypeError:
+            Bdb.__init__(self)
         self.begun = False
         self.app = app
-        self.ws = WebSocket('localhost', randint(10000, 60000))
+        self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
         self.connected = False
         tries = 1
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
-            self.ws = WebSocket('localhost', randint(10000, 60000))
+            self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
@@ -199,7 +211,7 @@ class Wdb(object, Bdb):
                 post['data'] = body
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html.format(port=self.ws.port, post=post)
+        yield self.html%dict(port=self.ws.port, post=post)
 
     def get_file(self, filename):
         checkcache(filename)
@@ -330,9 +342,9 @@ class Wdb(object, Bdb):
                 thing = reverse_id(int(data))
                 self.ws.send('Dump|%s' % dump({
                     'for': escape(repr(thing)),
-                    'val': escape(pformat({
-                        key: getattr(thing, key)
-                        for key in dir(thing)}))
+                    'val': escape(pformat(dict(
+                        (key, getattr(thing, key))
+                        for key in dir(thing))))
                 }))
 
             elif cmd == 'Trace':
