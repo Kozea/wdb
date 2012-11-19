@@ -18,6 +18,7 @@
 from log_colorizer import get_color_logger
 from StringIO import StringIO
 import array
+import atexit
 import base64
 import hashlib
 import socket
@@ -179,6 +180,12 @@ class WebSocket(object):
         else:
             log.debug('Listening on %s:%d' % (host, port))
             self.status = 'OK'
+
+        @atexit.register
+        def force_close():
+            log.debug("Force closing")
+            self.sock.shutdown(1)
+            self.sock.close()
 
     def _recv(self):
         try:
