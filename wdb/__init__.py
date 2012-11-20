@@ -217,16 +217,13 @@ class Wdb(object, Bdb):
         checkcache(filename)
         return escape(''.join(getlines(filename)))
 
-    # WDB
     def handle_connection(self):
         if self.connected:
-            ret = None
             try:
                 self.ws.send('Ping')
-                ret = self.ws.receive()
             except:
                 log.exception('Ping Failed')
-            self.connected = ret == 'Pong'
+                self.connected = False
 
         if not self.connected:
             self.ws.wait_for_connect()

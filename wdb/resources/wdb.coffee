@@ -99,7 +99,6 @@ make_ws = ->
             when 'Print'  then print  data
             when 'Echo'   then echo   data
             when 'Dump'   then echo   data
-            when 'Ping'   then send('Pong')
     new_ws
 
 #### Loading ####

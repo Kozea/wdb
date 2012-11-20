@@ -170,10 +170,11 @@ class WebSocket(object):
         self.stream = StringIO()
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.settimeout(2.5)
             self.handshaken = False
             # self.sock.settimeout(1)
             self.sock.bind((self.host, self.port))
-            self.sock.listen(5)
+            self.sock.listen(0)
         except socket.error:
             log.warn('Port %d is already taken' % port)
             self.status = 'FAIL'

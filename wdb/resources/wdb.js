@@ -113,8 +113,6 @@
           return echo(data);
         case 'Dump':
           return echo(data);
-        case 'Ping':
-          return send('Pong');
       }
     };
     return new_ws;
