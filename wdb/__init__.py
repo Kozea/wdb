@@ -353,7 +353,9 @@ class Wdb(object, Bdb):
                 }))
 
             elif cmd == 'Trace':
-                self.ws.send('Trace|%s' % dump(trace))
+                self.ws.send('Trace|%s' % dump({
+                    'trace': trace
+                }))
 
             elif cmd == 'Eval':
                 globals = dict(stack[current_index][0].f_globals)
@@ -413,6 +415,26 @@ class Wdb(object, Bdb):
                 self.clear_break(current_file, lno)
                 self.ws.send('BreakUnset|%s' % dump({'lno': lno}))
 
+            elif cmd == 'Jump':
+                lno = int(data)
+                if current_index != len(trace) - 1:
+                    log.error('Must be at bottom frame')
+                    continue
+
+                try:
+                    stack[current_index][0].f_lineno = lno
+                except ValueError:
+                    log.error('Jump failed')
+                    continue
+
+                trace[current_index]['lno'] = lno
+                self.ws.send('Trace|%s' % dump({
+                    'trace': trace
+                }))
+                self.ws.send('Select|%s' % dump({
+                    'frame': current
+                }))
+
             elif cmd == 'Quit':
                 if hasattr(self, 'botframe'):
                     self.set_continue()
@@ -431,7 +453,7 @@ class Wdb(object, Bdb):
             self.ws.send('Echo|%s' % dump({
                 'for': '__call__',
                 'val': frame.f_code.co_name}))
-            # self.interaction(frame, first_step=False)
+            self.interaction(frame, first_step=False)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",

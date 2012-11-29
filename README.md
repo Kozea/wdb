@@ -109,6 +109,7 @@ As of now the following special commands are supported during breakpoint:
    * `.c or [Ctrl] + [↑] or [F9] `: Step out (Return)
    * `.c or [Ctrl] + [←] or [F8] `: Continue
    * `.b [file:]lineno`: Break on file at lineno (file is the current file by default)
+   * `.b lineno`: Jump to lineno (Must be at bottom frame and in the same function)
    * `.q`: Quit
 
 NB: Hotkeys are purposedly not triggered in the eval prompt to avoid conflicts when typing.

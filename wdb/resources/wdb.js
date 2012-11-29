@@ -307,6 +307,9 @@
         case 'p':
           cmd('Eval|pprint(' + data + ')');
           break;
+        case 'j':
+          cmd('Jump|' + data);
+          break;
         case 'b':
           toggle_break(data);
       }

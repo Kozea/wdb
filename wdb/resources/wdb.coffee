@@ -254,6 +254,7 @@ execute = (snippet) ->
             when 'c' then cmd('Continue')
             when 'q' then cmd('Quit')
             when 'p' then cmd('Eval|pprint(' + data + ')')
+            when 'j' then cmd('Jump|' + data)
             when 'b' then toggle_break(data)
         return
     else if snippet == '' and last_cmd
