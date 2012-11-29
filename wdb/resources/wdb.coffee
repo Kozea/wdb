@@ -252,6 +252,7 @@ execute = (snippet) ->
             when 'n' then cmd('Next')
             when 'r' then cmd('Return')
             when 'c' then cmd('Continue')
+            when 'u' then cmd('Until')
             when 'q' then cmd('Quit')
             when 'p' then cmd('Eval|pprint(' + data + ')')
             when 'j' then cmd('Jump|' + data)
@@ -326,6 +327,9 @@ register_handlers = ->
             return false
         if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122 # ctrl + down  or F11
             send('Step')
+            return false
+        if e.keyCode == 118 # F7
+            send('Until')
             return false
 
     $('#eval').on 'keydown', (e) ->

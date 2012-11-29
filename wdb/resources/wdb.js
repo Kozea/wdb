@@ -301,6 +301,9 @@
         case 'c':
           cmd('Continue');
           break;
+        case 'u':
+          cmd('Until');
+          break;
         case 'q':
           cmd('Quit');
           break;
@@ -397,6 +400,10 @@
       }
       if ((e.ctrlKey && e.keyCode === 40) || e.keyCode === 122) {
         send('Step');
+        return false;
+      }
+      if (e.keyCode === 118) {
+        send('Until');
         return false;
       }
     });

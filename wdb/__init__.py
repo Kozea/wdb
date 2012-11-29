@@ -396,6 +396,11 @@ class Wdb(object, Bdb):
                     self.set_return(stack[current_index][0])
                 break
 
+            elif cmd == 'Until':
+                if hasattr(self, 'botframe'):
+                    self.set_until(stack[current_index][0])
+                break
+
             elif cmd == 'Break':
                 if ':' in data:
                     fn, lno = data.split(':')
