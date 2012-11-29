@@ -83,6 +83,8 @@ def wtf():
     wdb.set_trace()
     d = a - 2
     e = b + a - c + d
+    # Test breaking on /usr/lib/python2.7/logging/__init__.py:1244
+    app.logger.info('I was here')
     return 'OK! %d' % e
 
 
@@ -137,5 +139,5 @@ else:
     app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
 app.wsgi_app = Wdb(app.wsgi_app)
-app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=False)
+app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=True)
 # 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char

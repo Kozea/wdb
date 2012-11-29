@@ -152,14 +152,28 @@ ol.linenums li {
   -webkit-transition: 1s;
 }
 
-li.highlighted-other {
+ol.linenums li:hover {
+  -webkit-transition: 1s;
+  color: blue;
+}
+
+ol.linenums li.highlighted-other {
   color: black;
   background-color: #eee !important;
 }
 
-li.highlighted, li.highlighted:before {
-  color: orangered;
+ol.linenums li.breakpoint {
+  color: red;
   background-color: #fcd !important;
+}
+
+ol.linenums li.highlighted, ol.linenums li.highlighted:before {
+  color: green;
+  background-color: #cfd !important;
+}
+
+ol.linenums li.ask-breakpoint {
+  color: yellow;
 }
 
 a.inspect {

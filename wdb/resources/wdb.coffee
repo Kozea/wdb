@@ -76,6 +76,7 @@ make_ws = ->
             register_handlers()
             started = true
         send('Start')
+
         $('body').show()
         $('#eval').focus()
 
@@ -91,14 +92,16 @@ make_ws = ->
             cmd = m.data
         console.log time(), '<-', cmd
         switch cmd
-            when 'Title'  then title  data
-            when 'Trace'  then trace  data
-            when 'File'   then file   data
-            when 'Check'  then check  data
-            when 'Select' then select data
-            when 'Print'  then print  data
-            when 'Echo'   then echo   data
-            when 'Dump'   then echo   data
+            when 'Title'      then title      data
+            when 'Trace'      then trace      data
+            when 'File'       then file       data
+            when 'Check'      then check      data
+            when 'Select'     then select     data
+            when 'Print'      then print      data
+            when 'Echo'       then echo       data
+            when 'BreakSet'   then breakset   data
+            when 'BreakUnset' then breakunset data
+            when 'Dump'       then echo       data
     new_ws
 
 #### Loading ####
@@ -251,6 +254,7 @@ execute = (snippet) ->
             when 'c' then cmd('Continue')
             when 'q' then cmd('Quit')
             when 'p' then cmd('Eval|pprint(' + data + ')')
+            when 'b' then toggle_break(data)
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -284,23 +288,44 @@ echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.val or '')
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
-        
 
+breakset = (data) ->
+    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').addClass('breakpoint')
+    $eval = $('#eval')
+    if $eval.val().indexOf('.b ') == 0
+        $eval.val('')
+
+breakunset = (data) ->
+    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint')
+    $eval = $('#eval')
+    if $eval.val().indexOf('.b ') == 0
+        $eval.val('')
+
+toggle_break = (lno) ->
+    if ('' + lno).indexOf(':') > -1
+        ws.send('Break|' + lno)
+    $line = $('.linenums li').eq(lno - 1)
+    if $line.hasClass('breakpoint')
+        ws.send('Unbreak|' + lno)
+        $line.removeClass('breakpoint').addClass('ask-breakpoint')
+    else
+        $line.addClass('ask-breakpoint')
+        ws.send('Break|' + lno)
+    
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
-        if e.ctrlKey
-            if e.keyCode == 37  # left
-                send('Continue')
-                return false
-            if e.keyCode == 38  # up
-                send('Return')
-                return false
-            if e.keyCode == 39  # Right
-                send('Next')
-                return false
-            if e.keyCode == 40  # Down
-                send('Step')
-                return false
+        if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
+            send('Continue')
+            return false
+        if (e.ctrlKey and e.keyCode == 38) or e.keyCode == 120 # ctrl + up    or F9
+            send('Return')
+            return false
+        if (e.ctrlKey and e.keyCode == 39) or e.keyCode == 121 # ctrl + right or F10
+            send('Next')
+            return false
+        if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122 # ctrl + down  or F11
+            send('Step')
+            return false
 
     $('#eval').on 'keydown', (e) ->
         if e.ctrlKey
@@ -360,6 +385,12 @@ register_handlers = ->
         false
     ).on('click', '.short.close', ->
         $(@).addClass('open').removeClass('close').next('.long').show('fast')
-    ).on 'click', '.long,.short.open', ->
+    ).on('click', '.long,.short.open', ->
         elt = if $(@).hasClass('long') then $(@) else $(@).next('.long')
         elt.hide('fast').prev('.short').removeClass('open').addClass('close')
+    )
+
+    $("#sourcecode").on('click', '.linenums li', ->
+        lno = $(@).parent().find('li').index(@) + 1
+        toggle_break(lno)
+    )

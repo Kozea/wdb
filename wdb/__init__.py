@@ -165,6 +165,7 @@ class Wdb(object, Bdb):
 
     def handled_request(self, environ, start_response):
         self.quitting = 0
+        self.clear_all_breaks()
         appiter = None
         try:
             appiter = self.app(environ, start_response)
@@ -393,6 +394,25 @@ class Wdb(object, Bdb):
                     self.set_return(stack[current_index][0])
                 break
 
+            elif cmd == 'Break':
+                if ':' in data:
+                    fn, lno = data.split(':')
+                else:
+                    fn, lno = current['file'], data
+
+                lno = int(lno)
+                rv = self.set_break(fn, lno)
+                log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
+                if rv is None and fn == current['file']:
+                    self.ws.send('BreakSet|%s' % dump({'lno': lno}))
+
+            elif cmd == 'Unbreak':
+                lno = int(data)
+                current_file = current['file']
+                log.info('Break unset at %s:%d' % (current_file, lno))
+                self.clear_break(current_file, lno)
+                self.ws.send('BreakUnset|%s' % dump({'lno': lno}))
+
             elif cmd == 'Quit':
                 if hasattr(self, 'botframe'):
                     self.set_continue()
@@ -406,7 +426,7 @@ class Wdb(object, Bdb):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
         if self.stop_here(frame):
-            log.warn('CALL')
+            log.info('CALL')
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
                 'for': '__call__',
@@ -415,15 +435,15 @@ class Wdb(object, Bdb):
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",
-        if self.stop_here(frame):
-            log.warn('LINE')
+        if self.stop_here(frame) or self.break_here(frame):
+            log.info('LINE')
             self.handle_connection()
             self.interaction(frame)
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
         if self.stop_here(frame):
-            log.warn('RETURN')
+            log.info('RETURN')
             frame.f_locals['__return__'] = return_value
             self.handle_connection()
             self.ws.send('Echo|%s' % dump({
