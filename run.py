@@ -83,6 +83,8 @@ def wtf():
     wdb.set_trace()
     d = a - 2
     e = b + a - c + d
+    for i in range(5):
+        e += i
     # Test breaking on /usr/lib/python2.7/logging/__init__.py:1244
     app.logger.info('I was here')
     return 'OK! %d' % e

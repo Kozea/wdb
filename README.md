@@ -104,16 +104,17 @@ Multi-lines are partially supported using `[Shift] + [Enter]`.
 
 As of now the following special commands are supported during breakpoint:
 
-   * `.s or [Ctrl] + [↓] or [F11]`: Step into
-   * `.n or [Ctrl] + [→] or [F10]`: Step over (Next)
-   * `.r or [Ctrl] + [↑] or [F9] `: Step out (Return)
-   * `.c or [Ctrl] + [←] or [F8] `: Continue
-   * `.u or [F7]                 `: Until (Next over loops)
-   * `.b [file:]lineno           `: Break on file at lineno (file is the current file by default)
-   * `.j lineno                  `: Jump to lineno (Must be at bottom frame and in the same function)
-   * `.q                         `: Quit
+   * `.s or [Ctrl] + [↓] or [F11]  `: Step into
+   * `.n or [Ctrl] + [→] or [F10]  `: Step over (Next)
+   * `.r or [Ctrl] + [↑] or [F9]   `: Step out (Return)
+   * `.c or [Ctrl] + [←] or [F8]   `: Continue
+   * `.u or [F7]                   `: Until (Next over loops)
+   * `.b [file:]lineno[, condition]`: Break on file at lineno (file is the current file by default)
+   * `.t [file:]lineno[, condition]`: Same as b but break only once
+   * `.j lineno                    `: Jump to lineno (Must be at bottom frame and in the same function)
+   * `.q                           `: Quit
 
-NB: Hotkeys are purposedly not triggered in the eval prompt to avoid conflicts when typing.
+NB: Hotkeys with arrows are purposedly not triggered in the eval prompt to avoid conflicts when typing.
 
 Author
 ------

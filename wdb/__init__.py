@@ -50,7 +50,6 @@ RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
 
 REPR = re.compile(escape(r'<?\S+\s(object|instance)\sat\s([0-9a-fx]+)>?'))
-
 log = get_color_logger('wdb')
 # log.setLevel(20)
 
@@ -99,6 +98,11 @@ def dump(o):
 class MetaWdb(type):
 
     def __init__(cls, name, bases, dict):
+        try:
+            from werkzeug.serving import ThreadedWSGIServer
+            ThreadedWSGIServer.daemon_threads = True
+        except ImportError:
+            pass
         super(MetaWdb, cls).__init__(name, bases, dict)
         cls._inst_ = None
 
@@ -141,6 +145,7 @@ class Wdb(object, Bdb):
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
             self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
+        self.request = 0
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
@@ -165,7 +170,6 @@ class Wdb(object, Bdb):
 
     def handled_request(self, environ, start_response):
         self.quitting = 0
-        self.clear_all_breaks()
         appiter = None
         try:
             appiter = self.app(environ, start_response)
@@ -212,7 +216,8 @@ class Wdb(object, Bdb):
                 post['data'] = body
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        yield self.html % dict(port=self.ws.port, post=post)
+        self.request += 1
+        yield self.html % dict(port=self.ws.port, post=post, rq=self.request)
 
     def get_file(self, filename):
         checkcache(filename)
@@ -226,9 +231,13 @@ class Wdb(object, Bdb):
                 log.exception('Ping Failed')
                 self.connected = False
 
-        if not self.connected:
-            self.ws.wait_for_connect()
-            self.connected = True
+        while not self.connected:
+            try:
+                self.ws.wait_for_connect()
+            except WsError:
+                log.exception('Unable to connect')
+            else:
+                self.connected = True
 
     def get_trace(self, frame, tb, w_code=None):
         frames = []
@@ -267,6 +276,25 @@ class Wdb(object, Bdb):
             self.interaction(
                 frame, tb, exception, exception_description)
 
+    def send(self, data):
+        self.ws.send("%d:%s" % (self.request, data))
+
+    def receive(self):
+        message = None
+        while not message:
+            rv = self.ws.receive()
+            if not ':' in rv:
+                log.warn('No request index in %s. Ignoring' % rv)
+                continue
+            sep = rv.index(':')
+            rq = int(rv[:sep])
+            if rq != self.request:
+                log.warn('Bad request index %d in request %d' % (
+                    rq, self.request))
+            else:
+                message = rv[sep + 1:]
+        return message
+
     def _interaction(
             self, frame, tb,
             exception, exception_description):
@@ -276,11 +304,11 @@ class Wdb(object, Bdb):
         words = dict(stack[current_index][0].f_globals)
         words.update(locals)
         if self.begun:
-            self.ws.send('Trace|%s' % dump({
+            self.send('Trace|%s' % dump({
                 'trace': trace
             }))
             current_file = current['file']
-            self.ws.send('Check|%s' % dump({
+            self.send('Check|%s' % dump({
                 'name': current_file,
                 'words': words.keys(),
                 'sha512': sha512(self.get_file(current_file)).hexdigest()
@@ -289,7 +317,7 @@ class Wdb(object, Bdb):
             self.begun = True
 
         while True:
-            message = self.ws.receive()
+            message = self.receive()
             if '|' in message:
                 pipe = message.index('|')
                 cmd = message[:pipe]
@@ -300,15 +328,15 @@ class Wdb(object, Bdb):
 
             log.info('Cmd %s #Data %d' % (cmd, len(data)))
             if cmd == 'Start':
-                self.ws.send('Title|%s' % dump({
+                self.send('Title|%s' % dump({
                     'title': exception,
                     'subtitle': exception_description
                 }))
-                self.ws.send('Trace|%s' % dump({
+                self.send('Trace|%s' % dump({
                     'trace': trace
                 }))
                 current_file = current['file']
-                self.ws.send('Check|%s' % dump({
+                self.send('Check|%s' % dump({
                     'name': current_file,
                     'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
@@ -321,7 +349,7 @@ class Wdb(object, Bdb):
                 locals = stack[current_index][0].f_locals
                 words = dict(stack[current_index][0].f_globals)
                 words.update(locals)
-                self.ws.send('Check|%s' % dump({
+                self.send('Check|%s' % dump({
                     'name': current_file,
                     'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
@@ -329,23 +357,23 @@ class Wdb(object, Bdb):
 
             elif cmd == 'File':
                 current_file = current['file']
-                self.ws.send('File|%s' % dump({
+                self.send('File|%s' % dump({
                     'file': self.get_file(current_file),
                     'name': current_file,
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
-                self.ws.send('Select|%s' % dump({
+                self.send('Select|%s' % dump({
                     'frame': current
                 }))
 
             elif cmd == 'NoFile':
-                self.ws.send('Select|%s' % dump({
+                self.send('Select|%s' % dump({
                     'frame': current
                 }))
 
             elif cmd == 'Inspect':
                 thing = reverse_id(int(data))
-                self.ws.send('Dump|%s' % dump({
+                self.send('Dump|%s' % dump({
                     'for': escape(repr(thing)),
                     'val': escape(pformat(dict(
                         (key, getattr(thing, key))
@@ -353,7 +381,7 @@ class Wdb(object, Bdb):
                 }))
 
             elif cmd == 'Trace':
-                self.ws.send('Trace|%s' % dump({
+                self.send('Trace|%s' % dump({
                     'trace': trace
                 }))
 
@@ -369,12 +397,12 @@ class Wdb(object, Bdb):
                     except Exception:
                         type_, value, tb = exc_info()
                         print '%s: %s' % (type_.__name__, str(value))
-                self.ws.send('Print|%s' % dump({
+                self.send('Print|%s' % dump({
                     'result': escape('\n'.join(out) + '\n'.join(err))
                 }))
 
             elif cmd == 'Ping':
-                self.ws.send('Pong')
+                self.send('Pong')
 
             elif cmd == 'Step':
                 if hasattr(self, 'botframe'):
@@ -401,24 +429,30 @@ class Wdb(object, Bdb):
                     self.set_until(stack[current_index][0])
                 break
 
-            elif cmd == 'Break':
+            elif cmd in ('TBreak', 'Break'):
                 if ':' in data:
                     fn, lno = data.split(':')
                 else:
                     fn, lno = current['file'], data
+                cond = None
+                if ',' in lno:
+                    lno, cond = lno.split(',')
+                    cond = cond.lstrip()
 
                 lno = int(lno)
-                rv = self.set_break(fn, lno)
+                print int(cmd == 'TBreak')
+                rv = self.set_break(fn, lno, int(cmd == 'TBreak'), cond)
                 log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
                 if rv is None and fn == current['file']:
-                    self.ws.send('BreakSet|%s' % dump({'lno': lno}))
+                    self.send('BreakSet|%s' % dump({
+                        'lno': lno, 'cond': cond}))
 
             elif cmd == 'Unbreak':
                 lno = int(data)
                 current_file = current['file']
                 log.info('Break unset at %s:%d' % (current_file, lno))
                 self.clear_break(current_file, lno)
-                self.ws.send('BreakUnset|%s' % dump({'lno': lno}))
+                self.send('BreakUnset|%s' % dump({'lno': lno}))
 
             elif cmd == 'Jump':
                 lno = int(data)
@@ -433,10 +467,10 @@ class Wdb(object, Bdb):
                     continue
 
                 trace[current_index]['lno'] = lno
-                self.ws.send('Trace|%s' % dump({
+                self.send('Trace|%s' % dump({
                     'trace': trace
                 }))
-                self.ws.send('Select|%s' % dump({
+                self.send('Select|%s' % dump({
                     'frame': current
                 }))
 
@@ -452,32 +486,29 @@ class Wdb(object, Bdb):
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
-        if self.stop_here(frame):
-            log.info('CALL')
-            self.handle_connection()
-            self.ws.send('Echo|%s' % dump({
-                'for': '__call__',
-                'val': frame.f_code.co_name}))
-            self.interaction(frame, first_step=False)
+        log.info('CALL')
+        self.handle_connection()
+        self.send('Echo|%s' % dump({
+            'for': '__call__',
+            'val': frame.f_code.co_name}))
+        self.interaction(frame)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line.""",
-        if self.stop_here(frame) or self.break_here(frame):
-            log.info('LINE')
-            self.handle_connection()
-            self.interaction(frame)
+        log.info('LINE')
+        self.handle_connection()
+        self.interaction(frame)
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
-        if self.stop_here(frame):
-            log.info('RETURN')
-            frame.f_locals['__return__'] = return_value
-            self.handle_connection()
-            self.ws.send('Echo|%s' % dump({
-                'for': '__return__',
-                'val': return_value
-            }))
-            self.interaction(frame)
+        log.info('RETURN')
+        frame.f_locals['__return__'] = return_value
+        self.handle_connection()
+        self.send('Echo|%s' % dump({
+            'for': '__return__',
+            'val': return_value
+        }))
+        self.interaction(frame)
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
@@ -488,11 +519,15 @@ class Wdb(object, Bdb):
         exception = type_.__name__
         exception_description = str(value)
         self.handle_connection()
-        self.ws.send('Echo|%s' % dump({
+        self.send('Echo|%s' % dump({
             'for': '__exception__',
             'val': '%s: %s' % (
             exception, exception_description)}))
         self.interaction(frame, tb, exception, exception_description)
+
+    def do_clear(self, arg):
+        log.warn('Closing %r' % arg)
+        self.clear_bpbynumber(arg)
 
 
 def set_trace(frame=None):

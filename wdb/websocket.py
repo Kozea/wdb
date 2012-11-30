@@ -45,6 +45,10 @@ class WsBroken(WsError):
     pass
 
 
+class WsUnavailable(WsError):
+    pass
+
+
 class WsHeader(object):
     expected_fields = {
         'Host': 'host',
@@ -239,7 +243,10 @@ class WebSocket(object):
 
     def wait_for_connect(self):
         log.debug('Waiting for accept')
-        self.peer, self.info = self.sock.accept()
+        try:
+            self.peer, self.info = self.sock.accept()
+        except:
+            raise WsUnavailable
         log.debug('Handshaking with peer %r' % self.peer)
         header = self.recv_header()
         self.peer.sendall(self.handshake(header))

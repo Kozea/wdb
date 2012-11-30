@@ -25,7 +25,7 @@ ws = null
 
 send = (msg) ->
     console.log time(), '->', msg
-    ws.send msg
+    ws.send __ws_rq + ':' + msg
 
 persistable = 'localStorage' of window and window.localStorage
 if persistable and localStorage['__wdb_cmd_hist']
@@ -84,12 +84,22 @@ make_ws = ->
         if stop
             return
         # Open a websocket in case of request break
-        pipe = m.data.indexOf('|')
+        sep = m.data.indexOf(':')
+        if sep == -1
+            console.log 'No request index for ', m.data
+            return
+        rq = parseInt(m.data.substr(0, sep))
+        if rq != __ws_rq
+            console.log 'Bad request index', rq, 'for request', __ws_rq
+            return
+        message = m.data.substr(sep + 1)
+        
+        pipe = message.indexOf('|')
         if pipe > -1
-            cmd = m.data.substr(0, pipe)
-            data = JSON.parse m.data.substr(pipe + 1)
+            cmd = message.substr(0, pipe)
+            data = JSON.parse message.substr(pipe + 1)
         else
-            cmd = m.data
+            cmd = message
         console.log time(), '<-', cmd
         switch cmd
             when 'Title'      then title      data
@@ -174,8 +184,7 @@ trace = (data) ->
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr(title: frame.file))
 
-        $tracecode = $('<div>')
-            .addClass('tracecode')
+        $tracecode = $('<div>').addClass('tracecode')
         code($tracecode, frame.code)
         $traceline.append $tracefilelno
         $traceline.append $tracecode
@@ -225,6 +234,9 @@ code = (parent, code, classes=[]) ->
         code.addClass(cls)
     parent.append code
     code.syntaxHighlight()
+    # Re do it in case of
+    setTimeout((->
+        code.syntaxHighlight()), 50)
     code.find('span').each ->
         txt = $(@).text()
         if txt.length > 128
@@ -257,6 +269,7 @@ execute = (snippet) ->
             when 'p' then cmd('Eval|pprint(' + data + ')')
             when 'j' then cmd('Jump|' + data)
             when 'b' then toggle_break(data)
+            when 't' then toggle_break(data, true)
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -269,7 +282,7 @@ print = (data) ->
     code($('#scrollback'), data.result)
 
     # if data.exception
-    #     a = $('<a>').attr('href', '/?__w__=__w__&what=sub_exception&which=' + data.exception)
+    #     a = $('<a>').attr('href', '/?__ws__=__ws__&what=sub_exception&which=' + data.exception)
     #     nh.wrap(a)
 
     $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
@@ -292,27 +305,31 @@ echo = (data) ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
 breakset = (data) ->
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').addClass('breakpoint')
+    $line = $('.linenums li').eq(data.lno - 1)
+    $line.removeClass('ask-breakpoint').addClass('breakpoint')
+    if data.cond
+        $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
-    if $eval.val().indexOf('.b ') == 0
+    if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
         $eval.val('')
 
 breakunset = (data) ->
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint')
+    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').attr('title', '')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
         $eval.val('')
 
-toggle_break = (lno) ->
+toggle_break = (lno, temporary) ->
+    cmd = if temporary then 'TBreak' else 'Break'
     if ('' + lno).indexOf(':') > -1
-        ws.send('Break|' + lno)
+        send(cmd + '|' + lno)
     $line = $('.linenums li').eq(lno - 1)
     if $line.hasClass('breakpoint')
-        ws.send('Unbreak|' + lno)
+        send('Unbreak|' + lno)
         $line.removeClass('breakpoint').addClass('ask-breakpoint')
     else
         $line.addClass('ask-breakpoint')
-        ws.send('Break|' + lno)
+        send(cmd + '|' + lno)
     
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
@@ -386,7 +403,7 @@ register_handlers = ->
                         false
 
     $("#scrollback").on('click', 'a.inspect', ->
-        ws.send('Inspect|' + $(this).attr('href'))
+        send('Inspect|' + $(this).attr('href'))
         false
     ).on('click', '.short.close', ->
         $(@).addClass('open').removeClass('close').next('.long').show('fast')

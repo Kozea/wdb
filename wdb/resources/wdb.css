@@ -44,6 +44,7 @@ h1 small {
   padding: .2em 0;
   font-size: 14px;
   font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
+
 }
 
 #prompt:before, .prompted:before {

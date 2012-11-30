@@ -17,7 +17,7 @@
 
   send = function(msg) {
     console.log(time(), '->', msg);
-    return ws.send(msg);
+    return ws.send(__ws_rq + ':' + msg);
   };
 
   persistable = 'localStorage' in window && window.localStorage;
@@ -84,16 +84,27 @@
       return $('#eval').focus();
     };
     new_ws.onmessage = function(m) {
-      var cmd, data, pipe;
+      var cmd, data, message, pipe, rq, sep;
       if (stop) {
         return;
       }
-      pipe = m.data.indexOf('|');
+      sep = m.data.indexOf(':');
+      if (sep === -1) {
+        console.log('No request index for ', m.data);
+        return;
+      }
+      rq = parseInt(m.data.substr(0, sep));
+      if (rq !== __ws_rq) {
+        console.log('Bad request index', rq, 'for request', __ws_rq);
+        return;
+      }
+      message = m.data.substr(sep + 1);
+      pipe = message.indexOf('|');
       if (pipe > -1) {
-        cmd = m.data.substr(0, pipe);
-        data = JSON.parse(m.data.substr(pipe + 1));
+        cmd = message.substr(0, pipe);
+        data = JSON.parse(message.substr(pipe + 1));
       } else {
-        cmd = m.data;
+        cmd = message;
       }
       console.log(time(), '<-', cmd);
       switch (cmd) {
@@ -259,6 +270,9 @@
     }
     parent.append(code);
     code.syntaxHighlight();
+    setTimeout((function() {
+      return code.syntaxHighlight();
+    }), 50);
     code.find('span').each(function() {
       var txt;
       txt = $(this).text();
@@ -315,6 +329,9 @@
           break;
         case 'b':
           toggle_break(data);
+          break;
+        case 't':
+          toggle_break(data, true);
       }
       return;
     } else if (snippet === '' && last_cmd) {
@@ -352,35 +369,40 @@
   };
 
   breakset = function(data) {
-    var $eval;
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').addClass('breakpoint');
+    var $eval, $line;
+    $line = $('.linenums li').eq(data.lno - 1);
+    $line.removeClass('ask-breakpoint').addClass('breakpoint');
+    if (data.cond) {
+      $line.attr('title', "On [" + data.cond + "]");
+    }
     $eval = $('#eval');
-    if ($eval.val().indexOf('.b ') === 0) {
+    if ($eval.val().indexOf('.b ') === 0 || $eval.val().indexOf('.t ') === 0) {
       return $eval.val('');
     }
   };
 
   breakunset = function(data) {
     var $eval;
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint');
+    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').attr('title', '');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
       return $eval.val('');
     }
   };
 
-  toggle_break = function(lno) {
-    var $line;
+  toggle_break = function(lno, temporary) {
+    var $line, cmd;
+    cmd = temporary ? 'TBreak' : 'Break';
     if (('' + lno).indexOf(':') > -1) {
-      ws.send('Break|' + lno);
+      send(cmd + '|' + lno);
     }
     $line = $('.linenums li').eq(lno - 1);
     if ($line.hasClass('breakpoint')) {
-      ws.send('Unbreak|' + lno);
+      send('Unbreak|' + lno);
       return $line.removeClass('breakpoint').addClass('ask-breakpoint');
     } else {
       $line.addClass('ask-breakpoint');
-      return ws.send('Break|' + lno);
+      return send(cmd + '|' + lno);
     }
   };
 
@@ -468,7 +490,7 @@
       }
     });
     $("#scrollback").on('click', 'a.inspect', function() {
-      ws.send('Inspect|' + $(this).attr('href'));
+      send('Inspect|' + $(this).attr('href'));
       return false;
     }).on('click', '.short.close', function() {
       return $(this).addClass('open').removeClass('close').next('.long').show('fast');
