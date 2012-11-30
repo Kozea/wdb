@@ -225,6 +225,8 @@ select = (data) ->
         $('#sourcecode').html(file_cache[current_frame.file].file)
         $('#sourcecode').attr('title', current_frame.file)
     $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
+    for lno in data.breaks
+        $('.linenums li').eq(lno - 1).addClass('breakpoint')
     $('#sourcecode').stop().animate((scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 100)
 
 

@@ -160,17 +160,17 @@ ol.linenums li:hover {
 
 ol.linenums li.highlighted-other {
   color: black;
-  background-color: #eee !important;
+  background-color: rgba(0, 255, 0, .1) !important;
 }
 
 ol.linenums li.breakpoint {
   color: red;
-  background-color: #fcd !important;
+  background-color: rgba(255, 0, 0, .15) !important;
 }
 
 ol.linenums li.highlighted, ol.linenums li.highlighted:before {
   color: green;
-  background-color: #cfd !important;
+  background-color: rgba(0, 255, 0, .25) !important;
 }
 
 ol.linenums li.ask-breakpoint {

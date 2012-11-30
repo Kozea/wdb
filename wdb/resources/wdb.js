@@ -241,7 +241,7 @@
   };
 
   select = function(data) {
-    var current_frame;
+    var current_frame, lno, _i, _len, _ref;
     current_frame = data.frame;
     $('.traceline').removeClass('selected');
     $('#trace-' + current_frame.level).addClass('selected');
@@ -253,6 +253,11 @@
       $('#sourcecode').attr('title', current_frame.file);
     }
     $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other');
+    _ref = data.breaks;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      lno = _ref[_i];
+      $('.linenums li').eq(lno - 1).addClass('breakpoint');
+    }
     return $('#sourcecode').stop().animate({
       scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()
     }, 100);

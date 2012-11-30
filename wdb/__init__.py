@@ -16,7 +16,7 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from bdb import Bdb
+from bdb import Bdb, BdbQuit
 from cgi import escape
 try:
     from json import dumps, JSONEncoder
@@ -169,8 +169,12 @@ class Wdb(object, Bdb):
             yield f.read()
 
     def handled_request(self, environ, start_response):
-        self.quitting = 0
         appiter = None
+        self.quitting = 0
+        self.reset()
+        self.stopframe = sys._getframe().f_back
+        self.botframe = sys._getframe().f_back
+        sys.settrace(self.trace_dispatch)
         try:
             appiter = self.app(environ, start_response)
             for item in appiter:
@@ -226,7 +230,7 @@ class Wdb(object, Bdb):
     def handle_connection(self):
         if self.connected:
             try:
-                self.ws.send('Ping')
+                self.send('Ping')
             except:
                 log.exception('Ping Failed')
                 self.connected = False
@@ -363,12 +367,14 @@ class Wdb(object, Bdb):
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
                 self.send('Select|%s' % dump({
-                    'frame': current
+                    'frame': current,
+                    'breaks': self.get_file_breaks(current_file)
                 }))
 
             elif cmd == 'NoFile':
                 self.send('Select|%s' % dump({
-                    'frame': current
+                    'frame': current,
+                    'breaks': self.get_file_breaks(current['file'])
                 }))
 
             elif cmd == 'Inspect':
@@ -486,15 +492,16 @@ class Wdb(object, Bdb):
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
-        log.info('CALL')
-        self.handle_connection()
-        self.send('Echo|%s' % dump({
-            'for': '__call__',
-            'val': frame.f_code.co_name}))
-        self.interaction(frame)
+        if self.stop_here(frame):
+            log.info('CALL')
+            self.handle_connection()
+            self.send('Echo|%s' % dump({
+                'for': '__call__',
+                'val': frame.f_code.co_name}))
+            self.interaction(frame)
 
     def user_line(self, frame):
-        """This function is called when we stop or break at this line.""",
+        """This function is called when we stop or break at this line."""
         log.info('LINE')
         self.handle_connection()
         self.interaction(frame)
@@ -528,6 +535,12 @@ class Wdb(object, Bdb):
     def do_clear(self, arg):
         log.warn('Closing %r' % arg)
         self.clear_bpbynumber(arg)
+
+    def dispatch_exception(self, frame, arg):
+        self.user_exception(frame, arg)
+        if self.quitting:
+            raise BdbQuit
+        return self.trace_dispatch
 
 
 def set_trace(frame=None):
