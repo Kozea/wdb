@@ -139,13 +139,17 @@ class Wdb(object, Bdb):
             Bdb.__init__(self)
         self.begun = False
         self.app = app
+        self.request = 0
+        self.ws = None
+
+    def make_web_socket(self):
+        log.info('Creating WebSocket')
         self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
         self.connected = False
         tries = 1
         while self.ws == 'FAIL' and tries < 10:
             tries += 1
             self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
-        self.request = 0
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
@@ -158,54 +162,48 @@ class Wdb(object, Bdb):
             log.debug('Sending fake page (%s) for %s' % (
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
+        elif environ.get('HTTP_X_DEBUGGER') == 'WDB':
+            log.debug('Sending real page (%s) with exception'
+                      ' handling for %s' % (
+                          environ.get('HTTP_ACCEPT', ''), path))
+
+            def wsgi_with_trace(environ, start_response):
+                self.quitting = 0
+                self.reset()
+                frame = sys._getframe()
+                while frame:
+                    frame.f_trace = self.trace_dispatch
+                    self.botframe = frame
+                    frame = frame.f_back
+                self.stopframe = sys._getframe()
+                self.stoplineno = -1
+                sys.settrace(self.trace_dispatch)
+                appiter = self.app(environ, start_response)
+                for item in appiter:
+                    yield item
+                if hasattr(appiter, 'close'):
+                    appiter.close()
+                sys.settrace(None)
+                self.ws.force_close()
+                self.ws = None
+            return wsgi_with_trace(environ, start_response)
+
+            # return self.handled_request(environ, start_response)
         else:
-            log.debug('Sending real page (%s) for %s' % (
-                environ.get('HTTP_ACCEPT', ''), path))
-            return self.handled_request(environ, start_response)
+            log.debug("Don't doing anything for %s" % path)
+
+            def wsgi_default(environ, start_response):
+                appiter = self.app(environ, start_response)
+                for item in appiter:
+                    yield item
+                if hasattr(appiter, 'close'):
+                    appiter.close()
+            return wsgi_default(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
         start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
         with open(os.path.join(RES_PATH, filename)) as f:
             yield f.read()
-
-    def handled_request(self, environ, start_response):
-        appiter = None
-        self.quitting = 0
-        self.reset()
-        self.stopframe = sys._getframe().f_back
-        self.botframe = sys._getframe().f_back
-        if self.get_all_breaks():
-            log.info('Setting trace before request as we have breakpoints')
-            sys.settrace(self.trace_dispatch)
-        try:
-            appiter = self.app(environ, start_response)
-            for item in appiter:
-                yield item
-            if hasattr(appiter, 'close'):
-                appiter.close()
-            sys.settrace(None)
-        except Exception:
-            log.exception('wdb')
-            if hasattr(appiter, 'close'):
-                appiter.close()
-
-            self.handle_connection()
-            type_, value, tb = exc_info()
-            exception = type_.__name__
-            exception_description = str(value)
-            self.interaction(None, tb, exception, exception_description)
-            try:
-                start_response('500 INTERNAL SERVER ERROR', [
-                    ('Content-Type', 'text/html')])
-                yield (
-                    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">'
-                    '<title>500 Internal Server Error</title>'
-                    '<h1>Internal Server Error</h1>'
-                    '<p>There was an error in your request.</p>')
-            except:
-                pass
-        finally:
-            sys.settrace(None)
 
     def first_request(self, environ, start_response):
         post = 'null'
@@ -227,6 +225,8 @@ class Wdb(object, Bdb):
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.request += 1
         log.info('Starting request %d' % self.request)
+        self.make_web_socket()
+
         yield self.html % dict(port=self.ws.port, post=post, rq=self.request)
 
     def get_file(self, filename):
@@ -533,7 +533,7 @@ class Wdb(object, Bdb):
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
-        log.error('EXCEPTION', exc_info=exc_info)
+        log.error('Exception', exc_info=exc_info)
         type_, value, tb = exc_info
         frame.f_locals['__exception__'] = type_, value
         exception = type_.__name__
@@ -543,6 +543,8 @@ class Wdb(object, Bdb):
             'for': '__exception__',
             'val': '%s: %s' % (
             exception, exception_description)}))
+        if not self.begun:
+            frame = None
         self.interaction(frame, tb, exception, exception_description)
 
     def do_clear(self, arg):

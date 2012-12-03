@@ -184,12 +184,12 @@ class WebSocket(object):
         else:
             log.debug('Listening on %s:%d' % (host, port))
             self.status = 'OK'
+        atexit.register(lambda: self.force_close())
 
-        @atexit.register
-        def force_close():
-            log.debug("Force closing")
-            self.sock.shutdown(1)
-            self.sock.close()
+    def force_close(self):
+        log.debug("Force closing")
+        self.sock.shutdown(1)
+        self.sock.close()
 
     def _recv(self):
         try:

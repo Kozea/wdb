@@ -134,9 +134,11 @@ $ =>
             type: 'POST',
             data: __ws_post.data,
             contentType: __ws_post.enctype,
-            traditional: true)
+            traditional: true,
+            headers: 'X-Debugger': 'WDB')
     else
-        xhr = $.ajax(location.href)
+        xhr = $.ajax(location.href,
+            headers: 'X-Debugger': 'WDB')
 
     xhr.done((data) => end(data))
        .fail (data) =>
