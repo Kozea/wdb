@@ -116,11 +116,16 @@ class MetaWdb(type):
         return cls._inst_
 
     def tf(cls, frame=None):
+        self = cls._inst_
         log.info('Setting trace')
-        if not cls._inst_:
+        if not self:
             raise Exception("Can't set trace outside of request")
-        cls._inst_.begun = False
-        cls._inst_.set_trace(frame or sys._getframe().f_back)
+        sys.settrace(None)
+        fframe = frame = frame or sys._getframe().f_back
+        while frame and frame is not self.botframe:
+            del frame.f_trace
+            frame = frame.f_back
+        self.set_trace(fframe)
 
 
 class Wdb(object, Bdb):
@@ -169,6 +174,7 @@ class Wdb(object, Bdb):
 
             def wsgi_with_trace(environ, start_response):
                 self.quitting = 0
+                self.begun = False
                 self.reset()
                 frame = sys._getframe()
                 while frame:
