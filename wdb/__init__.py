@@ -174,13 +174,16 @@ class Wdb(object, Bdb):
         self.reset()
         self.stopframe = sys._getframe().f_back
         self.botframe = sys._getframe().f_back
-        sys.settrace(self.trace_dispatch)
+        if self.get_all_breaks():
+            log.info('Setting trace before request as we have breakpoints')
+            sys.settrace(self.trace_dispatch)
         try:
             appiter = self.app(environ, start_response)
             for item in appiter:
                 yield item
             if hasattr(appiter, 'close'):
                 appiter.close()
+            sys.settrace(None)
         except Exception:
             log.exception('wdb')
             if hasattr(appiter, 'close'):
@@ -201,6 +204,8 @@ class Wdb(object, Bdb):
                     '<p>There was an error in your request.</p>')
             except:
                 pass
+        finally:
+            sys.settrace(None)
 
     def first_request(self, environ, start_response):
         post = 'null'
@@ -221,6 +226,7 @@ class Wdb(object, Bdb):
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
         self.request += 1
+        log.info('Starting request %d' % self.request)
         yield self.html % dict(port=self.ws.port, post=post, rq=self.request)
 
     def get_file(self, filename):
@@ -287,6 +293,8 @@ class Wdb(object, Bdb):
         message = None
         while not message:
             rv = self.ws.receive()
+            if rv == 'CLOSED':
+                raise WsError
             if not ':' in rv:
                 log.warn('No request index in %s. Ignoring' % rv)
                 continue
@@ -302,6 +310,8 @@ class Wdb(object, Bdb):
     def _interaction(
             self, frame, tb,
             exception, exception_description):
+        log.debug('Interaction for %r %r %r %r' % (
+            frame, tb, exception, exception_description))
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
         locals = stack[current_index][0].f_locals
@@ -446,7 +456,6 @@ class Wdb(object, Bdb):
                     cond = cond.lstrip()
 
                 lno = int(lno)
-                print int(cmd == 'TBreak')
                 rv = self.set_break(fn, lno, int(cmd == 'TBreak'), cond)
                 log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
                 if rv is None and fn == current['file']:
@@ -493,23 +502,27 @@ class Wdb(object, Bdb):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
         if self.stop_here(frame):
-            log.info('CALL')
+            fun = frame.f_code.co_name
+            log.warn('Calling: %r' % fun)
             self.handle_connection()
             self.send('Echo|%s' % dump({
                 'for': '__call__',
-                'val': frame.f_code.co_name}))
+                'val': fun}))
             self.interaction(frame)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
-        log.info('LINE')
+        log.warn('Stopping at line %r:%d' % (
+            frame.f_code.co_filename, frame.f_lineno))
         self.handle_connection()
+        log.debug('User Line Interaction for %r' % frame)
         self.interaction(frame)
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
-        log.info('RETURN')
         frame.f_locals['__return__'] = return_value
+        log.warn('Returning from %r with value: %r' % (
+            frame.f_code.co_name, return_value))
         self.handle_connection()
         self.send('Echo|%s' % dump({
             'for': '__return__',

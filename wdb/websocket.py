@@ -174,9 +174,8 @@ class WebSocket(object):
         self.stream = StringIO()
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.settimeout(2.5)
             self.handshaken = False
-            # self.sock.settimeout(1)
+            self.sock.settimeout(1)
             self.sock.bind((self.host, self.port))
             self.sock.listen(0)
         except socket.error:
@@ -196,6 +195,7 @@ class WebSocket(object):
         try:
             packet = self.peer.recv(4096)
         except:
+            log.exception('Error on socket receive')
             raise WsBroken()
         cur = self.stream.tell()
         self.stream.read()  # Seek end
@@ -221,6 +221,7 @@ class WebSocket(object):
         try:
             self.peer.sendall(data)
         except:
+            log.exception('Error on socket send')
             raise WsBroken()
 
     def handshake(self, header):
@@ -246,6 +247,7 @@ class WebSocket(object):
         try:
             self.peer, self.info = self.sock.accept()
         except:
+            log.exception('Error on socket accept')
             raise WsUnavailable
         log.debug('Handshaking with peer %r' % self.peer)
         header = self.recv_header()
