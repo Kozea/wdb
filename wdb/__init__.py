@@ -16,6 +16,7 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# from _bdbdb import Bdb, BdbQuit  # Bdb with lot of log
 from bdb import Bdb, BdbQuit
 from cgi import escape
 try:
@@ -45,6 +46,7 @@ except ImportError:
 import os
 import sys
 import re
+import dis
 
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
@@ -181,7 +183,7 @@ class Wdb(object, Bdb):
                     frame.f_trace = self.trace_dispatch
                     self.botframe = frame
                     frame = frame.f_back
-                self.stopframe = sys._getframe()
+                self.stopframe = sys._getframe().f_back
                 self.stoplineno = -1
                 sys.settrace(self.trace_dispatch)
                 appiter = self.app(environ, start_response)
@@ -190,11 +192,10 @@ class Wdb(object, Bdb):
                 if hasattr(appiter, 'close'):
                     appiter.close()
                 sys.settrace(None)
-                self.ws.force_close()
-                self.ws = None
+                if self.ws:
+                    self.ws.force_close()
+                    self.ws = None
             return wsgi_with_trace(environ, start_response)
-
-            # return self.handled_request(environ, start_response)
         else:
             log.debug("Don't doing anything for %s" % path)
 
@@ -269,10 +270,13 @@ class Wdb(object, Bdb):
                 line = getline(filename, lno, frame.f_globals)
                 line = line and line.strip()
 
+            startlnos = dis.findlinestarts(code)
+            lastlineno = list(startlnos)[-1][1]
             frames.append({
                 'file': filename,
                 'function': code.co_name,
                 'flno': code.co_firstlineno,
+                'llno': lastlineno,
                 'lno': lno,
                 'code': escape(line),
                 'level': i

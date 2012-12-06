@@ -33,10 +33,11 @@ h1 small {
 
 #eval {
   width: 94%;
+  height: 1.25em;
+  padding: 0.25em 0 0;
   vertical-align: middle;
   border: 1px solid #ccc;
   background-color: transparent;
-  padding-left: 0;
 }
 
 
@@ -156,6 +157,19 @@ ol.linenums li {
 ol.linenums li:hover {
   -webkit-transition: 1s;
   color: blue;
+}
+
+ol.linenums li.ctx.ctx-top {
+  border-top: 1px solid #bbb;
+}
+
+ol.linenums li.ctx.ctx-bottom {
+  border-bottom: 1px solid #bbb;
+}
+
+ol.linenums li.ctx, ol.linenums li.ctx:before {
+  color: rgba(0, 125, 50, .6);
+  background-color: rgba(0, 125, 255, .05) !important;
 }
 
 ol.linenums li.highlighted-other {

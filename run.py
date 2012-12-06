@@ -34,6 +34,16 @@ def bad_function():
     return "Hello World!"
 
 
+@app.route("/cascade")
+def cascaded_exception():
+    try:
+        bad_function()
+    except ZeroDivisionError:
+        raise ValueError
+    finally:
+        raise KeyError
+
+
 @app.route("/wtf/error")
 def wtf_error():
     import wdb

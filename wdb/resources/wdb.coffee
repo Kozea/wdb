@@ -23,6 +23,9 @@ started = false
 stop = false
 ws = null
 
+$sourcecode = null
+$traceback = null
+
 send = (msg) ->
     console.log time(), '->', msg
     ws.send __ws_rq + ':' + msg
@@ -75,7 +78,7 @@ make_ws = ->
         if not started
             register_handlers()
             started = true
-        send('Start')
+        start()
 
         $('body').show()
         $('#eval').focus()
@@ -155,13 +158,18 @@ $ =>
             {}
         undefined
 
+start = ->
+    send('Start')
+    $sourcecode = $('#sourcecode')
+    $traceback = $('#traceback')
+
 title = (data) ->
     $('#title').text(data.title).append($('<small>').text(data.subtitle))
     $('#source').css(height: $(window).height() - $('#title').outerHeight(true))
-    $('#traceback').css(height: $(window).height() - $('#title').outerHeight(true))
+    $traceback.css(height: $(window).height() - $('#title').outerHeight(true))
 
 trace = (data) ->
-    $('#traceback').empty()
+    $traceback.empty()
     for frame in data.trace
         $traceline = $('<div>')
             .addClass('traceline')
@@ -191,7 +199,7 @@ trace = (data) ->
         $traceline.append $tracefilelno
         $traceline.append $tracecode
         $traceline.append $tracefunfun
-        $('#traceback').prepend $traceline
+        $traceback.prepend $traceline
     # $('.traceline').each(->
         # $(@).find('code').syntaxHighlight()
     # )
@@ -201,9 +209,9 @@ trace = (data) ->
         
 
 file = (data) ->
-    code($('#sourcecode').empty(), data.file, ['linenums'])
-    $('#sourcecode').attr('title', data.name)
-    file_cache[data.name] = file: $('#sourcecode').html(), sha512: data.sha512
+    code($sourcecode.empty(), data.file, ['linenums'])
+    $sourcecode.attr('title', data.name)
+    file_cache[data.name] = file: $sourcecode.html(), sha512: data.sha512
     persist()
 
 check = (data) ->
@@ -223,13 +231,25 @@ select = (data) ->
     # if current_frame.file == '<wdb>'
         # file_cache[current_frame.file] = current_frame.f_code
 
-    if current_frame.file != $('#sourcecode').attr('title')
-        $('#sourcecode').html(file_cache[current_frame.file].file)
-        $('#sourcecode').attr('title', current_frame.file)
+    if current_frame.file != $sourcecode.attr('title')
+        $sourcecode.html(file_cache[current_frame.file].file)
+        $sourcecode.attr('title', current_frame.file)
     $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
     for lno in data.breaks
         $('.linenums li').eq(lno - 1).addClass('breakpoint')
-    $('#sourcecode').stop().animate((scrollTop: $('#sourcecode').find('li').eq(current_frame.lno - 1).addClass('highlighted').position().top - $('#sourcecode').innerHeight() / 2 + $('#sourcecode').scrollTop()), 100)
+    $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
+    $cur_line.addClass('highlighted')
+
+    $sourcecode.find('li.ctx').removeClass('ctx')
+    for lno in [current_frame.flno...current_frame.llno + 1]
+        $line = $sourcecode.find('li').eq(lno - 1)
+        $line.addClass('ctx')
+        if lno == current_frame.flno
+            $line.addClass('ctx-top')
+        else if lno == current_frame.llno
+            $line.addClass('ctx-bottom')
+
+    $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
 
 
 code = (parent, code, classes=[]) ->
