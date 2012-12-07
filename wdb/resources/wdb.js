@@ -75,18 +75,14 @@
             if (event.target.result) {
               callback(event.target.result);
             } else {
-              notfound();
+              notfound && notfound();
             }
-            if (always) {
-              return always();
-            }
+            return always && always();
           };
           if (notfound) {
             rq.onerror = function(event) {
               notfound();
-              if (always) {
-                return always();
-              }
+              return always && always();
             };
           }
           return null;

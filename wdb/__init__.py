@@ -186,15 +186,20 @@ class Wdb(object, Bdb):
                 self.stopframe = sys._getframe().f_back
                 self.stoplineno = -1
                 sys.settrace(self.trace_dispatch)
-                appiter = self.app(environ, start_response)
-                for item in appiter:
-                    yield item
-                if hasattr(appiter, 'close'):
-                    appiter.close()
-                sys.settrace(None)
-                if self.ws:
-                    self.ws.force_close()
-                    self.ws = None
+                try:
+                    appiter = self.app(environ, start_response)
+                except BdbQuit:
+                    start_response('200 OK', [('Content-Type', 'text/html')])
+                    yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
+                else:
+                    for item in appiter:
+                        yield item
+                    if hasattr(appiter, 'close'):
+                        appiter.close()
+                    sys.settrace(None)
+                    if self.ws:
+                        self.ws.force_close()
+                        self.ws = None
             return wsgi_with_trace(environ, start_response)
         else:
             log.debug("Don't doing anything for %s" % path)
@@ -287,6 +292,8 @@ class Wdb(object, Bdb):
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Set Trace'):
+        if not self.ws:
+            raise BdbQuit()
         try:
             self._interaction(
                 frame, tb, exception, exception_description)
@@ -503,6 +510,8 @@ class Wdb(object, Bdb):
                 if hasattr(self, 'botframe'):
                     self.set_continue()
                     self.ws.close()
+                    self.ws = None
+                    raise BdbQuit()
                 break
 
             else:

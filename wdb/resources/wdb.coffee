@@ -60,14 +60,12 @@ else
                     if event.target.result
                         callback(event.target.result)
                     else
-                        notfound()
-                    if always
-                        always()
+                        notfound and notfound()
+                    always and always()
                 if notfound
                     rq.onerror = (event) ->
                         notfound()
-                        if always
-                            always()
+                        always and always()
                 null
         @set = (type) ->
             (obj) ->
