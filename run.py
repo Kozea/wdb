@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from flask import Flask, request
 import logging
-from wdb import Wdb
+from wdb import WdbMiddleware
 app = Flask(__name__)
 
 
@@ -150,6 +150,6 @@ else:
     wsreload.monkey_patch_http_server({'url': url}, callback=log)
     app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
-app.wsgi_app = Wdb(app.wsgi_app)
+app.wsgi_app = WdbMiddleware(app.wsgi_app)
 app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=True)
 # 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char

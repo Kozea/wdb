@@ -32,6 +32,7 @@ from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
+from uuid import uuid4
 try:
     from urlparse import parse_qs
 except ImportError:
@@ -106,19 +107,14 @@ class MetaWdb(type):
         except ImportError:
             pass
         super(MetaWdb, cls).__init__(name, bases, dict)
-        cls._inst_ = None
+        cls._last_inst = None
 
     def __call__(cls, *args, **kwargs):
-        if cls._inst_:
-            raise NotImplementedError(
-                'One debugger is allowed at a time, '
-                '%r already registered' % cls._inst_)
-
-        cls._inst_ = super(MetaWdb, cls).__call__(*args, **kwargs)
-        return cls._inst_
+        cls._last_inst = super(MetaWdb, cls).__call__(*args, **kwargs)
+        return cls._last_inst
 
     def tf(cls, frame=None):
-        self = cls._inst_
+        self = cls._last_inst
         log.info('Setting trace')
         if not self:
             raise Exception("Can't set trace outside of request")
@@ -130,9 +126,7 @@ class MetaWdb(type):
         self.set_trace(fframe)
 
 
-class Wdb(object, Bdb):
-    """Wdb debugger main class"""
-    __metaclass__ = MetaWdb
+class WdbMiddleware(object):
 
     @property
     def html(self):
@@ -140,23 +134,7 @@ class Wdb(object, Bdb):
             return f.read()
 
     def __init__(self, app, skip=None):
-        try:
-            Bdb.__init__(self, skip=skip)
-        except TypeError:
-            Bdb.__init__(self)
-        self.begun = False
         self.app = app
-        self.request = 0
-        self.ws = None
-
-    def make_web_socket(self):
-        log.info('Creating WebSocket')
-        self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
-        self.connected = False
-        tries = 1
-        while self.ws == 'FAIL' and tries < 10:
-            tries += 1
-            self.ws = WebSocket('0.0.0.0', randint(10000, 60000))
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
@@ -169,38 +147,14 @@ class Wdb(object, Bdb):
             log.debug('Sending fake page (%s) for %s' % (
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
-        elif environ.get('HTTP_X_DEBUGGER') == 'WDB':
+        elif environ.get('HTTP_X_DEBUGGER', '').startswith('WDB'):
+            port = int(environ['HTTP_X_DEBUGGER'].split('-')[1])
             log.debug('Sending real page (%s) with exception'
                       ' handling for %s' % (
                           environ.get('HTTP_ACCEPT', ''), path))
 
-            def wsgi_with_trace(environ, start_response):
-                self.quitting = 0
-                self.begun = False
-                self.reset()
-                frame = sys._getframe()
-                while frame:
-                    frame.f_trace = self.trace_dispatch
-                    self.botframe = frame
-                    frame = frame.f_back
-                self.stopframe = sys._getframe().f_back
-                self.stoplineno = -1
-                sys.settrace(self.trace_dispatch)
-                try:
-                    appiter = self.app(environ, start_response)
-                except BdbQuit:
-                    start_response('200 OK', [('Content-Type', 'text/html')])
-                    yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
-                else:
-                    for item in appiter:
-                        yield item
-                    if hasattr(appiter, 'close'):
-                        appiter.close()
-                    sys.settrace(None)
-                    if self.ws:
-                        self.ws.force_close()
-                        self.ws = None
-            return wsgi_with_trace(environ, start_response)
+            return Wdb(port).wsgi_trace(
+                self.app, environ, start_response)
         else:
             log.debug("Don't doing anything for %s" % path)
 
@@ -235,11 +189,57 @@ class Wdb(object, Bdb):
                 post['data'] = body
             post = dump(post)
         start_response('200 OK', [('Content-Type', 'text/html')])
-        self.request += 1
-        log.info('Starting request %d' % self.request)
-        self.make_web_socket()
+        log.info('Starting new request')
 
-        yield self.html % dict(port=self.ws.port, post=post, rq=self.request)
+        yield self.html % dict(post=post)
+
+
+class Wdb(object, Bdb):
+    """Wdb debugger main class"""
+    __metaclass__ = MetaWdb
+
+    def __init__(self, port, skip=None):
+        try:
+            Bdb.__init__(self, skip=skip)
+        except TypeError:
+            Bdb.__init__(self)
+        self.begun = False
+        self.connected = False
+        self.make_web_socket(port)
+
+    def make_web_socket(self, port):
+        log.info('Creating WebSocket')
+        self.ws = WebSocket('0.0.0.0', port)
+
+    def wsgi_trace(self, app, environ, start_response):
+        def wsgi_with_trace(environ, start_response):
+            self.quitting = 0
+            self.begun = False
+            self.reset()
+            frame = sys._getframe()
+            while frame:
+                frame.f_trace = self.trace_dispatch
+                self.botframe = frame
+                frame = frame.f_back
+            self.stopframe = sys._getframe().f_back
+            self.stoplineno = -1
+            sys.settrace(self.trace_dispatch)
+
+            try:
+                appiter = app(environ, start_response)
+            except BdbQuit:
+                sys.settrace(None)
+                start_response('200 OK', [('Content-Type', 'text/html')])
+                yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
+
+            else:
+                for item in appiter:
+                    yield item
+                if hasattr(appiter, 'close'):
+                    appiter.close()
+                sys.settrace(None)
+                self.ws.force_close()
+        return wsgi_with_trace(environ, start_response)
 
     def get_file(self, filename):
         checkcache(filename)
@@ -304,7 +304,7 @@ class Wdb(object, Bdb):
                 frame, tb, exception, exception_description)
 
     def send(self, data):
-        self.ws.send("%d:%s" % (self.request, data))
+        self.ws.send(data)
 
     def receive(self):
         message = None
@@ -312,16 +312,7 @@ class Wdb(object, Bdb):
             rv = self.ws.receive()
             if rv == 'CLOSED':
                 raise WsError
-            if not ':' in rv:
-                log.warn('No request index in %s. Ignoring' % rv)
-                continue
-            sep = rv.index(':')
-            rq = int(rv[:sep])
-            if rq != self.request:
-                log.warn('Bad request index %d in request %d' % (
-                    rq, self.request))
-            else:
-                message = rv[sep + 1:]
+            message = rv
         return message
 
     def _interaction(
@@ -509,8 +500,6 @@ class Wdb(object, Bdb):
             elif cmd == 'Quit':
                 if hasattr(self, 'botframe'):
                     self.set_continue()
-                    self.ws.close()
-                    self.ws = None
                     raise BdbQuit()
                 break
 

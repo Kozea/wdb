@@ -22,6 +22,7 @@ time = ->
 started = false
 stop = false
 ws = null
+__ws_port = 10000 + parseInt(Math.random() * 50000)
 cmd_hist = {}
 
 $sourcecode = null
@@ -29,8 +30,8 @@ $traceback = null
 
 send = (msg) ->
     console.log time(), '->', msg
-    ws.send __ws_rq + ':' + msg
-    
+    ws.send msg
+
 @indexedDB = @indexedDB or @mozIndexedDB or @webkitIndexedDB or @msIndexedDB
 @IDBTransaction = @IDBTransaction or @webkitIDBTransaction or @msIDBTransaction
 @IDBKeyRange = @IDBKeyRange or @webkitIDBKeyRange or @msIDBKeyRange
@@ -96,7 +97,7 @@ $.SyntaxHighlighter.init(
 make_ws = ->
     # Open a websocket in case of request break
     console.log 'Opening new socket'
-    new_ws = new WebSocket "ws://" + document.location.hostname + ":" + @__ws_port
+    new_ws = new WebSocket "ws://" + document.location.hostname + ":" + __ws_port
     new_ws.onclose = (m) =>
         console.log "close #{m}"
         if not stop
@@ -125,16 +126,7 @@ make_ws = ->
         if stop
             return
         # Open a websocket in case of request break
-        sep = m.data.indexOf(':')
-        if sep == -1
-            console.log 'No request index for ', m.data
-            return
-        rq = parseInt(m.data.substr(0, sep))
-        if rq != __ws_rq
-            console.log 'Bad request index', rq, 'for request', __ws_rq
-            return
-        message = m.data.substr(sep + 1)
-        
+        message = m.data
         pipe = message.indexOf('|')
         if pipe > -1
             cmd = message.substr(0, pipe)
@@ -176,10 +168,10 @@ $ =>
             data: __ws_post.data,
             contentType: __ws_post.enctype,
             traditional: true,
-            headers: 'X-Debugger': 'WDB')
+            headers: 'X-Debugger': 'WDB-' + __ws_port)
     else
         xhr = $.ajax(location.href,
-            headers: 'X-Debugger': 'WDB')
+            headers: 'X-Debugger': 'WDB-' + __ws_port)
 
     xhr.done((data) => end(data))
        .fail (data) =>
