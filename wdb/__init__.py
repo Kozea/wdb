@@ -126,7 +126,7 @@ class MetaWdb(type):
         self.set_trace(fframe)
 
 
-class WdbMiddleware(object):
+class Wdb(object):
 
     @property
     def html(self):
@@ -153,7 +153,7 @@ class WdbMiddleware(object):
                       ' handling for %s' % (
                           environ.get('HTTP_ACCEPT', ''), path))
 
-            return Wdb(port).wsgi_trace(
+            return WdbRequest(port).wsgi_trace(
                 self.app, environ, start_response)
         else:
             log.debug("Don't doing anything for %s" % path)
@@ -194,7 +194,7 @@ class WdbMiddleware(object):
         yield self.html % dict(post=post)
 
 
-class Wdb(object, Bdb):
+class WdbRequest(object, Bdb):
     """Wdb debugger main class"""
     __metaclass__ = MetaWdb
 
@@ -567,4 +567,4 @@ class Wdb(object, Bdb):
 
 
 def set_trace(frame=None):
-    Wdb.tf(frame or sys._getframe().f_back)
+    WdbRequest.tf(frame or sys._getframe().f_back)
