@@ -22,6 +22,7 @@ time = ->
 started = false
 stop = false
 ws = null
+cmd_hist = {}
 
 $sourcecode = null
 $traceback = null
@@ -29,24 +30,63 @@ $traceback = null
 send = (msg) ->
     console.log time(), '->', msg
     ws.send __ws_rq + ':' + msg
+    
+@indexedDB = @indexedDB or @mozIndexedDB or @webkitIndexedDB or @msIndexedDB
+@IDBTransaction = @IDBTransaction or @webkitIDBTransaction or @msIDBTransaction
+@IDBKeyRange = @IDBKeyRange or @webkitIDBKeyRange or @msIDBKeyRange
 
-persistable = 'localStorage' of window and window.localStorage
-if persistable and localStorage['__wdb_cmd_hist']
-    try
-        cmd_hist = JSON.parse localStorage['__wdb_cmd_hist']
-        file_cache = JSON.parse localStorage['__wdb_file_cache']
-    catch e
-        file_cache = {}
-        cmd_hist = {}
-else
+fallback = ->
     file_cache = {}
-    cmd_hist = {}
+    @get = (type) -> (obj, callback) -> callback(obj of file_cache and file_cache[obj])
+    @set = (type) -> (obj) -> file_cache[obj.name] = obj
 
-persist = ->
-    if not persistable
-        return
-    localStorage['__wdb_cmd_hist'] = JSON.stringify cmd_hist
-    localStorage['__wdb_file_cache'] = JSON.stringify file_cache
+if not @indexedDB
+    fallback()
+else
+    open = @indexedDB.open('wdbdb', 2)
+    open.onerror = (event) -> console.log('Error when opening wdbdb', event)
+    open.onupgradeneeded = (event) ->
+        db = event.target.result
+        db.createObjectStore("file", { keyPath: "name" })
+        db.createObjectStore("cmd", { keyPath: "name" })
+
+    open.onsuccess = (event) =>
+        console.info 'wdbdb is open'
+        @wdbdb = open.result
+        @get = (type) ->
+            (key, callback, notfound, always) ->
+                rq = @wdbdb.transaction([type]).objectStore(type).get(key)
+                rq.onsuccess = (event) ->
+                    if event.target.result
+                        callback(event.target.result)
+                    else
+                        notfound()
+                    if always
+                        always()
+                if notfound
+                    rq.onerror = (event) ->
+                        notfound()
+                        if always
+                            always()
+                null
+        @set = (type) ->
+            (obj) ->
+                rq = @wdbdb.transaction([type], 'readwrite')
+                os = rq.objectStore(type)
+                os.put(obj)
+                rq.oncomplete = (event) -> console.log('Set')
+                rq.onerror = (event) -> console.log('Add error', event)
+                null
+
+        @wdbdb.transaction(['cmd']).objectStore('cmd').openCursor().onsuccess = (event) ->
+            cursor = event.target.result
+            if cursor
+                cmd_hist[cursor.value.name] = cursor.value.history
+                cursor.continue()
+
+    open.onerror = (event) ->
+        console.log('Error when opening wdbdb', event)
+        fallback()    
 
 $.SyntaxHighlighter.loadedExtras = true
 $.SyntaxHighlighter.init(
@@ -206,20 +246,22 @@ trace = (data) ->
     $('.traceline').on('click', ->
         send('Select|' + $(@).attr('data-level'))
     )
-        
+
 
 file = (data) ->
     code($sourcecode.empty(), data.file, ['linenums'])
     $sourcecode.attr('title', data.name)
-    file_cache[data.name] = file: $sourcecode.html(), sha512: data.sha512
-    persist()
+    set('file')(name: data.name, file: $sourcecode.html(), sha512: data.sha512)
 
-check = (data) ->
-    filename = data.name
-    if filename not of file_cache or file_cache[filename].sha512 != data.sha512
-        send("File")
-    else
-        send("NoFile")
+check = (data) =>
+    @get('file')(data.name,
+        ((file) ->
+            if file.sha512 != data.sha512
+                send('File')
+            else    
+                send('NoFile')
+        ), (->
+            send('File')))
     $('#eval').asuggest(data.words)
 
 select = (data) ->
@@ -231,25 +273,27 @@ select = (data) ->
     # if current_frame.file == '<wdb>'
         # file_cache[current_frame.file] = current_frame.f_code
 
-    if current_frame.file != $sourcecode.attr('title')
-        $sourcecode.html(file_cache[current_frame.file].file)
-        $sourcecode.attr('title', current_frame.file)
-    $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-    for lno in data.breaks
-        $('.linenums li').eq(lno - 1).addClass('breakpoint')
-    $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
-    $cur_line.addClass('highlighted')
+    get('file')(current_frame.file,
+        (file) ->
+            $sourcecode.html(file.file)
+            $sourcecode.attr('title', current_frame.file)
+            $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
+            for lno in data.breaks
+                $('.linenums li').eq(lno - 1).addClass('breakpoint')
+            $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
+            $cur_line.addClass('highlighted')
 
-    $sourcecode.find('li.ctx').removeClass('ctx')
-    for lno in [current_frame.flno...current_frame.llno + 1]
-        $line = $sourcecode.find('li').eq(lno - 1)
-        $line.addClass('ctx')
-        if lno == current_frame.flno
-            $line.addClass('ctx-top')
-        else if lno == current_frame.llno
-            $line.addClass('ctx-bottom')
+            $sourcecode.find('li.ctx').removeClass('ctx')
+            for lno in [current_frame.flno...current_frame.llno + 1]
+                $line = $sourcecode.find('li').eq(lno - 1)
+                $line.addClass('ctx')
+                if lno == current_frame.flno
+                    $line.addClass('ctx-top')
+                else if lno == current_frame.llno
+                    $line.addClass('ctx-bottom')
+            $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
+        )
 
-    $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
 
 
 code = (parent, code, classes=[]) ->
@@ -310,11 +354,13 @@ print = (data) ->
     #     nh.wrap(a)
 
     $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
+
     filename = $('.selected .tracefile').text()
     if not (filename of cmd_hist)
         cmd_hist[filename] = []
     cmd_hist[filename].unshift snippet
-    persist()
+
+    set('cmd')(name: filename, history: cmd_hist[filename])
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
         # ((data) ->  # fail
