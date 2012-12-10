@@ -119,7 +119,8 @@ make_ws = ->
             started = true
         start()
 
-        $('body').show()
+        $('#waiter').remove()
+        $('#wdb').show()
         $('#eval').focus()
 
     new_ws.onmessage = (m) ->
@@ -149,6 +150,15 @@ make_ws = ->
 
 #### Loading ####
 $ =>
+    setTimeout(->
+        $('#waiter').text('WDB is tracing your request. It may take some time.')
+        dot = ->
+            if $('#waiter').length
+                $('#waiter').text($('#waiter').text() + '.')
+                setTimeout(dot, 250)
+        dot()
+    , 250)
+    
     # Try getting the original page
     end = (page) ->
         stop = true

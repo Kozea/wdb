@@ -135,15 +135,22 @@ class Wdb(object):
 
     def __init__(self, app, skip=None):
         self.app = app
+        self.enabled = True
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
-        if path.startswith('/__wdb/'):
+        if path in ('/__wdb/on', '/__wdb/off'):
+            self.enabled = path.endswith('on')
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            return ('<h1>Wdb is now %s</h1>' % (
+                '<span style="color: green">ON</span>' if self.enabled else
+                '<span style="color: red">OFF</span>'),)
+        elif path.startswith('/__wdb/'):
             filename = path.replace('/__wdb/', '')
             log.debug('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
-        elif 'text/html' in environ.get('HTTP_ACCEPT', ''):
+        elif self.enabled and 'text/html' in environ.get('HTTP_ACCEPT', ''):
             log.debug('Sending fake page (%s) for %s' % (
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)

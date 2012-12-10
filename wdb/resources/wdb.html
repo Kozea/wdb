@@ -24,20 +24,23 @@
     <script src="/__wdb/wdb.js"></script>
     <link href="/__wdb/wdb.css" rel="stylesheet" type="text/css">
   </head>
-  <body style="display: none">
-    <h1 id="title"></h1>
-    <div id="source">
-      <div id="sourcecode">
-      </div>
-      <div id="interpreter">
-        <div id="scrollback">
+  <body>
+    <div id="waiter"></div>
+    <div id="wdb" style="display: none;">
+      <h1 id="title"></h1>
+      <div id="source">
+        <div id="sourcecode">
         </div>
-        <div id="prompt">
-          <textarea rows="1" data-index="-1" id="eval"></textarea>
+        <div id="interpreter">
+          <div id="scrollback">
+          </div>
+          <div id="prompt">
+            <textarea rows="1" data-index="-1" id="eval"></textarea>
+          </div>
         </div>
       </div>
-    </div>
-    <div id="traceback">
+      <div id="traceback">
+      </div>
     </div>
   </body>
 </html>

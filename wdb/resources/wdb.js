@@ -157,7 +157,8 @@
         started = true;
       }
       start();
-      $('body').show();
+      $('#waiter').remove();
+      $('#wdb').show();
       return $('#eval').focus();
     };
     new_ws.onmessage = function(m) {
@@ -202,6 +203,17 @@
 
   $(function() {
     var end, xhr;
+    setTimeout(function() {
+      var dot;
+      $('#waiter').text('WDB is tracing your request. It may take some time.');
+      dot = function() {
+        if ($('#waiter').length) {
+          $('#waiter').text($('#waiter').text() + '.');
+          return setTimeout(dot, 250);
+        }
+      };
+      return dot();
+    }, 250);
     end = function(page) {
       stop = true;
       if (ws) {
