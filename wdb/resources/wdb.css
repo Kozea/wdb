@@ -5,12 +5,10 @@ body, html {
 
 h1 {
   font-variant: small-caps;
-  color: #444;
 }
 
 h1 small {
   display: block;
-  color: #ccc;
   font-size: .5em;
 }
 
@@ -33,19 +31,26 @@ h1 small {
 
 #eval {
   width: 94%;
-  height: 1.25em;
-  padding: 0.25em 0 0;
-  vertical-align: middle;
-  border: 1px solid #ccc;
+  vertical-align: top;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
   background-color: transparent;
+  overflow: hidden;
 }
 
 
-#prompt {
-  padding: .2em 0;
-  font-size: 14px;
-  font-family: Consolas,'Bitstream Vera Sans Mono','Courier New',Courier,monospace;
+#prompt, .prompted {
+  padding: .5em 0 0 0;
+}
 
+#prompt, #prompt textarea {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.trace {
+  font-family: 'Source Code Pro', monospace;
 }
 
 #prompt:before, .prompted:before {
@@ -61,27 +66,11 @@ h1 small {
 }
 
 .traceline {
-  -webkit-transition: 750ms;
-  /* padding: .25em; */
-  background-color: #eeefff;
-  border-right: 10px solid #fcfcff;
+  -webkit-transition: border 750ms;
   margin: 0 0 0 1em;
-  font-family: Consolas, 'Bitstream Vera Sans Mono', 'Courier New', Courier, monospace;
+  font-family: 'Source Code Pro', monospace;
   clear: both;
   overflow: auto;
-}
-
-.traceline:nth-child(odd) {
-  background-color: #fcfcff;
-  border-right: 10px solid #eeefff;
-}
-
-.traceline:hover {
-  border-color: #fdd;
-}
-
-.traceline.selected {
-  border-color: #fcd;
 }
 
 .tracecode {
@@ -90,18 +79,15 @@ h1 small {
 }
 
 .tracefunfun {
-  background-color: #fff;
   overflow: auto;
 }
 
 .tracefun {
   /* padding: .15em; */
   font-weight: bolder;
-  color: #88f;
   font-size: .8em;
   text-align: right;
   float: right;
-  background-color: #eeefff;
   line-height: 1.2;
 }
 
@@ -109,33 +95,14 @@ h1 small {
   content: '';
   width: 0;
   height: 0;
-  border-color: #eeefff #eeefff #fff #fff;
   border-style: solid;
   border-width: .7em;
   display: inline-block;
   vertical-align: top;
 }
 
-.traceline:nth-child(odd) .tracefun {
-  background-color: #fcfcff;
-
-}
-
-.traceline:nth-child(odd) .tracefun:before {
-  border-color: #fcfcff #fcfcff #fff #fff;
-
-}
-
 .tracefilelno {
   padding: .15em;
-}
-
-.tracefile {
-  color: #555;
-}
-
-.tracelno {
-  color: #999;
 }
 
 .tracelno:before {
@@ -156,39 +123,6 @@ ol.linenums li {
 
 ol.linenums li:hover {
   -webkit-transition: 1s;
-  color: blue;
-}
-
-ol.linenums li.ctx.ctx-top {
-  border-top: 1px solid #bbb;
-}
-
-ol.linenums li.ctx.ctx-bottom {
-  border-bottom: 1px solid #bbb;
-}
-
-ol.linenums li.ctx, ol.linenums li.ctx:before {
-  color: rgba(0, 125, 50, .6);
-  background-color: rgba(0, 125, 255, .05) !important;
-}
-
-ol.linenums li.highlighted-other {
-  color: black;
-  background-color: rgba(0, 255, 0, .1) !important;
-}
-
-ol.linenums li.breakpoint {
-  color: red;
-  background-color: rgba(255, 0, 0, .15) !important;
-}
-
-ol.linenums li.highlighted, ol.linenums li.highlighted:before {
-  color: green;
-  background-color: rgba(0, 255, 0, .25) !important;
-}
-
-ol.linenums li.ask-breakpoint {
-  color: yellow;
 }
 
 a.inspect {
@@ -197,12 +131,6 @@ a.inspect {
 
 a.inspect:after {
   content: ' {…}';
-  color: #aaa;
-}
-
-a.inspect:hover {
-  background-color: #f3f3f3;
-  border: 1px solid #e3e3e3;
 }
 
 .long {
@@ -212,3 +140,5 @@ a.inspect:hover {
 .short.close:after {
   content: '…"';
 }
+
+

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="http://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+    <!-- le jquery -->
+    <script src="/__wdb/jquery.min.js"></script>
+      <script>
+        $(function () {
+          $('#activate').click(function () {
+            $.get('/__wdb/on').done(function () { location.reload(); });
+            return false;
+          });
+        });
+    </script>
+  </head>
+  <body>
+    %(message)s
+    <a id="activate" href="">Enable it and reload page</a>
+    <pre class="trace">
+      %(trace)s
+    </pre>
+  </body>
+</html>

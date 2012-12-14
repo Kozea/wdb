@@ -6,23 +6,20 @@
 
     <!-- le syntax highlighter -->
     <script src="/__wdb/prettify.js"></script>
-    <link href="/__wdb/prettify.css" rel="stylesheet" type="text/css">
+    <!-- <link href="/__wdb/prettify.css" rel="stylesheet" type="text/css"> -->
 
     <script src="/__wdb/jquery.syntaxhighlighter.min.js"></script>
     <link href="/__wdb/jquery.syntaxhighlighter.styles/style.min.css" rel="stylesheet" type="text/css">
-    <link href="/__wdb/jquery.syntaxhighlighter.styles/theme-balupton.min.css" rel="stylesheet" type="text/css">
-
-
-    <!-- le autocompleter -->
-    <script src="/__wdb/jquery.a-tools-1.4.1.js"></script>
-    <script src="/__wdb/jquery.asuggest.js"></script>
+    <link href="/__wdb/jquery.syntaxhighlighter.styles/%(theme)s.css" rel="stylesheet" type="text/css">
 
     <!-- le debugger -->
     <script>
       __ws_post = %(post)s;
     </script>
     <script src="/__wdb/wdb.js"></script>
+    <link href="http://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
     <link href="/__wdb/wdb.css" rel="stylesheet" type="text/css">
+    <link href="/__wdb/wdb-%(theme)s.css" rel="stylesheet" type="text/css">
   </head>
   <body>
     <div id="waiter"></div>

@@ -18,6 +18,8 @@ from __future__ import with_statement
 
 # from _bdbdb import Bdb, BdbQuit  # Bdb with lot of log
 from bdb import Bdb, BdbQuit
+import pdb
+import traceback
 from cgi import escape
 try:
     from json import dumps, JSONEncoder
@@ -54,7 +56,7 @@ RES_PATH = os.path.join(
 
 REPR = re.compile(escape(r'<?\S+\s(object|instance)\sat\s([0-9a-fx]+)>?'))
 log = get_color_logger('wdb')
-# log.setLevel(20)
+log.setLevel(30)
 
 
 def reverse_id(id_):
@@ -98,26 +100,36 @@ def dump(o):
     return REPR.sub(repr_handle, out)
 
 
-class MetaWdb(type):
+class WdbOff(Exception):
+    pass
 
+
+class MetaWdbRequest(type):
     def __init__(cls, name, bases, dict):
+        MetaWdbRequest.started = False
         try:
             from werkzeug.serving import ThreadedWSGIServer
             ThreadedWSGIServer.daemon_threads = True
         except ImportError:
             pass
-        super(MetaWdb, cls).__init__(name, bases, dict)
+        super(MetaWdbRequest, cls).__init__(name, bases, dict)
         cls._last_inst = None
 
     def __call__(cls, *args, **kwargs):
-        cls._last_inst = super(MetaWdb, cls).__call__(*args, **kwargs)
+        cls._last_inst = super(MetaWdbRequest, cls).__call__(*args, **kwargs)
         return cls._last_inst
 
     def tf(cls, frame=None):
         self = cls._last_inst
         log.info('Setting trace')
         if not self:
-            raise Exception("Can't set trace outside of request")
+            if MetaWdbRequest.started:
+                raise WdbOff()
+            else:
+                log.warn("[Wdb] We are outside of request, "
+                         "launching pdb.set_trace instead")
+                pdb.set_trace(frame or sys._getframe().f_back)
+                return
         sys.settrace(None)
         fframe = frame = frame or sys._getframe().f_back
         while frame and frame is not self.botframe:
@@ -133,9 +145,16 @@ class Wdb(object):
         with open(os.path.join(RES_PATH, 'wdb.html')) as f:
             return f.read()
 
-    def __init__(self, app, skip=None):
+    @property
+    def _500(self):
+        with open(os.path.join(RES_PATH, '500.html')) as f:
+            return f.read()
+
+    def __init__(self, app, start_disabled=False, theme='dark'):
         self.app = app
-        self.enabled = True
+        self.theme = theme
+        self.enabled = not start_disabled
+        MetaWdbRequest.started = True
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
@@ -163,14 +182,39 @@ class Wdb(object):
             return WdbRequest(port).wsgi_trace(
                 self.app, environ, start_response)
         else:
-            log.debug("Don't doing anything for %s" % path)
+            log.debug("Serving %s" % path)
 
             def wsgi_default(environ, start_response):
-                appiter = self.app(environ, start_response)
-                for item in appiter:
-                    yield item
-                if hasattr(appiter, 'close'):
-                    appiter.close()
+                appiter = None
+                try:
+                    appiter = self.app(environ, start_response)
+                    for item in appiter:
+                        yield item
+                    hasattr(appiter, 'close') and appiter.close()
+                except WdbOff:
+                    hasattr(appiter, 'close') and appiter.close()
+                    try:
+                        start_response('500 INTERNAL SERVER ERROR', [
+                            ('Content-Type', 'text/html')])
+                        yield self._500 % dict(
+                            message='Wdb.set_trace() was called '
+                            'while wdb was off.',
+                            trace='')
+                    except:
+                        pass
+                except:
+                    log.exception('Exception with wdb off')
+                    hasattr(appiter, 'close') and appiter.close()
+                    try:
+                        start_response('500 INTERNAL SERVER ERROR', [
+                            ('Content-Type', 'text/html')])
+                        yield self._500 % dict(
+                            message='There was an exception in your '
+                            'request and wdb was off.',
+                            trace=traceback.format_exc())
+                    except:
+                        pass
+
             return wsgi_default(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
@@ -198,12 +242,12 @@ class Wdb(object):
         start_response('200 OK', [('Content-Type', 'text/html')])
         log.info('Starting new request')
 
-        yield self.html % dict(post=post)
+        yield self.html % dict(post=post, theme=self.theme)
 
 
 class WdbRequest(object, Bdb):
     """Wdb debugger main class"""
-    __metaclass__ = MetaWdb
+    __metaclass__ = MetaWdbRequest
 
     def __init__(self, port, skip=None):
         try:
@@ -238,12 +282,10 @@ class WdbRequest(object, Bdb):
                 sys.settrace(None)
                 start_response('200 OK', [('Content-Type', 'text/html')])
                 yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
-
             else:
                 for item in appiter:
                     yield item
-                if hasattr(appiter, 'close'):
-                    appiter.close()
+                hasattr(appiter, 'close') and appiter.close()
                 sys.settrace(None)
                 self.ws.force_close()
         return wsgi_with_trace(environ, start_response)
@@ -334,7 +376,8 @@ class WdbRequest(object, Bdb):
         words.update(locals)
         if self.begun:
             self.send('Trace|%s' % dump({
-                'trace': trace
+                'trace': trace,
+                'cwd': os.getcwd()
             }))
             current_file = current['file']
             self.send('Check|%s' % dump({
@@ -355,14 +398,15 @@ class WdbRequest(object, Bdb):
                 cmd = message
                 data = ''
 
-            log.info('Cmd %s #Data %d' % (cmd, len(data)))
+            log.debug('Cmd %s #Data %d' % (cmd, len(data)))
             if cmd == 'Start':
                 self.send('Title|%s' % dump({
                     'title': exception,
                     'subtitle': exception_description
                 }))
                 self.send('Trace|%s' % dump({
-                    'trace': trace
+                    'trace': trace,
+                    'cwd': os.getcwd()
                 }))
                 current_file = current['file']
                 self.send('Check|%s' % dump({
@@ -386,14 +430,12 @@ class WdbRequest(object, Bdb):
 
             elif cmd == 'File':
                 current_file = current['file']
-                self.send('File|%s' % dump({
+                self.send('Select|%s' % dump({
+                    'frame': current,
+                    'breaks': self.get_file_breaks(current_file),
                     'file': self.get_file(current_file),
                     'name': current_file,
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
-                }))
-                self.send('Select|%s' % dump({
-                    'frame': current,
-                    'breaks': self.get_file_breaks(current_file)
                 }))
 
             elif cmd == 'NoFile':
@@ -518,7 +560,7 @@ class WdbRequest(object, Bdb):
         that we ever need to stop in this function."""
         if self.stop_here(frame):
             fun = frame.f_code.co_name
-            log.warn('Calling: %r' % fun)
+            log.info('Calling: %r' % fun)
             self.handle_connection()
             self.send('Echo|%s' % dump({
                 'for': '__call__',
@@ -527,7 +569,7 @@ class WdbRequest(object, Bdb):
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
-        log.warn('Stopping at line %r:%d' % (
+        log.info('Stopping at line %r:%d' % (
             frame.f_code.co_filename, frame.f_lineno))
         self.handle_connection()
         log.debug('User Line Interaction for %r' % frame)
@@ -536,7 +578,7 @@ class WdbRequest(object, Bdb):
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
         frame.f_locals['__return__'] = return_value
-        log.warn('Returning from %r with value: %r' % (
+        log.info('Returning from %r with value: %r' % (
             frame.f_code.co_name, return_value))
         self.handle_connection()
         self.send('Echo|%s' % dump({
@@ -563,7 +605,7 @@ class WdbRequest(object, Bdb):
         self.interaction(frame, tb, exception, exception_description)
 
     def do_clear(self, arg):
-        log.warn('Closing %r' % arg)
+        log.info('Closing %r' % arg)
         self.clear_bpbynumber(arg)
 
     def dispatch_exception(self, frame, arg):

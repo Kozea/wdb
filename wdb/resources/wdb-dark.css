@@ -1,0 +1,132 @@
+body {
+  background-color: #1d1f21;
+}
+
+h1 {
+  color: #ccc;
+}
+
+h1 small {
+  color: #777;
+}
+
+.traceline {
+  background-color: #1b1b1b;
+  border-right: 10px solid #181818;
+}
+
+.traceline:nth-child(odd) {
+  background-color: #181818;
+  border-right: 10px solid #1b1b1b;
+}
+
+.traceline:hover {
+  border-color: #b6e354;
+}
+
+.traceline.selected {
+  border-color: #ff5995;
+}
+
+.tracefunfun {
+  background-color: #1d1f21;
+}
+
+.tracefun {
+  color: #88f;
+  background-color: #1b1b1b;
+}
+
+.tracefun:before {
+  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
+}
+
+
+.traceline:nth-child(odd) .tracefun {
+  background-color: #181818;
+}
+
+.traceline:nth-child(odd) .tracefun:before {
+  border-color: #181818 #181818 #1d1f21 #1d1f21;
+}
+
+.tracefile {
+  color: #555;
+}
+
+.tracelno {
+  color: #999;
+}
+
+ol.linenums li:hover {
+  color: #8cedff;
+}
+
+ol.linenums li.ctx.ctx-top {
+  border-top: 1px solid #000;
+}
+
+ol.linenums li.ctx.ctx-bottom {
+  border-bottom: 1px solid #000;
+}
+
+ol.linenums li.ctx, ol.linenums li.ctx:before {
+  color: #fff;
+  background-color: #181818;
+}
+
+ol.linenums li.highlighted-other {
+  color: black;
+  background-color: #111 !important;
+}
+
+ol.linenums li.breakpoint {
+  color: #ff5995;
+  background-color: rgba(255, 89, 149, .15) !important;
+}
+
+ol.linenums li.highlighted, ol.linenums li.highlighted:before {
+  color: #b6e354;
+  background-color: #000;
+}
+
+ol.linenums li.ask-breakpoint {
+  color: yellow;
+}
+
+
+a.inspect:after {
+  color: #aaa;
+}
+
+a.inspect:hover {
+  background-color: #f3f3f3;
+  border: 1px solid #e3e3e3;
+}
+
+#prompt:before, .prompted:before, #prompt textarea {
+  color: #c5c8c6;
+}
+
+#prompt textarea {
+  border-bottom: 1px solid #000;
+}
+
+#prompt, #prompt textarea {
+  font-size: 12px;
+  font-family: 'Source Code Pro', monospace;
+  font-weight: 900;
+  line-height: 1.5;
+}
+
+::-webkit-scrollbar {
+  background: #1d1f21;
+  border: 1px solid #000;
+  width: .75em;
+  height: .75em;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #181818;
+  border: 1px solid #000;
+}

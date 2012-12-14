@@ -138,7 +138,6 @@ make_ws = ->
         switch cmd
             when 'Title'      then title      data
             when 'Trace'      then trace      data
-            when 'File'       then file       data
             when 'Check'      then check      data
             when 'Select'     then select     data
             when 'Print'      then print      data
@@ -151,7 +150,7 @@ make_ws = ->
 #### Loading ####
 $ =>
     setTimeout(->
-        $('#waiter').text('WDB is tracing your request. It may take some time.')
+        $('#waiter').text('Wdb is tracing your request. It may take some time.')
         dot = ->
             if $('#waiter').length
                 $('#waiter').text($('#waiter').text() + '.')
@@ -205,8 +204,8 @@ start = ->
 
 title = (data) ->
     $('#title').text(data.title).append($('<small>').text(data.subtitle))
-    $('#source').css(height: $(window).height() - $('#title').outerHeight(true))
-    $traceback.css(height: $(window).height() - $('#title').outerHeight(true))
+    $('#source').css(height: $(window).height() - $('#title').outerHeight(true) - 10)
+    $traceback.css(height: $(window).height() - $('#title').outerHeight(true) - 10)
 
 trace = (data) ->
     $traceback.empty()
@@ -233,6 +232,11 @@ trace = (data) ->
             suffix = frame.file.split('site-packages').slice(-1)[0]
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr(title: frame.file))
+            
+        if frame.file.indexOf(data.cwd) == 0
+            suffix = frame.file.split(data.cwd).slice(-1)[0]
+            $tracefile.text(suffix)
+            $tracefile.prepend($('<span>').addClass('tracestar').text('.').attr(title: frame.file))
 
         $tracecode = $('<div>').addClass('tracecode')
         code($tracecode, frame.code)
@@ -248,11 +252,6 @@ trace = (data) ->
     )
 
 
-file = (data) ->
-    code($sourcecode.empty(), data.file, ['linenums'])
-    $sourcecode.attr('title', data.name)
-    set('file')(name: data.name, file: $sourcecode.html(), sha512: data.sha512)
-
 check = (data) =>
     @get('file')(data.name,
         ((file) ->
@@ -262,37 +261,43 @@ check = (data) =>
                 send('NoFile')
         ), (->
             send('File')))
-    $('#eval').asuggest(data.words)
 
 select = (data) ->
+    if data.file
+        code($sourcecode.empty(), data.file, ['linenums'])
+        $sourcecode.attr('title', data.name)
+        set('file')(name: data.name, file: $sourcecode.html(), sha512: data.sha512)
+
     current_frame = data.frame
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
+    $('#eval').val('').attr('data-index', -1).attr('rows', 1)
 
     # if current_frame.file == '<wdb>'
         # file_cache[current_frame.file] = current_frame.f_code
+    handle_file  = (file) ->
+        $sourcecode.html(file.file)
+        $sourcecode.attr('title', current_frame.file)
+        $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
+        for lno in data.breaks
+            $('.linenums li').eq(lno - 1).addClass('breakpoint')
+        $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
+        $cur_line.addClass('highlighted')
 
-    get('file')(current_frame.file,
-        (file) ->
-            $sourcecode.html(file.file)
-            $sourcecode.attr('title', current_frame.file)
-            $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-            for lno in data.breaks
-                $('.linenums li').eq(lno - 1).addClass('breakpoint')
-            $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
-            $cur_line.addClass('highlighted')
+        $sourcecode.find('li.ctx').removeClass('ctx')
+        for lno in [current_frame.flno...current_frame.llno + 1]
+            $line = $sourcecode.find('li').eq(lno - 1)
+            $line.addClass('ctx')
+            if lno == current_frame.flno
+                $line.addClass('ctx-top')
+            else if lno == current_frame.llno
+                $line.addClass('ctx-bottom')
+        $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
 
-            $sourcecode.find('li.ctx').removeClass('ctx')
-            for lno in [current_frame.flno...current_frame.llno + 1]
-                $line = $sourcecode.find('li').eq(lno - 1)
-                $line.addClass('ctx')
-                if lno == current_frame.flno
-                    $line.addClass('ctx-top')
-                else if lno == current_frame.llno
-                    $line.addClass('ctx-bottom')
-            $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
-        )
+    if data.file
+        handle_file(data.file)
+    else
+        get('file')(current_frame.file, handle_file)
 
 
 
@@ -353,7 +358,7 @@ print = (data) ->
     #     a = $('<a>').attr('href', '/?__ws__=__ws__&what=sub_exception&which=' + data.exception)
     #     nh.wrap(a)
 
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1).css color: 'black'
+    $('#eval').val('').attr('data-index', -1).attr('rows', 1)
 
     filename = $('.selected .tracefile').text()
     if not (filename of cmd_hist)
@@ -362,12 +367,6 @@ print = (data) ->
 
     set('cmd')(name: filename, history: cmd_hist[filename])
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
-
-        # ((data) ->  # fail
-        #     $('#eval').css color: 'red'
-        #     setTimeout (-> 
-        #         $('#eval').css color: 'black'), 1000
-        # )
 
 echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
@@ -482,7 +481,11 @@ register_handlers = ->
         elt.hide('fast').prev('.short').removeClass('open').addClass('close')
     )
 
-    $("#sourcecode").on('click', '.linenums li', ->
-        lno = $(@).parent().find('li').index(@) + 1
-        toggle_break(lno)
+    $("#sourcecode").on('click', '.linenums li', (e) ->
+        if this is e.target
+            lno = $(@).parent().find('li').index(@) + 1
+            toggle_break(lno)
     )
+
+    # $('#eval').on('input', ->
+        # send('Complete|' + $(@).val())
