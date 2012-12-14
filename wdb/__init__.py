@@ -419,12 +419,8 @@ class WdbRequest(object, Bdb):
                 current_index = int(data)
                 current = trace[current_index]
                 current_file = current['file']
-                locals = stack[current_index][0].f_locals
-                words = dict(stack[current_index][0].f_globals)
-                words.update(locals)
                 self.send('Check|%s' % dump({
                     'name': current_file,
-                    'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
@@ -544,6 +540,24 @@ class WdbRequest(object, Bdb):
                 }))
                 self.send('Select|%s' % dump({
                     'frame': current
+                }))
+
+            elif cmd == 'Complete':
+                from jedi import Script
+                current_file = current['file']
+                file_ = self.get_file(current_file)
+                lines = file_.split('\n')
+                lno = trace[current_index]['lno']
+                line_before = lines[lno - 1]
+                indent = len(line_before) - len(line_before.lstrip())
+                line = ' ' * indent + data
+                lines.insert(lno - 1, line)
+                completions = Script(
+                    '\n'.join(lines), lno,
+                    len(line), current_file).complete()
+                self.send('Suggest|%s' % dump({
+                    'base': data,
+                    'completions': [comp.complete for comp in completions]
                 }))
 
             elif cmd == 'Quit':

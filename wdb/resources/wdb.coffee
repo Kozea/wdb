@@ -145,6 +145,7 @@ make_ws = ->
             when 'BreakSet'   then breakset   data
             when 'BreakUnset' then breakunset data
             when 'Dump'       then echo       data
+            when 'Suggest'    then suggest    data
     new_ws
 
 #### Loading ####
@@ -350,6 +351,7 @@ execute = (snippet) ->
     send("Eval|#{snippet}")
 
 print = (data) ->
+    $('#completions table').empty()
     snippet = $('#eval').val()
     code($('#scrollback'), snippet, ['prompted'])
     code($('#scrollback'), data.result)
@@ -399,7 +401,19 @@ toggle_break = (lno, temporary) ->
     else
         $line.addClass('ask-breakpoint')
         send(cmd + '|' + lno)
-    
+
+
+suggest = (data) ->
+    $comp = $('#completions table').empty()
+    for completion, index in data.completions
+        if index % 5 == 0
+            $appender = $('<tr>')
+            $comp.append($appender)
+        $appender.append($('<td>')
+            .append($('<span>').addClass('base').text(data.base))
+            .append($('<span>').addClass('completion').text(completion))
+        )
+
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
         if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
@@ -487,5 +501,5 @@ register_handlers = ->
             toggle_break(lno)
     )
 
-    # $('#eval').on('input', ->
-        # send('Complete|' + $(@).val())
+    $('#eval').on('input', ->
+        send('Complete|' + $(@).val()))

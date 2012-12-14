@@ -112,11 +112,22 @@ a.inspect:hover {
   border-bottom: 1px solid #000;
 }
 
-#prompt, #prompt textarea {
+#prompt, #prompt textarea, #completions {
   font-size: 12px;
   font-family: 'Source Code Pro', monospace;
   font-weight: 900;
   line-height: 1.5;
+}
+
+.base {
+  color: #bbb;
+}
+.completion {
+  color: #777;
+}
+
+#completions td {
+  padding: 0.25em;
 }
 
 ::-webkit-scrollbar {
