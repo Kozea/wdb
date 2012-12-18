@@ -157,7 +157,6 @@ class WsPacket(object):
                 self.close = True
             else:
                 self.data = self.data.tostring().decode("utf-8")
-
         elif send:  # Send mode
             self.data = send.encode("utf-8")
             wssocket._send(WsFrame.from_data(self.data).data)

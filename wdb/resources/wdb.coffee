@@ -405,14 +405,21 @@ toggle_break = (lno, temporary) ->
 
 suggest = (data) ->
     $comp = $('#completions table').empty()
+    $comp.append($('<thead><tr><td id="comp-desc" colspan="5">'))
+    added = []
     for completion, index in data.completions
+        if (completion.base + completion.complete) in added
+            continue
+        added.push(completion.base + completion.complete)
         if index % 5 == 0
-            $appender = $('<tr>')
+            $appender = $('<tbody><tr>')
             $comp.append($appender)
-        $appender.append($('<td>')
-            .append($('<span>').addClass('base').text(data.base))
-            .append($('<span>').addClass('completion').text(completion))
-        )
+
+        $appender.append($('<td>').attr('title', completion.description)
+            .append($('<span>').addClass('base').text(completion.base))
+            .append($('<span>').addClass('completion').text(completion.complete)))
+
+            
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
@@ -433,10 +440,16 @@ register_handlers = ->
             return false
 
     $('#eval').on 'keydown', (e) ->
+        $eval = $(@)
         if e.ctrlKey
             e.stopPropagation()
             return
         if e.keyCode == 13
+            if $('#completions table td.active').length
+                l = $eval.val().length
+                $eval.caret(l, l)
+                $('#completions table').empty()
+                return false
             $eval = $(@)
             if not e.shiftKey
                 execute $eval.val()
@@ -445,14 +458,41 @@ register_handlers = ->
                 $eval.attr('rows', parseInt($eval.attr('rows')) + 1)
             
         else if e.keyCode == 9
-            $eval = $(@)
-            txtarea = $eval.get(0)
-            startPos = txtarea.selectionStart
-            endPos = txtarea.selectionEnd
-            if startPos or startPos == '0'
-                $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length))
-            else
-                $eval.val($eval.val() + '    ')
+            if e.shiftKey
+                $eval = $(@)
+                txtarea = $eval.get(0)
+                startPos = txtarea.selectionStart
+                endPos = txtarea.selectionEnd
+                if startPos or startPos == '0'
+                    $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length))
+                else
+                    $eval.val($eval.val() + '    ')
+                return false
+
+            $tds = $('#completions table td')
+            $active = $tds.filter('.active')
+            if $tds.length
+                if not $active.length
+                    $active = $tds.first().addClass('active')
+                    l = $eval.val().length
+                    $eval.caret(l, l)
+                else
+                    index = $tds.index($active)
+                    if index is $tds.length - 1
+                        index = 0
+                    else
+                        index++
+                    $active.removeClass('active')
+                    $active = $tds.eq(index).addClass('active')
+                base = $active.find('.base').text()
+                completion = $active.find('.completion').text()
+                mew = $eval.caret().replace(completion)
+                old_base = mew.slice(mew.length - completion.length - base.length, mew.length - completion.length)
+                mew = mew.slice(0, mew.length - completion.length - base.length) + base + mew.slice(mew.length - completion.length, mew.length)
+                $eval.val(mew)
+                $eval.caret(start: mew.length - completion.length, end: mew.length)
+                $('#comp-desc').text($active.attr('title'))
+
             false
         else if e.keyCode == 38  # Up
             $eval = $(@)
@@ -485,6 +525,14 @@ register_handlers = ->
                             .attr('rows', to_set.split('\n').length)
                         false
 
+    $('#eval').on('keyup', (e) ->
+        if e.keyCode >= 33 and e.keyCode <= 40
+            caret = $(@).caret()
+            if caret.start is caret.end and $('#completions table td.active').length
+                $('#completions table').empty()
+    )
+            
+
     $("#scrollback").on('click', 'a.inspect', ->
         send('Inspect|' + $(this).attr('href'))
         false
@@ -502,4 +550,8 @@ register_handlers = ->
     )
 
     $('#eval').on('input', ->
-        send('Complete|' + $(@).val()))
+        if $(@).val()
+            send('Complete|' + $(@).val())
+        else
+            $('#completions table').empty()
+    )

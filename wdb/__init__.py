@@ -29,12 +29,11 @@ except ImportError:
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
-from random import randint
+from jedi import Script
 from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
 from hashlib import sha512
-from uuid import uuid4
 try:
     from urlparse import parse_qs
 except ImportError:
@@ -301,8 +300,9 @@ class WdbRequest(object, Bdb):
             except:
                 log.exception('Ping Failed')
                 self.connected = False
-
-        while not self.connected:
+        tries = 0
+        while not self.connected and tries < 10:
+            tries += 1
             try:
                 self.ws.wait_for_connect()
             except WsError:
@@ -543,21 +543,27 @@ class WdbRequest(object, Bdb):
                 }))
 
             elif cmd == 'Complete':
-                from jedi import Script
                 current_file = current['file']
-                file_ = self.get_file(current_file)
-                lines = file_.split('\n')
+                file_ = self.get_file(current_file).decode('utf-8')
+                lines = file_.split(u'\n')
                 lno = trace[current_index]['lno']
                 line_before = lines[lno - 1]
                 indent = len(line_before) - len(line_before.lstrip())
-                line = ' ' * indent + data
-                lines.insert(lno - 1, line)
+                segments = data.split(u'\n')
+                for segment in reversed(segments):
+                    line = u' ' * indent + segment
+                    lines.insert(lno - 1, line)
                 completions = Script(
-                    '\n'.join(lines), lno,
-                    len(line), current_file).complete()
+                    u'\n'.join(lines), lno - 1 + len(segments),
+                    len(segments[-1]) + indent, current_file).complete()
+
                 self.send('Suggest|%s' % dump({
-                    'base': data,
-                    'completions': [comp.complete for comp in completions]
+                    'completions': [{
+                        'base': comp.word[:len(comp.word) - len(comp.complete)],
+                        'complete': comp.complete,
+                        'description': comp.description
+                    } for comp in completions
+                                    if comp.word.endswith(comp.complete)]
                 }))
 
             elif cmd == 'Quit':

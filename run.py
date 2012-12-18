@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from flask import Flask, request
 import logging
 from wdb import Wdb
@@ -152,4 +153,4 @@ else:
 
 app.wsgi_app = Wdb(app.wsgi_app)
 app.run(debug=True, host='0.0.0.0', port=1984, use_debugger=False, use_reloader=True, threaded=True)
-# 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80chars 80char
+# 80chars 80chars 80chars 80chars 80chars 80chars 80chårs 80chârs 80chàrs 80chαr

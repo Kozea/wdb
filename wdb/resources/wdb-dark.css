@@ -130,6 +130,19 @@ a.inspect:hover {
   padding: 0.25em;
 }
 
+#completions td.active .base {
+  color: red;
+}
+
+#completions td.active .completion {
+  color: orangered;
+}
+
+#comp-desc {
+  color: #81a2be;
+  font-style: italic;
+}
+
 ::-webkit-scrollbar {
   background: #1d1f21;
   border: 1px solid #000;
@@ -141,3 +154,4 @@ a.inspect:hover {
   background: #181818;
   border: 1px solid #000;
 }
+
