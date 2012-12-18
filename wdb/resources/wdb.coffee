@@ -135,17 +135,22 @@ make_ws = ->
         else
             cmd = message
         console.log time(), '<-', cmd
-        switch cmd
-            when 'Title'      then title      data
-            when 'Trace'      then trace      data
-            when 'Check'      then check      data
-            when 'Select'     then select     data
-            when 'Print'      then print      data
-            when 'Echo'       then echo       data
-            when 'BreakSet'   then breakset   data
-            when 'BreakUnset' then breakunset data
-            when 'Dump'       then echo       data
-            when 'Suggest'    then suggest    data
+        treat = switch cmd
+            when 'Title'      then title
+            when 'Trace'      then trace
+            when 'Check'      then check
+            when 'Select'     then select
+            when 'Print'      then print
+            when 'Echo'       then echo
+            when 'BreakSet'   then breakset
+            when 'BreakUnset' then breakunset
+            when 'Dump'       then echo
+            when 'Suggest'    then suggest
+            when 'Log'        then log
+        if not treat
+            console.log 'Unknown command', cmd
+        else
+            treat data
     new_ws
 
 #### Loading ####
@@ -321,6 +326,13 @@ code = (parent, code, classes=[]) ->
 
 last_cmd = null
 execute = (snippet) ->
+    filename = $('.selected .tracefile').text()
+    if not (filename of cmd_hist)
+        cmd_hist[filename] = []
+    cmd_hist[filename].unshift snippet
+
+    set('cmd')(name: filename, history: cmd_hist[filename])
+
     cmd = (cmd) ->
             send cmd
             last_cmd = cmd
@@ -355,19 +367,7 @@ print = (data) ->
     snippet = $('#eval').val()
     code($('#scrollback'), snippet, ['prompted'])
     code($('#scrollback'), data.result)
-
-    # if data.exception
-    #     a = $('<a>').attr('href', '/?__ws__=__ws__&what=sub_exception&which=' + data.exception)
-    #     nh.wrap(a)
-
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
-
-    filename = $('.selected .tracefile').text()
-    if not (filename of cmd_hist)
-        cmd_hist[filename] = []
-    cmd_hist[filename].unshift snippet
-
-    set('cmd')(name: filename, history: cmd_hist[filename])
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
 echo = (data) ->
@@ -376,10 +376,11 @@ echo = (data) ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
 breakset = (data) ->
-    $line = $('.linenums li').eq(data.lno - 1)
-    $line.removeClass('ask-breakpoint').addClass('breakpoint')
-    if data.cond
-        $line.attr('title', "On [#{data.cond}]")
+    if data.lno
+        $line = $('.linenums li').eq(data.lno - 1)
+        $line.removeClass('ask-breakpoint').addClass('breakpoint')
+        if data.cond
+            $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
         $eval.val('')
@@ -394,6 +395,7 @@ toggle_break = (lno, temporary) ->
     cmd = if temporary then 'TBreak' else 'Break'
     if ('' + lno).indexOf(':') > -1
         send(cmd + '|' + lno)
+        return
     $line = $('.linenums li').eq(lno - 1)
     if $line.hasClass('breakpoint')
         send('Unbreak|' + lno)
@@ -405,7 +407,7 @@ toggle_break = (lno, temporary) ->
 
 suggest = (data) ->
     $comp = $('#completions table').empty()
-    $comp.append($('<thead><tr><td id="comp-desc" colspan="5">'))
+    $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
     added = []
     for completion, index in data.completions
         if (completion.base + completion.complete) in added
@@ -419,7 +421,8 @@ suggest = (data) ->
             .append($('<span>').addClass('base').text(completion.base))
             .append($('<span>').addClass('completion').text(completion.complete)))
 
-            
+log = (data) ->
+    console.log data.message
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
@@ -550,8 +553,9 @@ register_handlers = ->
     )
 
     $('#eval').on('input', ->
-        if $(@).val()
-            send('Complete|' + $(@).val())
+        txt = $(@).val()
+        if txt and txt[0] != '.'
+            send('Complete|' + txt)
         else
             $('#completions table').empty()
     )

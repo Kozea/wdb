@@ -79,6 +79,7 @@ def capture_output():
 
 class ReprEncoder(JSONEncoder):
     def default(self, obj):
+        print obj
         return repr(obj)
 
 
@@ -372,8 +373,6 @@ class WdbRequest(object, Bdb):
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
         locals = stack[current_index][0].f_locals
-        words = dict(stack[current_index][0].f_globals)
-        words.update(locals)
         if self.begun:
             self.send('Trace|%s' % dump({
                 'trace': trace,
@@ -382,7 +381,6 @@ class WdbRequest(object, Bdb):
             current_file = current['file']
             self.send('Check|%s' % dump({
                 'name': current_file,
-                'words': words.keys(),
                 'sha512': sha512(self.get_file(current_file)).hexdigest()
             }))
         else:
@@ -411,7 +409,6 @@ class WdbRequest(object, Bdb):
                 current_file = current['file']
                 self.send('Check|%s' % dump({
                     'name': current_file,
-                    'words': words.keys(),
                     'sha512': sha512(self.get_file(current_file)).hexdigest()
                 }))
 
@@ -451,7 +448,8 @@ class WdbRequest(object, Bdb):
 
             elif cmd == 'Trace':
                 self.send('Trace|%s' % dump({
-                    'trace': trace
+                    'trace': trace,
+                    'cwd': os.getcwd()
                 }))
 
             elif cmd == 'Eval':
@@ -511,9 +509,17 @@ class WdbRequest(object, Bdb):
                 lno = int(lno)
                 rv = self.set_break(fn, lno, int(cmd == 'TBreak'), cond)
                 log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
-                if rv is None and fn == current['file']:
-                    self.send('BreakSet|%s' % dump({
-                        'lno': lno, 'cond': cond}))
+                if rv is None:
+                    if fn == current['file']:
+                        self.send('BreakSet|%s' % dump({
+                            'lno': lno, 'cond': cond
+                        }))
+                    else:
+                        self.send('BreakSet|%s' % dump({}))
+                else:
+                    self.send('Log|%s' % dump({
+                        'message': rv
+                    }))
 
             elif cmd == 'Unbreak':
                 lno = int(data)
@@ -536,10 +542,12 @@ class WdbRequest(object, Bdb):
 
                 trace[current_index]['lno'] = lno
                 self.send('Trace|%s' % dump({
-                    'trace': trace
+                    'trace': trace,
+                    'cwd': os.getcwd()
                 }))
                 self.send('Select|%s' % dump({
-                    'frame': current
+                    'frame': current,
+                    'breaks': self.get_file_breaks(current['file'])
                 }))
 
             elif cmd == 'Complete':
@@ -559,11 +567,12 @@ class WdbRequest(object, Bdb):
 
                 self.send('Suggest|%s' % dump({
                     'completions': [{
-                        'base': comp.word[:len(comp.word) - len(comp.complete)],
+                        'base': comp.word[
+                            :len(comp.word) - len(comp.complete)],
                         'complete': comp.complete,
                         'description': comp.description
-                    } for comp in completions
-                                    if comp.word.endswith(comp.complete)]
+                    } for comp in completions if comp.word.endswith(
+                        comp.complete)]
                 }))
 
             elif cmd == 'Quit':
