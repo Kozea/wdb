@@ -169,7 +169,8 @@ class Wdb(object):
             log.debug('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
-        elif self.enabled and 'text/html' in environ.get('HTTP_ACCEPT', ''):
+        elif ((self.enabled or path == '/__wdb') and
+              'text/html' in environ.get('HTTP_ACCEPT', '')):
             log.debug('Sending fake page (%s) for %s' % (
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
@@ -178,9 +179,15 @@ class Wdb(object):
             log.debug('Sending real page (%s) with exception'
                       ' handling for %s' % (
                           environ.get('HTTP_ACCEPT', ''), path))
-
+            app = self.app
+            if path == '/__wdb':
+                def set_trace(environ, start_response):
+                    start_response('200 OK', [('Content-Type', 'text/html')])
+                    WdbRequest.tf()
+                    yield "Done"
+                app = set_trace
             return WdbRequest(port).wsgi_trace(
-                self.app, environ, start_response)
+                app, environ, start_response)
         else:
             log.debug("Serving %s" % path)
 
@@ -290,9 +297,12 @@ class WdbRequest(object, Bdb):
                 self.ws.force_close()
         return wsgi_with_trace(environ, start_response)
 
-    def get_file(self, filename):
+    def get_file(self, filename, html_escape=True):
         checkcache(filename)
-        return escape(''.join(getlines(filename)))
+        file_ = ''.join(getlines(filename))
+        if not html_escape:
+            return file_
+        return escape(file_)
 
     def handle_connection(self):
         if self.connected:
@@ -552,7 +562,7 @@ class WdbRequest(object, Bdb):
 
             elif cmd == 'Complete':
                 current_file = current['file']
-                file_ = self.get_file(current_file).decode('utf-8')
+                file_ = self.get_file(current_file, False).decode('utf-8')
                 lines = file_.split(u'\n')
                 lno = trace[current_index]['lno']
                 line_before = lines[lno - 1]
@@ -561,19 +571,25 @@ class WdbRequest(object, Bdb):
                 for segment in reversed(segments):
                     line = u' ' * indent + segment
                     lines.insert(lno - 1, line)
-                completions = Script(
-                    u'\n'.join(lines), lno - 1 + len(segments),
-                    len(segments[-1]) + indent, current_file).complete()
-
-                self.send('Suggest|%s' % dump({
-                    'completions': [{
-                        'base': comp.word[
-                            :len(comp.word) - len(comp.complete)],
-                        'complete': comp.complete,
-                        'description': comp.description
-                    } for comp in completions if comp.word.endswith(
-                        comp.complete)]
-                }))
+                try:
+                    completions = Script(
+                        u'\n'.join(lines), lno - 1 + len(segments),
+                        len(segments[-1]) + indent, current_file).complete()
+                except:
+                    self.send('Log|%s' % dump({
+                        'message': 'Completion failed for %s' %
+                        '\n'.join(reversed(segments))
+                    }))
+                else:
+                    self.send('Suggest|%s' % dump({
+                        'completions': [{
+                            'base': comp.word[
+                                :len(comp.word) - len(comp.complete)],
+                            'complete': comp.complete,
+                            'description': comp.description
+                        } for comp in completions if comp.word.endswith(
+                            comp.complete)]
+                    }))
 
             elif cmd == 'Quit':
                 if hasattr(self, 'botframe'):

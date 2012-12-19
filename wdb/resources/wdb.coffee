@@ -24,6 +24,7 @@ stop = false
 ws = null
 __ws_port = 10000 + parseInt(Math.random() * 50000)
 cmd_hist = {}
+session_cmd_hist = {}
 
 $sourcecode = null
 $traceback = null
@@ -329,7 +330,10 @@ execute = (snippet) ->
     filename = $('.selected .tracefile').text()
     if not (filename of cmd_hist)
         cmd_hist[filename] = []
+    if not (filename of session_cmd_hist)
+        session_cmd_hist[filename] = []
     cmd_hist[filename].unshift snippet
+    session_cmd_hist[filename].unshift snippet
 
     set('cmd')(name: filename, history: cmd_hist[filename])
 
@@ -356,11 +360,15 @@ execute = (snippet) ->
             when 'j' then cmd('Jump|' + data)
             when 'b' then toggle_break(data)
             when 't' then toggle_break(data, true)
+            when 'f' then print_hist(session_cmd_hist[filename])
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
         return
     send("Eval|#{snippet}")
+
+print_hist = (hist) ->
+    print result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
 
 print = (data) ->
     $('#completions table').empty()
@@ -554,8 +562,9 @@ register_handlers = ->
 
     $('#eval').on('input', ->
         txt = $(@).val()
+        hist = session_cmd_hist[$('.selected .tracefile').text()] or []
         if txt and txt[0] != '.'
-            send('Complete|' + txt)
+            send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)
         else
             $('#completions table').empty()
     )
