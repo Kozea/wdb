@@ -95,14 +95,13 @@ ol.linenums li.ask-breakpoint {
   color: yellow;
 }
 
-
 a.inspect:after {
   color: #aaa;
 }
 
 a.inspect:hover {
-  background-color: #f3f3f3;
-  border: 1px solid #e3e3e3;
+  background-color: #111;
+  border: 1px solid #000;
 }
 
 #prompt:before, .prompted:before, #prompt textarea {
@@ -155,4 +154,5 @@ a.inspect:hover {
   background: #181818;
   border: 1px solid #000;
 }
+
 
