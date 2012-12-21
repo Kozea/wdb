@@ -22,6 +22,7 @@ time = ->
 started = false
 stop = false
 ws = null
+cwd = null
 __ws_port = 10000 + parseInt(Math.random() * 50000)
 cmd_hist = {}
 session_cmd_hist = {}
@@ -137,6 +138,7 @@ make_ws = ->
             cmd = message
         console.log time(), '<-', cmd
         treat = switch cmd
+            when 'Init'       then init
             when 'Title'      then title
             when 'Trace'      then trace
             when 'Check'      then check
@@ -209,6 +211,9 @@ start = ->
     $sourcecode = $('#sourcecode')
     $traceback = $('#traceback')
 
+init = (data) ->
+    cwd = data.cwd
+
 title = (data) ->
     $('#title').text(data.title).append($('<small>').text(data.subtitle))
     $('#source').css(height: $(window).height() - $('#title').outerHeight(true) - 10)
@@ -240,8 +245,8 @@ trace = (data) ->
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr(title: frame.file))
             
-        if frame.file.indexOf(data.cwd) == 0
-            suffix = frame.file.split(data.cwd).slice(-1)[0]
+        if frame.file.indexOf(cwd) == 0
+            suffix = frame.file.split(cwd).slice(-1)[0]
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('.').attr(title: frame.file))
 
@@ -251,9 +256,7 @@ trace = (data) ->
         $traceline.append $tracecode
         $traceline.append $tracefunfun
         $traceback.prepend $traceline
-    # $('.traceline').each(->
-        # $(@).find('code').syntaxHighlight()
-    # )
+
     $('.traceline').on('click', ->
         send('Select|' + $(@).attr('data-level'))
     )
@@ -327,6 +330,7 @@ code = (parent, code, classes=[]) ->
 
 last_cmd = null
 execute = (snippet) ->
+    snippet = snippet.trim()
     filename = $('.selected .tracefile').text()
     if not (filename of cmd_hist)
         cmd_hist[filename] = []
@@ -365,10 +369,14 @@ execute = (snippet) ->
     else if snippet == '' and last_cmd
         cmd last_cmd
         return
-    send("Eval|#{snippet}")
+    if snippet
+        send("Eval|#{snippet}")
 
 print_hist = (hist) ->
     print result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
+
+termscroll = ->
+    $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
 print = (data) ->
     $('#completions table').empty()
@@ -376,12 +384,12 @@ print = (data) ->
     code($('#scrollback'), snippet, ['prompted'])
     code($('#scrollback'), data.result)
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
-    $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
+    termscroll()
 
 echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.val or '')
-    $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
+    termscroll()
 
 breakset = (data) ->
     if data.lno
@@ -422,12 +430,15 @@ suggest = (data) ->
             continue
         added.push(completion.base + completion.complete)
         if index % 5 == 0
-            $appender = $('<tbody><tr>')
-            $comp.append($appender)
+            $comp.append($('<tbody>').append($appender = $('<tr>')))
 
-        $appender.append($('<td>').attr('title', completion.description)
+        $appender.append(td = $('<td>').attr('title', completion.description)
             .append($('<span>').addClass('base').text(completion.base))
             .append($('<span>').addClass('completion').text(completion.complete)))
+        if not completion.complete
+            td.addClass('active')
+            $('#comp-desc').text(td.attr('title'))
+    termscroll()
 
 log = (data) ->
     console.log data.message
@@ -467,6 +478,7 @@ register_handlers = ->
                 false
             else
                 $eval.attr('rows', parseInt($eval.attr('rows')) + 1)
+                termscroll()
             
         else if e.keyCode == 9
             if e.shiftKey
@@ -503,7 +515,7 @@ register_handlers = ->
                 $eval.val(mew)
                 $eval.caret(start: mew.length - completion.length, end: mew.length)
                 $('#comp-desc').text($active.attr('title'))
-
+                termscroll()
             false
         else if e.keyCode == 38  # Up
             $eval = $(@)

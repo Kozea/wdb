@@ -409,13 +409,15 @@ class WdbRequest(object, Bdb):
 
             log.debug('Cmd %s #Data %d' % (cmd, len(data)))
             if cmd == 'Start':
+                self.send('Init|%s' % dump({
+                    'cwd': os.getcwd()
+                }))
                 self.send('Title|%s' % dump({
                     'title': exception,
                     'subtitle': exception_description
                 }))
                 self.send('Trace|%s' % dump({
-                    'trace': trace,
-                    'cwd': os.getcwd()
+                    'trace': trace
                 }))
                 current_file = current['file']
                 self.send('Check|%s' % dump({
@@ -459,8 +461,7 @@ class WdbRequest(object, Bdb):
 
             elif cmd == 'Trace':
                 self.send('Trace|%s' % dump({
-                    'trace': trace,
-                    'cwd': os.getcwd()
+                    'trace': trace
                 }))
 
             elif cmd == 'Eval':
@@ -553,8 +554,7 @@ class WdbRequest(object, Bdb):
 
                 trace[current_index]['lno'] = lno
                 self.send('Trace|%s' % dump({
-                    'trace': trace,
-                    'cwd': os.getcwd()
+                    'trace': trace
                 }))
                 self.send('Select|%s' % dump({
                     'frame': current,
@@ -572,17 +572,25 @@ class WdbRequest(object, Bdb):
                 for segment in reversed(segments):
                     line = u' ' * indent + segment
                     lines.insert(lno - 1, line)
+                script = Script(
+                    u'\n'.join(lines), lno - 1 + len(segments),
+                    len(segments[-1]) + indent, current_file)
+                print  u'\n'.join(lines), lno - 1 + len(segments), len(segments[-1]) + indent, current_file
                 try:
-                    completions = Script(
-                        u'\n'.join(lines), lno - 1 + len(segments),
-                        len(segments[-1]) + indent, current_file).complete()
+                    completions = script.complete()
                 except:
                     self.send('Log|%s' % dump({
                         'message': 'Completion failed for %s' %
                         '\n'.join(reversed(segments))
                     }))
                 else:
+                    fun = script.get_in_function_call()
                     self.send('Suggest|%s' % dump({
+                        'params': {
+                            'params': [p.get_code().replace('\n', '')
+                                       for p in fun.params],
+                            'index': fun.index,
+                            'call_name': fun.call_name} if fun else None,
                         'completions': [{
                             'base': comp.word[
                                 :len(comp.word) - len(comp.complete)],
