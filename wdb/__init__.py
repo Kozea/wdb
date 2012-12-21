@@ -382,7 +382,8 @@ class WdbRequest(object, Bdb):
             frame, tb, exception, exception_description))
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
-        locals = stack[current_index][0].f_locals
+        locals_ = map(lambda x: x[0].f_locals, stack)
+
         if self.begun:
             self.send('Trace|%s' % dump({
                 'trace': trace,
@@ -465,12 +466,12 @@ class WdbRequest(object, Bdb):
             elif cmd == 'Eval':
                 globals = dict(stack[current_index][0].f_globals)
                 # Hack for function scope eval
-                globals.update(locals)
+                globals.update(locals_[current_index])
                 globals.setdefault('pprint', pprint)
                 with capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')
-                        exec compiled_code in globals, locals
+                        exec compiled_code in globals, locals_[current_index]
                     except Exception:
                         type_, value, tb = exc_info()
                         print '%s: %s' % (type_.__name__, str(value))
