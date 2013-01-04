@@ -158,3 +158,15 @@ a.inspect:hover {
 #sourcecode {
   box-shadow: inset -8px 0 20px #000;
 }
+
+.fun_punct {
+  color: white;
+}
+
+.fun_param {
+  color: #969896;
+}
+
+.fun_param.active {
+  color: #de935f;
+}

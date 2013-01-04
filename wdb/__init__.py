@@ -465,14 +465,14 @@ class WdbRequest(object, Bdb):
                 }))
 
             elif cmd == 'Eval':
-                globals = dict(stack[current_index][0].f_globals)
+                globals_ = dict(stack[current_index][0].f_globals)
                 # Hack for function scope eval
-                globals.update(locals_[current_index])
-                globals.setdefault('pprint', pprint)
+                globals_.update(locals_[current_index])
+                globals_.setdefault('pprint', pprint)
                 with capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')
-                        exec compiled_code in globals, locals_[current_index]
+                        exec compiled_code in globals_, locals_[current_index]
                     except Exception:
                         type_, value, tb = exc_info()
                         print '%s: %s' % (type_.__name__, str(value))
@@ -574,8 +574,7 @@ class WdbRequest(object, Bdb):
                     lines.insert(lno - 1, line)
                 script = Script(
                     u'\n'.join(lines), lno - 1 + len(segments),
-                    len(segments[-1]) + indent, current_file)
-                print  u'\n'.join(lines), lno - 1 + len(segments), len(segments[-1]) + indent, current_file
+                    len(segments[-1]) + indent, '')
                 try:
                     completions = script.complete()
                 except:
@@ -590,6 +589,7 @@ class WdbRequest(object, Bdb):
                             'params': [p.get_code().replace('\n', '')
                                        for p in fun.params],
                             'index': fun.index,
+                            'module': fun.module.path,
                             'call_name': fun.call_name} if fun else None,
                         'completions': [{
                             'base': comp.word[
@@ -668,6 +668,14 @@ class WdbRequest(object, Bdb):
             raise BdbQuit
         return self.trace_dispatch
 
+    def recursive(self, g, l):
+        # Inspect curent debugger vars through pdb
+        sys.settrace(None)
+        from pdb import Pdb
+        p = Pdb()
+        sys.call_tracing(p.run, ('1/0', g, l))
+        sys.settrace(self.trace_dispatch)
+        self.lastcmd = p.lastcmd
 
 def set_trace(frame=None):
     WdbRequest.tf(frame or sys._getframe().f_back)

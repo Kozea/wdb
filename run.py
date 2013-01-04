@@ -126,6 +126,11 @@ def lambda_():
     return ''.join(map(lambda x: 1 / x, reversed(range(10))))
 
 
+@app.route("/import")
+def import_():
+    import importtest
+
+
 from log_colorizer import make_colored_stream_handler
 handler = make_colored_stream_handler()
 app.logger.handlers = []

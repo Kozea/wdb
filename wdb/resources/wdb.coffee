@@ -420,11 +420,27 @@ toggle_break = (lno, temporary) ->
         $line.addClass('ask-breakpoint')
         send(cmd + '|' + lno)
 
+format_fun = (p) ->
+    tags = [
+        $('<span>', class: 'fun_name', title: p.module).text(p.call_name),
+        $('<span>', class: 'fun_punct').text('(')]
+    for param, i in p.params
+        cls = 'fun_param'
+        if i == p.index or (i == p.params.length - 1 and p.index > i)
+            cls = 'fun_param active'
+        tags.push $('<span>', class: cls).text(param)
+        if i != p.params.length - 1
+            tags.push $('<span>', class: 'fun_punct').text(', ')
+        
+    tags.push $('<span>', class: 'fun_punct').text(')')
+    tags
 
 suggest = (data) ->
     $comp = $('#completions table').empty()
     $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
     added = []
+    if data.params
+        $('#comp-desc').append(format_fun(data.params))
     for completion, index in data.completions
         if (completion.base + completion.complete) in added
             continue
@@ -437,7 +453,7 @@ suggest = (data) ->
             .append($('<span>').addClass('completion').text(completion.complete)))
         if not completion.complete
             td.addClass('active')
-            $('#comp-desc').text(td.attr('title'))
+            $('#comp-desc').html(td.attr('title'))
     termscroll()
 
 log = (data) ->
