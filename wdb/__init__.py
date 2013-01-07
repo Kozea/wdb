@@ -53,7 +53,7 @@ import dis
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
 
-REPR = re.compile(escape(r'<?\S+\s(object|instance)\sat\s([0-9a-fx]+)>?'))
+REPR = re.compile(escape(r'<[a-zA-Z0-9\s.\-_\'",\\]*\sat\s0x([0-9a-f]+)>'))
 log = get_color_logger('wdb')
 log.setLevel(30)
 
@@ -79,7 +79,6 @@ def capture_output():
 
 class ReprEncoder(JSONEncoder):
     def default(self, obj):
-        print obj
         return repr(obj)
 
 
@@ -89,13 +88,12 @@ def dump(o):
     def repr_handle(match):
         repr_ = match.group(0)
         try:
-            id_ = int(match.group(2), 16)
+            id_ = int('0x' + match.group(1), 16)
         except:
-            id_ = None
-
+            id_ = 0
         return (
             '<a href="%d" class="inspect">%s</a>' % (id_, repr_)
-        ).replace('"', '\\"')
+        ).replace('\\"', '"').replace('"', '\\"')
 
     return REPR.sub(repr_handle, out)
 

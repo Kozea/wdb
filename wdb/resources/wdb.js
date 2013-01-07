@@ -604,12 +604,20 @@
   };
 
   suggest = function(data) {
-    var $appender, $comp, added, completion, index, td, _i, _len, _ref, _ref1;
+    var $appender, $comp, $eval, $tbody, $td, added, base_len, completion, index, _i, _len, _ref, _ref1;
+    $eval = $('#eval');
     $comp = $('#completions table').empty();
     $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
     added = [];
     if (data.params) {
       $('#comp-desc').append(format_fun(data.params));
+    }
+    if (data.completions.length) {
+      $tbody = $('<tbody>');
+      base_len = data.completions[0].base.length;
+      $eval.data({
+        root: $eval.val().substr(0, $eval.val().length - base_len)
+      });
     }
     _ref = data.completions;
     for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
@@ -619,14 +627,15 @@
       }
       added.push(completion.base + completion.complete);
       if (index % 5 === 0) {
-        $comp.append($('<tbody>').append($appender = $('<tr>')));
+        $tbody.append($appender = $('<tr>'));
       }
-      $appender.append(td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
+      $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
       if (!completion.complete) {
-        td.addClass('active');
-        $('#comp-desc').html(td.attr('title'));
+        $td.addClass('active complete');
+        $('#comp-desc').html($td.attr('title'));
       }
     }
+    $comp.append($tbody);
     return termscroll();
   };
 
@@ -658,16 +667,14 @@
       }
     });
     $('#eval').on('keydown', function(e) {
-      var $active, $eval, $tds, base, completion, endPos, filename, index, l, mew, old_base, startPos, to_set, txtarea;
+      var $active, $eval, $tds, base, completion, endPos, filename, index, startPos, to_set, txtarea;
       $eval = $(this);
       if (e.ctrlKey) {
         e.stopPropagation();
         return;
       }
       if (e.keyCode === 13) {
-        if ($('#completions table td.active').length) {
-          l = $eval.val().length;
-          $eval.caret(l, l);
+        if ($('#completions table td.active').length && !$('#completions table td.complete').length) {
           $('#completions table').empty();
           return false;
         }
@@ -697,8 +704,6 @@
         if ($tds.length) {
           if (!$active.length) {
             $active = $tds.first().addClass('active');
-            l = $eval.val().length;
-            $eval.caret(l, l);
           } else {
             index = $tds.index($active);
             if (index === $tds.length - 1) {
@@ -706,19 +711,12 @@
             } else {
               index++;
             }
-            $active.removeClass('active');
+            $active.removeClass('active complete');
             $active = $tds.eq(index).addClass('active');
           }
           base = $active.find('.base').text();
           completion = $active.find('.completion').text();
-          mew = $eval.caret().replace(completion);
-          old_base = mew.slice(mew.length - completion.length - base.length, mew.length - completion.length);
-          mew = mew.slice(0, mew.length - completion.length - base.length) + base + mew.slice(mew.length - completion.length, mew.length);
-          $eval.val(mew);
-          $eval.caret({
-            start: mew.length - completion.length,
-            end: mew.length
-          });
+          $eval.val($eval.data().root + base + completion);
           $('#comp-desc').text($active.attr('title'));
           termscroll();
         }
@@ -755,15 +753,6 @@
               return false;
             }
           }
-        }
-      }
-    });
-    $('#eval').on('keyup', function(e) {
-      var caret;
-      if (e.keyCode >= 33 && e.keyCode <= 40) {
-        caret = $(this).caret();
-        if (caret.start === caret.end && $('#completions table td.active').length) {
-          return $('#completions table').empty();
         }
       }
     });

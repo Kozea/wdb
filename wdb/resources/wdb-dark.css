@@ -138,6 +138,10 @@ a.inspect:hover {
   color: orangered;
 }
 
+#completions td.active.complete .base {
+  color: #cc6666;
+}
+
 #comp-desc {
   color: #81a2be;
   font-style: italic;
@@ -170,3 +174,4 @@ a.inspect:hover {
 .fun_param.active {
   color: #de935f;
 }
+

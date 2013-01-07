@@ -354,17 +354,17 @@ execute = (snippet) ->
             key = snippet.substr(1)
             data = ''
         switch key
-            when 's' then cmd('Step')
-            when 'n' then cmd('Next')
-            when 'r' then cmd('Return')
-            when 'c' then cmd('Continue')
-            when 'u' then cmd('Until')
-            when 'q' then cmd('Quit')
-            when 'p' then cmd('Eval|pprint(' + data + ')')
-            when 'j' then cmd('Jump|' + data)
-            when 'b' then toggle_break(data)
+            when 's' then cmd 'Step'
+            when 'n' then cmd 'Next'
+            when 'r' then cmd 'Return'
+            when 'c' then cmd 'Continue'
+            when 'u' then cmd 'Until'
+            when 'q' then cmd 'Quit'
+            when 'p' then cmd 'Eval|pprint(' + data + ')'
+            when 'j' then cmd 'Jump|' + data
+            when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
-            when 'f' then print_hist(session_cmd_hist[filename])
+            when 'f' then print_hist session_cmd_hist[filename]
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -436,24 +436,31 @@ format_fun = (p) ->
     tags
 
 suggest = (data) ->
+    $eval = $('#eval')
     $comp = $('#completions table').empty()
     $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
     added = []
     if data.params
         $('#comp-desc').append(format_fun(data.params))
+    if data.completions.length
+        $tbody = $('<tbody>')
+        base_len = data.completions[0].base.length
+        $eval.data(root: $eval.val().substr(0, $eval.val().length - base_len))
     for completion, index in data.completions
         if (completion.base + completion.complete) in added
             continue
         added.push(completion.base + completion.complete)
         if index % 5 == 0
-            $comp.append($('<tbody>').append($appender = $('<tr>')))
+            $tbody.append($appender = $('<tr>'))
 
-        $appender.append(td = $('<td>').attr('title', completion.description)
+        $appender.append($td = $('<td>').attr('title', completion.description)
             .append($('<span>').addClass('base').text(completion.base))
             .append($('<span>').addClass('completion').text(completion.complete)))
         if not completion.complete
-            td.addClass('active')
-            $('#comp-desc').html(td.attr('title'))
+            $td.addClass('active complete')
+            $('#comp-desc').html($td.attr('title'))
+
+    $comp.append($tbody)
     termscroll()
 
 log = (data) ->
@@ -483,9 +490,7 @@ register_handlers = ->
             e.stopPropagation()
             return
         if e.keyCode == 13
-            if $('#completions table td.active').length
-                l = $eval.val().length
-                $eval.caret(l, l)
+            if $('#completions table td.active').length and not $('#completions table td.complete').length
                 $('#completions table').empty()
                 return false
             $eval = $(@)
@@ -513,23 +518,17 @@ register_handlers = ->
             if $tds.length
                 if not $active.length
                     $active = $tds.first().addClass('active')
-                    l = $eval.val().length
-                    $eval.caret(l, l)
                 else
                     index = $tds.index($active)
                     if index is $tds.length - 1
                         index = 0
                     else
                         index++
-                    $active.removeClass('active')
+                    $active.removeClass('active complete')
                     $active = $tds.eq(index).addClass('active')
                 base = $active.find('.base').text()
                 completion = $active.find('.completion').text()
-                mew = $eval.caret().replace(completion)
-                old_base = mew.slice(mew.length - completion.length - base.length, mew.length - completion.length)
-                mew = mew.slice(0, mew.length - completion.length - base.length) + base + mew.slice(mew.length - completion.length, mew.length)
-                $eval.val(mew)
-                $eval.caret(start: mew.length - completion.length, end: mew.length)
+                $eval.val($eval.data().root + base + completion)
                 $('#comp-desc').text($active.attr('title'))
                 termscroll()
             false
@@ -563,14 +562,7 @@ register_handlers = ->
                             .attr('data-index', index)
                             .attr('rows', to_set.split('\n').length)
                         false
-
-    $('#eval').on('keyup', (e) ->
-        if e.keyCode >= 33 and e.keyCode <= 40
-            caret = $(@).caret()
-            if caret.start is caret.end and $('#completions table td.active').length
-                $('#completions table').empty()
-    )
-            
+           
 
     $("#scrollback").on('click', 'a.inspect', ->
         send('Inspect|' + $(this).attr('href'))
