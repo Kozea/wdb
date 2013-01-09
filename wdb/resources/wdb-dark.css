@@ -175,3 +175,27 @@ a.inspect:hover {
   color: #de935f;
 }
 
+.object {
+  border: 1px solid #191919;
+}
+
+.object tbody td {
+  border: 2px solid #111;
+}
+
+.object tbody.toggle:hover td {
+  background-color: #111;
+}
+
+.object .core {
+  background-color: #0e0e0e;
+}
+
+.object .method {
+  background-color: #141414;
+}
+
+.object .attr {
+  background-color: #181818;
+}
+

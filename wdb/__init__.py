@@ -17,7 +17,7 @@ from __future__ import with_statement
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # from _bdbdb import Bdb, BdbQuit  # Bdb with lot of log
-from bdb import Bdb, BdbQuit
+from bdb import Bdb, BdbQuit, Breakpoint
 import pdb
 import traceback
 from cgi import escape
@@ -62,6 +62,16 @@ def reverse_id(id_):
     for obj in get_objects():
         if id(obj) == id_:
             return obj
+    raise KeyError('id not found in gc')
+
+
+def dmp(thing):
+    return {
+        escape(key): {
+            'val': escape(repr(getattr(thing, key))),
+            'type': type(getattr(thing, key)).__name__}
+        for key in dir(thing)
+    }
 
 
 @contextmanager
@@ -262,6 +272,13 @@ class WdbRequest(object, Bdb):
         self.begun = False
         self.connected = False
         self.make_web_socket(port)
+        breaks_per_file_lno = Breakpoint.bplist.values()
+        for bps in breaks_per_file_lno:
+            breaks = list(bps)
+            for bp in breaks:
+                args = bp.file, bp.line, bp.temporary, bp.cond
+                self.set_break(*args)
+                log.info('Resetting break %s' % repr(args))
 
     def make_web_socket(self, port):
         log.info('Creating WebSocket')
@@ -449,13 +466,24 @@ class WdbRequest(object, Bdb):
                 }))
 
             elif cmd == 'Inspect':
-                thing = reverse_id(int(data))
+                try:
+                    thing = reverse_id(int(data))
+                except:
+                    continue
                 self.send('Dump|%s' % dump({
                     'for': escape(repr(thing)),
-                    'val': escape(pformat(dict(
-                        (key, getattr(thing, key))
-                        for key in dir(thing))))
-                }))
+                    'val': dmp(thing)}))
+
+            elif cmd == 'Dump':
+                globals_ = dict(stack[current_index][0].f_globals)
+                try:
+                    thing = eval(data, globals_, locals_[current_index])
+                except:
+                    continue
+
+                self.send('Dump|%s' % dump({
+                    'for': escape(repr(thing)),
+                    'val': dmp(thing)}))
 
             elif cmd == 'Trace':
                 self.send('Trace|%s' % dump({
@@ -466,7 +494,8 @@ class WdbRequest(object, Bdb):
                 globals_ = dict(stack[current_index][0].f_globals)
                 # Hack for function scope eval
                 globals_.update(locals_[current_index])
-                globals_.setdefault('pprint', pprint)
+                globals_.setdefault('_pprint', pprint)
+                globals_.setdefault('_dump', dmp)
                 with capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')
@@ -518,8 +547,15 @@ class WdbRequest(object, Bdb):
 
                 lno = int(lno)
                 rv = self.set_break(fn, lno, int(cmd == 'TBreak'), cond)
-                log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
+                if rv is not None:
+                    for path in sys.path:
+                        rv = self.set_break(
+                            os.path.join(path, fn),
+                            lno, int(cmd == 'TBreak'), cond)
+                        if rv is None:
+                            break
                 if rv is None:
+                    log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
                     if fn == current['file']:
                         self.send('BreakSet|%s' % dump({
                             'lno': lno, 'cond': cond
@@ -674,6 +710,7 @@ class WdbRequest(object, Bdb):
         sys.call_tracing(p.run, ('1/0', g, l))
         sys.settrace(self.trace_dispatch)
         self.lastcmd = p.lastcmd
+
 
 def set_trace(frame=None):
     WdbRequest.tf(frame or sys._getframe().f_back)

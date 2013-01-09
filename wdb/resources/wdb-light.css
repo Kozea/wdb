@@ -106,3 +106,81 @@ a.inspect:hover {
   font-size: 14px;
   line-height: 15px;
 }
+
+
+.base {
+  color: blue;
+}
+
+.completion {
+  color: #88f;
+}
+
+#completions {
+  font-size: 14px;
+}
+a
+#completions td {
+  padding: 0.25em;
+}
+
+#completions td.active .base {
+  color: green;
+}
+
+#completions td.active .completion {
+  color: forestgreen;
+}
+
+#completions td.active.complete .base {
+  color: blue;
+}
+
+#comp-desc {
+  color: blue;
+  font-style: italic;
+}
+
+#sourcecode {
+  box-shadow: inset -8px 0 20px #ddd;
+}
+
+.fun_name {
+  color: blue;
+}
+
+.fun_punct {
+  color: black;
+}
+
+.fun_param {
+  color: #050;
+}
+
+.fun_param.active {
+  color: #0a0;
+}
+
+.object {
+  border: 1px solid #bbb;
+}
+
+.object tbody td {
+  border: 2px solid rgba(0, 125, 255, .05);
+}
+
+.object tbody.toggle:hover td {
+  background-color: rgba(0, 125, 255, .12);
+}
+
+.object .core {
+  background-color: rgba(0, 125, 255, .05);
+}
+
+.object .method {
+  background-color: rgba(0, 125, 255, .075);
+}
+
+.object .attr {
+  background-color: rgba(0, 125, 255, .1);
+}

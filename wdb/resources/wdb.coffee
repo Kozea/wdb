@@ -147,7 +147,7 @@ make_ws = ->
             when 'Echo'       then echo
             when 'BreakSet'   then breakset
             when 'BreakUnset' then breakunset
-            when 'Dump'       then echo
+            when 'Dump'       then dump
             when 'Suggest'    then suggest
             when 'Log'        then log
         if not treat
@@ -360,11 +360,16 @@ execute = (snippet) ->
             when 'c' then cmd 'Continue'
             when 'u' then cmd 'Until'
             when 'q' then cmd 'Quit'
-            when 'p' then cmd 'Eval|pprint(' + data + ')'
+            when 'p' then cmd 'Eval|_pprint(' + data + ')'
+            when 'd' then cmd 'Dump|' + data
             when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
             when 'f' then print_hist session_cmd_hist[filename]
+        return
+    else if snippet.indexOf('?') == 0
+        cmd 'Dump|' + snippet.slice(1).trim()
+        $('#completions table').empty()
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -390,6 +395,33 @@ echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.val or '')
     termscroll()
+    
+dump = (data) ->
+    code($('#scrollback'), data.for, ['prompted'])
+    $container = $('<div>')
+    $table = $('<table>', class: 'object').appendTo($container)
+    $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'core', colspan: 2).text('Core Members'))))
+    $core_tbody = $('<tbody>', class: 'core hidden').appendTo($table)
+    
+    $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'method', colspan: 2).text('Methods'))))
+    $method_tbody = $('<tbody>', class: 'method hidden').appendTo($table)
+    
+    $table.append($('<tbody>', class: 'toggle shown').append($('<tr>').append($('<td>', class: 'attr', colspan: 2).text('Attributes'))))
+    $attr_tbody = $('<tbody>', class: 'attr shown').appendTo($table)
+
+    for key, val of data.val
+        $tbody = $attr_tbody
+        if key.indexOf('__') == 0 and key.indexOf('__', key.length - 2) != -1
+            $tbody = $core_tbody
+        else if val.type.indexOf('method') != -1
+            $tbody = $method_tbody
+                
+        $tbody.append($('<tr>')
+            .append($('<td>').text(key))
+            .append($('<td>').html(val.val)))
+    code($('#scrollback'), $container.html())
+    termscroll()
+    $('#eval').val('')
 
 breakset = (data) ->
     if data.lno
@@ -572,6 +604,8 @@ register_handlers = ->
     ).on('click', '.long,.short.open', ->
         elt = if $(@).hasClass('long') then $(@) else $(@).next('.long')
         elt.hide('fast').prev('.short').removeClass('open').addClass('close')
+    ).on('click', '.toggle', ->
+        $(@).add($(@).next()).toggleClass('hidden', 'shown')
     )
 
     $("#sourcecode").on('click', '.linenums li', (e) ->
@@ -580,6 +614,18 @@ register_handlers = ->
             toggle_break(lno)
     )
 
+    $("#sourcecode").on('mouseup', 'span', (e) ->
+        if e.which == 2
+            send 'Dump|' + $(@).text()
+    )
+
+    $(document).on('keydown', (e) ->
+        if e.keyCode == 13
+            sel = document.getSelection().toString()
+            if sel
+                send 'Dump|' + sel
+    )
+        
     $('#eval').on('input', ->
         txt = $(@).val()
         hist = session_cmd_hist[$('.selected .tracefile').text()] or []

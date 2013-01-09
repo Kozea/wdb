@@ -145,6 +145,35 @@ a.inspect:after {
   text-align: left;
 }
 
-/* #completions { */
-/*   min-height: 500px; */
-/* } */
+.object {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85em;
+}
+
+.object tbody td {
+  padding: 0.2em 0.5em;
+}
+
+.object tbody.hidden:not(.toggle) {
+  display: none;
+}
+
+.object tbody:not(.toggle) tr>:first-child {
+  vertical-align: top;
+}
+
+.object tbody.toggle td {
+  text-align: center;
+}
+
+
+.object tbody.toggle td:after {
+  content: '[-]';
+  float: right;
+}
+
+.object tbody.toggle.hidden td:after {
+  content: '[+]';
+}
