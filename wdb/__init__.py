@@ -121,14 +121,10 @@ class MetaWdbRequest(type):
         except ImportError:
             pass
         super(MetaWdbRequest, cls).__init__(name, bases, dict)
-        cls._last_inst = None
-
-    def __call__(cls, *args, **kwargs):
-        cls._last_inst = super(MetaWdbRequest, cls).__call__(*args, **kwargs)
-        return cls._last_inst
+        MetaWdbRequest._last_inst = None
 
     def tf(cls, frame=None):
-        self = cls._last_inst
+        self = MetaWdbRequest._last_inst
         log.info('Setting trace')
         if not self:
             if MetaWdbRequest.started:
@@ -158,7 +154,7 @@ class Wdb(object):
         with open(os.path.join(RES_PATH, '500.html')) as f:
             return f.read()
 
-    def __init__(self, app, start_disabled=False, theme='dark'):
+    def __init__(self, app, start_disabled=not False, theme='dark'):
         self.app = app
         self.theme = theme
         self.enabled = not start_disabled
@@ -229,6 +225,7 @@ class Wdb(object):
                             trace=traceback.format_exc())
                     except:
                         pass
+                MetaWdbRequest._last_inst = None
 
             return wsgi_default(environ, start_response)
 
@@ -265,6 +262,7 @@ class WdbRequest(object, Bdb):
     __metaclass__ = MetaWdbRequest
 
     def __init__(self, port, skip=None):
+        MetaWdbRequest._last_inst = self
         try:
             Bdb.__init__(self, skip=skip)
         except TypeError:
@@ -310,6 +308,7 @@ class WdbRequest(object, Bdb):
                 hasattr(appiter, 'close') and appiter.close()
                 sys.settrace(None)
                 self.ws.force_close()
+            MetaWdbRequest._last_inst = None
         return wsgi_with_trace(environ, start_response)
 
     def get_file(self, filename, html_escape=True):
@@ -326,15 +325,9 @@ class WdbRequest(object, Bdb):
             except:
                 log.exception('Ping Failed')
                 self.connected = False
-        tries = 0
-        while not self.connected and tries < 10:
-            tries += 1
-            try:
-                self.ws.wait_for_connect()
-            except WsError:
-                log.exception('Unable to connect')
-            else:
-                self.connected = True
+        if not self.connected:
+            self.ws.wait_for_connect()
+            self.connected = True
 
     def get_trace(self, frame, tb, w_code=None):
         frames = []
