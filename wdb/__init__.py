@@ -154,7 +154,7 @@ class Wdb(object):
         with open(os.path.join(RES_PATH, '500.html')) as f:
             return f.read()
 
-    def __init__(self, app, start_disabled=not False, theme='dark'):
+    def __init__(self, app, start_disabled=False, theme='dark'):
         self.app = app
         self.theme = theme
         self.enabled = not start_disabled
