@@ -609,21 +609,21 @@ register_handlers = ->
     )
 
     $("#sourcecode").on('click', '.linenums li', (e) ->
-        if this is e.target
+        if this is e.target and e.pageX < $(this).offset().left
             lno = $(@).parent().find('li').index(@) + 1
             toggle_break(lno)
     )
 
     $("#sourcecode").on('mouseup', 'span', (e) ->
         if e.which == 2
-            send 'Dump|' + $(@).text()
+            send 'Dump|' + $(@).text().trim()
     )
 
     $(document).on('keydown', (e) ->
         if e.keyCode == 13
             sel = document.getSelection().toString()
             if sel
-                send 'Dump|' + sel
+                send 'Dump|' + sel.trim()
     )
         
     $('#eval').on('input', ->

@@ -827,14 +827,14 @@
     });
     $("#sourcecode").on('click', '.linenums li', function(e) {
       var lno;
-      if (this === e.target) {
+      if (this === e.target && e.pageX < $(this).offset().left) {
         lno = $(this).parent().find('li').index(this) + 1;
         return toggle_break(lno);
       }
     });
     $("#sourcecode").on('mouseup', 'span', function(e) {
       if (e.which === 2) {
-        return send('Dump|' + $(this).text());
+        return send('Dump|' + $(this).text().trim());
       }
     });
     $(document).on('keydown', function(e) {
@@ -842,7 +842,7 @@
       if (e.keyCode === 13) {
         sel = document.getSelection().toString();
         if (sel) {
-          return send('Dump|' + sel);
+          return send('Dump|' + sel.trim());
         }
       }
     });

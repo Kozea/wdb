@@ -164,6 +164,8 @@ class Wdb(object):
         path = environ.get('PATH_INFO', '')
         if path in ('/__wdb/on', '/__wdb/off'):
             self.enabled = path.endswith('on')
+            if not self.enabled:
+                MetaWdbRequest._last_inst = None
             start_response('200 OK', [('Content-Type', 'text/html')])
             return ('<h1>Wdb is now %s</h1>' % (
                 '<span style="color: green">ON</span>' if self.enabled else
@@ -225,7 +227,6 @@ class Wdb(object):
                             trace=traceback.format_exc())
                     except:
                         pass
-                MetaWdbRequest._last_inst = None
 
             return wsgi_default(environ, start_response)
 
@@ -308,7 +309,6 @@ class WdbRequest(object, Bdb):
                 hasattr(appiter, 'close') and appiter.close()
                 sys.settrace(None)
                 self.ws.force_close()
-            MetaWdbRequest._last_inst = None
         return wsgi_with_trace(environ, start_response)
 
     def get_file(self, filename, html_escape=True):
@@ -471,12 +471,14 @@ class WdbRequest(object, Bdb):
                 globals_ = dict(stack[current_index][0].f_globals)
                 try:
                     thing = eval(data, globals_, locals_[current_index])
-                except:
-                    continue
-
-                self.send('Dump|%s' % dump({
-                    'for': escape(repr(thing)),
-                    'val': dmp(thing)}))
+                except Exception as e:
+                    self.send('Echo|%s' % dump({
+                        'for': escape(data),
+                        'val': '%s: %s' % (e.__class__.__name__,  str(e))}))
+                else:
+                    self.send('Dump|%s' % dump({
+                        'for': escape(u'%s ⟶ %s ' % (data, repr(thing))),
+                        'val': dmp(thing)}))
 
             elif cmd == 'Trace':
                 self.send('Trace|%s' % dump({
@@ -529,6 +531,11 @@ class WdbRequest(object, Bdb):
                 break
 
             elif cmd in ('TBreak', 'Break'):
+                def fail(message):
+                    self.send('Echo|%s' % dump({
+                        'for': escape('Break on %s failed' % data),
+                        'val': message}))
+
                 if ':' in data:
                     fn, lno = data.split(':')
                 else:
@@ -538,8 +545,26 @@ class WdbRequest(object, Bdb):
                     lno, cond = lno.split(',')
                     cond = cond.lstrip()
 
-                lno = int(lno)
-                rv = self.set_break(fn, lno, int(cmd == 'TBreak'), cond)
+                try:
+                    lno = int(lno)
+                except:
+                    fail('Wrong breakpoint format must be [file:]lno[,cond].')
+                    continue
+
+                line = getline(
+                    fn, lno, stack[current_index][0].f_globals)
+                if not line:
+                    fail('Line does not exist')
+                    continue
+                line = line.strip()
+                if ((not line or (line[0] == '#') or
+                     (line[:3] == '"""') or
+                     line[:3] == "'''")):
+                    fail('Blank line or comment')
+                    continue
+
+                first_rv = rv = self.set_break(
+                    fn, lno, int(cmd == 'TBreak'), cond)
                 if rv is not None:
                     for path in sys.path:
                         rv = self.set_break(
@@ -556,9 +581,7 @@ class WdbRequest(object, Bdb):
                     else:
                         self.send('BreakSet|%s' % dump({}))
                 else:
-                    self.send('Log|%s' % dump({
-                        'message': rv
-                    }))
+                    fail(first_rv)
 
             elif cmd == 'Unbreak':
                 lno = int(data)
