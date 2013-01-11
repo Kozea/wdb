@@ -53,38 +53,8 @@ import dis
 RES_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)), 'resources')
 
-REPR = re.compile(escape(r'<[a-zA-Z0-9\s.\-_\'",\\]*\sat\s0x([0-9a-f]+)>'))
 log = get_color_logger('wdb')
 log.setLevel(30)
-
-
-def reverse_id(id_):
-    for obj in get_objects():
-        if id(obj) == id_:
-            return obj
-    raise KeyError('id not found in gc')
-
-
-def dmp(thing):
-    return {
-        escape(key): {
-            'val': escape(repr(getattr(thing, key))),
-            'type': type(getattr(thing, key)).__name__}
-        for key in dir(thing)
-    }
-
-
-@contextmanager
-def capture_output():
-    stdout, stderr = sys.stdout, sys.stderr
-    sys.stdout, sys.stderr = StringIO(), StringIO()
-    out, err = [], []
-    try:
-        yield out, err
-    finally:
-        out.extend(sys.stdout.getvalue().splitlines())
-        err.extend(sys.stderr.getvalue().splitlines())
-        sys.stdout, sys.stderr = stdout, stderr
 
 
 class ReprEncoder(JSONEncoder):
@@ -93,19 +63,7 @@ class ReprEncoder(JSONEncoder):
 
 
 def dump(o):
-    out = dumps(o, cls=ReprEncoder, sort_keys=True)
-
-    def repr_handle(match):
-        repr_ = match.group(0)
-        try:
-            id_ = int('0x' + match.group(1), 16)
-        except:
-            id_ = 0
-        return (
-            '<a href="%d" class="inspect">%s</a>' % (id_, repr_)
-        ).replace('\\"', '"').replace('"', '\\"')
-
-    return REPR.sub(repr_handle, out)
+    return dumps(o, cls=ReprEncoder, sort_keys=True)
 
 
 class WdbOff(Exception):
@@ -264,6 +222,8 @@ class WdbRequest(object, Bdb):
 
     def __init__(self, port, skip=None):
         MetaWdbRequest._last_inst = self
+        self.obj_cache = {}
+
         try:
             Bdb.__init__(self, skip=skip)
         except TypeError:
@@ -278,6 +238,75 @@ class WdbRequest(object, Bdb):
                 args = bp.file, bp.line, bp.temporary, bp.cond
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
+
+    def better_repr(self, obj):
+        try:
+            if isinstance(obj, basestring):
+                raise TypeError()
+            iter(obj)
+        except TypeError:
+            self.obj_cache[id(obj)] = obj
+            return '<a href="%d" class="inspect">%s</a>' % (
+                id(obj), escape(repr(obj)))
+
+        if isinstance(obj, dict):
+            if type(obj) != dict:
+                dict_repr = type(obj).__name__ + '({'
+                closer = '})'
+            else:
+                dict_repr = '{'
+                closer = '}'
+            dict_repr += ', '.join([
+                repr(key) + ': ' + self.better_repr(val)
+                for key, val in obj.items()])
+
+            dict_repr += closer
+            return dict_repr
+
+        if type(obj) == list:
+            iter_repr = '['
+            closer = ']'
+        elif type(obj) == set:
+            iter_repr = '{'
+            closer = '}'
+        elif type(obj) == tuple:
+            iter_repr = '('
+            closer = ')'
+        else:
+            iter_repr = escape(obj.__class__.__name__) + '(['
+            closer = '])'
+
+        iter_repr += ', '.join([self.better_repr(val) for val in obj])
+        iter_repr += closer
+
+        return iter_repr
+
+    @contextmanager
+    def capture_output(self):
+        self.hooked = ''
+
+        def display_hook(obj):
+            # That's some dirty hack
+            self.hooked += self.better_repr(obj)
+
+        stdout, stderr, d_hook = sys.stdout, sys.stderr, sys.displayhook
+        sys.stdout, sys.stderr, sys.displayhook = (
+            StringIO(), StringIO(), display_hook)
+        out, err = [], []
+        try:
+            yield out, err
+        finally:
+            out.extend(sys.stdout.getvalue().splitlines())
+            err.extend(sys.stderr.getvalue().splitlines())
+            sys.stdout, sys.stderr, sys.displayhook = stdout, stderr, d_hook
+
+    def dmp(self, thing):
+        return {
+            escape(key): {
+                'val': self.better_repr(getattr(thing, key)),
+                'type': type(getattr(thing, key)).__name__}
+            for key in dir(thing)
+        }
 
     def make_web_socket(self, port):
         log.info('Creating WebSocket')
@@ -460,12 +489,12 @@ class WdbRequest(object, Bdb):
 
             elif cmd == 'Inspect':
                 try:
-                    thing = reverse_id(int(data))
+                    thing = self.obj_cache.get(int(data))
                 except:
                     continue
                 self.send('Dump|%s' % dump({
                     'for': escape(repr(thing)),
-                    'val': dmp(thing)}))
+                    'val': self.dmp(thing)}))
 
             elif cmd == 'Dump':
                 globals_ = dict(stack[current_index][0].f_globals)
@@ -478,7 +507,7 @@ class WdbRequest(object, Bdb):
                 else:
                     self.send('Dump|%s' % dump({
                         'for': escape(u'%s ⟶ %s ' % (data, repr(thing))),
-                        'val': dmp(thing)}))
+                        'val': self.dmp(thing)}))
 
             elif cmd == 'Trace':
                 self.send('Trace|%s' % dump({
@@ -490,16 +519,19 @@ class WdbRequest(object, Bdb):
                 # Hack for function scope eval
                 globals_.update(locals_[current_index])
                 globals_.setdefault('_pprint', pprint)
-                globals_.setdefault('_dump', dmp)
-                with capture_output() as (out, err):
+                with self.capture_output() as (out, err):
                     try:
                         compiled_code = compile(data, '<stdin>', 'single')
                         exec compiled_code in globals_, locals_[current_index]
                     except Exception:
                         type_, value, tb = exc_info()
-                        print '%s: %s' % (type_.__name__, str(value))
+                        self.hooked = '<a title="%s">%s: %s</a>' % (
+                            escape(traceback.format_exc().replace('"', '\'')),
+                            type_.__name__, str(value))
                 self.send('Print|%s' % dump({
-                    'result': escape('\n'.join(out) + '\n'.join(err))
+                    'for': escape(data),
+                    'result': self.hooked + escape(
+                        '\n'.join(out) + '\n'.join(err))
                 }))
 
             elif cmd == 'Ping':

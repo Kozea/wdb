@@ -95,8 +95,9 @@ ol.linenums li.ask-breakpoint {
   color: yellow;
 }
 
-a.inspect:after {
-  color: #aaa;
+a.inspect {
+  background-color: #181818;
+  border: 1px solid #111;
 }
 
 a.inspect:hover {
@@ -198,4 +199,5 @@ a.inspect:hover {
 .object .attr {
   background-color: #181818;
 }
+
 

@@ -129,10 +129,6 @@ a.inspect {
   text-decoration: none;
 }
 
-a.inspect:after {
-  content: ' {…}';
-}
-
 .long {
   display: none;
 }
@@ -177,3 +173,4 @@ a.inspect:after {
 .object tbody.toggle.hidden td:after {
   content: '[+]';
 }
+

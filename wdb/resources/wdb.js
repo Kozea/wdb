@@ -525,7 +525,7 @@
     var snippet;
     $('#completions table').empty();
     snippet = $('#eval').val();
-    code($('#scrollback'), snippet, ['prompted']);
+    code($('#scrollback'), data["for"], ['prompted']);
     code($('#scrollback'), data.result);
     $('#eval').val('').attr('data-index', -1).attr('rows', 1);
     return termscroll();
