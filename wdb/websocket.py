@@ -188,8 +188,11 @@ class WebSocket(object):
 
     def force_close(self):
         log.debug("Force closing")
-        self.sock.shutdown(1)
-        self.sock.close()
+        try:
+            self.sock.shutdown(1)
+            self.sock.close()
+        except:
+            pass
 
     def _recv(self):
         try:

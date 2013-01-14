@@ -47,7 +47,7 @@ except ImportError:
     from StringIO  import StringIO
 import os
 import sys
-import re
+import time
 import dis
 
 RES_PATH = os.path.join(
@@ -139,7 +139,8 @@ class Wdb(object):
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
         elif environ.get('HTTP_X_DEBUGGER', '').startswith('WDB'):
-            port = int(environ['HTTP_X_DEBUGGER'].split('-')[1])
+            ports = map(
+                int, environ['HTTP_X_DEBUGGER'].split('-')[1].split(','))
             log.debug('Sending real page (%s) with exception'
                       ' handling for %s' % (
                           environ.get('HTTP_ACCEPT', ''), path))
@@ -150,7 +151,7 @@ class Wdb(object):
                     WdbRequest.tf()
                     yield "Done"
                 app = set_trace
-            return WdbRequest(port).wsgi_trace(
+            return WdbRequest(ports).wsgi_trace(
                 app, environ, start_response)
         else:
             log.debug("Serving %s" % path)
@@ -220,7 +221,7 @@ class WdbRequest(object, Bdb):
     """Wdb debugger main class"""
     __metaclass__ = MetaWdbRequest
 
-    def __init__(self, port, skip=None):
+    def __init__(self, ports, skip=None):
         MetaWdbRequest._last_inst = self
         self.obj_cache = {}
 
@@ -230,7 +231,7 @@ class WdbRequest(object, Bdb):
             Bdb.__init__(self)
         self.begun = False
         self.connected = False
-        self.make_web_socket(port)
+        self.make_web_socket(ports)
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -308,9 +309,15 @@ class WdbRequest(object, Bdb):
             for key in dir(thing)
         }
 
-    def make_web_socket(self, port):
+    def make_web_socket(self, ports):
         log.info('Creating WebSocket')
-        self.ws = WebSocket('0.0.0.0', port)
+        for port in ports:
+            self.ws = WebSocket('0.0.0.0', port)
+            if self.ws.status == 'OK':
+                return
+            time.sleep(.100)
+
+        raise WsError('No port could be opened')
 
     def wsgi_trace(self, app, environ, start_response):
         def wsgi_with_trace(environ, start_response):

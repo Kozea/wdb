@@ -23,7 +23,12 @@ started = false
 stop = false
 ws = null
 cwd = null
-__ws_port = 10000 + parseInt(Math.random() * 50000)
+get_random_port = () ->
+    10000 + parseInt(Math.random() * 50000)
+__ws_ports = []
+for i in [0..5]
+    __ws_ports.push(get_random_port())
+__ws_port_index = 0
 cmd_hist = {}
 session_cmd_hist = {}
 
@@ -99,15 +104,17 @@ $.SyntaxHighlighter.init(
 make_ws = ->
     # Open a websocket in case of request break
     console.log 'Opening new socket'
-    new_ws = new WebSocket "ws://" + document.location.hostname + ":" + __ws_port
+    new_ws = new WebSocket "ws://" + document.location.hostname + ":" + __ws_ports[__ws_port_index]
     new_ws.onclose = (m) =>
-        console.log "close #{m}"
+        console.log "WebSocket closed #{m}"
         if not stop
-            setTimeout (=>
-                @ws = ws = make_ws()), 1000
+            __ws_port_index++;
+            if __ws_port_index < __ws_ports.length
+                setTimeout (=>
+                    @ws = ws = make_ws()), 100
 
     new_ws.onerror = (m) =>
-        console.log "WebSocket error", m
+        console.log "WebSocket error #{m}"
         if not stop
             setTimeout (=>
                 @ws = ws = make_ws()), 1000
@@ -186,10 +193,10 @@ $ =>
             data: __ws_post.data,
             contentType: __ws_post.enctype,
             traditional: true,
-            headers: 'X-Debugger': 'WDB-' + __ws_port)
+            headers: 'X-Debugger': 'WDB-' + __ws_ports.join(','))
     else
         xhr = $.ajax(location.href,
-            headers: 'X-Debugger': 'WDB-' + __ws_port)
+            headers: 'X-Debugger': 'WDB-' + __ws_ports.join(','))
 
     xhr.done((data) => end(data))
        .fail (data) =>
