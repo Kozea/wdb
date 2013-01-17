@@ -109,11 +109,19 @@ As of now the following special commands are supported during breakpoint:
    * `.r or [Ctrl] + [↑] or [F9]   `: Step out (Return)
    * `.c or [Ctrl] + [←] or [F8]   `: Continue
    * `.u or [F7]                   `: Until (Next over loops)
+   * `.j lineno                    `: Jump to lineno (Must be at bottom frame and in the same function)
    * `.b [file:]lineno[, condition]`: Break on file at lineno (file is the current file by default)
    * `.t [file:]lineno[, condition]`: Same as b but break only once
-   * `.j lineno                    `: Jump to lineno (Must be at bottom frame and in the same function)
+   * `.f                           `: Echo all typed commands in the current debugging session
+   * `.d expression                `: Dump the result of expression in a table
    * `.q                           `: Quit
+   * `.h                           `: Get some help
+   * `expr !> file                 `: Write the result of expr in file
+   * `!< file                      `: Eval the content of file
+   * `[Enter]                      `: Eval the current selected text in page, useful to eval code in the source
 
+You can also eval a variable in the source by middle clicking on it.
+You can add/remove a breakpoint by clicking on the line number.
 NB: Hotkeys with arrows are purposedly not triggered in the eval prompt to avoid conflicts when typing.
 
 Author

@@ -174,3 +174,6 @@ a.inspect {
   content: '[+]';
 }
 
+.nogood, .nogood > .pln, .nogood > .typ {
+  color: red !important;
+}

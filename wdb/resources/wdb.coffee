@@ -80,7 +80,6 @@ else
                 rq = @wdbdb.transaction([type], 'readwrite')
                 os = rq.objectStore(type)
                 os.put(obj)
-                rq.oncomplete = (event) -> console.log('Set')
                 rq.onerror = (event) -> console.log('Add error', event)
                 null
 
@@ -366,13 +365,13 @@ execute = (snippet) ->
             when 'r' then cmd 'Return'
             when 'c' then cmd 'Continue'
             when 'u' then cmd 'Until'
-            when 'q' then cmd 'Quit'
-            when 'p' then cmd 'Eval|_pprint(' + data + ')'
-            when 'd' then cmd 'Dump|' + data
             when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
             when 'f' then print_hist session_cmd_hist[filename]
+            when 'd' then cmd 'Dump|' + data
+            when 'q' then cmd 'Quit'
+            when 'h' then print_help()
         return
     else if snippet.indexOf('?') == 0
         cmd 'Dump|' + snippet.slice(1).trim()
@@ -385,7 +384,25 @@ execute = (snippet) ->
         send("Eval|#{snippet}")
 
 print_hist = (hist) ->
-    print result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
+    print for: 'History', result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
+
+print_help = ->
+    print for: 'Supported commands', result: '''
+.s or [Ctrl] + [↓] or [F11]  : Step into
+.n or [Ctrl] + [→] or [F10]  : Step over (Next)
+.r or [Ctrl] + [↑] or [F9]   : Step out (Return)
+.c or [Ctrl] + [←] or [F8]   : Continue
+.u or [F7]                   : Until (Next over loops)
+.j lineno                    : Jump to lineno (Must be at bottom frame and in the same function)
+.b [file:]lineno[, condition]: Break on file at lineno (file is the current file by default)
+.t [file:]lineno[, condition]: Same as b but break only once
+.f                           : Echo all typed commands in the current debugging session
+.d expression                : Dump the result of expression in a table
+.q                           : Quit
+.h                           : Get some help
+expr !> file                 : Write the result of expr in file
+!< file                      : Eval the content of file
+[Enter]                      : Eval the current selected text in page, useful to eval code in the source'''
 
 termscroll = ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
