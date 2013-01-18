@@ -309,12 +309,12 @@ class WdbRequest(object, Bdb):
             sys.stdout, sys.stderr = stdout, stderr
 
     def dmp(self, thing):
-        return {
-            escape(key): {
+        return dict(
+            (escape(key), {
                 'val': self.better_repr(getattr(thing, key)),
-                'type': type(getattr(thing, key)).__name__}
+                'type': type(getattr(thing, key)).__name__})
             for key in dir(thing)
-        }
+        )
 
     def make_web_socket(self, ports):
         log.info('Creating WebSocket')
