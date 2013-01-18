@@ -6,11 +6,13 @@ wdb
 Description
 -----------
 
-**wdb** is as for now a proof of concept of an independant web debugger for wsgi project (implemented as a wsgi middleware).
+**wdb** is a complete web debugger for wsgi project (implemented as a wsgi middleware).
 
 Unlike other web debuggers, **wdb** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
 
 This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occured.
+
+In other words it's an enhanced version of pdb directly in your browser with nice features.
 
 
 How is it possible ?
@@ -19,16 +21,6 @@ How is it possible ?
 *WebSockets*! 
 All debug information between web page and web server transits throught a websocket opened on a random port.
 Server request processing is blocked by the websocket and then resumed when the debugging is over.
-
-
-Warning
--------
-
-This is still far from working perfectly, it has a lot of known issues and can easily break your application but the in page debugging does work. You probably will have to kill everything and start again once something went wrong.
-
-*Random disclaimer warning*
-
-This python thing will probably eat your cat.
 
 
 Instalation:
@@ -140,7 +132,7 @@ This library is licensed under GPLv3
 wdb - An improbable web debugger through WebSockets
 
 
-    wdb Copyright (C) 2012  Florian Mounier, Kozea
+    wdb Copyright (C) 2013  Florian Mounier, Kozea
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
