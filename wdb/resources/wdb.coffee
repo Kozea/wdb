@@ -23,6 +23,7 @@ started = false
 stop = false
 ws = null
 cwd = null
+backsearch = null
 get_random_port = () ->
     10000 + parseInt(Math.random() * 50000)
 __ws_ports = []
@@ -334,18 +335,26 @@ code = (parent, code, classes=[]) ->
             $(@).append $('<span class="long">').text(txt.substr(128))
     code
 
-last_cmd = null
-execute = (snippet) ->
-    snippet = snippet.trim()
+
+historize = (snippet) ->
     filename = $('.selected .tracefile').text()
     if not (filename of cmd_hist)
         cmd_hist[filename] = []
     if not (filename of session_cmd_hist)
         session_cmd_hist[filename] = []
+
+    while (index = cmd_hist[filename].indexOf(snippet)) != -1
+        cmd_hist[filename].splice(index, 1)
+
     cmd_hist[filename].unshift snippet
     session_cmd_hist[filename].unshift snippet
 
     set('cmd')(name: filename, history: cmd_hist[filename])
+
+last_cmd = null
+execute = (snippet) ->
+    snippet = snippet.trim()
+    historize snippet
 
     cmd = (cmd) ->
             send cmd
@@ -375,7 +384,7 @@ execute = (snippet) ->
         return
     else if snippet.indexOf('?') == 0
         cmd 'Dump|' + snippet.slice(1).trim()
-        $('#completions table').empty()
+        suggest_stop()
         return
     else if snippet == '' and last_cmd
         cmd last_cmd
@@ -408,7 +417,7 @@ termscroll = ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
 
 print = (data) ->
-    $('#completions table').empty()
+    suggest_stop()
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result)
@@ -519,8 +528,34 @@ suggest = (data) ->
     $comp.append($tbody)
     termscroll()
 
+suggest_stop = ->
+    $('#completions table').empty()
+
 log = (data) ->
     console.log data.message
+
+searchback = ->
+    suggest_stop()
+    index = backsearch
+    val = $('#eval').val()
+    for h in cmd_hist[$('.selected .tracefile').text()]
+        re = new RegExp('(' + val + ')', 'gi')
+        if re.test(h)
+            index--
+            if index == 0
+                $('#backsearch').html(h.replace(re, '<span class="backsearched">$1</span>'))
+                return
+    if backsearch == 1
+        searchback_stop()
+        return
+    backsearch = Math.max(backsearch - 1, 1)
+
+searchback_stop = (validate) ->
+    if validate
+        $('#eval').val($('#backsearch').text())
+    $('#backsearch').html('')
+    backsearch = null
+
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
@@ -542,22 +577,49 @@ register_handlers = ->
 
     $('#eval').on 'keydown', (e) ->
         $eval = $(@)
+        if e.altKey and e.keyCode == 82 and backsearch # R
+            backsearch = Math.max(backsearch - 1, 1)
+            searchback()
+            return false
+
         if e.ctrlKey
-            e.stopPropagation()
-            return
-        if e.keyCode == 13
+            if e.keyCode == 82 # R
+                if backsearch is null
+                    backsearch = 1
+                else
+                    if e.shiftKey
+                        backsearch = Math.max(backsearch - 1, 1)
+                    else
+                        backsearch++
+                searchback()
+                return false
+            else if e.keyCode == 67 # C
+                searchback_stop()
+            else 
+                e.stopPropagation()
+                return
+
+        if e.keyCode == 13 # Enter
+            if backsearch
+                searchback_stop true
+                return false
             if $('#completions table td.active').length and not $('#completions table td.complete').length
-                $('#completions table').empty()
+                suggest_stop()
                 return false
             $eval = $(@)
             if not e.shiftKey
                 execute $eval.val()
-                false
+                return false
             else
                 $eval.attr('rows', parseInt($eval.attr('rows')) + 1)
                 termscroll()
+
+        else if e.keyCode == 27 # Escape
+            suggest_stop()
+            searchback_stop()
+            return false
             
-        else if e.keyCode == 9
+        else if e.keyCode == 9 # Tab
             if e.shiftKey
                 $eval = $(@)
                 txtarea = $eval.get(0)
@@ -568,7 +630,8 @@ register_handlers = ->
                 else
                     $eval.val($eval.val() + '    ')
                 return false
-
+            if backsearch
+                return false
             $tds = $('#completions table td')
             $active = $tds.filter('.active')
             if $tds.length
@@ -587,7 +650,8 @@ register_handlers = ->
                 $eval.val($eval.data().root + base + completion)
                 $('#comp-desc').text($active.attr('title'))
                 termscroll()
-            false
+            return false
+
         else if e.keyCode == 38  # Up
             $eval = $(@)
             filename = $('.selected .tracefile').text()
@@ -601,8 +665,8 @@ register_handlers = ->
                         $eval.val(to_set)
                             .attr('data-index', index)
                             .attr('rows', to_set.split('\n').length)
-                        false
-        
+                        return false
+
         else if e.keyCode == 40  # Down
             $eval = $(@)
             filename = $('.selected .tracefile').text()
@@ -617,7 +681,7 @@ register_handlers = ->
                         $eval.val(to_set)
                             .attr('data-index', index)
                             .attr('rows', to_set.split('\n').length)
-                        false
+                        return false
            
 
     $("#scrollback").on('click', 'a.inspect', ->
@@ -639,22 +703,35 @@ register_handlers = ->
     )
 
     $("#sourcecode").on('mouseup', 'span', (e) ->
-        if e.which == 2
-            send 'Dump|' + $(@).text().trim()
+        if e.which == 2 # Middle
+            target = $(@).text().trim()
+            historize target
+            send 'Dump|' + target
     )
 
     $(document).on('keydown', (e) ->
         if e.keyCode == 13
-            sel = document.getSelection().toString()
+            sel = document.getSelection().toString().trim()
             if sel
-                send 'Dump|' + sel.trim()
+                historize sel
+                send 'Dump|' + sel
     )
         
     $('#eval').on('input', ->
         txt = $(@).val()
+        if backsearch
+            if not txt
+                searchback_stop()
+            else
+                backsearch = 1
+                searchback()
+            return
         hist = session_cmd_hist[$('.selected .tracefile').text()] or []
         if txt and txt[0] != '.'
             send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)
         else
-            $('#completions table').empty()
+            suggest_stop()
+    ).on('blur', ->
+        searchback_stop()
+        # suggest_stop()
     )

@@ -119,6 +119,8 @@ As of now the following special commands are supported during breakpoint:
    * `expr !> file                 `: Write the result of expr in file
    * `!< file                      `: Eval the content of file
    * `[Enter]                      `: Eval the current selected text in page, useful to eval code in the source
+   * `[Ctrl] + [r]                 `: Search back in command history
+   * `[Ctrl] + [Shift] + [r]       `: Search forward in command history
 
 You can also eval a variable in the source by middle clicking on it.
 You can add/remove a breakpoint by clicking on the line number.

@@ -138,7 +138,7 @@ a
   color: blue;
 }
 
-#comp-desc {
+#comp-desc, #backsearch {
   color: blue;
   font-style: italic;
 }
@@ -186,4 +186,5 @@ a
 .object .attr {
   background-color: rgba(0, 125, 255, .1);
 }
+
 

@@ -143,7 +143,7 @@ a.inspect:hover {
   color: #cc6666;
 }
 
-#comp-desc {
+#comp-desc, #backsearch {
   color: #81a2be;
   font-style: italic;
 }
@@ -199,5 +199,6 @@ a.inspect:hover {
 .object .attr {
   background-color: #181818;
 }
+
 
 

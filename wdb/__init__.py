@@ -719,6 +719,7 @@ class WdbRequest(object, Bdb):
                     try:
                         completions = script.complete()
                     except:
+                        log.exception('Completion failed')
                         self.send('Log|%s' % dump({
                             'message': 'Completion failed for %s' %
                             '\n'.join(reversed(segments))
@@ -750,6 +751,8 @@ class WdbRequest(object, Bdb):
                 else:
                     log.warn('Unknown command %s' % cmd)
 
+            except BdbQuit:
+                raise
             except Exception:
                 try:
                     exc = self.handle_exc()
