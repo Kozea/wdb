@@ -7,7 +7,7 @@ wdb
 
 from setuptools import setup, find_packages
 
-VERSION = "0.9"
+VERSION = "0.9.1"
 
 
 options = dict(
@@ -22,6 +22,7 @@ options = dict(
     platforms="Any",
     packages=find_packages(),
     install_requires=["log_colorizer", "jedi"],
+    package_data={'wdb': ['resources/*']},
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
