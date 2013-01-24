@@ -21,6 +21,7 @@ options = dict(
     license="GPLv3",
     platforms="Any",
     packages=find_packages(),
+    package_data={'wdb/resources': ['*']},
     install_requires=["log_colorizer", "jedi"],
     classifiers=[
         "Development Status :: 3 - Alpha",
