@@ -30,10 +30,24 @@ Instalation:
     $ pip install wdb
 ```
 
+
+Try it already
+--------------
+
+Now type:
+
+```
+    $ pip install flask
+    $ python -m wdb.test
+```
+
+And open this <http://localhost:1984/> in your browser. It will stop at a division by zero error.
+
+You can also go to <http://localhost:1984/wtf> and try step-by-step debugging right in your browser.
+
+
 Usage
 -----
-
-To try it you can simply run the `run.py` script which is a flask application which will be accessible at <http://localhost:1984/>,  <http://localhost:1984/wtf> for step by step testing.
 
 To try it on another wsgi application, use the `Wdb` middleware:
 
@@ -119,10 +133,11 @@ You can add/remove a breakpoint by clicking on the line number.
 
 NB: Hotkeys with arrows are purposedly not triggered in the eval prompt to avoid conflicts when typing.
 
+
 It it sloooow
 -------------
 
-If wdb slows down too much you application (tracing all the things takes time), you can start it disabled with:
+If wdb slows down too much your application (tracing all the things takes time), you can start it disabled with:
 
 ```python
     my_app = Wdb(wsgi_app, start_disabled=True)
@@ -132,8 +147,8 @@ Now when you will encounter an exception or a set_trace, a page will appear aski
 
 Manual activation/deactivation can be done anytime with:
 
-* http://yourserver/__wdb/on
-* http://yourserver/__wdb/off
+* <http://yourserver/__wdb/on>
+* <http://yourserver/__wdb/off>
 
 
 Where's the white theme ?
@@ -146,6 +161,12 @@ Here:
 
 But it is less polished than the dark one.
 If you like writing css feel free to make your own and pull request it to me.
+
+
+Code completion works ?
+-----------------------
+
+Yay ! It is based on [jedi](https://github.com/davidhalter/jedi).
 
 
 Contribute
