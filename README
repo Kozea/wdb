@@ -116,7 +116,43 @@ As of now the following special commands are supported during breakpoint:
 
 You can also eval a variable in the source by middle clicking on it.
 You can add/remove a breakpoint by clicking on the line number.
+
 NB: Hotkeys with arrows are purposedly not triggered in the eval prompt to avoid conflicts when typing.
+
+It it sloooow
+-------------
+
+If wdb slows down too much you application (tracing all the things takes time), you can start it disabled with:
+
+```python
+    my_app = Wdb(wsgi_app, start_disabled=True)
+```
+
+Now when you will encounter an exception or a set_trace, a page will appear asking you if you want to reload the page with wdb enabled.
+
+Manual activation/deactivation can be done anytime with:
+
+* http://yourserver/__wdb/on
+* http://yourserver/__wdb/off
+
+
+Where's the white theme ?
+-------------------------
+
+Here:
+```python
+    my_app = Wdb(wsgi_app, theme='light')
+```
+
+But it is less polished than the dark one.
+If you like writing css feel free to make your own and pull request it to me.
+
+
+Contribute
+----------
+
+I know it is not very well documented and all but contributions are more than welcomed, use the fork luke !
+
 
 Author
 ------
