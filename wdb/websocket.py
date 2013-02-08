@@ -175,7 +175,7 @@ class WebSocket(object):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.handshaken = False
-            self.sock.settimeout(1)
+            # self.sock.settimeout(1)
             self.sock.bind((self.host, self.port))
             self.sock.listen(0)
         except socket.error:
