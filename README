@@ -63,8 +63,9 @@ To try it on another wsgi application, use the `Wdb` middleware:
 ```python
     from wdb import Wdb
     app = Flask(__name__)
+    app.debug = True
     app.wsgi_app = Wdb(app.wsgi_app)
-    app.run()
+    app.run(use_debugger=False) # Disable builtin Werkzeug debugger
 ```
 
 ### Using django:
