@@ -241,11 +241,23 @@ class WdbRequest(object, Bdb):
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
 
-    def safe_repr(self, o):
+    def safe_repr(self, obj):
         try:
-            return repr(o)
+            return repr(obj)
         except Exception as e:
             return '??? Broken repr (%s)' % e
+
+    def safe_better_repr(self, obj):
+        try:
+            rv = self.better_repr(obj)
+        except Exception:
+            rv = None
+        if rv:
+            return rv
+
+        self.obj_cache[id(obj)] = obj
+        return '<a href="%d" class="inspect">%s</a>' % (
+            id(obj), escape(repr(obj)))
 
     def better_repr(self, obj):
         if isinstance(obj, dict):
@@ -256,7 +268,7 @@ class WdbRequest(object, Bdb):
                 dict_repr = '{'
                 closer = '}'
             dict_repr += ', '.join([
-                self.safe_repr(key) + ': ' + self.better_repr(val)
+                self.safe_repr(key) + ': ' + self.safe_better_repr(val)
                 for key, val in obj.items()])
 
             dict_repr += closer
@@ -279,14 +291,9 @@ class WdbRequest(object, Bdb):
                 iter_repr = escape(obj.__class__.__name__) + '(['
                 closer = '])'
 
-            iter_repr += ', '.join([self.better_repr(val) for val in obj])
+            iter_repr += ', '.join([self.safe_better_repr(val) for val in obj])
             iter_repr += closer
-
             return iter_repr
-
-        self.obj_cache[id(obj)] = obj
-        return '<a href="%d" class="inspect">%s</a>' % (
-            id(obj), escape(repr(obj)))
 
     @contextmanager
     def capture_output(self, with_hook=True):
@@ -294,7 +301,7 @@ class WdbRequest(object, Bdb):
 
         def display_hook(obj):
             # That's some dirty hack
-            self.hooked += self.better_repr(obj)
+            self.hooked += self.safe_better_repr(obj)
 
         stdout, stderr = sys.stdout, sys.stderr
         if with_hook:
@@ -316,7 +323,7 @@ class WdbRequest(object, Bdb):
     def dmp(self, thing):
         return dict(
             (escape(key), {
-                'val': self.better_repr(getattr(thing, key)),
+                'val': self.safe_better_repr(getattr(thing, key)),
                 'type': type(getattr(thing, key)).__name__})
             for key in dir(thing)
         )
