@@ -241,16 +241,13 @@ class WdbRequest(object, Bdb):
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
 
-    def better_repr(self, obj):
+    def safe_repr(self, o):
         try:
-            if isinstance(obj, basestring):
-                raise TypeError()
-            iter(obj)
-        except TypeError:
-            self.obj_cache[id(obj)] = obj
-            return '<a href="%d" class="inspect">%s</a>' % (
-                id(obj), escape(repr(obj)))
+            return repr(o)
+        except Exception as e:
+            return '??? Broken repr (%s)' % e
 
+    def better_repr(self, obj):
         if isinstance(obj, dict):
             if type(obj) != dict:
                 dict_repr = type(obj).__name__ + '({'
@@ -259,29 +256,37 @@ class WdbRequest(object, Bdb):
                 dict_repr = '{'
                 closer = '}'
             dict_repr += ', '.join([
-                repr(key) + ': ' + self.better_repr(val)
+                self.safe_repr(key) + ': ' + self.better_repr(val)
                 for key, val in obj.items()])
 
             dict_repr += closer
             return dict_repr
 
-        if type(obj) == list:
-            iter_repr = '['
-            closer = ']'
-        elif type(obj) == set:
-            iter_repr = '{'
-            closer = '}'
-        elif type(obj) == tuple:
-            iter_repr = '('
-            closer = ')'
-        else:
-            iter_repr = escape(obj.__class__.__name__) + '(['
-            closer = '])'
+        if any([
+                isinstance(obj, list),
+                isinstance(obj, set),
+                isinstance(obj, tuple)]):
+            if type(obj) == list:
+                iter_repr = '['
+                closer = ']'
+            elif type(obj) == set:
+                iter_repr = '{'
+                closer = '}'
+            elif type(obj) == tuple:
+                iter_repr = '('
+                closer = ')'
+            else:
+                iter_repr = escape(obj.__class__.__name__) + '(['
+                closer = '])'
 
-        iter_repr += ', '.join([self.better_repr(val) for val in obj])
-        iter_repr += closer
+            iter_repr += ', '.join([self.better_repr(val) for val in obj])
+            iter_repr += closer
 
-        return iter_repr
+            return iter_repr
+
+        self.obj_cache[id(obj)] = obj
+        return '<a href="%d" class="inspect">%s</a>' % (
+            id(obj), escape(repr(obj)))
 
     @contextmanager
     def capture_output(self, with_hook=True):
