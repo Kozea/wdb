@@ -245,7 +245,7 @@ class WdbRequest(object, Bdb):
         try:
             return repr(obj)
         except Exception as e:
-            return '??? Broken repr (%s)' % e
+            return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
     def safe_better_repr(self, obj):
         try:
@@ -321,10 +321,19 @@ class WdbRequest(object, Bdb):
             sys.stdout, sys.stderr = stdout, stderr
 
     def dmp(self, thing):
+        def safe_getattr(key):
+            try:
+                return getattr(thing, key)
+            except Exception as e:
+                return 'Error getting attr "%s" from "%s" (%s: %s)' % (
+                    key, thing,
+                    type(e).__name__, e)
+
         return dict(
             (escape(key), {
-                'val': self.safe_better_repr(getattr(thing, key)),
-                'type': type(getattr(thing, key)).__name__})
+                'val': self.safe_better_repr(safe_getattr(key)),
+                'type': type(safe_getattr(key)).__name__
+            })
             for key in dir(thing)
         )
 
