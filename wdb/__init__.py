@@ -51,8 +51,9 @@ import sys
 import time
 import dis
 
-RES_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)), 'resources')
+BASE_PATH = os.path.join(
+    os.path.abspath(os.path.dirname(__file__)))
+RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
 log.setLevel(30)
@@ -192,7 +193,7 @@ class Wdb(object):
 
     def static_request(self, environ, start_response, filename):
         start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
-        with open(os.path.join(RES_PATH, filename)) as f:
+        with open(os.path.join(BASE_PATH, filename)) as f:
             yield f.read()
 
     def first_request(self, environ, start_response):

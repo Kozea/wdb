@@ -1,0 +1,250 @@
+@import compass/css3
+
+body, html
+  color: $fg
+  background-color: $bg
+  height: 100%
+  overflow: hidden
+
+h1
+  color: $fg
+  font-variant: small-caps
+  small
+    color: $alt-fg
+    display: block
+    font-size: .5em
+
+#source
+  overflow: hidden
+  width: 70%
+  float: left
+  position: relative
+
+#sourcecode
+  +box-shadow(inset -8px 0 20px $source-shadow)
+
+#sourcecode, #interpreter
+  overflow: auto
+  height: 50%
+
+#eval
+  width: 94%
+  vertical-align: top
+  padding: 0
+  margin: 0
+  border: none
+  outline: none
+  background-color: transparent
+  overflow: hidden
+
+#prompt, .prompted
+  padding: 0.5em 0 0 0
+  &:before
+    color: $pln
+    content: ">>> "
+
+#prompt
+  font: $code-font
+  textarea
+    color: $pln
+    font: $code-font
+
+#completions
+  font: $code-font
+  .base
+    color: $comp-base
+  .completion
+    color: $comp
+
+  td
+    padding: 0.25em
+    &.active
+      .base
+        color: red
+      .completion
+        color: orangered
+      &.complete .base
+        color: #cc6666
+
+#comp-desc, #backsearch
+  color: $mini-prompt-fg
+  font-style: italic
+
+.trace
+  font: $code-font
+
+#traceback
+  overflow-y: auto
+  float: right
+  width: 30%
+  height: 100%
+
+.traceline
+  +transition(border 750ms)
+  margin: 0 0 0 1em
+  font: $code-font
+  clear: both
+  overflow: auto
+
+  background-color: $trace-bg
+  border-right: 10px solid $trace-alt-bg
+  &:before
+    border-color: $trace-alt-bg $trace-alt-bg $bg $bg
+    background-color: $trace-alt-bg
+    border-right: 10px solid $trace-bg
+
+  &:nth-child(odd)
+    .tracefun
+      background-color: $trace-alt-bg
+      &:before
+        border-color: $trace-alt-bg $trace-alt-bg $bg $bg
+
+  &:hover
+    border-color: $trace-hover
+  &.selected
+    border-color: $trace-sel
+
+.tracecode
+  padding: .25em
+  clear: both
+
+.tracefunfun
+  background-color: $bg
+  overflow: auto
+
+.tracefun
+  /* padding: .15em;
+  font-weight: bolder
+  font-size: .8em
+  text-align: right
+  float: right
+  line-height: 1.2
+  color: $trace-fun
+  background-color: $trace-bg
+
+  &:before
+    border-color: $trace-bg $trace-bg $bg $bg
+    content: ''
+    width: 0
+    height: 0
+    border-style: solid
+    border-width: .7em
+    display: inline-block
+    vertical-align: top
+
+.tracefilelno
+  padding: .15em
+
+.tracefile
+  color: $trace-file
+
+.tracelno
+  color: $trace-lno
+  &:before
+    content: ': '
+
+.prettyprint
+  border: none !important
+
+code:not(.prettyprinted)
+  opacity: 0.5
+
+ol.linenums li
+  +transition(1s)
+
+  &:hover
+    +transition(1s)
+    color: $lno-hover-fg
+  &.ctx
+    &.ctx-top
+      border-top: 1px solid $code-ctx-border
+    &.ctx-bottom
+      border-bottom: 1px solid $code-ctx-border
+    color: $lno-fg
+    background-color: $code-ctx-bg
+    &:before
+      color: $lno-fg
+      background-color: $code-ctx-bg
+  &.highlighted-other
+    color: $code-hl-other-fg
+    background-color: $code-hl-other-bg !important
+  &.breakpoint
+    color: $code-hl-break-fg
+    background-color: $code-hl-break-bg !important
+  &.highlighted
+    color: $code-hl-fg
+    background-color: $code-hl-bg
+    &:before
+      color: $code-hl-fg
+      background-color: $code-hl-bg
+  &.ask-breakpoint
+    color: $code-hl-break-ask-fg
+
+a.inspect
+  text-decoration: none
+  background-color: $inspect-fg
+  border: 1px solid $inspect-middle
+  &:hover
+    background-color: $inspect-middle
+    border: 1px solid $inspect-bg
+
+.long
+  display: none
+
+.short.close:after
+  content: '…"'
+
+#comp-desc
+  text-align: left
+
+  .fun_name
+    color: $comp-fun-name
+
+  .fun_punct
+    color: $comp-fun-punct
+
+  .fun_param
+    color: $comp-fun-param
+    &.active
+      color: $comp-fun-active-param
+
+.backsearched
+  text-decoration: underline
+
+.object
+  border: 1px solid $obj-border
+  border-spacing: 0
+  border-collapse: collapse
+  width: 100%
+  font-size: 0.85em
+  tbody
+    td
+      border: 2px solid $obj-inner-border
+      padding: 0.2em 0.5em
+    &.hidden:not(.toggle)
+      display: none
+    &:not(.toggle) tr > :first-child
+      vertical-align: top
+    &.toggle
+      &:hover
+        background-color: $obj-hover
+      td
+        text-align: center
+        &:after
+          content: '[-]'
+          float: right
+      &.hidden td:after
+        content: '[+]'
+
+  .core
+    background-color: $obj-core-bg
+  .method
+    background-color: $obj-method-bg
+  .attr
+    background-color: $obj-attr-bg
+
+.nogood
+  color: red !important
+  >
+    .pln, .typ
+      color: red !important

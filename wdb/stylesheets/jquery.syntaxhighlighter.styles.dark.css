@@ -1,0 +1,160 @@
+/* Tomorrow Night Theme */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+/* Pretty printing styles. Used with prettify.js. */
+/* SPAN elements with the classes below are added by prettyprint. */
+/* plain text */
+/* line 7, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+.pln {
+  color: #c5c8c6;
+}
+
+@media screen {
+  /* string content */
+  /* line 12, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .str {
+    color: #b5bd68;
+  }
+
+  /* a keyword */
+  /* line 15, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .kwd {
+    color: #b294bb;
+  }
+
+  /* a comment */
+  /* line 18, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .com {
+    color: #969896;
+  }
+
+  /* a type name */
+  /* line 21, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .typ {
+    color: #81a2be;
+  }
+
+  /* a literal value */
+  /* line 24, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .lit {
+    color: #de935f;
+  }
+
+  /* punctuation */
+  /* line 27, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .pun, .opn, .clo {
+    color: #c5c8c6;
+  }
+
+  /* lisp open bracket */
+  /* lisp close bracket */
+  /* a markup tag name */
+  /* line 32, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .tag {
+    color: #cc6666;
+  }
+
+  /* a markup attribute name */
+  /* line 35, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .atn {
+    color: #de935f;
+  }
+
+  /* a markup attribute value */
+  /* line 38, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .atv {
+    color: #8abeb7;
+  }
+
+  /* a declaration */
+  /* line 41, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .dec {
+    color: #de935f;
+  }
+
+  /* a variable name */
+  /* line 44, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .var {
+    color: #cc6666;
+  }
+
+  /* a function name */
+  /* line 47, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .fun {
+    color: #81a2be;
+  }
+}
+/* Use higher contrast and text-weight for printable form. */
+@media print, projection {
+  /* line 52, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .str {
+    color: #006600;
+  }
+
+  /* line 54, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .kwd {
+    color: #000066;
+    font-weight: bold;
+  }
+
+  /* line 57, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .com {
+    color: #660000;
+    font-style: italic;
+  }
+
+  /* line 60, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .typ {
+    color: #440044;
+    font-weight: bold;
+  }
+
+  /* line 63, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .lit {
+    color: #004444;
+  }
+
+  /* line 65, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .pun, .opn, .clo {
+    color: #444400;
+  }
+
+  /* line 67, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .tag {
+    color: #000066;
+    font-weight: bold;
+  }
+
+  /* line 70, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .atn {
+    color: #440044;
+  }
+
+  /* line 72, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+  .atv {
+    color: #006600;
+  }
+}
+/* Style */
+/* line 77, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+.prettyprint {
+  font-family: "Source Code Pro", monospace;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.5;
+  border: 1px solid #cccccc;
+}
+
+/* Specify class=linenums on a pre to get line numbering */
+/* line 86, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+ol.linenums {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* IE indents via margin-left */
+/* line 93, ../sass/jquery.syntaxhighlighter.styles.dark.sass */
+li.L0, li.L1, li.L2, li.L3, li.L4, li.L5, li.L6, li.L7, li.L8, li.L9, li.L1, li.L3, li.L5, li.L7, li.L9 {
+  /* */
+}
+
+/* Alternate shading for lines */
