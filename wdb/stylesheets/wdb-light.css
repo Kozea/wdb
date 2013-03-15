@@ -1,10 +1,10 @@
 /*
 Syntax error: Undefined variable: "$comp-fun-name".
-        on line 201 of /home/zero/kozea/wdb/wdb/sass/_wdb.sass
+        on line 202 of /home/zero/kozea/wdb/wdb/sass/_wdb.sass
         from line 2 of /home/zero/kozea/wdb/wdb/sass/wdb-light.sass
 
 Backtrace:
-/home/zero/kozea/wdb/wdb/sass/_wdb.sass:201
+/home/zero/kozea/wdb/wdb/sass/_wdb.sass:202
 /home/zero/kozea/wdb/wdb/sass/wdb-light.sass:2
 /home/zero/.gem/ruby/1.9.1/gems/sass-3.3.0.alpha.0/lib/sass/script/variable.rb:49:in `_perform'
 /home/zero/.gem/ruby/1.9.1/gems/sass-3.3.0.alpha.0/lib/sass/script/node.rb:50:in `perform'
@@ -97,4 +97,4 @@ Backtrace:
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Syntax error: Undefined variable: \"$comp-fun-name\".\A         on line 201 of /home/zero/kozea/wdb/wdb/sass/_wdb.sass\A         from line 2 of /home/zero/kozea/wdb/wdb/sass/wdb-light.sass"; }
+  content: "Syntax error: Undefined variable: \"$comp-fun-name\".\A         on line 202 of /home/zero/kozea/wdb/wdb/sass/_wdb.sass\A         from line 2 of /home/zero/kozea/wdb/wdb/sass/wdb-light.sass"; }
