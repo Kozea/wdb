@@ -6,11 +6,11 @@ wdb
 Description
 -----------
 
-**wdb** is a complete web debugger for wsgi project (implemented as a wsgi middleware).
+**wdb** is a complete web debugger for wsgi projects (implemented as a wsgi middleware).
 
 Unlike other web debuggers, **wdb** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
 
-This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occured.
+This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occurred.
 
 In other words it's an enhanced version of pdb directly in your browser with nice features.
 
@@ -19,11 +19,11 @@ How is it possible ?
 --------------------
 
 *WebSockets*! 
-All debug information between web page and web server transits throught a websocket opened on a random port.
+All debug information between web page and web server transits through a websocket opened on a random port.
 Server request processing is blocked by the websocket and then resumed when the debugging is over.
 
 
-Instalation:
+Installation:
 ------------
 
 ```
@@ -98,7 +98,7 @@ In your `settings.py`, activate exception propagation:
 
 ### Breaking
 
-You can now put some breakpoint in a request code:
+You can now put some breakpoints in a request code:
 
 ```python
     do_something()
@@ -132,19 +132,19 @@ As of now the following special commands are supported during breakpoint:
 You can also eval a variable in the source by middle clicking on it.
 You can add/remove a breakpoint by clicking on the line number.
 
-NB: Hotkeys with arrows are purposedly not triggered in the eval prompt to avoid conflicts when typing.
+NB: Hotkeys with arrows are purposely not triggered in the eval prompt to avoid conflicts when typing.
 
 
-It it sloooow
+It is sloooow
 -------------
 
-If wdb slows down too much your application (tracing all the things takes time), you can start it disabled with:
+If wdb slows down too much of your application (tracing all the things takes time), you can start it disabled with:
 
 ```python
     my_app = Wdb(wsgi_app, start_disabled=True)
 ```
 
-Now when you will encounter an exception or a set_trace, a page will appear asking you if you want to reload the page with wdb enabled.
+Now when you encounter an exception or a set_trace, a page will appear asking you if you want to reload the page with wdb enabled.
 
 Manual activation/deactivation can be done anytime with:
 
@@ -160,7 +160,7 @@ Here:
     my_app = Wdb(wsgi_app, theme='light')
 ```
 
-But it is less polished than the dark one.
+But it is less polished than the dark theme.
 If you like writing css feel free to make your own and pull request it to me.
 
 
