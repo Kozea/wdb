@@ -376,12 +376,9 @@ class WdbRequest(object, Bdb):
                 self.ws.force_close()
         return wsgi_with_trace(environ, start_response)
 
-    def get_file(self, filename, html_escape=True):
+    def get_file(self, filename):
         checkcache(filename)
-        file_ = ''.join(getlines(filename))
-        if not html_escape:
-            return file_
-        return escape(file_)
+        return ''.join(getlines(filename))
 
     def handle_connection(self):
         if self.connected:
@@ -416,7 +413,7 @@ class WdbRequest(object, Bdb):
                 'flno': code.co_firstlineno,
                 'llno': lastlineno,
                 'lno': lno,
-                'code': escape(line),
+                'code': line,
                 'level': i
             })
 
@@ -551,7 +548,7 @@ class WdbRequest(object, Bdb):
                         fail()
                         continue
                     self.send('Dump|%s' % dump({
-                        'for': escape(repr(thing)),
+                        'for': repr(thing),
                         'val': self.dmp(thing)}))
 
                 elif cmd == 'Dump':
@@ -563,7 +560,7 @@ class WdbRequest(object, Bdb):
                         continue
                     else:
                         self.send('Dump|%s' % dump({
-                            'for': escape(u'%s ⟶ %s ' % (data, repr(thing))),
+                            'for': u'%s ⟶ %s ' % (data, repr(thing)),
                             'val': self.dmp(thing)}))
 
                 elif cmd == 'Trace':
@@ -606,12 +603,12 @@ class WdbRequest(object, Bdb):
                             fail('Unable to write to file %s' % redir)
                             continue
                         self.send('Print|%s' % dump({
-                            'for': escape(raw_data),
+                            'for': raw_data,
                             'result': escape('Written to file %s' % redir)
                         }))
                     else:
                         self.send('Print|%s' % dump({
-                            'for': escape(raw_data),
+                            'for': raw_data,
                             'result': self.hooked + escape(
                                 '\n'.join(out) + '\n'.join(err))
                         }))
@@ -726,7 +723,7 @@ class WdbRequest(object, Bdb):
 
                 elif cmd == 'Complete':
                     current_file = current['file']
-                    file_ = self.get_file(current_file, False).decode('utf-8')
+                    file_ = self.get_file(current_file).decode('utf-8')
                     lines = file_.split(u'\n')
                     lno = trace[current_index]['lno']
                     line_before = lines[lno - 1]
@@ -786,14 +783,14 @@ class WdbRequest(object, Bdb):
                                 quote('```\n%s\n```\n' %
                                       traceback.format_exc()))
                     self.send('Echo|%s' % dump({
-                        'for': escape('Error in Wdb, this is bad'),
+                        'for': 'Error in Wdb, this is bad',
                         'val': exc + '<br>' + link
                     }))
                 except:
                     self.send('Echo|%s' % dump({
-                        'for': escape('Too many errors'),
-                        'val': escape("Don't really know what to say. "
-                                      "Maybe it will work tomorrow.")
+                        'for': 'Too many errors',
+                        'val': ("Don't really know what to say. "
+                                "Maybe it will work tomorrow.")
                     }))
                     continue
 

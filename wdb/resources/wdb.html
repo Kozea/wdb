@@ -4,10 +4,14 @@
     <!-- le jquery -->
     <script src="/__wdb/javascripts/jquery-1.9.1.min.js"></script>
 
-    <!-- le syntax highlighter -->
-    <script src="/__wdb/javascripts/prettify.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/lib/codemirror.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/addon/runmode/runmode.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/mode/javascript/javascript.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/mode/python/python.js"></script>
 
-    <script src="/__wdb/javascripts/jquery.syntaxhighlighter.min.js"></script>
+    <link href="/__wdb/javascripts/codemirror-3.1/lib/codemirror.css" rel="stylesheet" type="text/css">
+    <link href="/__wdb/javascripts/codemirror-3.1/theme/ambiance.css" rel="stylesheet" type="text/css">
+
 
     <!-- le debugger -->
     <script>
@@ -21,8 +25,6 @@
     <div id="wdb" style="display: none;">
       <h1 id="title"></h1>
       <div id="source">
-        <div id="sourcecode">
-        </div>
         <div id="interpreter">
           <div id="scrollback">
           </div>
