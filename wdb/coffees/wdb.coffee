@@ -15,9 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #### Initializations ####
+
 time = ->
     d = new Date()
     "#{d.getHours()}:#{d.getMinutes()}:#{d.getSeconds()}.#{d.getMilliseconds()}"
+
+cm_theme = 'ambiance'
 
 started = false
 stop = false
@@ -33,7 +36,7 @@ __ws_port_index = 0
 cmd_hist = {}
 session_cmd_hist = {}
 
-$sourcecode = null
+$source = null
 $traceback = null
 
 send = (msg) ->
@@ -49,7 +52,7 @@ fallback = ->
     @get = (type) -> (obj, callback) -> callback(obj of file_cache and file_cache[obj])
     @set = (type) -> (obj) -> file_cache[obj.name] = obj
 
-if not @indexedDB
+if true #not @indexedDB
     fallback()
 else
     open = @indexedDB.open('wdbdb', 2)
@@ -92,15 +95,8 @@ else
 
     open.onerror = (event) ->
         console.log('Error when opening wdbdb', event)
-        fallback()    
+        fallback()
 
-$.SyntaxHighlighter.loadedExtras = true
-$.SyntaxHighlighter.init(
-    debug: true,
-    lineNumbers: false,
-    highlight: false,
-    load: false)
-    
 make_ws = ->
     # Open a websocket in case of request break
     console.log 'Opening new socket'
@@ -118,7 +114,7 @@ make_ws = ->
         if not stop
             setTimeout (=>
                 @ws = ws = make_ws()), 1000
-            
+
     new_ws.onopen = (m) ->
         # We are connected, ie: in request break
         console.log "WebSocket is open", m
@@ -173,7 +169,7 @@ $ =>
                 setTimeout(dot, 250)
         dot()
     , 250)
-    
+
     # Try getting the original page
     end = (page) ->
         stop = true
@@ -215,7 +211,7 @@ $ =>
 
 start = ->
     send('Start')
-    $sourcecode = $('#sourcecode')
+    $source = $('#source')
     $traceback = $('#traceback')
 
 init = (data) ->
@@ -251,13 +247,14 @@ trace = (data) ->
             suffix = frame.file.split('site-packages').slice(-1)[0]
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr(title: frame.file))
-            
+
         if frame.file.indexOf(cwd) == 0
             suffix = frame.file.split(cwd).slice(-1)[0]
             $tracefile.text(suffix)
             $tracefile.prepend($('<span>').addClass('tracestar').text('.').attr(title: frame.file))
 
         $tracecode = $('<div>').addClass('tracecode')
+
         code($tracecode, frame.code)
         $traceline.append $tracefilelno
         $traceline.append $tracecode
@@ -274,16 +271,14 @@ check = (data) =>
         ((file) ->
             if file.sha512 != data.sha512
                 send('File')
-            else    
+            else
                 send('NoFile')
         ), (->
             send('File')))
 
 select = (data) ->
     if data.file
-        code($sourcecode.empty(), data.file, ['linenums'])
-        $sourcecode.attr('title', data.name)
-        set('file')(name: data.name, file: $sourcecode.html(), sha512: data.sha512)
+        set('file')(name: data.name, file: $source.html(), sha512: data.sha512)
 
     current_frame = data.frame
     $('.traceline').removeClass('selected')
@@ -293,23 +288,29 @@ select = (data) ->
     # if current_frame.file == '<wdb>'
         # file_cache[current_frame.file] = current_frame.f_code
     handle_file  = (file) ->
-        $sourcecode.html(file.file)
-        $sourcecode.attr('title', current_frame.file)
-        $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-        for lno in data.breaks
-            $('.linenums li').eq(lno - 1).addClass('breakpoint')
-        $cur_line = $sourcecode.find('li').eq(current_frame.lno - 1)
-        $cur_line.addClass('highlighted')
+        $source.find('.CodeMirror').remove()
+        $source.data('cm', cm = CodeMirror ((elt) ->
+            $source.prepend(elt)) , (
+            value: data.file,
+            mode:  'python',
+            theme: cm_theme,
+            lineNumbers: true))
 
-        $sourcecode.find('li.ctx').removeClass('ctx')
+        # $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
+        # for lno in data.breaks
+            # $('.linenums li').eq(lno - 1).addClass('breakpoint')
+        cm.addLineClass(current_frame.lno - 1, 'background', 'highlighted')
+
+        # $sourcecode.find('li.ctx').removeClass('ctx')
         for lno in [current_frame.flno...current_frame.llno + 1]
-            $line = $sourcecode.find('li').eq(lno - 1)
-            $line.addClass('ctx')
+            cm.addLineClass(lno - 1, 'background', 'ctx')
             if lno == current_frame.flno
-                $line.addClass('ctx-top')
+                cm.addLineClass(lno - 1, 'background', 'ctx-top')
             else if lno == current_frame.llno
-                $line.addClass('ctx-bottom')
-        $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
+                cm.addLineClass(lno - 1, 'background', 'ctx-bottom')
+
+        cm.scrollIntoView(line: current_frame.lno, ch: 1, 1)
+        # $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
 
     if data.file
         handle_file(data.file)
@@ -318,22 +319,36 @@ select = (data) ->
 
 
 
-code = (parent, code, classes=[]) ->
-    code = $('<code class="language">' + code + '</code>')
-    for cls in classes
-        code.addClass(cls)
-    parent.append code
-    code.syntaxHighlight()
-    # Re do it in case of
-    setTimeout((->
-        code.syntaxHighlight()), 50)
-    code.find('span').each ->
-        txt = $(@).text()
-        if txt.length > 128
-            $(@).text ''
-            $(@).append $('<span class="short close">').text(txt.substr(0, 128))
-            $(@).append $('<span class="long">').text(txt.substr(128))
-    code
+code = (parent, code, classes=[], html=false) ->
+    if html
+        code_elt = $('<code>', 'class': 'cm-s-' + cm_theme).html(code)
+        for cls in classes
+            code_elt.addClass(cls)
+        parent.append code_elt
+        code_elt.add(code_elt.find('*')).contents().filter(->
+            @nodeType == 3 and @nodeValue.length > 0
+        )
+        .wrap('<span>')
+        .parent()
+        .each ->
+            span = @
+            setTimeout (->
+                CodeMirror.runMode $(span).text(), "python", span), 50
+    else
+        code_elt = $('<code>', 'class': 'cm-s-' + cm_theme)
+        for cls in classes
+            code_elt.addClass(cls)
+        parent.append code_elt
+        setTimeout (->
+            CodeMirror.runMode code, "python", code_elt.get(0)), 50
+
+    # code.find('span').each ->
+        # txt = $(@).text()
+        # if txt.length > 128
+            # $(@).text ''
+            # $(@).append $('<span class="short close">').text(txt.substr(0, 128))
+            # $(@).append $('<span class="long">').text(txt.substr(128))
+    code_elt
 
 
 historize = (snippet) ->
@@ -420,25 +435,25 @@ print = (data) ->
     suggest_stop()
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
-    code($('#scrollback'), data.result)
+    code($('#scrollback'), data.result, [], true)
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
     termscroll()
 
 echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
-    code($('#scrollback'), data.val or '')
+    code($('#scrollback'), data.val or '', [], true)
     termscroll()
-    
+
 dump = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     $container = $('<div>')
     $table = $('<table>', class: 'object').appendTo($container)
     $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'core', colspan: 2).text('Core Members'))))
     $core_tbody = $('<tbody>', class: 'core hidden').appendTo($table)
-    
+
     $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'method', colspan: 2).text('Methods'))))
     $method_tbody = $('<tbody>', class: 'method hidden').appendTo($table)
-    
+
     $table.append($('<tbody>', class: 'toggle shown').append($('<tr>').append($('<td>', class: 'attr', colspan: 2).text('Attributes'))))
     $attr_tbody = $('<tbody>', class: 'attr shown').appendTo($table)
 
@@ -448,11 +463,11 @@ dump = (data) ->
             $tbody = $core_tbody
         else if val.type.indexOf('method') != -1
             $tbody = $method_tbody
-                
+
         $tbody.append($('<tr>')
             .append($('<td>').text(key))
             .append($('<td>').html(val.val)))
-    code($('#scrollback'), $container.html())
+    code($('#scrollback'), $container.html(), [], true)
     termscroll()
     $('#eval').val('')
 
@@ -496,7 +511,7 @@ format_fun = (p) ->
         tags.push $('<span>', class: cls).text(param)
         if i != p.params.length - 1
             tags.push $('<span>', class: 'fun_punct').text(', ')
-        
+
     tags.push $('<span>', class: 'fun_punct').text(')')
     tags
 
@@ -595,7 +610,7 @@ register_handlers = ->
                 return false
             else if e.keyCode == 67 # C
                 searchback_stop()
-            else 
+            else
                 e.stopPropagation()
                 return
 
@@ -618,7 +633,7 @@ register_handlers = ->
             suggest_stop()
             searchback_stop()
             return false
-            
+
         else if e.keyCode == 9 # Tab
             if e.shiftKey
                 $eval = $(@)
@@ -682,10 +697,10 @@ register_handlers = ->
                             .attr('data-index', index)
                             .attr('rows', to_set.split('\n').length)
                         return false
-           
+
 
     $("#scrollback").on('click', 'a.inspect', ->
-        send('Inspect|' + $(this).attr('href'))
+        send('Inspect|' + $(@).attr('href'))
         false
     ).on('click', '.short.close', ->
         $(@).addClass('open').removeClass('close').next('.long').show('fast')
@@ -697,7 +712,7 @@ register_handlers = ->
     )
 
     $("#sourcecode").on('click', '.linenums li', (e) ->
-        if this is e.target and e.pageX < $(this).offset().left
+        if @ is e.target and e.pageX < $(@).offset().left
             lno = $(@).parent().find('li').index(@) + 1
             toggle_break(lno)
     )
@@ -716,7 +731,7 @@ register_handlers = ->
                 historize sel
                 send 'Dump|' + sel
     )
-        
+
     $('#eval').on('input', ->
         txt = $(@).val()
         if backsearch

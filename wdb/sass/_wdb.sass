@@ -17,14 +17,24 @@ h1
     display: block
     font-size: .5em
 
+code
+  display: block
+
 #source
   overflow: hidden
   width: 70%
   float: left
   position: relative
 
-#sourcecode
-  +box-shadow(inset -8px 0 20px $source-shadow)
+  > .CodeMirror
+    font-family: "Source Code Pro" !important
+    height: 50%
+    +box-shadow(inset -8px 0 20px $source-shadow)
+    .CodeMirror-scroll
+      overflow-x: auto
+
+    .CodeMirror-hscrollbar
+      bottom: -1px
 
 #sourcecode, #interpreter
   overflow: auto
@@ -152,7 +162,7 @@ h1
 code:not(.prettyprinted)
   opacity: 0.5
 
-ol.linenums li
+.CodeMirror-linebackground
   +transition(1s)
 
   &:hover
