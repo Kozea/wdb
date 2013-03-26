@@ -280,25 +280,36 @@ select = (data) ->
             mode:  'python',
             theme: cm_theme,
             lineNumbers: true)
+        cm._bg_marks = []
+        cm._fn = data.name
+        cm.addClass = (lno, cls) ->
+            cm.addLineClass(lno - 1, 'background', cls)
+            cm._bg_marks.push(lno)
+
+        cm.removeClass = (lno, cls) ->
+            cm.removeLineClass(lno - 1, 'background', cls)
+            cm._bg_marks.splice cm._bg_marks.indexOf(lno), 1
     else
         cm = window.cm
-        # if data.name != $source.attr 'title'
-        $source.attr 'title', data.name
-        cm.setValue data.file
-        # else
-            # $('.CodeMirror-linebackground').removeClass('ctx ctx-top ctx-bottom highlighted breakpoint ask-breakpoint')
+        if cm._fn == data.name
+            for lno in cm._bg_marks
+                cm.removeLineClass(lno - 1, 'background')
+        else
+            cm.setValue data.file
+            cm._fn = data.name
+        cm._bg_marks = []
 
     for lno in data.breaks
-        cm.addLineClass(lno - 1, 'background', 'breakpoint')
+        cm.addClass(lno, 'breakpoint')
 
-    cm.addLineClass(current_frame.lno - 1, 'background', 'highlighted')
+    cm.addClass(current_frame.lno, 'highlighted')
 
     for lno in [current_frame.flno...current_frame.llno + 1]
-        cm.addLineClass(lno - 1, 'background', 'ctx')
+        cm.addClass(lno, 'ctx')
         if lno == current_frame.flno
-            cm.addLineClass(lno - 1, 'background', 'ctx-top')
+            cm.addClass(lno, 'ctx-top')
         else if lno == current_frame.llno
-            cm.addLineClass(lno - 1, 'background', 'ctx-bottom')
+            cm.addClass(lno, 'ctx-bottom')
 
     cm.scrollIntoView(line: current_frame.lno, ch: 1, 1)
     $scroll = $ '#source .CodeMirror-scroll'
@@ -460,8 +471,8 @@ dump = (data) ->
 
 breakset = (data) ->
     if data.lno
-        cm.removeLineClass(data.lno - 1, 'background', 'ask-breakpoint')
-        cm.addLineClass(data.lno - 1, 'background', 'breakpoint')
+        cm.removeClass(data.lno, 'ask-breakpoint')
+        cm.addClass(data.lno, 'breakpoint')
 
 
         if data.cond
@@ -471,7 +482,7 @@ breakset = (data) ->
         $eval.val('')
 
 breakunset = (data) ->
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').attr('title', '')
+    cm.removeClass(data.lno, 'ask-breakpoint')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
         $eval.val('')
@@ -483,11 +494,11 @@ toggle_break = (lno, temporary) ->
         return
     cls = cm.lineInfo(lno - 1).bgClass or ''
     if cls.split(' ').indexOf('breakpoint') > -1
-        cm.removeLineClass(lno - 1, 'background', 'breakpoint')
-        cm.addLineClass(lno - 1, 'background', 'ask-breakpoint')
+        cm.removeClass(lno, 'breakpoint')
+        cm.addClass(lno, 'ask-breakpoint')
         send('Unbreak|' + lno)
     else
-        cm.addLineClass(lno - 1, 'background', 'breakpoint')
+        cm.addClass(lno, 'breakpoint')
         send(cmd + '|' + lno)
 
 

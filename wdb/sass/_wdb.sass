@@ -31,6 +31,7 @@ code
 
   > .CodeMirror
     font-family: "Source Code Pro" !important
+    font-size: 15px
     height: 50%
     +box-shadow(inset -8px 0 20px $source-shadow)
     .CodeMirror-scroll
@@ -38,6 +39,9 @@ code
 
     .CodeMirror-hscrollbar
       bottom: -1px
+
+    .CodeMirror-linebackground
+      +transition(250ms)
 
 #sourcecode, #interpreter
   overflow: auto
@@ -161,9 +165,6 @@ code
 
 .prettyprint
   border: none !important
-
-code:not(.prettyprinted)
-  opacity: 0.5
 
 .CodeMirror-linenumber
   font-size: 14px

@@ -358,7 +358,7 @@
   };
 
   select = function(data) {
-    var $hline, $scroll, current_frame, lno, _j, _k, _len, _ref, _ref1, _ref2;
+    var $hline, $scroll, current_frame, lno, _j, _k, _l, _len, _len1, _ref, _ref1, _ref2, _ref3;
 
     $source = $('#source');
     current_frame = data.frame;
@@ -375,23 +375,42 @@
         theme: cm_theme,
         lineNumbers: true
       });
+      cm._bg_marks = [];
+      cm._fn = data.name;
+      cm.addClass = function(lno, cls) {
+        cm.addLineClass(lno - 1, 'background', cls);
+        return cm._bg_marks.push(lno);
+      };
+      cm.removeClass = function(lno, cls) {
+        cm.removeLineClass(lno - 1, 'background', cls);
+        return cm._bg_marks.splice(cm._bg_marks.indexOf(lno), 1);
+      };
     } else {
       cm = window.cm;
-      $source.attr('title', data.name);
-      cm.setValue(data.file);
+      if (cm._fn === data.name) {
+        _ref = cm._bg_marks;
+        for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+          lno = _ref[_j];
+          cm.removeLineClass(lno - 1, 'background');
+        }
+      } else {
+        cm.setValue(data.file);
+        cm._fn = data.name;
+      }
+      cm._bg_marks = [];
     }
-    _ref = data.breaks;
-    for (_j = 0, _len = _ref.length; _j < _len; _j++) {
-      lno = _ref[_j];
-      cm.addLineClass(lno - 1, 'background', 'breakpoint');
+    _ref1 = data.breaks;
+    for (_k = 0, _len1 = _ref1.length; _k < _len1; _k++) {
+      lno = _ref1[_k];
+      cm.addClass(lno, 'breakpoint');
     }
-    cm.addLineClass(current_frame.lno - 1, 'background', 'highlighted');
-    for (lno = _k = _ref1 = current_frame.flno, _ref2 = current_frame.llno + 1; _ref1 <= _ref2 ? _k < _ref2 : _k > _ref2; lno = _ref1 <= _ref2 ? ++_k : --_k) {
-      cm.addLineClass(lno - 1, 'background', 'ctx');
+    cm.addClass(current_frame.lno, 'highlighted');
+    for (lno = _l = _ref2 = current_frame.flno, _ref3 = current_frame.llno + 1; _ref2 <= _ref3 ? _l < _ref3 : _l > _ref3; lno = _ref2 <= _ref3 ? ++_l : --_l) {
+      cm.addClass(lno, 'ctx');
       if (lno === current_frame.flno) {
-        cm.addLineClass(lno - 1, 'background', 'ctx-top');
+        cm.addClass(lno, 'ctx-top');
       } else if (lno === current_frame.llno) {
-        cm.addLineClass(lno - 1, 'background', 'ctx-bottom');
+        cm.addClass(lno, 'ctx-bottom');
       }
     }
     cm.scrollIntoView({
@@ -633,8 +652,8 @@
     var $eval;
 
     if (data.lno) {
-      cm.removeLineClass(data.lno - 1, 'background', 'ask-breakpoint');
-      cm.addLineClass(data.lno - 1, 'background', 'breakpoint');
+      cm.removeClass(data.lno, 'ask-breakpoint');
+      cm.addClass(data.lno, 'breakpoint');
       if (data.cond) {
         $line.attr('title', "On [" + data.cond + "]");
       }
@@ -648,7 +667,7 @@
   breakunset = function(data) {
     var $eval;
 
-    $('.linenums li').eq(data.lno - 1).removeClass('ask-breakpoint').attr('title', '');
+    cm.removeClass(data.lno, 'ask-breakpoint');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
       return $eval.val('');
@@ -665,11 +684,11 @@
     }
     cls = cm.lineInfo(lno - 1).bgClass || '';
     if (cls.split(' ').indexOf('breakpoint') > -1) {
-      cm.removeLineClass(lno - 1, 'background', 'breakpoint');
-      cm.addLineClass(lno - 1, 'background', 'ask-breakpoint');
+      cm.removeClass(lno, 'breakpoint');
+      cm.addClass(lno, 'ask-breakpoint');
       return send('Unbreak|' + lno);
     } else {
-      cm.addLineClass(lno - 1, 'background', 'breakpoint');
+      cm.addClass(lno, 'breakpoint');
       return send(cmd + '|' + lno);
     }
   };
