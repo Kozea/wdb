@@ -20,7 +20,8 @@ time = ->
     d = new Date()
     "#{d.getHours()}:#{d.getMinutes()}:#{d.getSeconds()}.#{d.getMilliseconds()}"
 
-cm_theme = 'ambiance'
+cm = null
+cm_theme = 'tomorrow-night'
 
 started = false
 stop = false
@@ -52,14 +53,13 @@ fallback = ->
     @get = (type) -> (obj, callback) -> callback(obj of file_cache and file_cache[obj])
     @set = (type) -> (obj) -> file_cache[obj.name] = obj
 
-if true #not @indexedDB
+if not @indexedDB
     fallback()
 else
     open = @indexedDB.open('wdbdb', 2)
     open.onerror = (event) -> console.log('Error when opening wdbdb', event)
     open.onupgradeneeded = (event) ->
         db = event.target.result
-        db.createObjectStore("file", { keyPath: "name" })
         db.createObjectStore("cmd", { keyPath: "name" })
 
     open.onsuccess = (event) =>
@@ -144,7 +144,6 @@ make_ws = ->
             when 'Init'       then init
             when 'Title'      then title
             when 'Trace'      then trace
-            when 'Check'      then check
             when 'Select'     then select
             when 'Print'      then print
             when 'Echo'       then echo
@@ -266,57 +265,45 @@ trace = (data) ->
     )
 
 
-check = (data) =>
-    @get('file')(data.name,
-        ((file) ->
-            if file.sha512 != data.sha512
-                send('File')
-            else
-                send('NoFile')
-        ), (->
-            send('File')))
-
 select = (data) ->
-    if data.file
-        set('file')(name: data.name, file: $source.html(), sha512: data.sha512)
-
+    $source = $ '#source'
     current_frame = data.frame
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
 
-    # if current_frame.file == '<wdb>'
-        # file_cache[current_frame.file] = current_frame.f_code
-    handle_file  = (file) ->
-        $source.find('.CodeMirror').remove()
-        $source.data('cm', cm = CodeMirror ((elt) ->
+    if not window.cm
+        $source.attr 'title', data.name
+        window.cm = cm = CodeMirror ((elt) ->
             $source.prepend(elt)) , (
             value: data.file,
             mode:  'python',
             theme: cm_theme,
-            lineNumbers: true))
-
-        # $('#sourcecode li.highlighted').removeClass('highlighted').addClass('highlighted-other')
-        # for lno in data.breaks
-            # $('.linenums li').eq(lno - 1).addClass('breakpoint')
-        cm.addLineClass(current_frame.lno - 1, 'background', 'highlighted')
-
-        # $sourcecode.find('li.ctx').removeClass('ctx')
-        for lno in [current_frame.flno...current_frame.llno + 1]
-            cm.addLineClass(lno - 1, 'background', 'ctx')
-            if lno == current_frame.flno
-                cm.addLineClass(lno - 1, 'background', 'ctx-top')
-            else if lno == current_frame.llno
-                cm.addLineClass(lno - 1, 'background', 'ctx-bottom')
-
-        cm.scrollIntoView(line: current_frame.lno, ch: 1, 1)
-        # $sourcecode.stop().animate((scrollTop: $cur_line.position().top - $sourcecode.innerHeight() / 2 + $sourcecode.scrollTop()), 100)
-
-    if data.file
-        handle_file(data.file)
+            lineNumbers: true)
     else
-        get('file')(current_frame.file, handle_file)
+        cm = window.cm
+        # if data.name != $source.attr 'title'
+        $source.attr 'title', data.name
+        cm.setValue data.file
+        # else
+            # $('.CodeMirror-linebackground').removeClass('ctx ctx-top ctx-bottom highlighted breakpoint ask-breakpoint')
 
+    for lno in data.breaks
+        cm.addLineClass(lno - 1, 'background', 'breakpoint')
+
+    cm.addLineClass(current_frame.lno - 1, 'background', 'highlighted')
+
+    for lno in [current_frame.flno...current_frame.llno + 1]
+        cm.addLineClass(lno - 1, 'background', 'ctx')
+        if lno == current_frame.flno
+            cm.addLineClass(lno - 1, 'background', 'ctx-top')
+        else if lno == current_frame.llno
+            cm.addLineClass(lno - 1, 'background', 'ctx-bottom')
+
+    cm.scrollIntoView(line: current_frame.lno, ch: 1, 1)
+    $scroll = $ '#source .CodeMirror-scroll'
+    $hline = $ '#source .highlighted'
+    $scroll.scrollTop $hline.offset().top - $scroll.offset().top + $scroll.scrollTop() - $scroll.height() / 2
 
 
 code = (parent, code, classes=[], html=false) ->
@@ -473,8 +460,10 @@ dump = (data) ->
 
 breakset = (data) ->
     if data.lno
-        $line = $('.linenums li').eq(data.lno - 1)
-        $line.removeClass('ask-breakpoint').addClass('breakpoint')
+        cm.removeLineClass(data.lno - 1, 'background', 'ask-breakpoint')
+        cm.addLineClass(data.lno - 1, 'background', 'breakpoint')
+
+
         if data.cond
             $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
@@ -492,13 +481,15 @@ toggle_break = (lno, temporary) ->
     if ('' + lno).indexOf(':') > -1
         send(cmd + '|' + lno)
         return
-    $line = $('.linenums li').eq(lno - 1)
-    if $line.hasClass('breakpoint')
+    cls = cm.lineInfo(lno - 1).bgClass or ''
+    if cls.split(' ').indexOf('breakpoint') > -1
+        cm.removeLineClass(lno - 1, 'background', 'breakpoint')
+        cm.addLineClass(lno - 1, 'background', 'ask-breakpoint')
         send('Unbreak|' + lno)
-        $line.removeClass('breakpoint').addClass('ask-breakpoint')
     else
-        $line.addClass('ask-breakpoint')
+        cm.addLineClass(lno - 1, 'background', 'breakpoint')
         send(cmd + '|' + lno)
+
 
 format_fun = (p) ->
     tags = [
@@ -711,10 +702,8 @@ register_handlers = ->
         $(@).add($(@).next()).toggleClass('hidden', 'shown')
     )
 
-    $("#sourcecode").on('click', '.linenums li', (e) ->
-        if @ is e.target and e.pageX < $(@).offset().left
-            lno = $(@).parent().find('li').index(@) + 1
-            toggle_break(lno)
+    $("#source").on('click', '.CodeMirror-linenumber', (e) ->
+        toggle_break parseInt($(@).text())
     )
 
     $("#sourcecode").on('mouseup', 'span', (e) ->

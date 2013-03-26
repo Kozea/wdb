@@ -467,9 +467,11 @@ class WdbRequest(object, Bdb):
                 'cwd': os.getcwd()
             }))
             current_file = current['file']
-            self.send('Check|%s' % dump({
-                'name': current_file,
-                'sha512': sha512(self.get_file(current_file)).hexdigest()
+            self.send('Select|%s' % dump({
+                'frame': current,
+                'breaks': self.get_file_breaks(current_file),
+                'file': self.get_file(current_file),
+                'name': current_file
             }))
         else:
             self.begun = True
@@ -508,37 +510,22 @@ class WdbRequest(object, Bdb):
                         'trace': trace
                     }))
                     current_file = current['file']
-                    self.send('Check|%s' % dump({
-                        'name': current_file,
-                        'sha512': sha512(
-                            self.get_file(current_file)).hexdigest()
+                    self.send('Select|%s' % dump({
+                        'frame': current,
+                        'breaks': self.get_file_breaks(current_file),
+                        'file': self.get_file(current_file),
+                        'name': current_file
                     }))
 
                 elif cmd == 'Select':
                     current_index = int(data)
                     current = trace[current_index]
                     current_file = current['file']
-                    self.send('Check|%s' % dump({
-                        'name': current_file,
-                        'sha512': sha512(
-                            self.get_file(current_file)).hexdigest()
-                    }))
-
-                elif cmd == 'File':
-                    current_file = current['file']
                     self.send('Select|%s' % dump({
                         'frame': current,
                         'breaks': self.get_file_breaks(current_file),
                         'file': self.get_file(current_file),
-                        'name': current_file,
-                        'sha512': sha512(
-                            self.get_file(current_file)).hexdigest()
-                    }))
-
-                elif cmd == 'NoFile':
-                    self.send('Select|%s' % dump({
-                        'frame': current,
-                        'breaks': self.get_file_breaks(current['file'])
+                        'name': current_file
                     }))
 
                 elif cmd == 'Inspect':
