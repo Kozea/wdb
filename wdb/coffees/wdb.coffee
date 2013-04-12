@@ -265,6 +265,29 @@ trace = (data) ->
     )
 
 
+create_code_mirror = (file, name, rw=false)->
+    window.cm = cm = CodeMirror ((elt) ->
+        $('#source').prepend(elt)) , (
+        value: file,
+        mode:  'python',
+        readOnly: !rw,
+        theme: cm_theme,
+        lineNumbers: true)
+    cm._bg_marks = {}
+    cm._fn = name
+    cm._file = file
+    cm.addClass = (lno, cls) ->
+        cm.addLineClass(lno - 1, 'background', cls)
+        if cm._bg_marks[lno]
+            cm._bg_marks[lno] = cm._bg_marks[lno] + ' ' + cls
+        else
+            cm._bg_marks[lno] = cls
+
+    cm.removeClass = (lno, cls) ->
+        cm.removeLineClass(lno - 1, 'background', cls)
+        del cm._bg_marks[lno]
+
+
 select = (data) ->
     $source = $ '#source'
     current_frame = data.frame
@@ -274,30 +297,16 @@ select = (data) ->
 
     if not window.cm
         $source.attr 'title', data.name
-        window.cm = cm = CodeMirror ((elt) ->
-            $source.prepend(elt)) , (
-            value: data.file,
-            mode:  'python',
-            theme: cm_theme,
-            lineNumbers: true)
-        cm._bg_marks = []
-        cm._fn = data.name
-        cm.addClass = (lno, cls) ->
-            cm.addLineClass(lno - 1, 'background', cls)
-            cm._bg_marks.push(lno)
-
-        cm.removeClass = (lno, cls) ->
-            cm.removeLineClass(lno - 1, 'background', cls)
-            cm._bg_marks.splice cm._bg_marks.indexOf(lno), 1
+        create_code_mirror data.file, data.name
     else
         cm = window.cm
         if cm._fn == data.name
-            for lno in cm._bg_marks
+            for lno of cm._bg_marks
                 cm.removeLineClass(lno - 1, 'background')
         else
             cm.setValue data.file
             cm._fn = data.name
-        cm._bg_marks = []
+        cm._bg_marks = {}
 
     for lno in data.breaks
         cm.addClass(lno, 'breakpoint')
@@ -330,22 +339,24 @@ code = (parent, code, classes=[], html=false) ->
         .parent()
         .each ->
             span = @
+            $(span).addClass('waiting_for_hl')
             setTimeout (->
-                CodeMirror.runMode $(span).text(), "python", span), 50
+                CodeMirror.runMode $(span).text(), "python", span
+                $(span).removeClass('waiting_for_hl')
+            ), 50
     else
         code_elt = $('<code>', 'class': 'cm-s-' + cm_theme)
         for cls in classes
             code_elt.addClass(cls)
         parent.append code_elt
-        setTimeout (->
-            CodeMirror.runMode code, "python", code_elt.get(0)), 50
+        CodeMirror.runMode code, "python", code_elt.get(0)
 
-    # code.find('span').each ->
-        # txt = $(@).text()
-        # if txt.length > 128
-            # $(@).text ''
-            # $(@).append $('<span class="short close">').text(txt.substr(0, 128))
-            # $(@).append $('<span class="long">').text(txt.substr(128))
+    code_elt.find('span').each ->
+        txt = $(@).text()
+        if txt.length > 128
+            $(@).text ''
+            $(@).append $('<span class="short close">').text(txt.substr(0, 128))
+            $(@).append $('<span class="long">').text(txt.substr(128))
     code_elt
 
 
@@ -473,7 +484,6 @@ breakset = (data) ->
     if data.lno
         cm.removeClass(data.lno, 'ask-breakpoint')
         cm.addClass(data.lno, 'breakpoint')
-
 
         if data.cond
             $line.attr('title', "On [#{data.cond}]")
@@ -715,6 +725,16 @@ register_handlers = ->
 
     $("#source").on('click', '.CodeMirror-linenumber', (e) ->
         toggle_break parseInt($(@).text())
+    )
+
+    $("#source").on('dblclick', (e) ->
+        marks = $.extend({}, cm._bg_marks)
+        scroll = $('#source .CodeMirror-scroll').scrollTop()
+        $('#source .CodeMirror').remove()
+        create_code_mirror cm._file, cm._fn, true
+        for lno of marks
+            cm.addClass(lno, marks[lno])
+        $('#source .CodeMirror-scroll').scrollTop(scroll)
     )
 
     $("#sourcecode").on('mouseup', 'span', (e) ->

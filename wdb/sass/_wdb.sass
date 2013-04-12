@@ -21,6 +21,7 @@ h1
     font-size: .5em
 
 code
+  font: $code-font
   display: block
 
 #source
@@ -57,20 +58,23 @@ code
   background-color: transparent
   overflow: hidden
 
+#interpreter
+  font: $code-font
+
 #prompt, .prompted
   padding: 0.5em 0 0 0
   &:before
+    font: $code-font
     color: $pln
     content: ">>> "
 
 #prompt
-  font: $code-font
   textarea
     color: $pln
     font: $code-font
+    font-weight: bold
 
 #completions
-  font: $code-font
   .base
     color: $comp-base
   .completion
@@ -268,3 +272,10 @@ a.inspect
   >
     .pln, .typ
       color: red !important
+
+.waiting_for_hl
+  opacity: .4
+
+
+code, code span
+  +transition(opacity 50ms)
