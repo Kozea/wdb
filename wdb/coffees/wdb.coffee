@@ -264,6 +264,10 @@ trace = (data) ->
         send('Select|' + $(@).attr('data-level'))
     )
 
+CodeMirror.keyMap.wdb = (
+    "Ctrl-S": (cm) -> save(),
+    fallthrough: ["basic", "emacsy"]
+)
 
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
@@ -272,21 +276,38 @@ create_code_mirror = (file, name, rw=false)->
         mode:  'python',
         readOnly: !rw,
         theme: cm_theme,
+        keyMap: 'wdb',
+        gutters: ["breakpoints", "CodeMirror-linenumbers"],
         lineNumbers: true)
-    cm._bg_marks = {}
+    cm._bg_marks = cls: {}, marks: {}
     cm._fn = name
     cm._file = file
+
+    cm.on("gutterClick", (cm, n) ->
+        toggle_break n + 1
+    )
+
     cm.addClass = (lno, cls) ->
         cm.addLineClass(lno - 1, 'background', cls)
-        if cm._bg_marks[lno]
-            cm._bg_marks[lno] = cm._bg_marks[lno] + ' ' + cls
+        if cm._bg_marks.cls[lno]
+            cm._bg_marks.cls[lno] = cm._bg_marks.cls[lno] + ' ' + cls
         else
-            cm._bg_marks[lno] = cls
+            cm._bg_marks.cls[lno] = cls
 
     cm.removeClass = (lno, cls) ->
         cm.removeLineClass(lno - 1, 'background', cls)
-        del cm._bg_marks[lno]
+        delete cm._bg_marks.cls[lno]
 
+    cm.addMark = (lno, cls, char) ->
+        cm._bg_marks.marks[lno] = [cls, char]
+        cm.setGutterMarker(lno - 1, "breakpoints", $('<div>', class: cls).html(char).get(0))
+
+    cm.removeMark = (lno) ->
+        delete cm._bg_marks.marks[lno]
+        cm.setGutterMarker(lno - 1, "breakpoints", null)
+
+save = ->
+    send("Save|#{cm._fn}|#{cm.getValue()}")
 
 select = (data) ->
     $source = $ '#source'
@@ -301,17 +322,21 @@ select = (data) ->
     else
         cm = window.cm
         if cm._fn == data.name
-            for lno of cm._bg_marks
+            for lno of cm._bg_marks.cls
                 cm.removeLineClass(lno - 1, 'background')
+            for lno of cm._bg_marks.marks
+                cm.setGutterMarker(lno - 1, 'breakpoints', null)
         else
             cm.setValue data.file
             cm._fn = data.name
-        cm._bg_marks = {}
+        cm._bg_marks.cls = {}
+        cm._bg_marks.marks = {}
 
     for lno in data.breaks
         cm.addClass(lno, 'breakpoint')
 
     cm.addClass(current_frame.lno, 'highlighted')
+    cm.addMark(current_frame.lno, 'highlighted', '➤')
 
     for lno in [current_frame.flno...current_frame.llno + 1]
         cm.addClass(lno, 'ctx')
@@ -504,11 +529,13 @@ toggle_break = (lno, temporary) ->
         return
     cls = cm.lineInfo(lno - 1).bgClass or ''
     if cls.split(' ').indexOf('breakpoint') > -1
+        cm.removeMark(lno)
         cm.removeClass(lno, 'breakpoint')
         cm.addClass(lno, 'ask-breakpoint')
         send('Unbreak|' + lno)
     else
         cm.addClass(lno, 'breakpoint')
+        cm.addMark(lno, 'breakpoint', if temporary then '○' else '●')
         send(cmd + '|' + lno)
 
 
@@ -723,17 +750,17 @@ register_handlers = ->
         $(@).add($(@).next()).toggleClass('hidden', 'shown')
     )
 
-    $("#source").on('click', '.CodeMirror-linenumber', (e) ->
-        toggle_break parseInt($(@).text())
-    )
-
     $("#source").on('dblclick', (e) ->
-        marks = $.extend({}, cm._bg_marks)
+        cls = $.extend({}, cm._bg_marks.cls)
+        marks = $.extend({}, cm._bg_marks.marks)
         scroll = $('#source .CodeMirror-scroll').scrollTop()
         $('#source .CodeMirror').remove()
         create_code_mirror cm._file, cm._fn, true
+        for lno of cls
+            cm.addClass(lno, cls[lno])
         for lno of marks
-            cm.addClass(lno, marks[lno])
+            [cls, char] = marks[lno]
+            cm.addMark(lno, cls, char)
         $('#source .CodeMirror-scroll').scrollTop(scroll)
     )
 
@@ -770,3 +797,4 @@ register_handlers = ->
         searchback_stop()
         # suggest_stop()
     )
+

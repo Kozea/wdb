@@ -21,6 +21,8 @@ from bdb import Bdb, BdbQuit, Breakpoint
 import pdb
 import traceback
 from cgi import escape
+from tempfile import gettempdir
+from shutil import move
 try:
     from json import dumps, JSONEncoder
 except ImportError:
@@ -747,6 +749,21 @@ class WdbRequest(object, Bdb):
                             } for comp in completions if comp.word.endswith(
                                 comp.complete)]
                         }))
+
+                elif cmd == 'Save':
+                    pipe = data.index('|')
+                    fn = data[:pipe]
+                    src = data[pipe + 1:]
+                    if os.path.exists(fn):
+                        dn = os.path.dirname(fn)
+                        bn = os.path.basename(fn)
+                        move(
+                            fn, os.path.join(
+                                gettempdir(),
+                                dn.replace(os.path.sep, '!') + bn +
+                                '-wdb-back-%d' % time.time()))
+                        with open(fn, 'w') as f:
+                            f.write(src)
 
                 elif cmd == 'Quit':
                     if hasattr(self, 'botframe'):
