@@ -757,13 +757,24 @@ class WdbRequest(object, Bdb):
                     if os.path.exists(fn):
                         dn = os.path.dirname(fn)
                         bn = os.path.basename(fn)
-                        move(
-                            fn, os.path.join(
-                                gettempdir(),
-                                dn.replace(os.path.sep, '!') + bn +
-                                '-wdb-back-%d' % time.time()))
-                        with open(fn, 'w') as f:
-                            f.write(src)
+                        try:
+                            move(
+                                fn, os.path.join(
+                                    gettempdir(),
+                                    dn.replace(os.path.sep, '!') + bn +
+                                    '-wdb-back-%d' % time.time()))
+                            with open(fn, 'w') as f:
+                                f.write(src)
+                        except OSError as e:
+                            self.send('Echo|%s' % dump({
+                                'for': 'Error during save',
+                                'val': str(e)
+                            }))
+                        else:
+                            self.send('Echo|%s' % dump({
+                                'for': 'Save succesful',
+                                'val': 'Wrote %s' % fn
+                            }))
 
                 elif cmd == 'Quit':
                     if hasattr(self, 'botframe'):
