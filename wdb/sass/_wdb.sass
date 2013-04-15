@@ -35,6 +35,19 @@ code
     font-size: 15px
     height: 50%
     +box-shadow(inset -8px 0 20px $source-shadow)
+
+    &.rw:after
+      position: absolute
+      top: 2em
+      right: -2em
+      content: 'Edit Mode'
+      background: black
+      color: #777
+      border-top: 1px solid #555
+      border-bottom: 1px solid #555
+      padding: .2em 3em
+      +rotate(45deg)
+
     .CodeMirror-scroll
       overflow-x: auto
 

@@ -265,13 +265,18 @@ trace = (data) ->
     )
 
 CodeMirror.keyMap.wdb = (
-    "Ctrl-S": (cm) -> save(),
-    fallthrough: ["basic", "emacsy"]
+    "Esc": (cm) -> toggle_edition false,
+    fallthrough: ["default"]
 )
+
+CodeMirror.commands.save = ->
+    send("Save|#{cm._fn}|#{cm.getValue()}")
 
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
-        $('#source').prepend(elt)) , (
+        $('#source').prepend(elt)
+        $(elt).addClass(if rw then 'rw' else 'ro')
+        ) , (
         value: file,
         mode:  'python',
         readOnly: !rw,
@@ -280,6 +285,7 @@ create_code_mirror = (file, name, rw=false)->
         gutters: ["breakpoints", "CodeMirror-linenumbers"],
         lineNumbers: true)
     cm._bg_marks = cls: {}, marks: {}
+    cm._rw = rw
     cm._fn = name
     cm._file = file
 
@@ -306,8 +312,18 @@ create_code_mirror = (file, name, rw=false)->
         delete cm._bg_marks.marks[lno]
         cm.setGutterMarker(lno - 1, "breakpoints", null)
 
-save = ->
-    send("Save|#{cm._fn}|#{cm.getValue()}")
+toggle_edition = (rw) ->
+    cls = $.extend({}, cm._bg_marks.cls)
+    marks = $.extend({}, cm._bg_marks.marks)
+    scroll = $('#source .CodeMirror-scroll').scrollTop()
+    $('#source .CodeMirror').remove()
+    create_code_mirror cm._file, cm._fn, rw
+    for lno of cls
+        cm.addClass(lno, cls[lno])
+    for lno of marks
+        [cls, char] = marks[lno]
+        cm.addMark(lno, cls, char)
+    $('#source .CodeMirror-scroll').scrollTop(scroll)
 
 select = (data) ->
     $source = $ '#source'
@@ -329,6 +345,7 @@ select = (data) ->
         else
             cm.setValue data.file
             cm._fn = data.name
+            cm._file = data.file
         cm._bg_marks.cls = {}
         cm._bg_marks.marks = {}
 
@@ -426,8 +443,9 @@ execute = (snippet) ->
             when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
-            when 'f' then print_hist session_cmd_hist[filename]
+            when 'f' then print_hist session_cmd_hist[$('.selected .tracefile').text()]
             when 'd' then cmd 'Dump|' + data
+            when 'e' then toggle_edition(not cm._rw)
             when 'q' then cmd 'Quit'
             when 'h' then print_help()
         return
@@ -458,6 +476,7 @@ print_help = ->
 .d expression                : Dump the result of expression in a table
 .q                           : Quit
 .h                           : Get some help
+.e                           : Toggle file edition mode
 expr !> file                 : Write the result of expr in file
 !< file                      : Eval the content of file
 [Enter]                      : Eval the current selected text in page, useful to eval code in the source'''
@@ -613,6 +632,8 @@ searchback_stop = (validate) ->
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
+        if cm._rw
+            return true
         if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
             send('Continue')
             return false
@@ -751,17 +772,7 @@ register_handlers = ->
     )
 
     $("#source").on('dblclick', (e) ->
-        cls = $.extend({}, cm._bg_marks.cls)
-        marks = $.extend({}, cm._bg_marks.marks)
-        scroll = $('#source .CodeMirror-scroll').scrollTop()
-        $('#source .CodeMirror').remove()
-        create_code_mirror cm._file, cm._fn, true
-        for lno of cls
-            cm.addClass(lno, cls[lno])
-        for lno of marks
-            [cls, char] = marks[lno]
-            cm.addMark(lno, cls, char)
-        $('#source .CodeMirror-scroll').scrollTop(scroll)
+        not cm._rw and toggle_edition(true)
     )
 
     $("#sourcecode").on('mouseup', 'span', (e) ->
