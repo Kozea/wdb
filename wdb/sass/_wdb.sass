@@ -272,6 +272,7 @@ a.inspect
   border-collapse: collapse
   width: 100%
   font-size: 0.85em
+
   tbody
     td
       border: 2px solid $obj-inner-border
@@ -290,6 +291,9 @@ a.inspect
           float: right
       &.hidden td:after
         content: '[+]'
+
+    table td
+      border: none
 
   .core
     background-color: $obj-core-bg
