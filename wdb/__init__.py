@@ -286,10 +286,17 @@ class WdbRequest(object, Bdb):
             else:
                 dict_repr = '{'
                 closer = '}'
-            dict_repr += ', '.join([
-                self.safe_repr(key) + ': ' + self.safe_better_repr(val)
-                for key, val in obj.items()])
-
+            if len(obj) > 2:
+                dict_repr += '<table>'
+                dict_repr += ''.join([
+                    '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
+                    '<td>' + self.safe_better_repr(val) + '</td></tr>'
+                    for key, val in sorted(obj.items(), key=lambda x: x[0])])
+                dict_repr += '</table>'
+            else:
+                dict_repr += ', '.join([
+                    self.safe_repr(key) + ': ' + self.safe_better_repr(val)
+                    for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
 
@@ -310,7 +317,15 @@ class WdbRequest(object, Bdb):
                 iter_repr = escape(obj.__class__.__name__) + '(['
                 closer = '])'
 
-            iter_repr += ', '.join([self.safe_better_repr(val) for val in obj])
+            splitter = ', '
+            if len(obj) > 2:
+                splitter += '\n'
+                iter_repr += '\n'
+                closer = '\n' + closer
+
+            iter_repr += splitter.join(
+                [self.safe_better_repr(val) for val in obj])
+
             iter_repr += closer
             return iter_repr
 
