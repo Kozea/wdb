@@ -3,21 +3,25 @@
   <head>
     <!-- le jquery -->
     <script src="/__wdb/javascripts/jquery-1.9.1.min.js"></script>
-      <script>
-        $(function () {
-          $('#activate').click(function () {
-            // Doesn't work in webkit for POSTS because of https://bugs.webkit.org/show_bug.cgi?id=23735 T_T
-            $.get('/__wdb/on').done(function () { location.reload(true); });
-            return false;
-          });
-        });
+    <script src="/__wdb/javascripts/codemirror-3.1/lib/codemirror.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/addon/runmode/runmode.js"></script>
+    <script src="/__wdb/javascripts/codemirror-3.1/mode/python/python.js"></script>
+
+    <link href="/__wdb/javascripts/codemirror-3.1/lib/codemirror.css" rel="stylesheet" type="text/css">
+    <link href="/__wdb/javascripts/codemirror-3.1/theme/tomorrow.css" rel="stylesheet" type="text/css">
+    <link href="/__wdb/stylesheets/wdb-%(theme)s.css" rel="stylesheet" type="text/css">
+    <script>
+      var trace = %(trace_dict)s,
+          title = '%(title)s',
+          subtitle = '%(subtitle)s';
     </script>
+    <script src="/__wdb/javascripts/500.js"></script>
   </head>
   <body>
-    %(message)s
-    <a id="activate" href="">Enable it and reload page</a>
-    <pre class="trace">
+    <!--
       %(trace)s
-    </pre>
+    -->
+    <h1 id="title"></h1>
+    <a id="activate" href=""></a>
   </body>
 </html>
