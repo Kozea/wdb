@@ -29,7 +29,7 @@ def bad_function():
     app.logger.warn('It will try to divide by zero')
     a = 2
     b = -2
-    c = 1 / (a + b) < 0  # <strong> Err
+    c = 1 / (a + b) < 0  # <strong> Err œ
     print c <b> a
     relay_error()
     return "Hello World!"
@@ -104,6 +104,13 @@ def wtf():
 @app.route("/long")
 def long_trace():
     return bad_recur(10)
+
+
+@app.route("/slow")
+def slow():
+    from time import sleep
+    sleep(10)
+    return 'Finally'
 
 
 @app.route("/gen")

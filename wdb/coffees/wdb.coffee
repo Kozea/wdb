@@ -161,10 +161,14 @@ make_ws = ->
 #### Loading ####
 $ =>
     setTimeout(->
-        $('#waiter').text('Wdb is tracing your request. It may take some time.')
+        $('#deactivate').click () ->
+            $.get('/__wdb/off').done(() -> location.reload(true))
+            false
+
+        $('#waiter').html('Wdb is tracing your request.<small>It may take some time.</small>')
         dot = ->
             if $('#waiter').length
-                $('#waiter').text($('#waiter').text() + '.')
+                $('#waiter small').text($('#waiter small').text() + '.')
                 setTimeout(dot, 250)
         dot()
     , 250)

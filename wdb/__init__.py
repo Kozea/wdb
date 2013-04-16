@@ -169,27 +169,41 @@ class Wdb(object):
                     hasattr(appiter, 'close') and appiter.close()
                 except WdbOff:
                     hasattr(appiter, 'close') and appiter.close()
+                    tb = sys.exc_info()[2]
+                    stack = traceback.extract_tb(tb)
+                    stack.reverse()
                     try:
                         start_response('500 INTERNAL SERVER ERROR', [
                             ('Content-Type', 'text/html')])
                         yield self._500 % dict(
-                            message='Wdb.set_trace() was called '
-                            'while wdb was off.',
-                            trace='')
+                            theme=self.theme,
+                            trace='',
+                            title='Wdb',
+                            subtitle='Set Trace (Please set Wdb On)',
+                            trace_dict=dump({'trace': stack[2:]}))
                     except:
-                        pass
-                except:
+                        log.exception('Uh oh')
+
+                except Exception as e:
                     log.exception('Exception with wdb off')
                     hasattr(appiter, 'close') and appiter.close()
+                    tb = sys.exc_info()[2]
+                    stack = traceback.extract_tb(tb)
+                    stack.reverse()
                     try:
                         start_response('500 INTERNAL SERVER ERROR', [
                             ('Content-Type', 'text/html')])
                         yield self._500 % dict(
-                            message='There was an exception in your '
-                            'request and wdb was off.',
-                            trace=traceback.format_exc())
+                            theme=self.theme,
+                            trace=traceback.format_exc(),
+                            title=type(e).__name__,
+                            subtitle=str(e),
+                            trace_dict=dump({
+                                'trace': stack,
+                            })
+                        )
                     except:
-                        pass
+                        log.exception('Uh oh')
 
             return wsgi_default(environ, start_response)
 
@@ -236,6 +250,8 @@ class WdbRequest(object, Bdb):
         self.begun = False
         self.connected = False
         self.make_web_socket(ports)
+        self.extra_vars = {}
+        self.last_obj = None
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -305,6 +321,7 @@ class WdbRequest(object, Bdb):
         def display_hook(obj):
             # That's some dirty hack
             self.hooked += self.safe_better_repr(obj)
+            self.last_obj = obj
 
         stdout, stderr = sys.stdout, sys.stderr
         if with_hook:
@@ -463,6 +480,16 @@ class WdbRequest(object, Bdb):
         current = trace[current_index]
         locals_ = map(lambda x: x[0].f_locals, stack)
 
+        def get_globals():
+            globals_ = dict(stack[current_index][0].f_globals)
+            globals_['_'] = self.last_obj
+            # Hack for function scope eval
+            globals_.update(locals_[current_index])
+            for var, val in self.extra_vars.items():
+                globals_[var] = val
+            self.extra_items = {}
+            return globals_
+
         if self.begun:
             self.send('Trace|%s' % dump({
                 'trace': trace,
@@ -541,9 +568,9 @@ class WdbRequest(object, Bdb):
                         'val': self.dmp(thing)}))
 
                 elif cmd == 'Dump':
-                    globals_ = dict(stack[current_index][0].f_globals)
                     try:
-                        thing = eval(data, globals_, locals_[current_index])
+                        thing = eval(
+                            data, get_globals(), locals_[current_index])
                     except Exception:
                         fail()
                         continue
@@ -572,16 +599,13 @@ class WdbRequest(object, Bdb):
                         except Exception:
                             fail('Unable to read from file %s' % filename)
                             continue
-                    globals_ = dict(stack[current_index][0].f_globals)
-                    # Hack for function scope eval
-                    globals_.update(locals_[current_index])
-                    globals_.setdefault('_pprint', pprint)
+
                     with self.capture_output(
                             with_hook=redir is None) as (out, err):
                         try:
                             compiled_code = compile(data, '<stdin>', 'single')
                             l = locals_[current_index]
-                            exec compiled_code in globals_, l
+                            exec compiled_code in get_globals(), l
                         except Exception:
                             self.hooked = self.handle_exc()
                     if redir:
@@ -764,7 +788,7 @@ class WdbRequest(object, Bdb):
                                     dn.replace(os.path.sep, '!') + bn +
                                     '-wdb-back-%d' % time.time()))
                             with open(fn, 'w') as f:
-                                f.write(src)
+                                f.write(src.encode('utf-8'))
                         except OSError as e:
                             self.send('Echo|%s' % dump({
                                 'for': 'Error during save',
@@ -831,7 +855,8 @@ class WdbRequest(object, Bdb):
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
-        frame.f_locals['__return__'] = return_value
+        self.obj_cache[id(return_value)] = return_value
+        self.extra_vars['__return__'] = return_value
         log.info('Returning from %r with value: %r' % (
             frame.f_code.co_name, return_value))
         self.handle_connection()
@@ -846,7 +871,9 @@ class WdbRequest(object, Bdb):
         but only if we are to stop at or just below this level."""
         log.error('Exception', exc_info=exc_info)
         type_, value, tb = exc_info
-        frame.f_locals['__exception__'] = type_, value
+        # exc = type_, value
+        self.obj_cache[id(exc_info)] = exc_info
+        self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__
         exception_description = str(value)
         self.handle_connection()

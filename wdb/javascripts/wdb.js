@@ -233,10 +233,16 @@
     setTimeout(function() {
       var dot;
 
-      $('#waiter').text('Wdb is tracing your request. It may take some time.');
+      $('#deactivate').click(function() {
+        $.get('/__wdb/off').done(function() {
+          return location.reload(true);
+        });
+        return false;
+      });
+      $('#waiter').html('Wdb is tracing your request.<small>It may take some time.</small>');
       dot = function() {
         if ($('#waiter').length) {
-          $('#waiter').text($('#waiter').text() + '.');
+          $('#waiter small').text($('#waiter small').text() + '.');
           return setTimeout(dot, 250);
         }
       };

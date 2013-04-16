@@ -14,7 +14,11 @@ body, html
 a
   color: $fg
 
-h1
+h1, #waiter
+  margin-top: .67em
+  margin-bottom: .67em
+  font-size: 2em
+  font-weight: bold
   color: $fg
   font-variant: small-caps
   small
@@ -306,3 +310,51 @@ a.inspect
 
 code, code span
   +transition(opacity 50ms)
+
+
+.trace_500
+  padding: 1em
+
+  .flno
+    color: $alt-fg
+    font-size: 1.3em
+    float: left
+
+  .fun
+    font-size: 1.2em
+    float: right
+
+  code
+    font-size: 1.3em
+    padding: .5em
+    clear: left
+
+
+#activate, #deactivate
+  position: absolute
+  display: block
+  top: 40px
+  right: 40px
+  width: 80px
+  height: 20px
+  text-decoration: none
+  background-color: lighten($bg, 5%)
+
+  &:before
+    display: block
+    height: 20px
+    width: 40px
+    text-align: center
+    color: white
+    font-variant: small-caps
+    font-weight: bold
+
+#activate:before
+  content: 'Off'
+  background-color: red
+
+#deactivate:before
+  content: 'On'
+  margin-left: 40px
+  background-color: green
+
