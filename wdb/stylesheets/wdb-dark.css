@@ -1,8 +1,23 @@
 @charset "UTF-8";
 @font-face {
   font-family: "Source Code Pro";
-  src: url('/__wdb/fonts/source-code-pro-webfont.eot');
-  src: url('/__wdb/fonts/source-code-pro-webfont.eot?#iefix') format('eot'), url('/__wdb/fonts/source-code-pro-webfont.woff') format('woff'), url('/__wdb/fonts/source-code-pro-webfont.ttf') format('truetype'), url('/__wdb/fonts/source-code-pro-webfont.otf') format('opentype'), url('/__wdb/fonts/source-code-pro-webfont.svg') format('svg');
+  src: url('/__wdb/fonts/SourceCodePro-Regular.eot');
+  src: url('/__wdb/fonts/SourceCodePro-Regular.eot?#iefix') format('eot'), url('/__wdb/fonts/SourceCodePro-Regular.woff') format('woff'), url('/__wdb/fonts/SourceCodePro-Regular.ttf') format('truetype'), url('/__wdb/fonts/SourceCodePro-Regular.svg') format('svg');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  src: url('/__wdb/fonts/SourceCodePro-Semibold.eot');
+  src: url('/__wdb/fonts/SourceCodePro-Semibold.eot?#iefix') format('eot'), url('/__wdb/fonts/SourceCodePro-Semibold.woff') format('woff'), url('/__wdb/fonts/SourceCodePro-Semibold.ttf') format('truetype'), url('/__wdb/fonts/SourceCodePro-Semibold.svg') format('svg');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  src: url('/__wdb/fonts/SourceCodePro-Bold.eot');
+  src: url('/__wdb/fonts/SourceCodePro-Bold.eot?#iefix') format('eot'), url('/__wdb/fonts/SourceCodePro-Bold.woff') format('woff'), url('/__wdb/fonts/SourceCodePro-Bold.ttf') format('truetype'), url('/__wdb/fonts/SourceCodePro-Bold.svg') format('svg');
+  font-weight: 900;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_hl\.sass}line{font-family:\000031}}
@@ -132,7 +147,7 @@
   color: #81a2be;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\000036}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\000038}}
 body, html {
   color: #cccccc;
   background-color: #1d1f21;
@@ -140,37 +155,37 @@ body, html {
   overflow: hidden;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000312}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000314}}
 a {
   color: #cccccc;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000315}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000317}}
 h1 {
   color: #cccccc;
   font-variant: small-caps;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000318}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000320}}
 h1 small {
   color: #777777;
   display: block;
   font-size: 0.5em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000323}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000325}}
 code {
   font: 12px/1.5 "Source Code Pro", monospace;
   display: block;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000327}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000329}}
 #source {
   overflow: hidden;
   width: 70%;
   float: left;
   position: relative;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000333}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000335}}
 #source > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-size: 15px;
@@ -179,7 +194,7 @@ code {
   -moz-box-shadow: inset -8px 0 20px black;
   box-shadow: inset -8px 0 20px black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000339}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000341}}
 #source > .CodeMirror.rw:after {
   position: absolute;
   top: 2em;
@@ -196,34 +211,34 @@ code {
   -o-transform: rotate(45deg);
   transform: rotate(45deg);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000351}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000353}}
 #source > .CodeMirror .CodeMirror-scroll {
   overflow-x: auto;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000354}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000356}}
 #source > .CodeMirror .CodeMirror-hscrollbar {
   bottom: -1px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000357}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000359}}
 #source > .CodeMirror .CodeMirror-linebackground {
   -webkit-transition: 250ms;
   -moz-transition: 250ms;
   -o-transition: 250ms;
   transition: 250ms;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000360}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000362}}
 #source > .CodeMirror .breakpoints {
   width: 0.6em;
   border: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000364}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000366}}
 #sourcecode, #interpreter {
   overflow: auto;
   height: 50%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000368}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000370}}
 #eval {
   width: 94%;
   vertical-align: top;
@@ -235,66 +250,66 @@ code {
   overflow: hidden;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000380}}
 #interpreter {
   font: 12px/1.5 "Source Code Pro", monospace;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000381}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000383}}
 #prompt, .prompted {
   padding: 0.5em 0 0 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000383}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000385}}
 #prompt:before, .prompted:before {
   font: 12px/1.5 "Source Code Pro", monospace;
   color: #c5c8c6;
   content: ">>> ";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000389}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000391}}
 #prompt textarea {
   color: #c5c8c6;
   font: 12px/1.5 "Source Code Pro", monospace;
   font-weight: bold;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000395}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000397}}
 #completions .base {
   color: #cccccc;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000397}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\0000399}}
 #completions .completion {
   color: #777777;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003100}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003102}}
 #completions td {
   padding: 0.25em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003103}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003105}}
 #completions td.active .base {
   color: red;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003105}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003107}}
 #completions td.active .completion {
   color: orangered;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003107}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003109}}
 #completions td.active.complete .base {
   color: #cc6666;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003110}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003112}}
 #comp-desc, #backsearch {
   color: #81a2be;
   font-style: italic;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003114}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003116}}
 .trace {
   font: 12px/1.5 "Source Code Pro", monospace;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003117}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003119}}
 #traceback {
   overflow-y: auto;
   float: right;
@@ -302,68 +317,124 @@ code {
   height: 100%;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003123}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003139}}
 .traceline {
   -webkit-transition: border 750ms;
   -moz-transition: border 750ms;
   -o-transition: border 750ms;
   transition: border 750ms;
-  margin: 0 0 0 1em;
+  margin: 0 0 1em 1em;
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
-  overflow: auto;
+  overflow: hidden;
   background-color: #1b1b1b;
-  border-right: 10px solid #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003128}}
+.traceline:before {
+  background-color: #1b1b1b;
+  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003132}}
-.traceline:before {
-  border-color: #181818 #181818 #1d1f21 #1d1f21;
+.traceline .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003134}}
+.traceline .tracefunfun .tracefun {
+  background-color: #1b1b1b;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003136}}
+.traceline .tracefunfun .tracefun:before {
+  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003147}}
+.traceline:nth-child(odd) {
   background-color: #181818;
-  border-right: 10px solid #1b1b1b;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003138}}
-.traceline:nth-child(odd) .tracefun {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003128}}
+.traceline:nth-child(odd):before {
   background-color: #181818;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003140}}
-.traceline:nth-child(odd) .tracefun:before {
   border-color: #181818 #181818 #1d1f21 #1d1f21;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003143}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003132}}
+.traceline:nth-child(odd) .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003134}}
+.traceline:nth-child(odd) .tracefunfun .tracefun {
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003136}}
+.traceline:nth-child(odd) .tracefunfun .tracefun:before {
+  border-color: #181818 #181818 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003150}}
 .traceline:hover {
-  border-color: #b6e354;
+  background-color: #0e0e0e;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003145}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003128}}
+.traceline:hover:before {
+  background-color: #0e0e0e;
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003132}}
+.traceline:hover .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003134}}
+.traceline:hover .tracefunfun .tracefun {
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003136}}
+.traceline:hover .tracefunfun .tracefun:before {
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003153}}
 .traceline.selected {
-  border-color: #ff5995;
+  background-color: #010101;
+  background-color: #010101;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003148}}
-.tracecode {
-  padding: 0.25em;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003128}}
+.traceline.selected:before {
+  background-color: #010101;
+  border-color: #010101 #010101 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003132}}
+.traceline.selected .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003134}}
+.traceline.selected .tracefunfun .tracefun {
+  background-color: #010101;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003136}}
+.traceline.selected .tracefunfun .tracefun:before {
+  border-color: #010101 #010101 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003157}}
+.traceline .tracecode {
+  padding: 0.5em;
+  padding-top: 0.25em;
   clear: both;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003152}}
-.tracefunfun {
-  background-color: #1d1f21;
-  overflow: auto;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003162}}
+.traceline .tracecode > code {
+  white-space: nowrap;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003156}}
-.tracefun {
-  /* padding: .15em; */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003165}}
+.traceline .tracefunfun {
+  overflow: hidden;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003168}}
+.traceline .tracefunfun .tracefun {
   font-weight: bolder;
   font-size: 0.8em;
   text-align: right;
   float: right;
   line-height: 1.2;
   color: #8888ff;
-  background-color: #1b1b1b;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003166}}
-.tracefun:before {
-  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003176}}
+.traceline .tracefunfun .tracefun:before {
   content: "";
   width: 0;
   height: 0;
@@ -372,44 +443,42 @@ code {
   display: inline-block;
   vertical-align: top;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003176}}
-.tracefilelno {
-  padding: 0.15em;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003185}}
+.traceline .tracefilelno {
+  padding: 0.5em;
+  padding-bottom: 0.25em;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003179}}
-.tracefile {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003189}}
+.traceline .tracefilelno .tracefile {
   color: #555555;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003182}}
-.tracelno {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003192}}
+.traceline .tracefilelno .tracelno {
   color: #999999;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003184}}
-.tracelno:before {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003194}}
+.traceline .tracefilelno .tracelno:before {
   content: ": ";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003187}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003197}}
 .prettyprint {
   border: none !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003190}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003200}}
 .CodeMirror-linenumber {
   font-size: 14px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003193}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003203}}
 .CodeMirror-linebackground {
   -webkit-transition: 1s;
   -moz-transition: 1s;
   -o-transition: 1s;
   transition: 1s;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003196}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003206}}
 .CodeMirror-linebackground:hover {
   -webkit-transition: 1s;
   -moz-transition: 1s;
@@ -417,98 +486,98 @@ code {
   transition: 1s;
   color: #8cedff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003199}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003209}}
 .CodeMirror-linebackground.ctx {
   color: white;
   background-color: #181818;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003200}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003210}}
 .CodeMirror-linebackground.ctx.ctx-top {
   border-top: 1px solid black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003202}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003212}}
 .CodeMirror-linebackground.ctx.ctx-bottom {
   border-bottom: 1px solid black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003206}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003216}}
 .CodeMirror-linebackground.ctx:before {
   color: white;
   background-color: #181818;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003209}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003219}}
 .CodeMirror-linebackground.highlighted-other {
   color: black;
   background-color: #111111 !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003212}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003222}}
 .CodeMirror-linebackground.breakpoint {
   color: #ff5995;
   background-color: rgba(255, 89, 149, 0.15) !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003215}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003225}}
 .CodeMirror-linebackground.highlighted {
   color: #b6e354;
   background-color: black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003218}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003228}}
 .CodeMirror-linebackground.highlighted:before {
   color: #b6e354;
   background-color: black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003221}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003231}}
 .CodeMirror-linebackground.ask-breakpoint {
   color: yellow;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003224}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003234}}
 a.inspect {
   text-decoration: none;
   background-color: #181818;
   border: 1px solid #111111;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003238}}
 a.inspect:hover {
   background-color: #111111;
   border: 1px solid black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003232}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003242}}
 .long {
   display: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003235}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003245}}
 .short.close:after {
   content: '…"';
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003238}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003248}}
 #comp-desc {
   text-align: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003241}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003251}}
 #comp-desc .fun_name {
   color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003244}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003254}}
 #comp-desc .fun_punct {
   color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003247}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003257}}
 #comp-desc .fun_param {
   color: #969896;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003249}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003259}}
 #comp-desc .fun_param.active {
   color: #de935f;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003252}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003262}}
 .backsearched {
   text-decoration: underline;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003255}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003265}}
 .object {
   border: 1px solid #191919;
   border-spacing: 0;
@@ -516,64 +585,64 @@ a.inspect:hover {
   width: 100%;
   font-size: 0.85em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003262}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003272}}
 .object tbody td {
   border: 2px solid #111111;
   padding: 0.2em 0.5em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003265}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003275}}
 .object tbody.hidden:not(.toggle) {
   display: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003267}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003277}}
 .object tbody:not(.toggle) tr > :first-child {
   vertical-align: top;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003270}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003280}}
 .object tbody.toggle:hover {
   background-color: #111111;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003272}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003282}}
 .object tbody.toggle td {
   text-align: center;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003274}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003284}}
 .object tbody.toggle td:after {
   content: "[-]";
   float: right;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003277}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003287}}
 .object tbody.toggle.hidden td:after {
   content: "[+]";
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003280}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003290}}
 .object .core {
   background-color: #0e0e0e;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003282}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .object .method {
   background-color: #141414;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003284}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003294}}
 .object .attr {
   background-color: #181818;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003287}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003297}}
 .nogood {
   color: red !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003290}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .nogood > .pln, .nogood > .typ {
   color: red !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003293}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003303}}
 .waiting_for_hl {
   opacity: 0.4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003297}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003307}}
 code, code span {
   -webkit-transition: opacity 50ms;
   -moz-transition: opacity 50ms;

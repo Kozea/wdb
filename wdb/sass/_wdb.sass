@@ -1,5 +1,7 @@
 @import compass/css3
-+font-face("Source Code Pro", font-files("source-code-pro-webfont.woff", "source-code-pro-webfont.ttf", "source-code-pro-webfont.otf", "source-code-pro-webfont.svg"), "source-code-pro-webfont.eot")
++font-face("Source Code Pro", font-files("SourceCodePro-Regular.woff", "SourceCodePro-Regular.ttf", "SourceCodePro-Regular.svg"), "SourceCodePro-Regular.eot", 400)
++font-face("Source Code Pro", font-files("SourceCodePro-Semibold.woff", "SourceCodePro-Semibold.ttf", "SourceCodePro-Semibold.svg"), "SourceCodePro-Semibold.eot", 700)
++font-face("Source Code Pro", font-files("SourceCodePro-Bold.woff", "SourceCodePro-Bold.ttf", "SourceCodePro-Bold.svg"), "SourceCodePro-Bold.eot", 900)
 
 @import hl
 
@@ -41,10 +43,10 @@ code
       top: 2em
       right: -2em
       content: 'Edit Mode'
-      background: black
-      color: #777
-      border-top: 1px solid #555
-      border-bottom: 1px solid #555
+      background: $code-ctx-border
+      color: $alt-fg
+      border-top: 1px solid $trace-file
+      border-bottom: 1px solid $trace-file
       padding: .2em 3em
       +rotate(45deg)
 
@@ -120,69 +122,77 @@ code
   width: 30%
   height: 100%
 
+@mixin traceline($col)
+  background-color: $col
+
+  &:before
+    background-color: $col
+    border-color: $col $col $bg $bg
+
+  .tracefunfun
+    background-color: $bg
+    .tracefun
+      background-color: $col
+      &:before
+        border-color: $col $col $bg $bg
+
 .traceline
   +transition(border 750ms)
-  margin: 0 0 0 1em
+  margin: 0 0 1em 1em
   font: $code-font
   clear: both
-  overflow: auto
+  overflow: hidden
 
-  background-color: $trace-bg
-  border-right: 10px solid $trace-alt-bg
-  &:before
-    border-color: $trace-alt-bg $trace-alt-bg $bg $bg
-    background-color: $trace-alt-bg
-    border-right: 10px solid $trace-bg
-
+  +traceline($trace-bg)
   &:nth-child(odd)
-    .tracefun
-      background-color: $trace-alt-bg
-      &:before
-        border-color: $trace-alt-bg $trace-alt-bg $bg $bg
+    +traceline($trace-alt-bg)
 
   &:hover
-    border-color: $trace-hover
+    +traceline(darken($trace-bg, 5%))
+
   &.selected
-    border-color: $trace-sel
+    +traceline(darken($trace-bg, 10%))
+    background-color: darken($trace-bg, 10%)
 
-.tracecode
-  padding: .25em
-  clear: both
+  .tracecode
+    padding: .5em
+    padding-top: .25em
+    clear: both
 
-.tracefunfun
-  background-color: $bg
-  overflow: auto
+    > code
+      white-space: nowrap
 
-.tracefun
-  /* padding: .15em;
-  font-weight: bolder
-  font-size: .8em
-  text-align: right
-  float: right
-  line-height: 1.2
-  color: $trace-fun
-  background-color: $trace-bg
+  .tracefunfun
+    overflow: hidden
 
-  &:before
-    border-color: $trace-bg $trace-bg $bg $bg
-    content: ''
-    width: 0
-    height: 0
-    border-style: solid
-    border-width: .7em
-    display: inline-block
-    vertical-align: top
+    .tracefun
+      font-weight: bolder
+      font-size: .8em
+      text-align: right
+      float: right
+      line-height: 1.2
+      color: $trace-fun
 
-.tracefilelno
-  padding: .15em
+      &:before
+        content: ''
+        width: 0
+        height: 0
+        border-style: solid
+        border-width: .7em
+        display: inline-block
+        vertical-align: top
 
-.tracefile
-  color: $trace-file
+  .tracefilelno
+    padding: .5em
+    padding-bottom: .25em
 
-.tracelno
-  color: $trace-lno
-  &:before
-    content: ': '
+    .tracefile
+      color: $trace-file
+
+    .tracelno
+      color: $trace-lno
+      &:before
+        content: ': '
 
 .prettyprint
   border: none !important
