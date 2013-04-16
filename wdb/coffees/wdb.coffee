@@ -272,13 +272,20 @@ CodeMirror.keyMap.wdb = (
 CodeMirror.commands.save = ->
     send("Save|#{cm._fn}|#{cm.getValue()}")
 
+get_mode = (fn) ->
+    ext = fn.split('.').splice(-1)[0]
+    if ext == 'py'
+        'python'
+    else if ext == 'jinja2'
+        'jinja2'
+
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
         $('#source').prepend(elt)
         $(elt).addClass(if rw then 'rw' else 'ro')
         ) , (
         value: file,
-        mode:  'python',
+        mode:  get_mode(name),
         readOnly: !rw,
         theme: cm_theme,
         keyMap: 'wdb',
@@ -333,7 +340,6 @@ select = (data) ->
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
 
     if not window.cm
-        $source.attr 'title', data.name
         create_code_mirror data.file, data.name
     else
         cm = window.cm
