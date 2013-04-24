@@ -94,8 +94,28 @@ class MetaWdbRequest(type):
             else:
                 log.warn("[Wdb] We are outside of request, "
                          "launching pdb.set_trace instead")
-                pdb.set_trace(frame or sys._getframe().f_back)
+                # pdb.set_trace(frame or sys._getframe().f_back)
+                from wsgiref.simple_server import make_server, WSGIServer
+                from SocketServer import ThreadingMixIn
+
+                class ThreadingServer(ThreadingMixIn, WSGIServer):
+                    """Threaded wsgi !"""
+
+                def trace_app(environ, start_response):
+                    # This does not work yet
+                    cls.tf()
+                    start_response('200 OK', [('Content-Type', 'text/html')])
+                    return ["Done"]
+
+                httpd = make_server(
+                    '', 2001, Wdb(trace_app),
+                    server_class=ThreadingServer)
+                try:
+                    httpd.serve_forever()
+                except:
+                    pass
                 return
+
         sys.settrace(None)
         fframe = frame = frame or sys._getframe().f_back
         while frame and frame is not self.botframe:
