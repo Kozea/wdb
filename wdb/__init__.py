@@ -18,7 +18,6 @@ from __future__ import with_statement
 
 # from _bdbdb import Bdb, BdbQuit  # Bdb with lot of log
 from bdb import Bdb, BdbQuit, Breakpoint
-import pdb
 import traceback
 from cgi import escape
 from tempfile import gettempdir
@@ -35,15 +34,18 @@ from jedi import Script
 from sys import exc_info
 from websocket import WebSocket, WsError
 from mimetypes import guess_type
-from hashlib import sha512
+from random import randint
 try:
     from urlparse import parse_qs
 except ImportError:
     def parse_qs(qs):
         return dict([x.split("=") for x in qs.split("&")])
-from pprint import pprint, pformat
-from gc import get_objects
+
 from urllib import quote
+from multiprocessing import active_children, Process
+from signal import SIGKILL
+import atexit
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -74,6 +76,57 @@ class WdbOff(Exception):
     pass
 
 
+class AltServer(Process):
+
+    def __init__(self, ports, *args, **kwargs):
+        log.debug('Starting alt server with ports %s' % ports)
+        self.ports = ports
+        super(AltServer, self).__init__(*args, **kwargs)
+        self.daemon = 1
+        self.start()
+
+    def run(self):
+        from wsgiref.simple_server import (
+            make_server, WSGIServer, WSGIRequestHandler)
+        from SocketServer import ThreadingMixIn
+
+        class ThreadingServer(ThreadingMixIn, WSGIServer):
+            """Threaded wsgi !"""
+
+        class SilentHandler(WSGIRequestHandler):
+
+            def log_message(self, f, *args):
+                return
+
+        def trace_app(environ, start_response):
+            path = environ.get('PATH_INFO', '')
+            # Serving statics
+            if path.startswith('/__wdb/'):
+                filename = path.replace('/__wdb/', '')
+                log.debug('Getting static "%s"' % filename)
+                start_response(
+                    '200 OK', [('Content-Type', guess_type(filename)[0])])
+                with open(os.path.join(BASE_PATH, filename)) as f:
+                    return f.read(),
+
+            # Serving wdb page
+            log.debug('Getting wdb page from fork')
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            with open(os.path.join(RES_PATH, 'wdb.html')) as f:
+                return f.read() % dict(
+                    post='false', theme='dark', alt_ports=self.ports),
+
+        httpd = make_server(
+            '', 2001, trace_app,
+            server_class=ThreadingServer, handler_class=SilentHandler)
+        httpd.serve_forever()
+
+    @staticmethod
+    def killall():
+        for child in active_children():
+            os.kill(child.pid, SIGKILL)
+
+
 class MetaWdbRequest(type):
     def __init__(cls, name, bases, dict):
         MetaWdbRequest.started = False
@@ -92,29 +145,16 @@ class MetaWdbRequest(type):
             if MetaWdbRequest.started:
                 raise WdbOff()
             else:
-                log.warn("[Wdb] We are outside of request, "
-                         "launching pdb.set_trace instead")
-                # pdb.set_trace(frame or sys._getframe().f_back)
-                from wsgiref.simple_server import make_server, WSGIServer
-                from SocketServer import ThreadingMixIn
-
-                class ThreadingServer(ThreadingMixIn, WSGIServer):
-                    """Threaded wsgi !"""
-
-                def trace_app(environ, start_response):
-                    # This does not work yet
-                    cls.tf()
-                    start_response('200 OK', [('Content-Type', 'text/html')])
-                    return ["Done"]
-
-                httpd = make_server(
-                    '', 2001, Wdb(trace_app),
-                    server_class=ThreadingServer)
-                try:
-                    httpd.serve_forever()
-                except:
-                    pass
-                return
+                log.warn(
+                    'Wdb set_trace was called outside of a wsgi application. '
+                    'Please open http://localhost:2001/ in your browser.')
+                # Spawning server to debug outside WSGI set_trace
+                rand_ports = [randint(10000, 60000) for _ in range(5)]
+                AltServer(rand_ports)
+                self = WdbRequest(rand_ports)
+                self.quitting = 0
+                self.begun = False
+                self.reset()
 
         sys.settrace(None)
         fframe = frame = frame or sys._getframe().f_back
@@ -258,7 +298,7 @@ class Wdb(object):
         start_response('200 OK', [('Content-Type', 'text/html')])
         log.info('Starting new request')
 
-        yield self.html % dict(post=post, theme=self.theme)
+        yield self.html % dict(post=post, theme=self.theme, alt_ports='null')
 
 
 class WdbRequest(object, Bdb):
@@ -285,6 +325,8 @@ class WdbRequest(object, Bdb):
                 args = bp.file, bp.line, bp.temporary, bp.cond
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
+
+        atexit.register(lambda: self.die())
 
     def safe_repr(self, obj):
         try:
@@ -944,6 +986,9 @@ class WdbRequest(object, Bdb):
         sys.call_tracing(p.run, ('1/0', g, l))
         sys.settrace(self.trace_dispatch)
         self.lastcmd = p.lastcmd
+
+    def die(self):
+        self.send('Die')
 
 
 def set_trace(frame=None):

@@ -30,9 +30,11 @@ cwd = null
 backsearch = null
 get_random_port = () ->
     10000 + parseInt(Math.random() * 50000)
-__ws_ports = []
-for i in [0..5]
-    __ws_ports.push(get_random_port())
+__ws_ports = __ws_alt_ports
+if not __ws_ports
+    __ws_ports = []
+    for i in [0..5]
+        __ws_ports.push(get_random_port())
 __ws_port_index = 0
 cmd_hist = {}
 session_cmd_hist = {}
@@ -152,6 +154,7 @@ make_ws = ->
             when 'Dump'       then dump
             when 'Suggest'    then suggest
             when 'Log'        then log
+            when 'Die'        then die
         if not treat
             console.log 'Unknown command', cmd
         else
@@ -186,6 +189,10 @@ $ =>
         document.write page
         document.close()
 
+    @ws = ws = make_ws()
+    if __ws_alt_ports  # alt_ports -> Outside of WSGI
+        return
+
     if __ws_post
         xhr = $.ajax(location.href,
             type: 'POST',
@@ -202,7 +209,6 @@ $ =>
             if data.responseText
                 end(data.responseText)
 
-    @ws = ws = make_ws()
 
     @onbeforeunload = ->
         try
@@ -642,6 +648,10 @@ searchback_stop = (validate) ->
     $('#backsearch').html('')
     backsearch = null
 
+die = ->
+    $('#source,#traceback').remove()
+    $('h1').html('Dead<small>Program has exited</small>')
+    ws.close()
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
