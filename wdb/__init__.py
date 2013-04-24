@@ -129,9 +129,13 @@ class Wdb(object):
             if not self.enabled:
                 MetaWdbRequest._last_inst = None
             start_response('200 OK', [('Content-Type', 'text/html')])
-            return ('<h1>Wdb is now %s</h1>' % (
-                '<span style="color: green">ON</span>' if self.enabled else
-                '<span style="color: red">OFF</span>'),)
+            return self._500 % dict(
+                trace_dict={}, trace='',
+                title='Switched ' + ('ON' if self.enabled else 'OFF'),
+                subtitle='You can now go back to your normal pages',
+                theme=self.theme,
+                state=('de' if self.enabled else ''))
+
         elif path.startswith('/__wdb/'):
             filename = path.replace('/__wdb/', '')
             log.debug('Getting static "%s"' % filename)
@@ -178,6 +182,7 @@ class Wdb(object):
                         yield self._500 % dict(
                             theme=self.theme,
                             trace='',
+                            state='',
                             title='Wdb',
                             subtitle='Set Trace (Please set Wdb On)',
                             trace_dict=dump({'trace': stack[2:]}))
@@ -198,6 +203,7 @@ class Wdb(object):
                             trace=traceback.format_exc(),
                             title=type(e).__name__,
                             subtitle=str(e),
+                            state='',
                             trace_dict=dump({
                                 'trace': stack,
                             })
