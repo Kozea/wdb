@@ -714,3 +714,15 @@ code, code span {
   margin-left: 40px;
   background-color: green;
 }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003365}}
+.CodeMirror-dialog {
+  background-color: #e6e6e6;
+  border-bottom-color: white;
+  color: black;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003370}}
+.cm-searching {
+  background: white;
+}
