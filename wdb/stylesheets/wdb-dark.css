@@ -715,6 +715,18 @@ code, code span {
   background-color: green;
 }
 
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003365}}
+.CodeMirror-dialog {
+  background-color: #050606;
+  border-bottom-color: #1d1f21;
+  color: #cccccc;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/_wdb\.sass}line{font-family:\00003370}}
+.cm-searching {
+  background: #35393c;
+}
+
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb\/sass\/wdb-dark\.sass}line{font-family:\000035}}
 ::-webkit-scrollbar {
   background: #1d1f21;

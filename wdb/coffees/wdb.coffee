@@ -377,6 +377,13 @@ select = (data) ->
     $hline = $ '#source .highlighted'
     $scroll.scrollTop $hline.offset().top - $scroll.offset().top + $scroll.scrollTop() - $scroll.height() / 2
 
+ellipsize = (code_elt) ->
+    code_elt.find('span.cm-string').each ->
+        txt = $(@).text()
+        if txt.length > 128
+            $(@).text ''
+            $(@).append $('<span class="short close">').text(txt.substr(0, 128))
+            $(@).append $('<span class="long">').text(txt.substr(128))
 
 code = (parent, code, classes=[], html=false) ->
     if html
@@ -395,6 +402,7 @@ code = (parent, code, classes=[], html=false) ->
             setTimeout (->
                 CodeMirror.runMode $(span).text(), "python", span
                 $(span).removeClass('waiting_for_hl')
+                ellipsize code_elt
             ), 50
     else
         code_elt = $('<code>', 'class': 'cm-s-' + cm_theme)
@@ -402,13 +410,8 @@ code = (parent, code, classes=[], html=false) ->
             code_elt.addClass(cls)
         parent.append code_elt
         CodeMirror.runMode code, "python", code_elt.get(0)
+        ellipsize code_elt
 
-    code_elt.find('span').each ->
-        txt = $(@).text()
-        if txt.length > 128
-            $(@).text ''
-            $(@).append $('<span class="short close">').text(txt.substr(0, 128))
-            $(@).append $('<span class="long">').text(txt.substr(128))
     code_elt
 
 
