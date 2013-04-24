@@ -1,8 +1,8 @@
 a = 2
 b = 4
-import wdb; wdb.set_trace()
 c = a + b
+import wdb; wdb.set_trace()
 print c
-d = c / 2
+d = c / 0
 print d
 print 'The end'
