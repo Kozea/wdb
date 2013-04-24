@@ -318,6 +318,7 @@ class WdbRequest(object, Bdb):
         self.make_web_socket(ports)
         self.extra_vars = {}
         self.last_obj = None
+        self._wait_for_mainpyfile = 0
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -919,6 +920,8 @@ class WdbRequest(object, Bdb):
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
+        if self._wait_for_mainpyfile:
+            return
         if self.stop_here(frame):
             fun = frame.f_code.co_name
             log.info('Calling: %r' % fun)
@@ -930,6 +933,10 @@ class WdbRequest(object, Bdb):
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
+        if self._wait_for_mainpyfile:
+            if (self.mainpyfile != self.canonic(frame.f_code.co_filename)
+                or frame.f_lineno <= 0):
+                return
         log.info('Stopping at line %r:%d' % (
             frame.f_code.co_filename, frame.f_lineno))
         self.handle_connection()
@@ -938,6 +945,8 @@ class WdbRequest(object, Bdb):
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
+        if self._wait_for_mainpyfile:
+            return
         self.obj_cache[id(return_value)] = return_value
         self.extra_vars['__return__'] = return_value
         log.info('Returning from %r with value: %r' % (
@@ -952,6 +961,8 @@ class WdbRequest(object, Bdb):
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
+        if self._wait_for_mainpyfile:
+            return
         log.error('Exception', exc_info=exc_info)
         type_, value, tb = exc_info
         # exc = type_, value
