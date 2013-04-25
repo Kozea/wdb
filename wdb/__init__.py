@@ -60,7 +60,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(30)
+log.setLevel(10)
 
 
 class ReprEncoder(JSONEncoder):
@@ -933,10 +933,12 @@ class WdbRequest(object, Bdb):
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
+        log.debug('LINE')
         if self._wait_for_mainpyfile:
-            if (self.mainpyfile != self.canonic(frame.f_code.co_filename)
-                or frame.f_lineno <= 0):
+            if (self.mainpyfile != self.canonic(frame.f_code.co_filename) or
+                    frame.f_lineno <= 0):
                 return
+            self._wait_for_mainpyfile = 0
         log.info('Stopping at line %r:%d' % (
             frame.f_code.co_filename, frame.f_lineno))
         self.handle_connection()
@@ -961,6 +963,7 @@ class WdbRequest(object, Bdb):
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
+        log.debug('EXC')
         if self._wait_for_mainpyfile:
             return
         log.error('Exception', exc_info=exc_info)

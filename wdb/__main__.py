@@ -25,6 +25,14 @@ def main():
     self.begun = False
     self.reset()
 
+    frame = sys._getframe()
+    while frame:
+        frame.f_trace = self.trace_dispatch
+        self.botframe = frame
+        frame = frame.f_back
+    self.stopframe = sys._getframe().f_back
+    self.stoplineno = -1
+    sys.settrace(self.trace_dispatch)
     import __main__
     __main__.__dict__.clear()
     __main__.__dict__.update({
