@@ -41,7 +41,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(30)
+log.setLevel(10)
 
 
 class WdbOff(Exception):
@@ -55,6 +55,7 @@ class AltServer(Process):
     def __init__(self, ports, *args, **kwargs):
         log.debug('Starting alt server with ports %s' % ports)
         self.ports = ports
+        self.http_port = 2001
         super(AltServer, self).__init__(*args, **kwargs)
         self.daemon = 1
         self.start()
@@ -92,9 +93,9 @@ class AltServer(Process):
             with open(os.path.join(RES_PATH, 'wdb.html')) as f:
                 return f.read() % dict(
                     post='false', theme='dark', alt_ports=self.ports),
-
+        port = self.http_port
         httpd = make_server(
-            '', 2001, trace_app,
+            '', port, trace_app,
             server_class=ThreadingServer, handler_class=SilentHandler)
 
         # Monkey patch httpserver to launch webbrowser.open just in time
@@ -103,7 +104,7 @@ class AltServer(Process):
 
         def new_serve_forever(self):
             import webbrowser
-            webbrowser.open('http://localhost:2001/')
+            webbrowser.open('http://localhost:%d/' % port)
             old_serve_forever(self)
         HTTPServer.serve_forever = new_serve_forever
 
@@ -141,8 +142,7 @@ class MetaWdbRequest(type):
             else:
                 # Wdb was not init: we are outside any WSGI Request
                 log.warn(
-                    'Wdb set_trace was called outside of a wsgi application. '
-                    'Debugger is now running at http://localhost:2001/.')
+                    'Wdb set_trace was called outside of a wsgi application.')
 
                 # Spawn a server to inspect code throught wdb
                 wdbr = Wdb.make_server()
@@ -681,6 +681,7 @@ class WdbRequest(object, Bdb):
 
     def die(self):
         """That's the end my friend"""
+        log.info('Dying')
         self.send('Die')
 
 

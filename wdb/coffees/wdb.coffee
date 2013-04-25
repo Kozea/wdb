@@ -652,6 +652,8 @@ die = ->
     $('#source,#traceback').remove()
     $('h1').html('Dead<small>Program has exited</small>')
     ws.close()
+    if __ws_alt_ports
+        setTimeout (-> close()), 1000
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->

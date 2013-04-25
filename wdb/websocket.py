@@ -26,7 +26,7 @@ import struct
 import sys
 
 log = get_color_logger('wdb-socket')
-log.setLevel(30)
+log.setLevel(10)
 
 OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',
@@ -226,7 +226,7 @@ class WebSocket(object):
         try:
             self.peer.sendall(data)
         except:
-            log.exception('[%d] Error on socket send' % self.port)
+            log.exception('[%d] Error on socket send (%s)' % (self.port, data))
             raise WsBroken()
 
     def handshake(self, header):

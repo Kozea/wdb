@@ -1,4 +1,5 @@
 import sys
+import threading
 import os
 from bdb import BdbQuit
 from wdb import Wdb
@@ -42,6 +43,7 @@ def main():
 
     # Set trace with wdb
     sys.settrace(wdbr.trace_dispatch)
+    threading.settrace(wdbr.trace_dispatch)
     try:
         exec cmd in __main__.__dict__, __main__.__dict__
     except BdbQuit:
@@ -49,6 +51,7 @@ def main():
     finally:
         wdbr.quitting = 1
         sys.settrace(None)
+        threading.settrace(None)
 
 
 if __name__ == '__main__':
