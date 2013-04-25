@@ -12,7 +12,7 @@ import os
 import sys
 import time
 import traceback
-log = get_color_logger('wdb')
+log = get_color_logger('wdb-ui')
 
 
 class ReprEncoder(JSONEncoder):
@@ -124,14 +124,12 @@ class Interaction(object):
                         'for': 'Error in Wdb, this is bad',
                         'val': exc + '<br>' + link
                     }))
-                    stop = True
                 except:
                     self.db.send('Echo|%s' % dump({
                         'for': 'Too many errors',
                         'val': ("Don't really know what to say. "
                                 "Maybe it will work tomorrow.")
                     }))
-                    stop = True
 
     def interact(self):
         try:
@@ -249,27 +247,27 @@ class Interaction(object):
         self.db.send('Pong')
 
     def do_step(self, data):
-        if hasattr(self, 'botframe'):
+        if hasattr(self.db, 'botframe'):
             self.db.set_step()
         return True
 
     def do_next(self, data):
-        if hasattr(self, 'botframe'):
+        if hasattr(self.db, 'botframe'):
             self.db.set_next(self.current_frame)
         return True
 
     def do_continue(self, data):
-        if hasattr(self, 'botframe'):
+        if hasattr(self.db, 'botframe'):
             self.db.set_continue()
         return True
 
     def do_return(self, data):
-        if hasattr(self, 'botframe'):
+        if hasattr(self.db, 'botframe'):
             self.db.set_return(self.current_frame)
         return True
 
     def do_until(self, data):
-        if hasattr(self, 'botframe'):
+        if hasattr(self.db, 'botframe'):
             self.db.set_until(self.current_frame)
         return True
 

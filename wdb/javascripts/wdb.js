@@ -917,7 +917,12 @@
   die = function() {
     $('#source,#traceback').remove();
     $('h1').html('Dead<small>Program has exited</small>');
-    return ws.close();
+    ws.close();
+    if (__ws_alt_ports) {
+      return setTimeout((function() {
+        return close();
+      }), 1000);
+    }
   };
 
   register_handlers = function() {
