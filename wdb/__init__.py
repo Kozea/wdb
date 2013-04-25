@@ -64,19 +64,24 @@ log.setLevel(30)
 
 
 class ReprEncoder(JSONEncoder):
+    """JSON encoder using repr for objects"""
+
     def default(self, obj):
         return repr(obj)
 
 
 def dump(o):
+    """Shortcut to json.dumps with ReprEncoder"""
     return dumps(o, cls=ReprEncoder, sort_keys=True)
 
 
 class WdbOff(Exception):
+    """Wdb is disabled"""
     pass
 
 
 class AltServer(Process):
+    """Process spawning a wsgi server to serve wdb when used outside wsgi"""
 
     def __init__(self, ports, *args, **kwargs):
         log.debug('Starting alt server with ports %s' % ports)
@@ -86,19 +91,22 @@ class AltServer(Process):
         self.start()
 
     def run(self):
+        """Run the process"""
         from wsgiref.simple_server import (
             make_server, WSGIServer, WSGIRequestHandler)
         from SocketServer import ThreadingMixIn
 
         class ThreadingServer(ThreadingMixIn, WSGIServer):
-            """Threaded wsgi !"""
+            """Threaded wsgi"""
 
         class SilentHandler(WSGIRequestHandler):
+            """Silent handler"""
 
             def log_message(self, f, *args):
                 return
 
         def trace_app(environ, start_response):
+            """Served wsgi app"""
             path = environ.get('PATH_INFO', '')
             # Serving statics
             if path.startswith('/__wdb/'):
@@ -135,13 +143,10 @@ class AltServer(Process):
         except KeyboardInterrupt:
             pass
 
-    @staticmethod
-    def killall():
-        for child in active_children():
-            os.kill(child.pid, SIGKILL)
-
 
 class MetaWdbRequest(type):
+    """Metaclass of Wdbrequest"""
+
     def __init__(cls, name, bases, dict):
         MetaWdbRequest.started = False
         try:
@@ -190,11 +195,13 @@ class Wdb(object):
 
     @property
     def html(self):
+        """Property used to return the wdb page"""
         with open(os.path.join(RES_PATH, 'wdb.html')) as f:
             return f.read()
 
     @property
     def _500(self):
+        """Property used to return the wdb error page"""
         with open(os.path.join(RES_PATH, '500.html')) as f:
             return f.read()
 
@@ -206,7 +213,9 @@ class Wdb(object):
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
+
         if path in ('/__wdb/on', '/__wdb/off'):
+            # Enable / Disable wdb
             self.enabled = path.endswith('on')
             if not self.enabled:
                 MetaWdbRequest._last_inst = None
@@ -219,32 +228,38 @@ class Wdb(object):
                 state=('de' if self.enabled else ''))
 
         elif path.startswith('/__wdb/'):
+            # Serve static files
             filename = path.replace('/__wdb/', '')
             log.debug('Getting static "%s"' % filename)
             return self.static_request(
                 environ, start_response, filename)
+
         elif ((self.enabled or path == '/__wdb') and
               'text/html' in environ.get('HTTP_ACCEPT', '')):
+            # Send page that will get the real page back in ajax
             log.debug('Sending fake page (%s) for %s' % (
                 environ['HTTP_ACCEPT'], path))
             return self.first_request(environ, start_response)
+
         elif environ.get('HTTP_X_DEBUGGER', '').startswith('WDB'):
+            # Send page that will get the real page back in ajax
             ports = map(
                 int, environ['HTTP_X_DEBUGGER'].split('-')[1].split(','))
-            log.debug('Sending real page (%s) with exception'
-                      ' handling for %s' % (
+            log.debug('Sending real page (%s) with tracing function on'
+                      ' for %s' % (
                           environ.get('HTTP_ACCEPT', ''), path))
             app = self.app
             if path == '/__wdb':
+                # Set trace on url /__wdb
                 def set_trace(environ, start_response):
                     start_response('200 OK', [('Content-Type', 'text/html')])
                     WdbRequest.tf()
                     yield "Done"
                 app = set_trace
-            return WdbRequest(ports).wsgi_trace(
-                app, environ, start_response)
+            return WdbRequest(ports).wsgi_trace(app, environ, start_response)
         else:
             log.debug("Serving %s" % path)
+            # Serving normally with exception handling
 
             def wsgi_default(environ, start_response):
                 appiter = None
@@ -296,11 +311,13 @@ class Wdb(object):
             return wsgi_default(environ, start_response)
 
     def static_request(self, environ, start_response, filename):
+        """Return static file"""
         start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
         with open(os.path.join(BASE_PATH, filename)) as f:
             yield f.read()
 
     def first_request(self, environ, start_response):
+        """Return page that will call real request in ajax"""
         post = 'null'
         if environ.get('REQUEST_METHOD', '') == 'POST':
             post = {}
@@ -324,6 +341,7 @@ class Wdb(object):
 
     @staticmethod
     def make_server():
+        """Make a wsgi server and start a WdbRequest"""
         rand_ports = [randint(10000, 60000) for _ in range(5)]
         AltServer(rand_ports)
         wdbr = WdbRequest(rand_ports)
@@ -361,12 +379,14 @@ class WdbRequest(object, Bdb):
         atexit.register(lambda: self.die())
 
     def safe_repr(self, obj):
+        """Like a repr but without exception"""
         try:
             return repr(obj)
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
     def safe_better_repr(self, obj):
+        """Repr with inspect links on objects"""
         try:
             rv = self.better_repr(obj)
         except Exception:
@@ -379,6 +399,7 @@ class WdbRequest(object, Bdb):
             id(obj), escape(repr(obj)))
 
     def better_repr(self, obj):
+        """Repr with html decorations"""
         if isinstance(obj, dict):
             if type(obj) != dict:
                 dict_repr = type(obj).__name__ + '({'
@@ -431,6 +452,7 @@ class WdbRequest(object, Bdb):
 
     @contextmanager
     def capture_output(self, with_hook=True):
+        """Steal stream output, return them in string, restore them"""
         self.hooked = ''
 
         def display_hook(obj):
@@ -456,7 +478,10 @@ class WdbRequest(object, Bdb):
             sys.stdout, sys.stderr = stdout, stderr
 
     def dmp(self, thing):
+        """Dump the content of an object in a dict for wdb.js"""
+
         def safe_getattr(key):
+            """Avoid crash on getattr"""
             try:
                 return getattr(thing, key)
             except Exception as e:
@@ -473,6 +498,8 @@ class WdbRequest(object, Bdb):
         )
 
     def make_web_socket(self, ports):
+        """Create a web socket"""
+
         log.info('Creating WebSocket')
         for port in ports:
             self.ws = WebSocket('0.0.0.0', port)
@@ -483,7 +510,10 @@ class WdbRequest(object, Bdb):
         raise WsError('No port could be opened')
 
     def wsgi_trace(self, app, environ, start_response):
+        """WSGI with a tracing function activated"""
+
         def wsgi_with_trace(environ, start_response):
+            """Inner WSGI gen"""
             self.quitting = 0
             self.begun = False
             self.reset()
@@ -511,10 +541,12 @@ class WdbRequest(object, Bdb):
         return wsgi_with_trace(environ, start_response)
 
     def get_file(self, filename):
+        """Get file source from cache"""
         checkcache(filename)
         return ''.join(getlines(filename))
 
     def handle_connection(self):
+        """Check connection state, and try to reconnect if it's broken"""
         if self.connected:
             try:
                 self.send('Ping')
@@ -526,6 +558,7 @@ class WdbRequest(object, Bdb):
             self.connected = True
 
     def get_trace(self, frame, tb, w_code=None):
+        """Get a dict of the traceback for wdb.js use"""
         frames = []
         stack, current = self.get_stack(frame, tb)
 
@@ -554,6 +587,7 @@ class WdbRequest(object, Bdb):
         return stack, frames, current
 
     def handle_exc(self):
+        """Return a formated exception traceback for wdb.js use"""
         type_, value = exc_info()[:2]
         return '<a title="%s">%s: %s</a>' % (
             escape(traceback.format_exc().replace('"', '\'')),
@@ -562,6 +596,7 @@ class WdbRequest(object, Bdb):
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Set Trace'):
+        """Entry point of user interaction"""
         if not self.ws:
             raise BdbQuit()
         try:
@@ -570,13 +605,16 @@ class WdbRequest(object, Bdb):
         except WsError:
             log.exception('Websocket Error during interaction. Starting again')
             self.handle_connection()
+            # Recursive call to restart interaction on ws crash
             self.interaction(
                 frame, tb, exception, exception_description)
 
     def send(self, data):
+        """Send data through websocket"""
         self.ws.send(data)
 
     def receive(self):
+        """Receive data through websocket"""
         message = None
         while not message:
             rv = self.ws.receive()
@@ -588,14 +626,17 @@ class WdbRequest(object, Bdb):
     def _interaction(
             self, frame, tb,
             exception, exception_description):
+        """User interaction handling blocking on socket receive"""
 
         log.debug('Interaction for %r %r %r %r' % (
             frame, tb, exception, exception_description))
         stack, trace, current_index = self.get_trace(frame, tb)
         current = trace[current_index]
+        # Copy locals to avoid strange cpython behaviour
         locals_ = map(lambda x: x[0].f_locals, stack)
 
         def get_globals():
+            """Get enriched globals"""
             globals_ = dict(stack[current_index][0].f_globals)
             globals_['_'] = self.last_obj
             # Hack for function scope eval
@@ -606,6 +647,7 @@ class WdbRequest(object, Bdb):
             return globals_
 
         if self.begun:
+            # Each new state sends the trace and selects a frame
             self.send('Trace|%s' % dump({
                 'trace': trace,
                 'cwd': os.getcwd()
@@ -625,8 +667,10 @@ class WdbRequest(object, Bdb):
                 try:
                     message = self.receive()
                 except KeyboardInterrupt:
+                    # Quit on KeyboardInterrupt
                     message = 'Quit'
 
+                # Parse received message
                 if '|' in message:
                     pipe = message.index('|')
                     cmd = message[:pipe]
@@ -636,6 +680,7 @@ class WdbRequest(object, Bdb):
                     data = ''
 
                 def fail(title=None, message=None):
+                    """Send back captured exceptions"""
                     if message is None:
                         message = self.handle_exc()
                     else:
@@ -929,6 +974,7 @@ class WdbRequest(object, Bdb):
                     log.warn('Unknown command %s' % cmd)
 
             except BdbQuit:
+                # This will be handled by caller
                 raise
             except Exception:
                 try:
@@ -1007,16 +1053,19 @@ class WdbRequest(object, Bdb):
         self.interaction(frame, tb, exception, exception_description)
 
     def do_clear(self, arg):
+        """Breakpoint clearing implementation"""
         log.info('Closing %r' % arg)
         self.clear_bpbynumber(arg)
 
     def dispatch_exception(self, frame, arg):
+        """Always break on exception (This is different from pdb behaviour)"""
         self.user_exception(frame, arg)
         if self.quitting:
             raise BdbQuit
         return self.trace_dispatch
 
-    def recursive(self, g, l):
+    def _recursive(self, g, l):
+        """Inspect wdb with pdb"""
         # Inspect curent debugger vars through pdb
         sys.settrace(None)
         from pdb import Pdb
@@ -1026,8 +1075,10 @@ class WdbRequest(object, Bdb):
         self.lastcmd = p.lastcmd
 
     def die(self):
+        """That's the end my friend"""
         self.send('Die')
 
 
 def set_trace(frame=None):
+    """Set trace on current line, or on given frame"""
     WdbRequest.tf(frame or sys._getframe().f_back)
