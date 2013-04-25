@@ -16,7 +16,7 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# from _bdbdb import Bdb, BdbQuit  # Bdb with lot of log
+# from _bdbdb import Bdb, BdbQuit, Breakpoint  # Bdb with lot of log
 from bdb import Bdb, BdbQuit, Breakpoint
 import traceback
 from cgi import escape
@@ -60,7 +60,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(10)
+log.setLevel(30)
 
 
 class ReprEncoder(JSONEncoder):
@@ -119,7 +119,21 @@ class AltServer(Process):
         httpd = make_server(
             '', 2001, trace_app,
             server_class=ThreadingServer, handler_class=SilentHandler)
-        httpd.serve_forever()
+
+        # Monkey patch httpserver to launch webbrowser.open just in time
+        from BaseHTTPServer import HTTPServer
+        old_serve_forever = HTTPServer.serve_forever
+
+        def new_serve_forever(self):
+            import webbrowser
+            webbrowser.open('http://localhost:2001/')
+            old_serve_forever(self)
+        HTTPServer.serve_forever = new_serve_forever
+
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
 
     @staticmethod
     def killall():
@@ -139,29 +153,37 @@ class MetaWdbRequest(type):
         MetaWdbRequest._last_inst = None
 
     def tf(cls, frame=None):
-        self = MetaWdbRequest._last_inst
+        """Set trace in frame or in current frame"""
         log.info('Setting trace')
-        if not self:
+
+        # Get the last request which must be the current
+        wdbr = MetaWdbRequest._last_inst
+        if not wdbr:
+            # If there's none:
+
             if MetaWdbRequest.started:
+                # But Wdb was init: wdb is disabled
                 raise WdbOff()
             else:
+                # Wdb was not init: we are outside any WSGI Request
                 log.warn(
                     'Wdb set_trace was called outside of a wsgi application. '
-                    'Please open http://localhost:2001/ in your browser.')
-                # Spawning server to debug outside WSGI set_trace
-                rand_ports = [randint(10000, 60000) for _ in range(5)]
-                AltServer(rand_ports)
-                self = WdbRequest(rand_ports)
-                self.quitting = 0
-                self.begun = False
-                self.reset()
+                    'Debugger is now running at http://localhost:2001/.')
 
+                # Spawn a server to inspect code throught wdb
+                wdbr = Wdb.make_server()
+
+        # Removing current global tracing function if any
         sys.settrace(None)
-        fframe = frame = frame or sys._getframe().f_back
-        while frame and frame is not self.botframe:
+        frame = frame or sys._getframe().f_back
+        top_frame = frame
+        # Remove local tracing functions if any
+        while frame and frame is not wdbr.botframe:
             del frame.f_trace
             frame = frame.f_back
-        self.set_trace(fframe)
+
+        # Set trace to the top frame
+        wdbr.set_trace(top_frame)
 
 
 class Wdb(object):
@@ -300,6 +322,16 @@ class Wdb(object):
 
         yield self.html % dict(post=post, theme=self.theme, alt_ports='null')
 
+    @staticmethod
+    def make_server():
+        rand_ports = [randint(10000, 60000) for _ in range(5)]
+        AltServer(rand_ports)
+        wdbr = WdbRequest(rand_ports)
+        wdbr.quitting = 0
+        wdbr.begun = False
+        wdbr.reset()
+        return wdbr
+
 
 class WdbRequest(object, Bdb):
     """Wdb debugger main class"""
@@ -318,7 +350,6 @@ class WdbRequest(object, Bdb):
         self.make_web_socket(ports)
         self.extra_vars = {}
         self.last_obj = None
-        self._wait_for_mainpyfile = 0
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -591,7 +622,11 @@ class WdbRequest(object, Bdb):
 
         while True:
             try:
-                message = self.receive()
+                try:
+                    message = self.receive()
+                except KeyboardInterrupt:
+                    message = 'Quit'
+
                 if '|' in message:
                     pipe = message.index('|')
                     cmd = message[:pipe]
@@ -920,8 +955,6 @@ class WdbRequest(object, Bdb):
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
-        if self._wait_for_mainpyfile:
-            return
         if self.stop_here(frame):
             fun = frame.f_code.co_name
             log.info('Calling: %r' % fun)
@@ -934,11 +967,6 @@ class WdbRequest(object, Bdb):
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
         log.debug('LINE')
-        if self._wait_for_mainpyfile:
-            if (self.mainpyfile != self.canonic(frame.f_code.co_filename) or
-                    frame.f_lineno <= 0):
-                return
-            self._wait_for_mainpyfile = 0
         log.info('Stopping at line %r:%d' % (
             frame.f_code.co_filename, frame.f_lineno))
         self.handle_connection()
@@ -947,8 +975,6 @@ class WdbRequest(object, Bdb):
 
     def user_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
-        if self._wait_for_mainpyfile:
-            return
         self.obj_cache[id(return_value)] = return_value
         self.extra_vars['__return__'] = return_value
         log.info('Returning from %r with value: %r' % (
@@ -964,8 +990,6 @@ class WdbRequest(object, Bdb):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
         log.debug('EXC')
-        if self._wait_for_mainpyfile:
-            return
         log.error('Exception', exc_info=exc_info)
         type_, value, tb = exc_info
         # exc = type_, value

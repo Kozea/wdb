@@ -197,6 +197,8 @@ class WebSocket(object):
     def _recv(self):
         try:
             packet = self.peer.recv(4096)
+        except KeyboardInterrupt:
+            raise
         except:
             log.exception('[%d] Error on socket receive' % self.port)
             raise WsBroken()
