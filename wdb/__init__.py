@@ -17,43 +17,24 @@ from __future__ import with_statement
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # from _bdbdb import Bdb, BdbQuit, Breakpoint  # Bdb with lot of log
-from bdb import Bdb, BdbQuit, Breakpoint
-import traceback
-from cgi import escape
-from tempfile import gettempdir
-from shutil import move
-try:
-    from json import dumps, JSONEncoder
-except ImportError:
-    from simplejson import dumps, JSONEncoder
 
+from _compat import StringIO, parse_qs
+from bdb import Bdb, BdbQuit, Breakpoint
+from cgi import escape
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
-from jedi import Script
-from sys import exc_info
-from websocket import WebSocket, WsError
 from mimetypes import guess_type
+from multiprocessing import Process
 from random import randint
-try:
-    from urlparse import parse_qs
-except ImportError:
-    def parse_qs(qs):
-        return dict([x.split("=") for x in qs.split("&")])
-
-from urllib import quote
-from multiprocessing import active_children, Process
-from signal import SIGKILL
+from ui import Interaction, dump
+from websocket import WebSocket, WsError
 import atexit
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO  import StringIO
+import dis
 import os
 import sys
 import time
-import dis
+import traceback
 
 BASE_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)))
@@ -61,18 +42,6 @@ RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
 log.setLevel(30)
-
-
-class ReprEncoder(JSONEncoder):
-    """JSON encoder using repr for objects"""
-
-    def default(self, obj):
-        return repr(obj)
-
-
-def dump(o):
-    """Shortcut to json.dumps with ReprEncoder"""
-    return dumps(o, cls=ReprEncoder, sort_keys=True)
 
 
 class WdbOff(Exception):
@@ -586,13 +555,6 @@ class WdbRequest(object, Bdb):
 
         return stack, frames, current
 
-    def handle_exc(self):
-        """Return a formated exception traceback for wdb.js use"""
-        type_, value = exc_info()[:2]
-        return '<a title="%s">%s: %s</a>' % (
-            escape(traceback.format_exc().replace('"', '\'')),
-            escape(type_.__name__), escape(str(value)))
-
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Set Trace'):
@@ -630,373 +592,16 @@ class WdbRequest(object, Bdb):
 
         log.debug('Interaction for %r %r %r %r' % (
             frame, tb, exception, exception_description))
-        stack, trace, current_index = self.get_trace(frame, tb)
-        current = trace[current_index]
-        # Copy locals to avoid strange cpython behaviour
-        locals_ = map(lambda x: x[0].f_locals, stack)
 
-        def get_globals():
-            """Get enriched globals"""
-            globals_ = dict(stack[current_index][0].f_globals)
-            globals_['_'] = self.last_obj
-            # Hack for function scope eval
-            globals_.update(locals_[current_index])
-            for var, val in self.extra_vars.items():
-                globals_[var] = val
-            self.extra_items = {}
-            return globals_
+        interaction = Interaction(
+            self, frame, tb, exception, exception_description)
 
         if self.begun:
             # Each new state sends the trace and selects a frame
-            self.send('Trace|%s' % dump({
-                'trace': trace,
-                'cwd': os.getcwd()
-            }))
-            current_file = current['file']
-            self.send('Select|%s' % dump({
-                'frame': current,
-                'breaks': self.get_file_breaks(current_file),
-                'file': self.get_file(current_file),
-                'name': current_file
-            }))
+            interaction.init()
         else:
             self.begun = True
-
-        while True:
-            try:
-                try:
-                    message = self.receive()
-                except KeyboardInterrupt:
-                    # Quit on KeyboardInterrupt
-                    message = 'Quit'
-
-                # Parse received message
-                if '|' in message:
-                    pipe = message.index('|')
-                    cmd = message[:pipe]
-                    data = message[pipe + 1:]
-                else:
-                    cmd = message
-                    data = ''
-
-                def fail(title=None, message=None):
-                    """Send back captured exceptions"""
-                    if message is None:
-                        message = self.handle_exc()
-                    else:
-                        message = escape(message)
-                    self.send('Echo|%s' % dump({
-                        'for': escape(title or '%s failed' % cmd),
-                        'val': message
-                    }))
-
-                log.debug('Cmd %s #Data %d' % (cmd, len(data)))
-                if cmd == 'Start':
-                    self.send('Init|%s' % dump({
-                        'cwd': os.getcwd()
-                    }))
-                    self.send('Title|%s' % dump({
-                        'title': exception,
-                        'subtitle': exception_description
-                    }))
-                    self.send('Trace|%s' % dump({
-                        'trace': trace
-                    }))
-                    current_file = current['file']
-                    self.send('Select|%s' % dump({
-                        'frame': current,
-                        'breaks': self.get_file_breaks(current_file),
-                        'file': self.get_file(current_file),
-                        'name': current_file
-                    }))
-
-                elif cmd == 'Select':
-                    current_index = int(data)
-                    current = trace[current_index]
-                    current_file = current['file']
-                    self.send('Select|%s' % dump({
-                        'frame': current,
-                        'breaks': self.get_file_breaks(current_file),
-                        'file': self.get_file(current_file),
-                        'name': current_file
-                    }))
-
-                elif cmd == 'Inspect':
-                    try:
-                        thing = self.obj_cache.get(int(data))
-                    except Exception:
-                        fail()
-                        continue
-                    self.send('Dump|%s' % dump({
-                        'for': repr(thing),
-                        'val': self.dmp(thing)}))
-
-                elif cmd == 'Dump':
-                    try:
-                        thing = eval(
-                            data, get_globals(), locals_[current_index])
-                    except Exception:
-                        fail()
-                        continue
-                    else:
-                        self.send('Dump|%s' % dump({
-                            'for': u'%s ⟶ %s ' % (data, repr(thing)),
-                            'val': self.dmp(thing)}))
-
-                elif cmd == 'Trace':
-                    self.send('Trace|%s' % dump({
-                        'trace': trace
-                    }))
-
-                elif cmd == 'Eval':
-                    redir = None
-                    raw_data = data = data.strip()
-                    if '!>' in data:
-                        data, redir = data.split('!>')
-                        data = data.strip()
-                        redir = redir.strip()
-                    elif data.startswith('!<'):
-                        filename = data[2:].strip()
-                        try:
-                            with open(filename, 'r') as f:
-                                data = f.read()
-                        except Exception:
-                            fail('Unable to read from file %s' % filename)
-                            continue
-
-                    with self.capture_output(
-                            with_hook=redir is None) as (out, err):
-                        try:
-                            compiled_code = compile(data, '<stdin>', 'single')
-                            l = locals_[current_index]
-                            exec compiled_code in get_globals(), l
-                        except Exception:
-                            self.hooked = self.handle_exc()
-                    if redir:
-                        try:
-                            with open(redir, 'w') as f:
-                                f.write('\n'.join(out) + '\n'.join(err) + '\n')
-                        except Exception:
-                            fail('Unable to write to file %s' % redir)
-                            continue
-                        self.send('Print|%s' % dump({
-                            'for': raw_data,
-                            'result': escape('Written to file %s' % redir)
-                        }))
-                    else:
-                        self.send('Print|%s' % dump({
-                            'for': raw_data,
-                            'result': self.hooked + escape(
-                                '\n'.join(out) + '\n'.join(err))
-                        }))
-
-                elif cmd == 'Ping':
-                    self.send('Pong')
-
-                elif cmd == 'Step':
-                    if hasattr(self, 'botframe'):
-                        self.set_step()
-                    break
-
-                elif cmd == 'Next':
-                    if hasattr(self, 'botframe'):
-                        self.set_next(stack[current_index][0])
-                    break
-
-                elif cmd == 'Continue':
-                    if hasattr(self, 'botframe'):
-                        self.set_continue()
-                    break
-
-                elif cmd == 'Return':
-                    if hasattr(self, 'botframe'):
-                        self.set_return(stack[current_index][0])
-                    break
-
-                elif cmd == 'Until':
-                    if hasattr(self, 'botframe'):
-                        self.set_until(stack[current_index][0])
-                    break
-
-                elif cmd in ('TBreak', 'Break'):
-                    break_fail = lambda x: fail(
-                        'Break on %s failed' % data, message=x)
-                    if ':' in data:
-                        fn, lno = data.split(':')
-                    else:
-                        fn, lno = current['file'], data
-                    cond = None
-                    if ',' in lno:
-                        lno, cond = lno.split(',')
-                        cond = cond.lstrip()
-
-                    try:
-                        lno = int(lno)
-                    except:
-                        break_fail(
-                            'Wrong breakpoint format must be '
-                            '[file:]lno[,cond].')
-                        continue
-
-                    line = getline(
-                        fn, lno, stack[current_index][0].f_globals)
-                    if not line:
-                        break_fail('Line does not exist')
-                        continue
-                    line = line.strip()
-                    if ((not line or (line[0] == '#') or
-                         (line[:3] == '"""') or
-                         line[:3] == "'''")):
-                        break_fail('Blank line or comment')
-                        continue
-
-                    first_rv = rv = self.set_break(
-                        fn, lno, int(cmd == 'TBreak'), cond)
-                    if rv is not None:
-                        for path in sys.path:
-                            rv = self.set_break(
-                                os.path.join(path, fn),
-                                lno, int(cmd == 'TBreak'), cond)
-                            if rv is None:
-                                break
-                    if rv is None:
-                        log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
-                        if fn == current['file']:
-                            self.send('BreakSet|%s' % dump({
-                                'lno': lno, 'cond': cond
-                            }))
-                        else:
-                            self.send('BreakSet|%s' % dump({}))
-                    else:
-                        break_fail(first_rv)
-
-                elif cmd == 'Unbreak':
-                    lno = int(data)
-                    current_file = current['file']
-                    log.info('Break unset at %s:%d' % (current_file, lno))
-                    self.clear_break(current_file, lno)
-                    self.send('BreakUnset|%s' % dump({'lno': lno}))
-
-                elif cmd == 'Jump':
-                    lno = int(data)
-                    if current_index != len(trace) - 1:
-                        log.error('Must be at bottom frame')
-                        continue
-
-                    try:
-                        stack[current_index][0].f_lineno = lno
-                    except ValueError:
-                        fail()
-                        continue
-
-                    trace[current_index]['lno'] = lno
-                    self.send('Trace|%s' % dump({
-                        'trace': trace
-                    }))
-                    self.send('Select|%s' % dump({
-                        'frame': current,
-                        'breaks': self.get_file_breaks(current['file'])
-                    }))
-
-                elif cmd == 'Complete':
-                    current_file = current['file']
-                    file_ = self.get_file(current_file).decode('utf-8')
-                    lines = file_.split(u'\n')
-                    lno = trace[current_index]['lno']
-                    line_before = lines[lno - 1]
-                    indent = len(line_before) - len(line_before.lstrip())
-                    segments = data.split(u'\n')
-                    for segment in reversed(segments):
-                        line = u' ' * indent + segment
-                        lines.insert(lno - 1, line)
-                    script = Script(
-                        u'\n'.join(lines), lno - 1 + len(segments),
-                        len(segments[-1]) + indent, '')
-                    try:
-                        completions = script.complete()
-                    except:
-                        log.exception('Completion failed')
-                        self.send('Log|%s' % dump({
-                            'message': 'Completion failed for %s' %
-                            '\n'.join(reversed(segments))
-                        }))
-                    else:
-                        fun = script.get_in_function_call()
-                        self.send('Suggest|%s' % dump({
-                            'params': {
-                                'params': [p.get_code().replace('\n', '')
-                                           for p in fun.params],
-                                'index': fun.index,
-                                'module': fun.module.path,
-                                'call_name': fun.call_name} if fun else None,
-                            'completions': [{
-                                'base': comp.word[
-                                    :len(comp.word) - len(comp.complete)],
-                                'complete': comp.complete,
-                                'description': comp.description
-                            } for comp in completions if comp.word.endswith(
-                                comp.complete)]
-                        }))
-
-                elif cmd == 'Save':
-                    pipe = data.index('|')
-                    fn = data[:pipe]
-                    src = data[pipe + 1:]
-                    if os.path.exists(fn):
-                        dn = os.path.dirname(fn)
-                        bn = os.path.basename(fn)
-                        try:
-                            move(
-                                fn, os.path.join(
-                                    gettempdir(),
-                                    dn.replace(os.path.sep, '!') + bn +
-                                    '-wdb-back-%d' % time.time()))
-                            with open(fn, 'w') as f:
-                                f.write(src.encode('utf-8'))
-                        except OSError as e:
-                            self.send('Echo|%s' % dump({
-                                'for': 'Error during save',
-                                'val': str(e)
-                            }))
-                        else:
-                            self.send('Echo|%s' % dump({
-                                'for': 'Save succesful',
-                                'val': 'Wrote %s' % fn
-                            }))
-
-                elif cmd == 'Quit':
-                    if hasattr(self, 'botframe'):
-                        self.set_continue()
-                        raise BdbQuit()
-                    break
-
-                else:
-                    log.warn('Unknown command %s' % cmd)
-
-            except BdbQuit:
-                # This will be handled by caller
-                raise
-            except Exception:
-                try:
-                    exc = self.handle_exc()
-                    type_, value = exc_info()[:2]
-                    link = ('<a href="https://github.com/Kozea/wdb/issues/new?'
-                            'title=%s&body=%s&labels=defect" class="nogood">'
-                            'Please click here to report it on Github</a>') % (
-                                quote('%s: %s' % (type_.__name__, str(value))),
-                                quote('```\n%s\n```\n' %
-                                      traceback.format_exc()))
-                    self.send('Echo|%s' % dump({
-                        'for': 'Error in Wdb, this is bad',
-                        'val': exc + '<br>' + link
-                    }))
-                except:
-                    self.send('Echo|%s' % dump({
-                        'for': 'Too many errors',
-                        'val': ("Don't really know what to say. "
-                                "Maybe it will work tomorrow.")
-                    }))
-                    continue
+        interaction.loop()
 
     def user_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
