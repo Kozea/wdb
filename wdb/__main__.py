@@ -43,7 +43,47 @@ def main():
 
     # Set trace with wdb
     sys.settrace(wdbr.trace_dispatch)
-    threading.settrace(wdbr.trace_dispatch)
+
+    # Monkey patch threading to have callback to kill thread debugger
+    old_start = threading.Thread.start
+
+    def wdb_start(self):
+        """Monkey patched start monkey patching run"""
+        self.old_run = self.run
+
+        def run(self):
+            """Monkey patched run"""
+            try:
+                self.old_run()
+            finally:
+                if hasattr(self, '_wdbr'):
+                    self._wdbr.die()
+        import types
+        self.run = types.MethodType(run, self, self.__class__)
+        old_start(self)
+    threading.Thread.start = wdb_start
+
+    def init_new_wdbr(frame, event, args):
+        """First settrace call start the debugger for the current thread"""
+        thread = threading.currentThread()
+        if getattr(thread, 'no_trace', False):
+            sys.settrace(None)
+            return None
+
+        wdbr_thread = Wdb.make_server()
+        thread._wdbr = wdbr_thread
+
+        frame = sys._getframe()
+        while frame:
+            frame.f_trace = wdbr_thread.trace_dispatch
+            frame = frame.f_back
+        wdbr_thread.stopframe = sys._getframe().f_back
+        wdbr_thread.botframe = sys._getframe().f_back
+        wdbr_thread.stoplineno = -1
+        sys.settrace(wdbr_thread.trace_dispatch)
+        return wdbr_thread.trace_dispatch
+
+    threading.settrace(init_new_wdbr)
     try:
         exec cmd in __main__.__dict__, __main__.__dict__
     except BdbQuit:
