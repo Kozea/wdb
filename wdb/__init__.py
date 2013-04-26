@@ -33,6 +33,7 @@ import atexit
 import dis
 import os
 import sys
+import threading
 import time
 import traceback
 
@@ -41,7 +42,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(10)
+log.setLevel(30)
 
 
 class WdbOff(Exception):
@@ -52,22 +53,31 @@ class WdbOff(Exception):
 class AltServer(Process):
     """Process spawning a wsgi server to serve wdb when used outside wsgi"""
 
-    def __init__(self, ports, *args, **kwargs):
-        log.debug('Starting alt server with ports %s' % ports)
-        self.ports = ports
-        self.http_port = 2001
+    def __init__(self, http_port, ws_ports, *args, **kwargs):
+        self.ws_ports = ws_ports
+        self.http_port = http_port
         super(AltServer, self).__init__(*args, **kwargs)
         self.daemon = 1
-        self.start()
 
     def run(self):
         """Run the process"""
+        log.debug('Starting alt server on port %d with ports %s' % (
+            self.http_port, self.ws_ports))
         from wsgiref.simple_server import (
             make_server, WSGIServer, WSGIRequestHandler)
         from SocketServer import ThreadingMixIn
 
         class ThreadingServer(ThreadingMixIn, WSGIServer):
             """Threaded wsgi"""
+            daemon_threads = True
+
+            def process_request(self, request, client_address):
+                """Override thread start with no_trace on"""
+                t = threading.Thread(target=self.process_request_thread,
+                                     args=(request, client_address))
+                t.daemon = self.daemon_threads
+                t.no_trace = True
+                t.start()
 
         class SilentHandler(WSGIRequestHandler):
             """Silent handler"""
@@ -92,7 +102,7 @@ class AltServer(Process):
             start_response('200 OK', [('Content-Type', 'text/html')])
             with open(os.path.join(RES_PATH, 'wdb.html')) as f:
                 return f.read() % dict(
-                    post='false', theme='dark', alt_ports=self.ports),
+                    post='false', theme='dark', alt_ports=self.ws_ports),
         port = self.http_port
         httpd = make_server(
             '', port, trace_app,
@@ -125,14 +135,14 @@ class MetaWdbRequest(type):
         except ImportError:
             pass
         super(MetaWdbRequest, cls).__init__(name, bases, dict)
-        MetaWdbRequest._last_inst = None
+        MetaWdbRequest._instances = {}
 
     def tf(cls, frame=None):
         """Set trace in frame or in current frame"""
         log.info('Setting trace')
 
         # Get the last request which must be the current
-        wdbr = MetaWdbRequest._last_inst
+        wdbr = MetaWdbRequest._instances.get(threading.current_thread())
         if not wdbr:
             # If there's none:
 
@@ -187,7 +197,7 @@ class Wdb(object):
             # Enable / Disable wdb
             self.enabled = path.endswith('on')
             if not self.enabled:
-                MetaWdbRequest._last_inst = None
+                MetaWdbRequest._instances[threading.enumerate()] = None
             start_response('200 OK', [('Content-Type', 'text/html')])
             return self._500 % dict(
                 trace_dict={}, trace='',
@@ -312,8 +322,10 @@ class Wdb(object):
     def make_server():
         """Make a wsgi server and start a WdbRequest"""
         rand_ports = [randint(10000, 60000) for _ in range(5)]
-        AltServer(rand_ports)
         wdbr = WdbRequest(rand_ports)
+        wdbr.server = AltServer(
+            2000 + threading.enumerate().index(threading.current_thread()),
+            rand_ports)
         wdbr.quitting = 0
         wdbr.begun = False
         wdbr.reset()
@@ -325,7 +337,7 @@ class WdbRequest(object, Bdb):
     __metaclass__ = MetaWdbRequest
 
     def __init__(self, ports, skip=None):
-        MetaWdbRequest._last_inst = self
+        MetaWdbRequest._instances[threading.current_thread()] = self
         self.obj_cache = {}
 
         try:
@@ -334,9 +346,11 @@ class WdbRequest(object, Bdb):
             Bdb.__init__(self)
         self.begun = False
         self.connected = False
-        self.make_web_socket(ports)
+        self.ports = ports
         self.extra_vars = {}
         self.last_obj = None
+        self.server_started = False
+        self.server = None
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -466,12 +480,21 @@ class WdbRequest(object, Bdb):
             for key in dir(thing)
         )
 
+    @property
+    def ws(self):
+        if not self.server_started:
+            self.server_started = True
+            if self.server is not None:
+                self.server.start()
+            self.make_web_socket(self.ports)
+        return self.__ws
+
     def make_web_socket(self, ports):
         """Create a web socket"""
 
         log.info('Creating WebSocket')
         for port in ports:
-            self.ws = WebSocket('0.0.0.0', port)
+            self.__ws = WebSocket('0.0.0.0', port)
             if self.ws.status == 'OK':
                 return
             time.sleep(.100)
@@ -681,8 +704,9 @@ class WdbRequest(object, Bdb):
 
     def die(self):
         """That's the end my friend"""
-        log.info('Dying')
-        self.send('Die')
+        if self.server_started and self.begun:
+            log.info('Dying')
+            self.send('Die')
 
 
 def set_trace(frame=None):

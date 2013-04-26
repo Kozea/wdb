@@ -26,7 +26,7 @@ import struct
 import sys
 
 log = get_color_logger('wdb-socket')
-log.setLevel(10)
+log.setLevel(30)
 
 OPCODES = ['continuation', 'text', 'binary',
            '?', '?', '?', '?', '?',

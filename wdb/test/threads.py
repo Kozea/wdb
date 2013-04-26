@@ -4,16 +4,14 @@ from time import sleep
 
 
 class Thread1(Thread):
-
     def run(self):
         print 'Thread 1 start'
+        1/0
         sleep(1)
-        import wdb; wdb.set_trace()
         print 'Thread 1 end'
 
 
 class Thread2(Thread):
-
     def run(self):
         print 'Thread 2 start'
         sleep(2)
@@ -22,6 +20,7 @@ class Thread2(Thread):
 
 t1 = Thread1()
 t2 = Thread2()
+t1.daemon = t2.daemon = True
 print 'Starting threads'
 t1.start()
 t2.start()
