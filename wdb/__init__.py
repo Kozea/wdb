@@ -26,7 +26,7 @@ from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
 from mimetypes import guess_type
 from multiprocessing import Process
-from random import randint
+from random import randint, seed
 from ui import Interaction, dump
 from websocket import WebSocket, WsError
 import atexit
@@ -104,9 +104,17 @@ class AltServer(Process):
                 return f.read() % dict(
                     post='false', theme='dark', alt_ports=self.ws_ports),
         port = self.http_port
-        httpd = make_server(
-            '', port, trace_app,
-            server_class=ThreadingServer, handler_class=SilentHandler)
+        started = False
+
+        while not started and port < 60001:
+            try:
+                httpd = make_server(
+                    '', port, trace_app,
+                    server_class=ThreadingServer, handler_class=SilentHandler)
+            except:
+                port += 1000
+            else:
+                started = True
 
         # Monkey patch httpserver to launch webbrowser.open just in time
         from BaseHTTPServer import HTTPServer
@@ -140,6 +148,8 @@ class MetaWdbRequest(type):
     def tf(cls, frame=None):
         """Set trace in frame or in current frame"""
         log.info('Setting trace')
+        # Removing current global tracing function if any
+        sys.settrace(None)
 
         # Get the last request which must be the current
         wdbr = MetaWdbRequest._instances.get(threading.current_thread())
@@ -157,17 +167,11 @@ class MetaWdbRequest(type):
                 # Spawn a server to inspect code throught wdb
                 wdbr = Wdb.make_server()
 
-        # Removing current global tracing function if any
-        sys.settrace(None)
         frame = frame or sys._getframe().f_back
-        top_frame = frame
-        # Remove local tracing functions if any
-        while frame and frame is not wdbr.botframe:
-            del frame.f_trace
-            frame = frame.f_back
-
+        # Clear previous tracing
+        wdbr.set_continue()
         # Set trace to the top frame
-        wdbr.set_trace(top_frame)
+        wdbr.set_trace(frame)
 
 
 class Wdb(object):
@@ -321,14 +325,15 @@ class Wdb(object):
     @staticmethod
     def make_server():
         """Make a wsgi server and start a WdbRequest"""
+        seed()
         rand_ports = [randint(10000, 60000) for _ in range(5)]
         wdbr = WdbRequest(rand_ports)
-        wdbr.server = AltServer(
-            2000 + threading.enumerate().index(threading.current_thread()),
-            rand_ports)
         wdbr.quitting = 0
         wdbr.begun = False
         wdbr.reset()
+        wdbr.server = AltServer(
+            2000 + threading.enumerate().index(threading.current_thread()),
+            rand_ports)
         return wdbr
 
 
@@ -485,14 +490,21 @@ class WdbRequest(object, Bdb):
         if not self.server_started:
             self.server_started = True
             if self.server is not None:
-                self.server.start()
+                if hasattr(os, '_original_fork'):
+                    os._fork = os.fork
+                    os.fork = os._original_fork
+                    self.server.start()
+                    os.fork = os._fork
+                else:
+                    self.server.start()
+
             self.make_web_socket(self.ports)
         return self.__ws
 
     def make_web_socket(self, ports):
         """Create a web socket"""
 
-        log.info('Creating WebSocket')
+        log.info('Creating WebSocket %r' % self)
         for port in ports:
             self.__ws = WebSocket('0.0.0.0', port)
             if self.ws.status == 'OK':

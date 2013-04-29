@@ -13,6 +13,7 @@ import sys
 import time
 import traceback
 log = get_color_logger('wdb-ui')
+log.setLevel(30)
 
 
 class ReprEncoder(JSONEncoder):
