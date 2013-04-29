@@ -96,7 +96,7 @@ def wtf():
     e = b + a - c + d
     for i in range(5):
         e += i
-    # Test breaking on /usr/lib/python2.7/logging/__init__.py:1244
+    # Test breaking on /usr/lib/python2.7/logging/__init__.py:1254
     app.logger.info('I was here')
     return 'OK! %d' % e
 

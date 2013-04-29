@@ -1,4 +1,5 @@
 import sys
+import multiprocessing
 import threading
 import os
 from bdb import BdbQuit
@@ -44,10 +45,11 @@ def main():
     # Set trace with wdb
     sys.settrace(wdbr.trace_dispatch)
 
+    # Multithread support
     # Monkey patch threading to have callback to kill thread debugger
-    old_start = threading.Thread.start
+    old_thread_start = threading.Thread.start
 
-    def wdb_start(self):
+    def wdb_thread_start(self):
         """Monkey patched start monkey patching run"""
         self.old_run = self.run
 
@@ -60,8 +62,8 @@ def main():
                     self._wdbr.die()
         import types
         self.run = types.MethodType(run, self, self.__class__)
-        old_start(self)
-    threading.Thread.start = wdb_start
+        old_thread_start(self)
+    threading.Thread.start = wdb_thread_start
 
     def init_new_wdbr(frame, event, args):
         """First settrace call start the debugger for the current thread"""
@@ -84,6 +86,59 @@ def main():
         return wdbr_thread.trace_dispatch
 
     threading.settrace(init_new_wdbr)
+
+    # Multiprocess support
+    # Monkey patch threading to have callback to kill thread debugger
+    old_process_start = multiprocessing.Process.start
+
+    def wdb_process_start(self):
+        """Monkey patched start monkey patching run"""
+        self.old_run = self.run
+
+        def run(self):
+            """Monkey patched run"""
+            try:
+                self.old_run()
+            finally:
+                if hasattr(self, '_wdbr'):
+                    self._wdbr.die()
+        import types
+        self.run = types.MethodType(run, self, self.__class__)
+        old_process_start(self)
+    multiprocessing.Process.start = wdb_process_start
+
+    # Monkey patching fork
+    osfork = os.fork
+
+    def tracing_fork():
+        pid = osfork()
+
+        if pid == 0:
+            wdbr_process = Wdb.make_server()
+            sys.settrace(None)
+
+            def trace(frame, event, arg):
+                process = multiprocessing.current_process()
+                if not hasattr(process, '_wdbr'):
+                    process._wdbr = wdbr_process
+                wdbr_process.trace_dispatch(frame, event, arg)
+                return trace
+
+            frame = sys._getframe()
+            while frame:
+                frame.f_trace = wdbr_process.trace_dispatch
+                wdbr_process.botframe = frame
+                frame = frame.f_back
+            wdbr_process.stopframe = sys._getframe().f_back
+            wdbr_process.stoplineno = -1
+            sys.settrace(trace)
+
+        return pid
+
+    if os.fork != tracing_fork:
+        os._original_fork = osfork
+        os.fork = tracing_fork
+
     try:
         exec cmd in __main__.__dict__, __main__.__dict__
     except BdbQuit:

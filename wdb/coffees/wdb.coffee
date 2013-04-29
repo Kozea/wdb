@@ -38,7 +38,7 @@ if not __ws_ports
 __ws_port_index = 0
 cmd_hist = {}
 session_cmd_hist = {}
-
+waited_for_ws = 0
 $source = null
 $traceback = null
 
@@ -101,15 +101,19 @@ else
 
 make_ws = ->
     # Open a websocket in case of request break
-    console.log 'Opening new socket'
-    new_ws = new WebSocket "ws://" + document.location.hostname + ":" + __ws_ports[__ws_port_index]
+    sck = "ws://" + document.location.hostname + ":" + __ws_ports[__ws_port_index]
+    console.log 'Opening new socket', sck
+    new_ws = new WebSocket sck
     new_ws.onclose = (m) =>
         console.log "WebSocket closed #{m}"
         if not stop
-            __ws_port_index++;
+            if waited_for_ws > 5000
+                waited_for_ws = 0
+                __ws_port_index++
             if __ws_port_index < __ws_ports.length
+                waited_for_ws += 500
                 setTimeout (=>
-                    @ws = ws = make_ws()), 100
+                    @ws = ws = make_ws()), 500
 
     new_ws.onerror = (m) =>
         console.log "WebSocket error #{m}"

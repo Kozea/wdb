@@ -1,4 +1,3 @@
-# This is not currently working
 from threading import Thread
 from time import sleep
 
@@ -29,4 +28,5 @@ print 'Joining'
 t1.join()
 t2.join()
 
+import wdb; wdb.set_trace()
 print 'The End'
