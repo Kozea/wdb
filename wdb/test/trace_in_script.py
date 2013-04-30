@@ -3,7 +3,7 @@ b = 4
 c = a + b
 import wdb
 wdb.set_trace()
-print c
+print(c)
 d = c / 10
-print d
-print 'The end'
+print(d)
+print('The end')

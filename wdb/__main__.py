@@ -1,20 +1,19 @@
+from wdb import Wdb
 import sys
 import multiprocessing
 import threading
 import os
-from bdb import BdbQuit
-from wdb import Wdb
 
 
 def main():
     """Inspired by python -m pdb. Debug any python script with wdb"""
     if not sys.argv[1:] or sys.argv[1] in ("--help", "-h"):
-        print "usage: wdb.py scriptfile [arg] ..."
+        print("usage: wdb.py scriptfile [arg] ...")
         sys.exit(2)
 
     mainpyfile = sys.argv[1]
     if not os.path.exists(mainpyfile):
-        print 'Error:', mainpyfile, 'does not exist'
+        print('Error:', mainpyfile, 'does not exist')
         sys.exit(1)
 
     del sys.argv[0]
@@ -31,16 +30,6 @@ def main():
         frame = frame.f_back
     wdbr.stopframe = sys._getframe().f_back
     wdbr.stoplineno = -1
-
-    # Init the python context
-    import __main__
-    __main__.__dict__.clear()
-    __main__.__dict__.update({
-        "__name__": "__main__",
-        "__file__": mainpyfile,
-        "__builtins__": __builtins__,
-    })
-    cmd = 'execfile(%r)\n' % mainpyfile
 
     # Set trace with wdb
     sys.settrace(wdbr.trace_dispatch)
@@ -60,13 +49,17 @@ def main():
             finally:
                 if hasattr(self, '_wdbr'):
                     self._wdbr.die()
-        import types
-        self.run = types.MethodType(run, self, self.__class__)
+
+        from wdb._compat import bind
+        self.run = bind(self, run)
         old_thread_start(self)
     threading.Thread.start = wdb_thread_start
 
     def init_new_wdbr(frame, event, args):
         """First settrace call start the debugger for the current thread"""
+        import threading
+        import sys
+        from wdb import Wdb
         thread = threading.currentThread()
         if getattr(thread, 'no_trace', False):
             sys.settrace(None)
@@ -82,7 +75,12 @@ def main():
         wdbr_thread.stopframe = sys._getframe().f_back
         wdbr_thread.botframe = sys._getframe().f_back
         wdbr_thread.stoplineno = -1
-        sys.settrace(wdbr_thread.trace_dispatch)
+
+        def trace(frame, event, arg):
+            wdbr_thread.trace_dispatch(frame, event, arg)
+            return trace
+
+        sys.settrace(trace)
         return wdbr_thread.trace_dispatch
 
     threading.settrace(init_new_wdbr)
@@ -102,8 +100,8 @@ def main():
             finally:
                 if hasattr(self, '_wdbr'):
                     self._wdbr.die()
-        import types
-        self.run = types.MethodType(run, self, self.__class__)
+        from wdb._compat import bind
+        self.run = bind(self, run)
         old_process_start(self)
     multiprocessing.Process.start = wdb_process_start
 
@@ -111,6 +109,9 @@ def main():
     osfork = os.fork
 
     def tracing_fork():
+        import sys
+        import multiprocessing
+        from wdb import Wdb
         pid = osfork()
 
         if pid == 0:
@@ -140,13 +141,10 @@ def main():
         os.fork = tracing_fork
 
     try:
-        exec cmd in __main__.__dict__, __main__.__dict__
-    except BdbQuit:
-        pass
+        Wdb.run_file(mainpyfile)
     finally:
         wdbr.quitting = 1
-        sys.settrace(None)
-        threading.settrace(None)
+        wdbr.cleanup()
 
 
 if __name__ == '__main__':

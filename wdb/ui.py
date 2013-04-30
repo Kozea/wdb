@@ -1,13 +1,12 @@
 # *-* coding: utf-8 *-*
+from ._compat import dumps, JSONEncoder, quote, execute
 from bdb import BdbQuit
 from cgi import escape
-from _compat import dumps, JSONEncoder
 from jedi import Script
 from linecache import getline
 from log_colorizer import get_color_logger
 from shutil import move
 from tempfile import gettempdir
-from urllib import quote
 import os
 import sys
 import time
@@ -55,7 +54,7 @@ class Interaction(object):
         self.exception = exception
         self.exception_description = exception_description
         # Copy locals to avoid strange cpython behaviour
-        self.locals = map(lambda x: x[0].f_locals, self.stack)
+        self.locals = list(map(lambda x: x[0].f_locals, self.stack))
 
     @property
     def current(self):
@@ -223,9 +222,9 @@ class Interaction(object):
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
                 l = self.locals[self.index]
-                exec compiled_code in self.get_globals(), l
+                execute(compiled_code, self.get_globals(), l)
             except Exception:
-                self.db.hooked = self.db.handle_exc()
+                self.db.hooked = handle_exc()
         if redir:
             try:
                 with open(redir, 'w') as f:
@@ -355,7 +354,7 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
-        file_ = self.db.get_file(self.current_file).decode('utf-8')
+        file_ = self.db.get_file(self.current_file)#.decode('utf-8')
         lines = file_.split(u'\n')
         lno = self.current['lno']
         line_before = lines[lno - 1]

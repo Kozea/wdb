@@ -18,8 +18,11 @@ from __future__ import with_statement
 
 # from _bdbdb import Bdb, BdbQuit, Breakpoint  # Bdb with lot of log
 
-from _compat import StringIO, parse_qs
-from bdb import Bdb, BdbQuit, Breakpoint
+from ._compat import parse_qs, Bdb, with_metaclass, to_bytes, execute
+from .ui import Interaction, dump
+from .websocket import WebSocket, WsError
+from io import StringIO
+from bdb import BdbQuit, Breakpoint
 from cgi import escape
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
@@ -27,8 +30,6 @@ from log_colorizer import get_color_logger
 from mimetypes import guess_type
 from multiprocessing import Process
 from random import randint, seed
-from ui import Interaction, dump
-from websocket import WebSocket, WsError
 import atexit
 import dis
 import os
@@ -65,7 +66,7 @@ class AltServer(Process):
             self.http_port, self.ws_ports))
         from wsgiref.simple_server import (
             make_server, WSGIServer, WSGIRequestHandler)
-        from SocketServer import ThreadingMixIn
+        from ._compat import ThreadingMixIn
 
         class ThreadingServer(ThreadingMixIn, WSGIServer):
             """Threaded wsgi"""
@@ -94,15 +95,15 @@ class AltServer(Process):
                 log.debug('Getting static "%s"' % filename)
                 start_response(
                     '200 OK', [('Content-Type', guess_type(filename)[0])])
-                with open(os.path.join(BASE_PATH, filename)) as f:
+                with open(os.path.join(BASE_PATH, filename), 'rb') as f:
                     return f.read(),
 
             # Serving wdb page
             log.debug('Getting wdb page from fork')
             start_response('200 OK', [('Content-Type', 'text/html')])
-            with open(os.path.join(RES_PATH, 'wdb.html')) as f:
-                return f.read() % dict(
-                    post='false', theme='dark', alt_ports=self.ws_ports),
+            with open(os.path.join(RES_PATH, 'wdb.html'), 'r') as f:
+                return to_bytes(f.read() % dict(
+                    post='false', theme='dark', alt_ports=self.ws_ports)),
         port = self.http_port
         started = False
 
@@ -117,7 +118,7 @@ class AltServer(Process):
                 started = True
 
         # Monkey patch httpserver to launch webbrowser.open just in time
-        from BaseHTTPServer import HTTPServer
+        from ._compat import HTTPServer
         old_serve_forever = HTTPServer.serve_forever
 
         def new_serve_forever(self):
@@ -332,14 +333,42 @@ class Wdb(object):
         wdbr.begun = False
         wdbr.reset()
         wdbr.server = AltServer(
-            2000 + threading.enumerate().index(threading.current_thread()),
+            2520 + threading.enumerate().index(threading.current_thread()),
             rand_ports)
         return wdbr
 
+    @staticmethod
+    def run_file(filename):
+        import __main__
+        __main__.__dict__.clear()
+        __main__.__dict__.update({
+            "__name__": "__main__",
+            "__file__": filename,
+            "__builtins__": __builtins__,
+        })
+        with open(filename, "rb") as fp:
+            statement = "exec(compile(%r, %r, 'exec'))" % \
+                        (fp.read(), filename)
+        Wdb.run(statement)
 
-class WdbRequest(object, Bdb):
+    @staticmethod
+    def run(cmd, globals=None, locals=None):
+        if globals is None:
+            import __main__
+            globals = __main__.__dict__
+        if locals is None:
+            locals = globals
+
+        if isinstance(cmd, str):
+            cmd = compile(cmd, "<string>", "exec")
+        try:
+            execute(cmd, globals, locals)
+        except BdbQuit:
+            pass
+
+
+class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
     """Wdb debugger main class"""
-    __metaclass__ = MetaWdbRequest
 
     def __init__(self, ports, skip=None):
         MetaWdbRequest._instances[threading.current_thread()] = self
@@ -365,6 +394,10 @@ class WdbRequest(object, Bdb):
                 log.info('Resetting break %s' % repr(args))
 
         atexit.register(lambda: self.die())
+
+    def cleanup(self):
+        sys.settrace(None)
+        threading.settrace(None)
 
     def safe_repr(self, obj):
         """Like a repr but without exception"""
@@ -675,10 +708,11 @@ class WdbRequest(object, Bdb):
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
-        log.debug('EXC')
-        log.error('Exception', exc_info=exc_info)
         type_, value, tb = exc_info
-        # exc = type_, value
+
+        # Python 3 is broken see http://bugs.python.org/issue17413
+        fake_exc_info = type_, type_(value), tb
+        log.error('Exception during trace', exc_info=fake_exc_info)
         self.obj_cache[id(exc_info)] = exc_info
         self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__

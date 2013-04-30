@@ -30,7 +30,7 @@ def bad_function():
     a = 2
     b = -2
     c = 1 / (a + b) < 0  # <strong> Err œ
-    print c <b> a
+    print(c <b> a)
     relay_error()
     return "Hello World!"
 
