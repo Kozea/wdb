@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from io import BytesIO
+from ._compat import from_bytes, to_bytes
 from log_colorizer import get_color_logger
-from StringIO import StringIO
 import array
 import atexit
 import base64
@@ -105,7 +106,7 @@ class WsFrame(object):
 
         frame.mask = array.array("B", get(4))
         frame.data = array.array("B", get(frame.payload_len))
-        for i in xrange(len(frame.data)):
+        for i in range(len(frame.data)):
             frame.data[i] = frame.data[i] ^ frame.mask[i % 4]
         return frame
 
@@ -171,7 +172,7 @@ class WebSocket(object):
         log.info('Creating websocket on %s:%d' % (host, port))
         self.host = host
         self.port = port
-        self.stream = StringIO()
+        self.stream = BytesIO()
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.handshaken = False
@@ -214,7 +215,7 @@ class WebSocket(object):
             # Stream has been all read, clean it up
             self.stream.close()
             del self.stream
-            self.stream = StringIO()
+            self.stream = BytesIO()
             self._recv()
             part = self.stream.read(size - len(message))
             if part == '':
@@ -231,20 +232,20 @@ class WebSocket(object):
 
     def handshake(self, header):
         sha1 = hashlib.sha1()
-        sha1.update(header.key)
-        sha1.update("258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+        sha1.update(to_bytes(header.key))
+        sha1.update(to_bytes("258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
         return (
             "HTTP/1.1 101 Switching Protocols\r\n"
             "Upgrade: websocket\r\n"
             "Connection: Upgrade\r\n"
             "Sec-WebSocket-Accept: %s\r\n"
             "\r\n"
-        ) % base64.b64encode(sha1.digest())
+        ) % from_bytes(base64.b64encode(sha1.digest()))
 
     def recv_header(self):
         h = ''
         while h.find('\r\n\r\n') == -1:
-            h += self.peer.recv(16)
+            h += from_bytes(self.peer.recv(16))
         return WsHeader(h)
 
     def wait_for_connect(self):
@@ -256,7 +257,7 @@ class WebSocket(object):
             raise WsUnavailable
         log.debug('Handshaking with peer %r' % self.peer)
         header = self.recv_header()
-        self.peer.sendall(self.handshake(header))
+        self.peer.sendall(to_bytes(self.handshake(header)))
         log.debug('Handshaken')
 
     def receive(self):
@@ -284,16 +285,16 @@ class WebSocket(object):
 
 
 if __name__ == '__main__':
-    print "Connecting to : localhost:%s" % sys.argv[1]
+    print("Connecting to : localhost:%s" % sys.argv[1])
     ws = WebSocket('localhost', int(sys.argv[1]))
-    print "Waiting for connect"
+    print("Waiting for connect")
     ws.wait_for_connect()
-    print "Connected !"
-    print "Waiting for data"
+    print("Connected !")
+    print("Waiting for data")
     data = ''
     while data != 'CLOSED':
         data = ws.receive()
-        print data
+        print(data)
         ws.send(data)
         if data == 'abort':
             ws.close()

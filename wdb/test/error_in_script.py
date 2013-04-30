@@ -1,7 +1,7 @@
 a = 2
 b = 4
 c = a + b
-print c
+print(c)
 d = c / 0
-print d
-print 'The end'
+print(d)
+print('The end')
