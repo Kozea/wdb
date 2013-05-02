@@ -20,19 +20,7 @@ def main():
     sys.path[0] = os.path.dirname(mainpyfile)
 
     # Let's make a server in case of
-    wdbr = Wdb.make_server()
-
-    # Prepare full tracing
-    frame = sys._getframe()
-    while frame:
-        frame.f_trace = wdbr.trace_dispatch
-        wdbr.botframe = frame
-        frame = frame.f_back
-    wdbr.stopframe = sys._getframe().f_back
-    wdbr.stoplineno = -1
-
-    # Set trace with wdb
-    sys.settrace(wdbr.trace_dispatch)
+    wdbr = Wdb.trace()
 
     # Multithread support
     # Monkey patch threading to have callback to kill thread debugger
@@ -70,7 +58,7 @@ def main():
 
         frame = sys._getframe()
         while frame:
-            frame.f_trace = wdbr_thread.trace_dispatch
+            # frame.f_trace = wdbr_thread.trace_dispatch
             frame = frame.f_back
         wdbr_thread.stopframe = sys._getframe().f_back
         wdbr_thread.botframe = sys._getframe().f_back
@@ -127,7 +115,7 @@ def main():
 
             frame = sys._getframe()
             while frame:
-                frame.f_trace = wdbr_process.trace_dispatch
+                # frame.f_trace = wdbr_process.trace_dispatch
                 wdbr_process.botframe = frame
                 frame = frame.f_back
             wdbr_process.stopframe = sys._getframe().f_back
@@ -143,8 +131,8 @@ def main():
     try:
         Wdb.run_file(mainpyfile)
     finally:
-        wdbr.quitting = 1
-        wdbr.cleanup()
+        wdbr.quitting = True
+        wdbr.stop_trace(True)
 
 
 if __name__ == '__main__':

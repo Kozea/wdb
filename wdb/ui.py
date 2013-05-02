@@ -354,7 +354,7 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
-        file_ = self.db.get_file(self.current_file)#.decode('utf-8')
+        file_ = self.db.get_file(self.current_file)
         lines = file_.split(u'\n')
         lno = self.current['lno']
         line_before = lines[lno - 1]
@@ -419,7 +419,5 @@ class Interaction(object):
                 }))
 
     def do_quit(self, data):
-        if hasattr(self.db, 'botframe'):
-            self.db.set_continue()
-            raise BdbQuit()
+        self.db.stop_trace()
         return True

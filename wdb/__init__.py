@@ -16,11 +16,9 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# from _bdbdb import Bdb, BdbQuit, Breakpoint  # Bdb with lot of log
-
 from ._compat import parse_qs, Bdb, with_metaclass, to_bytes, execute
 from .ui import Interaction, dump
-from .websocket import WebSocket, WsError
+from .websocket import WebSocket, WsError, WsBroken
 from io import StringIO
 from bdb import BdbQuit, Breakpoint
 from cgi import escape
@@ -43,7 +41,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(30)
+log.setLevel(10)
 
 
 class WdbOff(Exception):
@@ -170,7 +168,7 @@ class MetaWdbRequest(type):
 
         frame = frame or sys._getframe().f_back
         # Clear previous tracing
-        wdbr.set_continue()
+        wdbr.stop_trace()
         # Set trace to the top frame
         wdbr.set_trace(frame)
 
@@ -202,7 +200,8 @@ class Wdb(object):
             # Enable / Disable wdb
             self.enabled = path.endswith('on')
             if not self.enabled:
-                MetaWdbRequest._instances[threading.enumerate()] = None
+                for thread in threading.enumerate():
+                    MetaWdbRequest._instances[thread] = None
             start_response('200 OK', [('Content-Type', 'text/html')])
             return self._500 % dict(
                 trace_dict={}, trace='',
@@ -329,12 +328,42 @@ class Wdb(object):
         seed()
         rand_ports = [randint(10000, 60000) for _ in range(5)]
         wdbr = WdbRequest(rand_ports)
-        wdbr.quitting = 0
-        wdbr.begun = False
         wdbr.reset()
         wdbr.server = AltServer(
             2520 + threading.enumerate().index(threading.current_thread()),
             rand_ports)
+        return wdbr
+
+    @staticmethod
+    def trace():
+        """Make an instance of Wdb and trace all code below"""
+        wdbr = MetaWdbRequest._instances.get(threading.current_thread())
+        if not wdbr:
+            log.info('Tracing with a new server')
+            # Let's make a server
+            wdbr = Wdb.make_server()
+        else:
+            log.info('Tracing with an existing server')
+            wdbr.reset()
+            wdbr.stop_trace()
+            wdbr.begun = False
+
+        def trace(frame, event, arg):
+            wdbr.trace_dispatch(frame, event, arg)
+            return trace
+
+        # Prepare full tracing
+        frame = sys._getframe().f_back
+        # Stop frame is the calling one
+        wdbr.stoplineno = -1
+        wdbr.stopframe = frame
+        while frame:
+            frame.f_trace = trace
+            wdbr.botframe = frame
+            frame = frame.f_back
+
+        # Set trace with wdb
+        sys.settrace(trace)
         return wdbr
 
     @staticmethod
@@ -379,12 +408,14 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         except TypeError:
             Bdb.__init__(self)
         self.begun = False
+        self.quitting = False
         self.connected = False
         self.ports = ports
         self.extra_vars = {}
         self.last_obj = None
         self.server_started = False
         self.server = None
+        self.reset()
         breaks_per_file_lno = Breakpoint.bplist.values()
         for bps in breaks_per_file_lno:
             breaks = list(bps)
@@ -395,9 +426,17 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
         atexit.register(lambda: self.die())
 
-    def cleanup(self):
+    def stop_trace(self, threading_too=False):
         sys.settrace(None)
-        threading.settrace(None)
+        frame = sys._getframe().f_back
+        while frame and frame is not self.botframe:
+            del frame.f_trace
+            frame = frame.f_back
+        if threading_too:
+            threading.settrace(None)
+
+    def set_continue(self):
+        self._set_stopinfo(self.botframe, None, -1)
 
     def safe_repr(self, obj):
         """Like a repr but without exception"""
@@ -551,29 +590,19 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
         def wsgi_with_trace(environ, start_response):
             """Inner WSGI gen"""
-            self.quitting = 0
-            self.begun = False
-            self.reset()
-            frame = sys._getframe()
-            while frame:
-                frame.f_trace = self.trace_dispatch
-                self.botframe = frame
-                frame = frame.f_back
-            self.stopframe = sys._getframe().f_back
-            self.stoplineno = -1
-            sys.settrace(self.trace_dispatch)
+            Wdb.trace()
 
             try:
                 appiter = app(environ, start_response)
             except BdbQuit:
-                sys.settrace(None)
+                self.stop_trace()
                 start_response('200 OK', [('Content-Type', 'text/html')])
                 yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
             else:
                 for item in appiter:
                     yield item
                 hasattr(appiter, 'close') and appiter.close()
-                sys.settrace(None)
+                self.stop_trace()
                 self.ws.force_close()
         return wsgi_with_trace(environ, start_response)
 
@@ -641,7 +670,15 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
     def send(self, data):
         """Send data through websocket"""
-        self.ws.send(data)
+        try:
+            self.ws.send(data)
+        except WsBroken:
+            if self.server:
+                import webbrowser
+                webbrowser.open('http://localhost:%d/' % self.server.http_port)
+                self.ws.wait_for_connect()
+            else:
+                raise
 
     def receive(self):
         """Receive data through websocket"""
@@ -709,7 +746,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
         type_, value, tb = exc_info
-
         # Python 3 is broken see http://bugs.python.org/issue17413
         fake_exc_info = type_, type_(value), tb
         log.error('Exception during trace', exc_info=fake_exc_info)
@@ -722,8 +758,8 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
             'for': '__exception__',
             'val': escape('%s: %s') % (
                 exception, exception_description)}))
-        if not self.begun:
-            frame = None
+        # User exception is 4 frames away from exception
+        frame = frame or sys._getframe().f_back.f_back.f_back.f_back
         self.interaction(frame, tb, exception, exception_description)
 
     def do_clear(self, arg):
@@ -733,6 +769,16 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
     def dispatch_exception(self, frame, arg):
         """Always break on exception (This is different from pdb behaviour)"""
+        while frame is not None and frame is not self.stopframe:
+            log.debug('-> Frame: %s:%d' % (
+                frame.f_code.co_filename, frame.f_lineno))
+            frame = frame.f_back
+
+        while frame is not None:
+            log.debug('-> (Under)Frame: %s:%d' % (
+                frame.f_code.co_filename, frame.f_lineno))
+            frame = frame.f_back
+
         self.user_exception(frame, arg)
         if self.quitting:
             raise BdbQuit

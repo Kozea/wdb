@@ -227,7 +227,7 @@ class WebSocket(object):
         try:
             self.peer.sendall(data)
         except:
-            log.exception('[%d] Error on socket send (%s)' % (self.port, data))
+            log.exception('[%d] Error on socket send' % self.port)
             raise WsBroken()
 
     def handshake(self, header):

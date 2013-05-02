@@ -4,7 +4,6 @@ import logging
 from wdb import Wdb
 app = Flask(__name__)
 
-
 def make_error():
     import whatever
 
