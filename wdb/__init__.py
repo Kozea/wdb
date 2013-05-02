@@ -354,7 +354,7 @@ class Wdb(object):
             fn = frame.f_code.co_filename
             if (rv is None and not
                 full and
-                fn == os.path.abspath(fn) and not
+                (fn == os.path.abspath(fn) or fn.startswith('<')) and not
                 fn.startswith(
                     os.path.dirname(os.path.abspath(sys.argv[0])))):
                 return
@@ -801,7 +801,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         if self.server_started and self.begun:
             log.info('Dying')
             self.send('Die')
-            self.ws.force_close()
 
 
 def set_trace(frame=None):
