@@ -41,7 +41,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(10)
+log.setLevel(30)
 
 
 class WdbOff(Exception):
@@ -343,6 +343,7 @@ class Wdb(object):
             # Let's make a server
             wdbr = Wdb.make_server()
         else:
+            sys.settrace(None)
             log.info('Tracing with an existing server')
             wdbr.reset()
             wdbr.stop_trace()
@@ -350,7 +351,10 @@ class Wdb(object):
 
         def trace(frame, event, arg):
             rv = wdbr.trace_dispatch(frame, event, arg)
-            if rv is None and not full:
+            if (rv is None and not
+                full and not
+                frame.f_code.co_filename.startswith(
+                    os.path.dirname(os.path.abspath(sys.argv[0])))):
                 return
 
             return trace
