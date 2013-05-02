@@ -194,6 +194,15 @@ $ =>
         document.close()
 
     @ws = ws = make_ws()
+    
+    @onbeforeunload = ->
+        try
+            console.log('Try jit quit')
+            send('Quit')
+        catch e
+            {}
+        undefined
+
     if __ws_alt_ports  # alt_ports -> Outside of WSGI
         return
 
@@ -213,14 +222,6 @@ $ =>
             if data.responseText
                 end(data.responseText)
 
-
-    @onbeforeunload = ->
-        try
-            console.log('Try jit quit')
-            send('Quit')
-        catch e
-            {}
-        undefined
 
 start = ->
     send('Start')

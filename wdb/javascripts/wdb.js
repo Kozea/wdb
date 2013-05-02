@@ -278,6 +278,18 @@
       return document.close();
     };
     _this.ws = ws = make_ws();
+    _this.onbeforeunload = function() {
+      var e;
+
+      try {
+        console.log('Try jit quit');
+        send('Quit');
+      } catch (_error) {
+        e = _error;
+        ({});
+      }
+      return void 0;
+    };
     if (__ws_alt_ports) {
       return;
     }
@@ -298,25 +310,13 @@
         }
       });
     }
-    xhr.done(function(data) {
+    return xhr.done(function(data) {
       return end(data);
     }).fail(function(data) {
       if (data.responseText) {
         return end(data.responseText);
       }
     });
-    return _this.onbeforeunload = function() {
-      var e;
-
-      try {
-        console.log('Try jit quit');
-        send('Quit');
-      } catch (_error) {
-        e = _error;
-        ({});
-      }
-      return void 0;
-    };
   });
 
   start = function() {
