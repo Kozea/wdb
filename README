@@ -61,11 +61,27 @@ To try it on another wsgi application, use the `Wdb` middleware:
 ### Using flask:
 
 ```python
+    from flask import Flask
     from wdb import Wdb
+
     app = Flask(__name__)
     app.debug = True
     app.wsgi_app = Wdb(app.wsgi_app)
+
     app.run(use_debugger=False) # Disable builtin Werkzeug debugger
+```
+
+or use the [Flask-Wdb](https://github.com/techniq/flask-wdb/) extension
+
+```python
+    from flask import Flask
+    from flask_wdb import Wdb
+
+    app = Flask(__name__)
+    app.debug = True
+    Wdb(app)
+
+    app.run()
 ```
 
 ### Using django:
