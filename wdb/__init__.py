@@ -335,7 +335,7 @@ class Wdb(object):
         return wdbr
 
     @staticmethod
-    def trace():
+    def trace(full=False):
         """Make an instance of Wdb and trace all code below"""
         wdbr = MetaWdbRequest._instances.get(threading.current_thread())
         if not wdbr:
@@ -350,7 +350,7 @@ class Wdb(object):
 
         def trace(frame, event, arg):
             rv = wdbr.trace_dispatch(frame, event, arg)
-            if rv is None:
+            if rv is None and not full:
                 return
 
             return trace
@@ -606,7 +606,7 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
                     yield item
                 hasattr(appiter, 'close') and appiter.close()
                 self.stop_trace()
-                self.ws.force_close()
+                self.die()
         return wsgi_with_trace(environ, start_response)
 
     def get_file(self, filename):
@@ -704,6 +704,9 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         interaction = Interaction(
             self, frame, tb, exception, exception_description)
 
+        # For meta debugging purpose
+        self._ui = interaction
+
         if self.begun:
             # Each new state sends the trace and selects a frame
             interaction.init()
@@ -792,6 +795,7 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         if self.server_started and self.begun:
             log.info('Dying')
             self.send('Die')
+            self.ws.force_close()
 
 
 def set_trace(frame=None):

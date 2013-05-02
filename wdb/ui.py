@@ -76,6 +76,8 @@ class Interaction(object):
         """Get enriched globals"""
         globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
+        # For meta debuging purpose
+        globals_['___wdb'] = self.db
         # Hack for function scope eval
         globals_.update(self.current_locals)
         for var, val in self.db.extra_vars.items():
