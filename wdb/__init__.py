@@ -349,7 +349,10 @@ class Wdb(object):
             wdbr.begun = False
 
         def trace(frame, event, arg):
-            wdbr.trace_dispatch(frame, event, arg)
+            rv = wdbr.trace_dispatch(frame, event, arg)
+            if rv is None:
+                return
+
             return trace
 
         # Prepare full tracing
@@ -769,16 +772,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
     def dispatch_exception(self, frame, arg):
         """Always break on exception (This is different from pdb behaviour)"""
-        while frame is not None and frame is not self.stopframe:
-            log.debug('-> Frame: %s:%d' % (
-                frame.f_code.co_filename, frame.f_lineno))
-            frame = frame.f_back
-
-        while frame is not None:
-            log.debug('-> (Under)Frame: %s:%d' % (
-                frame.f_code.co_filename, frame.f_lineno))
-            frame = frame.f_back
-
         self.user_exception(frame, arg)
         if self.quitting:
             raise BdbQuit
