@@ -351,9 +351,11 @@ class Wdb(object):
 
         def trace(frame, event, arg):
             rv = wdbr.trace_dispatch(frame, event, arg)
+            fn = frame.f_code.co_filename
             if (rv is None and not
-                full and not
-                frame.f_code.co_filename.startswith(
+                full and
+                fn == os.path.abspath(fn) and not
+                fn.startswith(
                     os.path.dirname(os.path.abspath(sys.argv[0])))):
                 return
 
@@ -763,6 +765,8 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__
         exception_description = str(value)
+        print exception
+        print exception_description
         self.handle_connection()
         self.send('Echo|%s' % dump({
             'for': '__exception__',

@@ -51,21 +51,28 @@ def main():
         thread = threading.currentThread()
         if getattr(thread, 'no_trace', False):
             sys.settrace(None)
-            return None
+            return
 
         wdbr_thread = Wdb.make_server()
         thread._wdbr = wdbr_thread
 
-        frame = sys._getframe()
+        frame = sys._getframe().f_back
+        wdbr_thread.stopframe = frame
+        wdbr_thread.botframe = frame
+
         while frame:
-            # frame.f_trace = wdbr_thread.trace_dispatch
+            frame.f_trace = wdbr_thread.trace_dispatch
             frame = frame.f_back
-        wdbr_thread.stopframe = sys._getframe().f_back
-        wdbr_thread.botframe = sys._getframe().f_back
         wdbr_thread.stoplineno = -1
 
         def trace(frame, event, arg):
-            wdbr_thread.trace_dispatch(frame, event, arg)
+            rv = wdbr_thread.trace_dispatch(frame, event, arg)
+            fn = frame.f_code.co_filename
+            if (rv is None and not
+                fn == os.path.abspath(fn) and not
+                fn.startswith(
+                    os.path.dirname(os.path.abspath(sys.argv[0])))):
+                return
             return trace
 
         sys.settrace(trace)
@@ -103,23 +110,31 @@ def main():
         pid = osfork()
 
         if pid == 0:
-            wdbr_process = Wdb.make_server()
+            # Doesn't work with Wdb.trace()...
             sys.settrace(None)
+            wdbr_process = Wdb.make_server()
 
             def trace(frame, event, arg):
                 process = multiprocessing.current_process()
                 if not hasattr(process, '_wdbr'):
                     process._wdbr = wdbr_process
-                wdbr_process.trace_dispatch(frame, event, arg)
+                rv = wdbr_process.trace_dispatch(frame, event, arg)
+                fn = frame.f_code.co_filename
+                if (rv is None and
+                    fn == os.path.abspath(fn) and not
+                    fn.startswith(
+                        os.path.dirname(os.path.abspath(sys.argv[0])))):
+                    return
+
                 return trace
 
-            frame = sys._getframe()
+            frame = sys._getframe().f_back
+            wdbr_process.stoplineno = -1
+            wdbr_process.stopframe = frame
             while frame:
-                # frame.f_trace = wdbr_process.trace_dispatch
+                frame.f_trace = wdbr_process.trace_dispatch
                 wdbr_process.botframe = frame
                 frame = frame.f_back
-            wdbr_process.stopframe = sys._getframe().f_back
-            wdbr_process.stoplineno = -1
             sys.settrace(trace)
 
         return pid
