@@ -69,7 +69,7 @@ def main():
             rv = wdbr_thread.trace_dispatch(frame, event, arg)
             fn = frame.f_code.co_filename
             if (rv is None and not
-                fn == os.path.abspath(fn) and not
+                (fn == os.path.abspath(fn) or fn.startswith('<')) and not
                 fn.startswith(
                     os.path.dirname(os.path.abspath(sys.argv[0])))):
                 return
@@ -121,11 +121,10 @@ def main():
                 rv = wdbr_process.trace_dispatch(frame, event, arg)
                 fn = frame.f_code.co_filename
                 if (rv is None and
-                    fn == os.path.abspath(fn) and not
+                    (fn == os.path.abspath(fn) or fn.startswith('<')) and not
                     fn.startswith(
                         os.path.dirname(os.path.abspath(sys.argv[0])))):
                     return
-
                 return trace
 
             frame = sys._getframe().f_back
