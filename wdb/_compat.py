@@ -31,12 +31,14 @@ except ImportError:
 
 # Bdb old style class problem
 if python_version == 2:
+    # from _bdbdb import Bdb as BdbOldStyle
     from bdb import Bdb as BdbOldStyle
 
     class Bdb(BdbOldStyle, object):
         pass
 else:
     from bdb import Bdb
+    # from ._bdbdb3 import Bdb
 
 
 if python_version == 2:
