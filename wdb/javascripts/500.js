@@ -13,7 +13,7 @@
       });
       return false;
     });
-    $('#title').text(title).append($('<small>').text(subtitle));
+    $('#title').text(_title).append($('<small>').text(_subtitle));
     if (trace.trace) {
       $('body').append($trace = $('<div>', {
         "class": 'trace_500'
