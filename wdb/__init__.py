@@ -281,8 +281,8 @@ class Wdb(object):
                         yield self._500 % dict(
                             theme=self.theme,
                             trace=traceback.format_exc(),
-                            title=type(e).__name__,
-                            subtitle=str(e),
+                            title=type(e).__name__.replace("'", "\\'"),
+                            subtitle=str(e).replace("'", "\\'"),
                             state='',
                             trace_dict=dump({
                                 'trace': stack,
@@ -759,7 +759,10 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         but only if we are to stop at or just below this level."""
         type_, value, tb = exc_info
         # Python 3 is broken see http://bugs.python.org/issue17413
-        fake_exc_info = type_, type_(value), tb
+        _value = value
+        if not isinstance(_value, BaseException):
+            _value = type_(value)
+        fake_exc_info = type_,  _value, tb
         log.error('Exception during trace', exc_info=fake_exc_info)
         self.obj_cache[id(exc_info)] = exc_info
         self.extra_vars['__exception__'] = exc_info
