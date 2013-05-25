@@ -42,7 +42,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(30)
+log.setLevel(10)
 
 
 class Wdb(Bdb):
@@ -325,7 +325,7 @@ class Wdb(Bdb):
     def send(self, data):
         """Send data through websocket"""
         log.info('Sending' + data)
-        Wdb.connection.send(data)
+        Wdb.connection.send(self.uuid + '|' + data)
 
     def receive(self):
         """Receive data through websocket"""

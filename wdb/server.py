@@ -1,40 +1,28 @@
-from uuid import uuid4
 from multiprocessing import Pipe
-import tornado.ioloop
 import tornado.options
 import tornado.web
 import tornado.websocket
 import os
 
-ioloop = tornado.ioloop.IOLoop.instance()
-
 connection, child_connection = Pipe()
 
 
 class MainHandler(tornado.web.RequestHandler):
-    def get(self, tag):
-        self.render('wdb.html', theme='dark', uuid=str(uuid4()))
+    def get(self, uuid):
+        self.render('wdb.html', theme='dark', uuid=uuid)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def transmit(self):
-        try:
-            poll = connection.poll()
-        except:
-            return
+    clients = {}
 
-        if poll:
-            message = connection.recv()
-            try:
-                self.write_message(message)
-            except:
-                return
-        ioloop.add_callback(self.transmit)
-
-    def open(self, tag):
-        self.tag = tag
+    def open(self, uuid):
+        self.uuid = uuid.decode('utf-8')
+        existing = WebSocketHandler.clients.get(self.uuid)
+        if existing:
+            existing.write_message('Die')
+            existing.close()
+        WebSocketHandler.clients[self.uuid] = self
         connection.send('start')
-        ioloop.add_callback(self.transmit)
 
     def on_message(self, message):
         connection.send(message)
