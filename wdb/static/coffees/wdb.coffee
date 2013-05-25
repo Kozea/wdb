@@ -28,14 +28,6 @@ stop = false
 ws = null
 cwd = null
 backsearch = null
-get_random_port = () ->
-    10000 + parseInt(Math.random() * 50000)
-__ws_ports = __ws_alt_ports
-if not __ws_ports
-    __ws_ports = []
-    for i in [0..5]
-        __ws_ports.push(get_random_port())
-__ws_port_index = 0
 cmd_hist = {}
 session_cmd_hist = {}
 waited_for_ws = 0
@@ -101,25 +93,14 @@ else
 
 make_ws = ->
     # Open a websocket in case of request break
-    sck = "ws://" + document.location.hostname + ":" + __ws_ports[__ws_port_index]
+    sck = "ws://" + document.location.hostname + ':2560/websocket/' + _uuid
     console.log 'Opening new socket', sck
     new_ws = new WebSocket sck
     new_ws.onclose = (m) =>
         console.log "WebSocket closed #{m}"
-        if not stop
-            if waited_for_ws > 5000
-                waited_for_ws = 0
-                __ws_port_index++
-            if __ws_port_index < __ws_ports.length
-                waited_for_ws += 500
-                setTimeout (=>
-                    @ws = ws = make_ws()), 500
 
     new_ws.onerror = (m) =>
         console.log "WebSocket error #{m}"
-        if not stop
-            setTimeout (=>
-                @ws = ws = make_ws()), 1000
 
     new_ws.onopen = (m) ->
         # We are connected, ie: in request break
@@ -194,34 +175,6 @@ $ =>
         document.close()
 
     @ws = ws = make_ws()
-    
-    @onbeforeunload = ->
-        try
-            console.log('Try jit quit')
-            send('Quit')
-        catch e
-            {}
-        undefined
-
-    if __ws_alt_ports  # alt_ports -> Outside of WSGI
-        return
-
-    if __ws_post
-        xhr = $.ajax(location.href,
-            type: 'POST',
-            data: __ws_post.data,
-            contentType: __ws_post.enctype,
-            traditional: true,
-            headers: 'X-Debugger': 'WDB-' + __ws_ports.join(','))
-    else
-        xhr = $.ajax(location.href,
-            headers: 'X-Debugger': 'WDB-' + __ws_ports.join(','))
-
-    xhr.done((data) => end(data))
-       .fail (data) =>
-            if data.responseText
-                end(data.responseText)
-
 
 start = ->
     send('Start')
@@ -657,8 +610,7 @@ die = ->
     $('#source,#traceback').remove()
     $('h1').html('Dead<small>Program has exited</small>')
     ws.close()
-    if __ws_alt_ports
-        setTimeout (-> close()), 1000
+    setTimeout (-> close()), 1000
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->

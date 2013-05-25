@@ -6,7 +6,6 @@
 
   $(function() {
     var $code, $trace, code, file, fun, lno, _i, _len, _ref, _ref1, _results;
-
     $('#activate').click(function() {
       $.get('/__wdb/on').done(function() {
         return location.reload(true);

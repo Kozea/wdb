@@ -18,7 +18,6 @@ from __future__ import with_statement
 
 from ._compat import parse_qs, Bdb, with_metaclass, to_bytes, execute
 from .ui import Interaction, dump
-from .websocket import WebSocket, WsError, WsBroken
 from io import StringIO
 from bdb import BdbQuit, Breakpoint
 from cgi import escape
@@ -28,6 +27,7 @@ from log_colorizer import get_color_logger
 from mimetypes import guess_type
 from multiprocessing import Process
 from random import randint, seed
+from uuid import uuid4
 import atexit
 import dis
 import os
@@ -35,6 +35,7 @@ import sys
 import threading
 import time
 import traceback
+import webbrowser
 
 BASE_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)))
@@ -44,310 +45,61 @@ log = get_color_logger('wdb')
 log.setLevel(30)
 
 
-class WdbOff(Exception):
-    """Wdb is disabled"""
-    pass
-
-
-class AltServer(Process):
-    """Process spawning a wsgi server to serve wdb when used outside wsgi"""
-
-    def __init__(self, http_port, ws_ports, *args, **kwargs):
-        self.ws_ports = ws_ports
-        self.http_port = http_port
-        super(AltServer, self).__init__(*args, **kwargs)
-        self.daemon = 1
-
-    def run(self):
-        """Run the process"""
-        log.debug('Starting alt server on port %d with ports %s' % (
-            self.http_port, self.ws_ports))
-        from wsgiref.simple_server import (
-            make_server, WSGIServer, WSGIRequestHandler)
-        from ._compat import ThreadingMixIn
-
-        class ThreadingServer(ThreadingMixIn, WSGIServer):
-            """Threaded wsgi"""
-            daemon_threads = True
-
-            def process_request(self, request, client_address):
-                """Override thread start with no_trace on"""
-                t = threading.Thread(target=self.process_request_thread,
-                                     args=(request, client_address))
-                t.daemon = self.daemon_threads
-                t.no_trace = True
-                t.start()
-
-        class SilentHandler(WSGIRequestHandler):
-            """Silent handler"""
-
-            def log_message(self, f, *args):
-                return
-
-        def trace_app(environ, start_response):
-            """Served wsgi app"""
-            path = environ.get('PATH_INFO', '')
-            # Serving statics
-            if path.startswith('/__wdb/'):
-                filename = path.replace('/__wdb/', '')
-                log.debug('Getting static "%s"' % filename)
-                start_response(
-                    '200 OK', [('Content-Type', guess_type(filename)[0])])
-                with open(os.path.join(BASE_PATH, filename), 'rb') as f:
-                    return f.read(),
-
-            # Serving wdb page
-            log.debug('Getting wdb page from fork')
-            start_response('200 OK', [('Content-Type', 'text/html')])
-            with open(os.path.join(RES_PATH, 'wdb.html'), 'r') as f:
-                return to_bytes(f.read() % dict(
-                    post='false', theme='dark', alt_ports=self.ws_ports)),
-        port = self.http_port
-        started = False
-
-        while not started and port < 60001:
-            try:
-                httpd = make_server(
-                    '', port, trace_app,
-                    server_class=ThreadingServer, handler_class=SilentHandler)
-            except:
-                port += 1000
-            else:
-                started = True
-
-        # Monkey patch httpserver to launch webbrowser.open just in time
-        from ._compat import HTTPServer
-        old_serve_forever = HTTPServer.serve_forever
-
-        def new_serve_forever(self):
-            import webbrowser
-            webbrowser.open('http://localhost:%d/' % port)
-            old_serve_forever(self)
-        HTTPServer.serve_forever = new_serve_forever
-
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            pass
-
-
-class MetaWdbRequest(type):
-    """Metaclass of Wdbrequest"""
-
-    def __init__(cls, name, bases, dict):
-        MetaWdbRequest.started = False
-        try:
-            from werkzeug.serving import ThreadedWSGIServer
-            ThreadedWSGIServer.daemon_threads = True
-        except ImportError:
-            pass
-        super(MetaWdbRequest, cls).__init__(name, bases, dict)
-        MetaWdbRequest._instances = {}
-
-    def tf(cls, frame=None):
-        """Set trace in frame or in current frame"""
-        log.info('Setting trace')
-        # Removing current global tracing function if any
-        sys.settrace(None)
-
-        # Get the last request which must be the current
-        wdbr = MetaWdbRequest._instances.get(threading.current_thread())
-        if not wdbr:
-            # If there's none:
-
-            if MetaWdbRequest.started:
-                # But Wdb was init: wdb is disabled
-                raise WdbOff()
-            else:
-                # Wdb was not init: we are outside any WSGI Request
-                log.warn(
-                    'Wdb set_trace was called outside of a wsgi application.')
-
-                # Spawn a server to inspect code throught wdb
-                wdbr = Wdb.make_server()
-
-        frame = frame or sys._getframe().f_back
-        # Clear previous tracing
-        wdbr.stop_trace()
-        # Set trace to the top frame
-        wdbr.set_trace(frame)
-
-
-class Wdb(object):
-
-    @property
-    def html(self):
-        """Property used to return the wdb page"""
-        with open(os.path.join(RES_PATH, 'wdb.html')) as f:
-            return f.read()
-
-    @property
-    def _500(self):
-        """Property used to return the wdb error page"""
-        with open(os.path.join(RES_PATH, '500.html')) as f:
-            return f.read()
-
-    def __init__(self, app, start_disabled=False, theme='dark'):
-        self.app = app
-        self.theme = theme
-        self.enabled = not start_disabled
-        MetaWdbRequest.started = True
-
-    def __call__(self, environ, start_response):
-        path = environ.get('PATH_INFO', '')
-
-        if path in ('/__wdb/on', '/__wdb/off'):
-            # Enable / Disable wdb
-            self.enabled = path.endswith('on')
-            if not self.enabled:
-                for thread in threading.enumerate():
-                    MetaWdbRequest._instances[thread] = None
-            start_response('200 OK', [('Content-Type', 'text/html')])
-            return self._500 % dict(
-                trace_dict={}, trace='',
-                title='Switched ' + ('ON' if self.enabled else 'OFF'),
-                subtitle='You can now go back to your normal pages',
-                theme=self.theme,
-                state=('de' if self.enabled else ''))
-
-        elif path.startswith('/__wdb/'):
-            # Serve static files
-            filename = path.replace('/__wdb/', '')
-            log.debug('Getting static "%s"' % filename)
-            return self.static_request(
-                environ, start_response, filename)
-
-        elif ((self.enabled or path == '/__wdb') and
-              'text/html' in environ.get('HTTP_ACCEPT', '')):
-            # Send page that will get the real page back in ajax
-            log.debug('Sending fake page (%s) for %s' % (
-                environ['HTTP_ACCEPT'], path))
-            return self.first_request(environ, start_response)
-
-        elif environ.get('HTTP_X_DEBUGGER', '').startswith('WDB'):
-            # Send page that will get the real page back in ajax
-            ports = map(
-                int, environ['HTTP_X_DEBUGGER'].split('-')[1].split(','))
-            log.debug('Sending real page (%s) with tracing function on'
-                      ' for %s' % (
-                          environ.get('HTTP_ACCEPT', ''), path))
-            app = self.app
-            if path == '/__wdb':
-                # Set trace on url /__wdb
-                def set_trace(environ, start_response):
-                    start_response('200 OK', [('Content-Type', 'text/html')])
-                    WdbRequest.tf()
-                    yield "Done"
-                app = set_trace
-            return WdbRequest(ports).wsgi_trace(app, environ, start_response)
-        else:
-            log.debug("Serving %s" % path)
-            # Serving normally with exception handling
-
-            def wsgi_default(environ, start_response):
-                appiter = None
-                try:
-                    appiter = self.app(environ, start_response)
-                    for item in appiter:
-                        yield item
-                    hasattr(appiter, 'close') and appiter.close()
-                except WdbOff:
-                    hasattr(appiter, 'close') and appiter.close()
-                    tb = sys.exc_info()[2]
-                    stack = traceback.extract_tb(tb)
-                    stack.reverse()
-                    try:
-                        start_response('500 INTERNAL SERVER ERROR', [
-                            ('Content-Type', 'text/html')])
-                        yield self._500 % dict(
-                            theme=self.theme,
-                            trace='',
-                            state='',
-                            title='Wdb',
-                            subtitle='Set Trace (Please set Wdb On)',
-                            trace_dict=dump({'trace': stack[2:]}))
-                    except:
-                        log.exception('Uh oh')
-
-                except Exception as e:
-                    log.exception('Exception with wdb off')
-                    hasattr(appiter, 'close') and appiter.close()
-                    tb = sys.exc_info()[2]
-                    stack = traceback.extract_tb(tb)
-                    stack.reverse()
-                    try:
-                        start_response('500 INTERNAL SERVER ERROR', [
-                            ('Content-Type', 'text/html')])
-                        yield self._500 % dict(
-                            theme=self.theme,
-                            trace=traceback.format_exc(),
-                            title=type(e).__name__.replace("'", "\\'"),
-                            subtitle=str(e).replace("'", "\\'"),
-                            state='',
-                            trace_dict=dump({
-                                'trace': stack,
-                            })
-                        )
-                    except:
-                        log.exception('Uh oh')
-
-            return wsgi_default(environ, start_response)
-
-    def static_request(self, environ, start_response, filename):
-        """Return static file"""
-        start_response('200 OK', [('Content-Type', guess_type(filename)[0])])
-        with open(os.path.join(BASE_PATH, filename)) as f:
-            yield f.read()
-
-    def first_request(self, environ, start_response):
-        """Return page that will call real request in ajax"""
-        post = 'null'
-        if environ.get('REQUEST_METHOD', '') == 'POST':
-            post = {}
-            body = ''
-            try:
-                length = int(environ.get('CONTENT_LENGTH', '0'))
-            except ValueError:
-                pass
-            else:
-                body = environ['wsgi.input'].read(length)
-            post['enctype'] = environ.get('CONTENT_TYPE', '')
-            if not 'multipart/form-data' in post['enctype']:
-                post['data'] = parse_qs(body)
-            else:
-                post['data'] = body
-            post = dump(post)
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        log.info('Starting new request')
-
-        yield self.html % dict(post=post, theme=self.theme, alt_ports='null')
+class Wdb(Bdb):
+    """Wdb debugger main class"""
+    _instances = {}
 
     @staticmethod
-    def make_server():
-        """Make a wsgi server and start a WdbRequest"""
-        seed()
-        rand_ports = [randint(10000, 60000) for _ in range(5)]
-        wdbr = WdbRequest(rand_ports)
-        wdbr.reset()
-        wdbr.server = AltServer(
-            2520 + threading.enumerate().index(threading.current_thread()),
-            rand_ports)
-        return wdbr
+    def get():
+        wdb = Wdb._instances.get(threading.current_thread())
+        if not wdb:
+            wdb = Wdb()
+            Wdb._instances[threading.current_thread()] = wdb
+        return wdb
+
+    @staticmethod
+    def settrace(frame=None):
+        sys.settrace(None)
+        # Removing current global tracing function if any
+        wdb = Wdb.get()
+        frame = frame or sys._getframe().f_back
+        # Clear previous tracing
+        wdb.stop_trace()
+        # Set trace to the top frame
+        wdb.set_trace(frame)
+
+    def __init__(self, skip=None):
+        self.obj_cache = {}
+
+        try:
+            Bdb.__init__(self, skip=skip)
+        except TypeError:
+            Bdb.__init__(self)
+        self.begun = False
+        self.quitting = False
+        self.connected = False
+        self.extra_vars = {}
+        self.last_obj = None
+        self.reset()
+        self.uuid = str(uuid4())
+
+        breaks_per_file_lno = Breakpoint.bplist.values()
+        for bps in breaks_per_file_lno:
+            breaks = list(bps)
+            for bp in breaks:
+                args = bp.file, bp.line, bp.temporary, bp.cond
+                self.set_break(*args)
+                log.info('Resetting break %s' % repr(args))
 
     @staticmethod
     def trace(full=False):
         """Make an instance of Wdb and trace all code below"""
-        wdbr = MetaWdbRequest._instances.get(threading.current_thread())
-        if not wdbr:
-            log.info('Tracing with a new server')
-            # Let's make a server
-            wdbr = Wdb.make_server()
-        else:
-            sys.settrace(None)
-            log.info('Tracing with an existing server')
-            wdbr.reset()
-            wdbr.stop_trace()
-            wdbr.begun = False
+        wdbr = MetaWdb._instances.get(threading.current_thread())
+        sys.settrace(None)
+        log.info('Tracing with an existing server')
+        wdbr.reset()
+        wdbr.stop_trace()
+        wdbr.begun = False
 
         def trace(frame, event, arg):
             rv = wdbr.trace_dispatch(frame, event, arg)
@@ -384,6 +136,7 @@ class Wdb(object):
             "__file__": filename,
             "__builtins__": __builtins__,
         })
+        __main__.__dict__['__builtins__']['wtf'] = set_trace
         with open(filename, "rb") as fp:
             statement = "exec(compile(%r, %r, 'exec'))" % \
                         (fp.read(), filename)
@@ -403,37 +156,6 @@ class Wdb(object):
             execute(cmd, globals, locals)
         except BdbQuit:
             pass
-
-
-class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
-    """Wdb debugger main class"""
-
-    def __init__(self, ports, skip=None):
-        MetaWdbRequest._instances[threading.current_thread()] = self
-        self.obj_cache = {}
-
-        try:
-            Bdb.__init__(self, skip=skip)
-        except TypeError:
-            Bdb.__init__(self)
-        self.begun = False
-        self.quitting = False
-        self.connected = False
-        self.ports = ports
-        self.extra_vars = {}
-        self.last_obj = None
-        self.server_started = False
-        self.server = None
-        self.reset()
-        breaks_per_file_lno = Breakpoint.bplist.values()
-        for bps in breaks_per_file_lno:
-            breaks = list(bps)
-            for bp in breaks:
-                args = bp.file, bp.line, bp.temporary, bp.cond
-                self.set_break(*args)
-                log.info('Resetting break %s' % repr(args))
-
-        atexit.register(lambda: self.die())
 
     def stop_trace(self, threading_too=False):
         sys.settrace(None)
@@ -566,71 +288,10 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
             for key in dir(thing)
         )
 
-    @property
-    def ws(self):
-        if not self.server_started:
-            self.server_started = True
-            if self.server is not None:
-                if hasattr(os, '_original_fork'):
-                    os._fork = os.fork
-                    os.fork = os._original_fork
-                    self.server.start()
-                    os.fork = os._fork
-                else:
-                    self.server.start()
-
-            self.make_web_socket(self.ports)
-        return self.__ws
-
-    def make_web_socket(self, ports):
-        """Create a web socket"""
-
-        log.info('Creating WebSocket %r' % self)
-        for port in ports:
-            self.__ws = WebSocket('0.0.0.0', port)
-            if self.ws.status == 'OK':
-                return
-            time.sleep(.100)
-
-        raise WsError('No port could be opened')
-
-    def wsgi_trace(self, app, environ, start_response):
-        """WSGI with a tracing function activated"""
-
-        def wsgi_with_trace(environ, start_response):
-            """Inner WSGI gen"""
-            Wdb.trace()
-
-            try:
-                appiter = app(environ, start_response)
-            except BdbQuit:
-                self.stop_trace()
-                start_response('200 OK', [('Content-Type', 'text/html')])
-                yield '<h1>BdbQuit</h1><p>Wdb was interrupted</p>'
-            else:
-                for item in appiter:
-                    yield item
-                hasattr(appiter, 'close') and appiter.close()
-                self.stop_trace()
-                self.die()
-        return wsgi_with_trace(environ, start_response)
-
     def get_file(self, filename):
         """Get file source from cache"""
         checkcache(filename)
         return ''.join(getlines(filename))
-
-    def handle_connection(self):
-        """Check connection state, and try to reconnect if it's broken"""
-        if self.connected:
-            try:
-                self.send('Ping')
-            except:
-                log.exception('Ping Failed')
-                self.connected = False
-        if not self.connected:
-            self.ws.wait_for_connect()
-            self.connected = True
 
     def get_trace(self, frame, tb, w_code=None):
         """Get a dict of the traceback for wdb.js use"""
@@ -661,51 +322,29 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
 
         return stack, frames, current
 
-    def interaction(
-            self, frame, tb=None,
-            exception='Wdb', exception_description='Set Trace'):
-        """Entry point of user interaction"""
-        if not self.ws:
-            raise BdbQuit()
-        try:
-            self._interaction(
-                frame, tb, exception, exception_description)
-        except WsError:
-            log.exception('Websocket Error during interaction. Starting again')
-            self.handle_connection()
-            # Recursive call to restart interaction on ws crash
-            self.interaction(
-                frame, tb, exception, exception_description)
-
     def send(self, data):
         """Send data through websocket"""
-        try:
-            self.ws.send(data)
-        except WsBroken:
-            if self.server:
-                import webbrowser
-                webbrowser.open('http://localhost:%d/' % self.server.http_port)
-                self.ws.wait_for_connect()
-            else:
-                raise
+        log.info('Sending' + data)
+        Wdb.connection.send(data)
 
     def receive(self):
         """Receive data through websocket"""
-        message = None
-        while not message:
-            rv = self.ws.receive()
-            if rv == 'CLOSED':
-                raise WsError
-            message = rv
-        return message
+        return Wdb.connection.recv()
 
-    def _interaction(
-            self, frame, tb,
-            exception, exception_description):
+    def interaction(
+            self, frame, tb=None,
+            exception='Wdb', exception_description='Set Trace'):
         """User interaction handling blocking on socket receive"""
 
         log.debug('Interaction for %r %r %r %r' % (
             frame, tb, exception, exception_description))
+
+        if not self.connected:
+            log.info('Connectiong')
+            webbrowser.open('http://localhost:2560/debug/session/%s' % self.uuid)
+            start = self.receive()
+            log.info('Received' + start)
+            self.connected = True
 
         interaction = Interaction(
             self, frame, tb, exception, exception_description)
@@ -726,7 +365,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         if self.stop_here(frame):
             fun = frame.f_code.co_name
             log.info('Calling: %r' % fun)
-            self.handle_connection()
             self.send('Echo|%s' % dump({
                 'for': '__call__',
                 'val': fun}))
@@ -737,7 +375,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         log.debug('LINE')
         log.info('Stopping at line %r:%d' % (
             frame.f_code.co_filename, frame.f_lineno))
-        self.handle_connection()
         log.debug('User Line Interaction for %r' % frame)
         self.interaction(frame)
 
@@ -747,7 +384,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         self.extra_vars['__return__'] = return_value
         log.info('Returning from %r with value: %r' % (
             frame.f_code.co_name, return_value))
-        self.handle_connection()
         self.send('Echo|%s' % dump({
             'for': '__return__',
             'val': return_value
@@ -768,7 +404,6 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__
         exception_description = str(value)
-        self.handle_connection()
         self.send('Echo|%s' % dump({
             'for': '__exception__',
             'val': escape('%s: %s') % (
@@ -799,13 +434,7 @@ class WdbRequest(Bdb, with_metaclass(MetaWdbRequest)):
         sys.settrace(self.trace_dispatch)
         self.lastcmd = p.lastcmd
 
-    def die(self):
-        """That's the end my friend"""
-        if self.server_started and self.begun:
-            log.info('Dying')
-            self.send('Die')
-
 
 def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
-    WdbRequest.tf(frame or sys._getframe().f_back)
+    Wdb.settrace(frame or sys._getframe().f_back)

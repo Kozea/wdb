@@ -1,6 +1,5 @@
 # *-* coding: utf-8 *-*
 from ._compat import dumps, JSONEncoder, quote, execute
-from .websocket import WsError
 from bdb import BdbQuit
 from cgi import escape
 from jedi import Script
@@ -113,8 +112,8 @@ class Interaction(object):
             except BdbQuit:
                 # This will be handled by caller
                 raise
-            except WsError:
-                stop = True
+            # except WsError:
+            #     stop = True
             except Exception:
                 try:
                     exc = handle_exc()
@@ -139,6 +138,7 @@ class Interaction(object):
     def interact(self):
         try:
             message = self.db.receive()
+            log.warn(message)
         except KeyboardInterrupt:
             # Quit on KeyboardInterrupt
             message = 'Quit'
