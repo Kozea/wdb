@@ -6,7 +6,7 @@ class Process1(Process):
     def run(self):
         print('Process 1 start')
         sleep(1)
-        1/0
+        import wdb; wdb.set_trace()
         print('Process 1 end')
         sleep(1)
 

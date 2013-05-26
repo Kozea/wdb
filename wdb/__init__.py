@@ -25,7 +25,7 @@ from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
 from mimetypes import guess_type
-from multiprocessing import Process
+from multiprocessing.connection import Client
 from random import randint, seed
 from uuid import uuid4
 import atexit
@@ -70,7 +70,6 @@ class Wdb(Bdb):
 
     def __init__(self, skip=None):
         self.obj_cache = {}
-
         try:
             Bdb.__init__(self, skip=skip)
         except TypeError:
@@ -91,18 +90,20 @@ class Wdb(Bdb):
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
 
+        self.connect()
+
     @staticmethod
     def trace(full=False):
         """Make an instance of Wdb and trace all code below"""
-        wdbr = MetaWdb._instances.get(threading.current_thread())
+        wdb = Wdb.get()
         sys.settrace(None)
         log.info('Tracing with an existing server')
-        wdbr.reset()
-        wdbr.stop_trace()
-        wdbr.begun = False
+        wdb.reset()
+        wdb.stop_trace()
+        wdb.begun = False
 
         def trace(frame, event, arg):
-            rv = wdbr.trace_dispatch(frame, event, arg)
+            rv = wdb.trace_dispatch(frame, event, arg)
             fn = frame.f_code.co_filename
             if (rv is None and not
                 full and
@@ -116,16 +117,16 @@ class Wdb(Bdb):
         # Prepare full tracing
         frame = sys._getframe().f_back
         # Stop frame is the calling one
-        wdbr.stoplineno = -1
-        wdbr.stopframe = frame
+        wdb.stoplineno = -1
+        wdb.stopframe = frame
         while frame:
             frame.f_trace = trace
-            wdbr.botframe = frame
+            wdb.botframe = frame
             frame = frame.f_back
 
         # Set trace with wdb
         sys.settrace(trace)
-        return wdbr
+        return wdb
 
     @staticmethod
     def run_file(filename):
@@ -156,6 +157,10 @@ class Wdb(Bdb):
             execute(cmd, globals, locals)
         except BdbQuit:
             pass
+
+    def connect(self):
+        self._socket = Client(('localhost', 18532))
+        self._socket._send(self.uuid.encode('utf-8'))
 
     def stop_trace(self, threading_too=False):
         sys.settrace(None)
@@ -324,12 +329,15 @@ class Wdb(Bdb):
 
     def send(self, data):
         """Send data through websocket"""
-        log.info('Sending' + data)
-        Wdb.connection.send(self.uuid + '|' + data)
+        log.info('Sending %s' % data)
+        self._socket.send_bytes(data.encode('utf-8'))
 
     def receive(self):
         """Receive data through websocket"""
-        return Wdb.connection.recv()
+        log.info('Receiving')
+        data = self._socket.recv_bytes()
+        log.info('Got %s' % data)
+        return data.decode('utf-8')
 
     def interaction(
             self, frame, tb=None,
@@ -341,9 +349,8 @@ class Wdb(Bdb):
 
         if not self.connected:
             log.info('Connectiong')
-            webbrowser.open('http://localhost:2560/debug/session/%s' % self.uuid)
-            start = self.receive()
-            log.info('Received' + start)
+            webbrowser.open(
+                'http://localhost:2560/debug/session/%s' % self.uuid)
             self.connected = True
 
         interaction = Interaction(
