@@ -1,5 +1,6 @@
 from threading import Thread
 from time import sleep
+from wdb import set_trace as wtf
 
 
 class Thread1(Thread):

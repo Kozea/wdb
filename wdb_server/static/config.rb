@@ -1,4 +1,4 @@
-http_path = "/__wdb/"
+http_path = "/static/"
 css_dir = "stylesheets"
 sass_dir = "sass"
 images_dir = "images"
