@@ -56,12 +56,18 @@ def bind(self, method):
         return types.MethodType(method, self)
 
 if python_version == 2:
+    def to_unicode(string):
+        return string.decode('utf-8')
+
     def to_bytes(string):
         return string
 
     def from_bytes(bytes_):
         return bytes_
 else:
+    def to_unicode(string):
+        return string
+
     def to_bytes(string):
         return string.encode('utf-8')
 
