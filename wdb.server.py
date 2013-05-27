@@ -34,13 +34,17 @@ def assign_stream(stream, uuid):
     stream.read_bytes(4, partial(read_header, stream, uuid))
 
 
+def read_uuid_size(stream, length):
+    length, = unpack("!i", length)
+    assert length == 36, 'Wrong uuid'
+    stream.read_bytes(length, partial(assign_stream, stream))
+
+
 def handle_connection(connection, address):
     log.info('Connection received from %s' % str(address))
     stream = IOStream(connection, ioloop)
     # Getting uuid
-    stream.read_until_regex(
-        uuid_re,
-        partial(assign_stream, stream))
+    stream.read_bytes(4, partial(read_uuid_size, stream))
 
 
 log.debug('Accepting')
