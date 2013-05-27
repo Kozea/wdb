@@ -16,7 +16,7 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ._compat import parse_qs, Bdb, with_metaclass, to_bytes, execute
+from ._compat import Bdb, execute
 from .ui import Interaction, dump
 from io import StringIO
 from bdb import BdbQuit, Breakpoint
@@ -24,18 +24,15 @@ from cgi import escape
 from contextlib import contextmanager
 from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
-from mimetypes import guess_type
 from multiprocessing.connection import Client
-from random import randint, seed
 from uuid import uuid4
-import atexit
 import dis
 import os
 import sys
 import threading
-import time
-import traceback
 import webbrowser
+import atexit
+
 
 BASE_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)))
@@ -48,6 +45,7 @@ log.setLevel(10)
 class Wdb(Bdb):
     """Wdb debugger main class"""
     _instances = {}
+    _sockets = []
 
     @staticmethod
     def get():
@@ -89,7 +87,6 @@ class Wdb(Bdb):
                 args = bp.file, bp.line, bp.temporary, bp.cond
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
-
         self.connect()
 
     @staticmethod
@@ -160,6 +157,7 @@ class Wdb(Bdb):
 
     def connect(self):
         self._socket = Client(('localhost', 18532))
+        Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
     def stop_trace(self, threading_too=False):
@@ -445,3 +443,9 @@ class Wdb(Bdb):
 def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
     Wdb.settrace(frame or sys._getframe().f_back)
+
+
+@atexit.register
+def cleanup():
+    for socket in Wdb._sockets:
+        socket.close()

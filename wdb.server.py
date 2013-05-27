@@ -17,6 +17,15 @@ log.debug('Binding sockets')
 sockets = bind_sockets(18532)
 
 
+def on_close(stream, uuid):
+    # None if the user closed the window
+    if WebSocketHandler.websockets[uuid].ws_connection is not None:
+        WebSocketHandler.websockets[uuid].write_message('Die')
+        WebSocketHandler.websockets[uuid].close()
+    del WebSocketHandler.websockets[uuid]
+    del WebSocketHandler.sockets[uuid]
+
+
 def read_frame(stream, uuid, frame):
     WebSocketHandler.websockets[uuid].write_message(frame)
     stream.read_bytes(4, partial(read_header, stream, uuid))
@@ -31,6 +40,7 @@ def assign_stream(stream, uuid):
     uuid = uuid.decode('utf-8')
     log.debug('Assigning stream to %s' % uuid)
     WebSocketHandler.sockets[uuid] = stream
+    stream.set_close_callback(partial(on_close, stream, uuid))
     stream.read_bytes(4, partial(read_header, stream, uuid))
 
 
