@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, request
 import logging
-from wdb import Wdb
+from wdb.ext import WdbMiddleware
 app = Flask(__name__)
+
 
 def make_error():
     import whatever
@@ -155,7 +156,7 @@ def init():
     except ImportError:
         app.logger.debug('wsreload not found')
     else:
-        url = "http://l:1984/*"
+        url = "http://l:1985/*"
 
         def log(httpserver):
             app.logger.debug('WSReloaded after server restart')
@@ -165,6 +166,7 @@ def init():
 
 def run():
     init()
+    app.wsgi_app = WdbMiddleware(app.wsgi_app)
     app.run(
         debug=True, host='0.0.0.0', port=1985, use_debugger=False,
         use_reloader=True, threaded=True)
