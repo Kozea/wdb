@@ -1,5 +1,5 @@
 # *-* coding: utf-8 *-*
-from ._compat import dumps, JSONEncoder, quote, execute
+from ._compat import dumps, JSONEncoder, quote, execute, to_unicode
 from .websocket import WsError
 from bdb import BdbQuit
 from cgi import escape
@@ -360,6 +360,7 @@ class Interaction(object):
 
     def do_complete(self, data):
         file_ = self.db.get_file(self.current_file)
+        file_ = to_unicode(file_)
         lines = file_.split(u'\n')
         lno = self.current['lno']
         line_before = lines[lno - 1]
