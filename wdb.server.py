@@ -4,30 +4,38 @@ from tornado.netutil import bind_sockets, add_accept_handler
 from tornado.ioloop import IOLoop
 from tornado.iostream import IOStream
 from functools import partial
-from log_colorizer import get_color_logger
+from logging import getLogger
 from struct import unpack
 import re
 
 
-log = get_color_logger('wdb_server')
+log = getLogger('wdb_server')
+log.setLevel(30)
 uuid_re = b'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
 size_pattern = re.compile(b'<(\d+)>')
 ioloop = IOLoop.instance()
 log.debug('Binding sockets')
-sockets = bind_sockets(18532)
+sockets = bind_sockets(19840)
 
 
 def on_close(stream, uuid):
     # None if the user closed the window
-    if WebSocketHandler.websockets[uuid].ws_connection is not None:
-        WebSocketHandler.websockets[uuid].write_message('Die')
-        WebSocketHandler.websockets[uuid].close()
-    del WebSocketHandler.websockets[uuid]
+    log.info('uuid %s closed' % uuid)
+    if WebSocketHandler.websockets.get(uuid):
+        if WebSocketHandler.websockets[uuid].ws_connection is not None:
+            log.info('Telling browser to die')
+            WebSocketHandler.websockets[uuid].write_message('Die')
+            WebSocketHandler.websockets[uuid].close()
+        del WebSocketHandler.websockets[uuid]
     del WebSocketHandler.sockets[uuid]
 
 
 def read_frame(stream, uuid, frame):
-    WebSocketHandler.websockets[uuid].write_message(frame)
+    websocket = WebSocketHandler.websockets.get(uuid)
+    if websocket:
+        websocket.write_message(frame)
+    else:
+        log.error('Web socket is unknown for frame %s' % frame)
     stream.read_bytes(4, partial(read_header, stream, uuid))
 
 
@@ -62,7 +70,7 @@ for socket in sockets:
     add_accept_handler(socket, handle_connection, ioloop)
 
 log.debug('Listening')
-server.listen(2560)
+server.listen(1984)
 
 log.debug('Starting loop')
 ioloop.start()

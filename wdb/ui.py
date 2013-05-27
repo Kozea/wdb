@@ -48,8 +48,10 @@ def fail(db, cmd, title=None, message=None):
 
 
 class Interaction(object):
-    def __init__(self, db, frame, tb, exception, exception_description):
+    def __init__(
+            self, db, frame, tb, exception, exception_description, init=None):
         self.db = db
+        self.init_message = init
         self.stack, self.trace, self.index = self.db.get_trace(frame, tb)
         self.exception = exception
         self.exception_description = exception_description
@@ -96,6 +98,10 @@ class Interaction(object):
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
         }))
+        self.db.send('Title|%s' % dump({
+            'title': self.exception,
+            'subtitle': self.exception_description
+        }))
 
     def parse_command(self, message):
         # Parse received message
@@ -115,6 +121,7 @@ class Interaction(object):
             # except WsError:
             #     stop = True
             except Exception:
+                log.exception('Error in loop')
                 try:
                     exc = handle_exc()
                     type_, value = sys.exc_info()[:2]
@@ -129,6 +136,7 @@ class Interaction(object):
                         'val': exc + '<br>' + link
                     }))
                 except:
+                    log.exception('Error in loop exception handling')
                     self.db.send('Echo|%s' % dump({
                         'for': 'Too many errors',
                         'val': ("Don't really know what to say. "
@@ -138,7 +146,6 @@ class Interaction(object):
     def interact(self):
         try:
             message = self.db.receive()
-            log.warn(message)
         except KeyboardInterrupt:
             # Quit on KeyboardInterrupt
             message = 'Quit'
@@ -168,6 +175,9 @@ class Interaction(object):
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
         }))
+        if self.init_message:
+            self.db.send(self.init_message)
+            self.init_message = None
 
     def do_select(self, data):
         self.index = int(data)

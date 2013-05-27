@@ -6,6 +6,7 @@
 
   time = function() {
     var d;
+
     d = new Date();
     return "" + (d.getHours()) + ":" + (d.getMinutes()) + ":" + (d.getSeconds()) + "." + (d.getMilliseconds());
   };
@@ -47,6 +48,7 @@
 
   fallback = function() {
     var file_cache;
+
     file_cache = {};
     this.get = function(type) {
       return function(obj, callback) {
@@ -69,6 +71,7 @@
     };
     open.onupgradeneeded = function(event) {
       var db;
+
       db = event.target.result;
       return db.createObjectStore("cmd", {
         keyPath: "name"
@@ -80,6 +83,7 @@
       _this.get = function(type) {
         return function(key, callback, notfound, always) {
           var rq;
+
           rq = this.wdbdb.transaction([type]).objectStore(type).get(key);
           rq.onsuccess = function(event) {
             if (event.target.result) {
@@ -101,6 +105,7 @@
       _this.set = function(type) {
         return function(obj) {
           var os, rq;
+
           rq = this.wdbdb.transaction([type], 'readwrite');
           os = rq.objectStore(type);
           os.put(obj);
@@ -112,6 +117,7 @@
       };
       return _this.wdbdb.transaction(['cmd']).objectStore('cmd').openCursor().onsuccess = function(event) {
         var cursor;
+
         cursor = event.target.result;
         if (cursor) {
           cmd_hist[cursor.value.name] = cursor.value.history;
@@ -128,7 +134,8 @@
   make_ws = function() {
     var new_ws, sck,
       _this = this;
-    sck = "ws://" + document.location.hostname + ':2560/websocket/' + _uuid;
+
+    sck = "ws://" + document.location.hostname + ':1984/websocket/' + _uuid;
     console.log('Opening new socket', sck);
     new_ws = new WebSocket(sck);
     new_ws.onclose = function(m) {
@@ -150,6 +157,7 @@
     };
     new_ws.onmessage = function(m) {
       var cmd, data, message, pipe, treat;
+
       if (stop) {
         return;
       }
@@ -201,8 +209,10 @@
 
   $(function() {
     var end;
+
     setTimeout(function() {
       var dot;
+
       $('#deactivate').click(function() {
         $.get('/__wdb/off').done(function() {
           return location.reload(true);
@@ -220,6 +230,7 @@
     }, 250);
     end = function(page) {
       var e;
+
       stop = true;
       if (ws) {
         try {
@@ -259,6 +270,7 @@
 
   trace = function(data) {
     var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, frame, suffix, _i, _len, _ref;
+
     $traceback.empty();
     _ref = data.trace;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -308,6 +320,7 @@
 
   get_mode = function(fn) {
     var ext;
+
     ext = fn.split('.').splice(-1)[0];
     if (ext === 'py') {
       return 'python';
@@ -368,6 +381,7 @@
 
   toggle_edition = function(rw) {
     var char, cls, lno, marks, scroll, _ref;
+
     cls = $.extend({}, cm._bg_marks.cls);
     marks = $.extend({}, cm._bg_marks.marks);
     scroll = $('#source .CodeMirror-scroll').scrollTop();
@@ -385,6 +399,7 @@
 
   select = function(data) {
     var $hline, $scroll, current_frame, lno, _i, _j, _len, _ref, _ref1, _ref2;
+
     $source = $('#source');
     current_frame = data.frame;
     $('.traceline').removeClass('selected');
@@ -436,6 +451,7 @@
   ellipsize = function(code_elt) {
     return code_elt.find('span.cm-string').each(function() {
       var txt;
+
       txt = $(this).text();
       if (txt.length > 128) {
         $(this).text('');
@@ -447,6 +463,7 @@
 
   code = function(parent, code, classes, html) {
     var cls, code_elt, _i, _j, _len, _len1;
+
     if (classes == null) {
       classes = [];
     }
@@ -466,6 +483,7 @@
         return this.nodeType === 3 && this.nodeValue.length > 0;
       }).wrap('<span>').parent().each(function() {
         var span;
+
         span = this;
         $(span).addClass('waiting_for_hl');
         return setTimeout((function() {
@@ -491,6 +509,7 @@
 
   historize = function(snippet) {
     var filename, index;
+
     filename = $('.selected .tracefile').text();
     if (!(filename in cmd_hist)) {
       cmd_hist[filename] = [];
@@ -513,6 +532,7 @@
 
   execute = function(snippet) {
     var cmd, data, key, space;
+
     snippet = snippet.trim();
     historize(snippet);
     cmd = function(cmd) {
@@ -606,6 +626,7 @@
 
   print = function(data) {
     var snippet;
+
     suggest_stop();
     snippet = $('#eval').val();
     code($('#scrollback'), data["for"], ['prompted']);
@@ -622,6 +643,7 @@
 
   dump = function(data) {
     var $attr_tbody, $container, $core_tbody, $method_tbody, $table, $tbody, key, val, _ref;
+
     code($('#scrollback'), data["for"], ['prompted']);
     $container = $('<div>');
     $table = $('<table>', {
@@ -672,6 +694,7 @@
 
   breakset = function(data) {
     var $eval;
+
     if (data.lno) {
       cm.removeClass(data.lno, 'ask-breakpoint');
       cm.addClass(data.lno, 'breakpoint');
@@ -687,6 +710,7 @@
 
   breakunset = function(data) {
     var $eval;
+
     cm.removeClass(data.lno, 'ask-breakpoint');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
@@ -696,6 +720,7 @@
 
   toggle_break = function(lno, temporary) {
     var cls, cmd;
+
     cmd = temporary ? 'TBreak' : 'Break';
     if (('' + lno).indexOf(':') > -1) {
       send(cmd + '|' + lno);
@@ -716,6 +741,7 @@
 
   format_fun = function(p) {
     var cls, i, param, tags, _i, _len, _ref;
+
     tags = [
       $('<span>', {
         "class": 'fun_name',
@@ -748,6 +774,7 @@
 
   suggest = function(data) {
     var $appender, $comp, $eval, $tbody, $td, added, base_len, completion, index, _i, _len, _ref, _ref1;
+
     $eval = $('#eval');
     $comp = $('#completions table').empty();
     $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
@@ -792,6 +819,7 @@
 
   searchback = function() {
     var h, index, re, val, _i, _len, _ref;
+
     suggest_stop();
     index = backsearch;
     val = $('#eval').val();
@@ -859,6 +887,7 @@
     });
     $('#eval').on('keydown', function(e) {
       var $active, $eval, $tds, base, completion, endPos, filename, index, startPos, to_set, txtarea;
+
       $eval = $(this);
       if (e.altKey && e.keyCode === 82 && backsearch) {
         backsearch = Math.max(backsearch - 1, 1);
@@ -986,6 +1015,7 @@
       return $(this).addClass('open').removeClass('close').next('.long').show('fast');
     }).on('click', '.long,.short.open', function() {
       var elt;
+
       elt = $(this).hasClass('long') ? $(this) : $(this).next('.long');
       return elt.hide('fast').prev('.short').removeClass('open').addClass('close');
     }).on('click', '.toggle', function() {
@@ -996,6 +1026,7 @@
     });
     $("#sourcecode").on('mouseup', 'span', function(e) {
       var target;
+
       if (e.which === 2) {
         target = $(this).text().trim();
         historize(target);
@@ -1004,6 +1035,7 @@
     });
     $(document).on('keydown', function(e) {
       var sel;
+
       if (e.keyCode === 13) {
         sel = document.getSelection().toString().trim();
         if (sel) {
@@ -1014,6 +1046,7 @@
     });
     return $('#eval').on('input', function() {
       var hist, txt;
+
       txt = $(this).val();
       if (backsearch) {
         if (!txt) {
