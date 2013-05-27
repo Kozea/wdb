@@ -160,7 +160,7 @@ class Wdb(Bdb):
 
     def connect(self):
         self._socket = Client(('localhost', 18532))
-        self._socket._send(self.uuid.encode('utf-8'))
+        self._socket.send_bytes(self.uuid.encode('utf-8'))
 
     def stop_trace(self, threading_too=False):
         sys.settrace(None)
