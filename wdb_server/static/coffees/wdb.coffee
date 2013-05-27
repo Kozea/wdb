@@ -93,7 +93,7 @@ else
 
 make_ws = ->
     # Open a websocket in case of request break
-    sck = "ws://" + document.location.hostname + ':2560/websocket/' + _uuid
+    sck = "ws://" + document.location.hostname + ':1984/websocket/' + _uuid
     console.log 'Opening new socket', sck
     new_ws = new WebSocket sck
     new_ws.onclose = (m) =>

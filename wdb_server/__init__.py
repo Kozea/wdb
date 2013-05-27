@@ -6,6 +6,7 @@ import os
 import logging
 
 log = logging.getLogger('wdb_server')
+log.setLevel(30)
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -27,7 +28,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def send(self, message):
         socket = WebSocketHandler.sockets.get(self.uuid)
-        log.info('websocket -> socket: %s' % message)
+        if not socket:
+            self.close()
+            return
+        log.debug('websocket -> socket: %s' % message)
         data = message.encode('utf-8')
         socket.write(pack("!i", len(data)))
         socket.write(data)
@@ -35,18 +39,17 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self, uuid):
         self.uuid = uuid.decode('utf-8')
         log.info('Websocket opened for %s' % self.uuid)
-        existing = WebSocketHandler.websockets.get(self.uuid)
-        if existing:
-            existing.write_message('Die')
-            existing.close()
         WebSocketHandler.websockets[self.uuid] = self
 
     def on_message(self, message):
+        log.debug('socket -> websocket: %s' % message)
         self.send(message)
 
     def on_close(self):
-        self.send('Continue')
-        WebSocketHandler.sockets.get(self.uuid).close()
+        socket = WebSocketHandler.sockets.get(self.uuid)
+        if socket:
+            self.send('Continue')
+            socket.close()
 
 
 server = tornado.web.Application(

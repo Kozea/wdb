@@ -165,9 +165,8 @@ def init():
 
 def run():
     init()
-    app.wsgi_app = Wdb(app.wsgi_app)
     app.run(
-        debug=True, host='0.0.0.0', port=1984, use_debugger=False,
+        debug=True, host='0.0.0.0', port=1985, use_debugger=False,
         use_reloader=True, threaded=True)
 
 if __name__ == '__main__':

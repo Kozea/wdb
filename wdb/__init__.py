@@ -39,7 +39,7 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-log.setLevel(10)
+log.setLevel(30)
 
 
 class Wdb(Bdb):
@@ -54,17 +54,6 @@ class Wdb(Bdb):
             wdb = Wdb()
             Wdb._instances[threading.current_thread()] = wdb
         return wdb
-
-    @staticmethod
-    def settrace(frame=None):
-        sys.settrace(None)
-        # Removing current global tracing function if any
-        wdb = Wdb.get()
-        frame = frame or sys._getframe().f_back
-        # Clear previous tracing
-        wdb.stop_trace()
-        # Set trace to the top frame
-        wdb.set_trace(frame)
 
     def __init__(self, skip=None):
         self.obj_cache = {}
@@ -88,42 +77,6 @@ class Wdb(Bdb):
                 self.set_break(*args)
                 log.info('Resetting break %s' % repr(args))
         self.connect()
-
-    @staticmethod
-    def trace(full=False):
-        """Make an instance of Wdb and trace all code below"""
-        wdb = Wdb.get()
-        sys.settrace(None)
-        log.info('Tracing with an existing server')
-        wdb.reset()
-        wdb.stop_trace()
-        wdb.begun = False
-
-        def trace(frame, event, arg):
-            rv = wdb.trace_dispatch(frame, event, arg)
-            fn = frame.f_code.co_filename
-            if (rv is None and not
-                full and
-                (fn == os.path.abspath(fn) or fn.startswith('<')) and not
-                fn.startswith(
-                    os.path.dirname(os.path.abspath(sys.argv[0])))):
-                return
-
-            return trace
-
-        # Prepare full tracing
-        frame = sys._getframe().f_back
-        # Stop frame is the calling one
-        wdb.stoplineno = -1
-        wdb.stopframe = frame
-        while frame:
-            frame.f_trace = trace
-            wdb.botframe = frame
-            frame = frame.f_back
-
-        # Set trace with wdb
-        sys.settrace(trace)
-        return wdb
 
     @staticmethod
     def run_file(filename):
@@ -156,18 +109,48 @@ class Wdb(Bdb):
             pass
 
     def connect(self):
-        self._socket = Client(('localhost', 18532))
+        log.info('Connecting socket')
+        self._socket = Client(('localhost', 19840))
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
-    def stop_trace(self, threading_too=False):
+    def start_trace(self, full=False, frame=None):
+        """Make an instance of Wdb and trace all code below"""
         sys.settrace(None)
-        frame = sys._getframe().f_back
+        self.reset()
+        self.stop_trace()
+
+        def trace(frame, event, arg):
+            rv = self.trace_dispatch(frame, event, arg)
+            fn = frame.f_code.co_filename
+            if (rv is None and not
+                full and
+                (fn == os.path.abspath(fn) or fn.startswith('<')) and not
+                fn.startswith(
+                    os.path.dirname(os.path.abspath(sys.argv[0])))):
+                return
+
+            return trace
+
+        # Prepare full tracing
+        frame = frame or sys._getframe().f_back
+        # Stop frame is the calling one
+        self.stoplineno = -1
+        self.stopframe = frame
+        while frame:
+            frame.f_trace = trace
+            self.botframe = frame
+            frame = frame.f_back
+
+        # Set trace with wdb
+        sys.settrace(trace)
+
+    def stop_trace(self, frame=None):
+        sys.settrace(None)
+        frame = frame or sys._getframe().f_back
         while frame and frame is not self.botframe:
             del frame.f_trace
             frame = frame.f_back
-        if threading_too:
-            threading.settrace(None)
 
     def set_continue(self):
         self._set_stopinfo(self.botframe, None, -1)
@@ -339,20 +322,21 @@ class Wdb(Bdb):
 
     def interaction(
             self, frame, tb=None,
-            exception='Wdb', exception_description='Set Trace'):
+            exception='Wdb', exception_description='Stepping',
+            init=None):
         """User interaction handling blocking on socket receive"""
 
         log.debug('Interaction for %r %r %r %r' % (
             frame, tb, exception, exception_description))
 
         if not self.connected:
-            log.info('Connectiong')
+            log.info('Launching browser and wait for connection')
             webbrowser.open(
-                'http://localhost:2560/debug/session/%s' % self.uuid)
+                'http://localhost:1984/debug/session/%s' % self.uuid)
             self.connected = True
 
         interaction = Interaction(
-            self, frame, tb, exception, exception_description)
+            self, frame, tb, exception, exception_description, init=init)
 
         # For meta debugging purpose
         self._ui = interaction
@@ -370,10 +354,12 @@ class Wdb(Bdb):
         if self.stop_here(frame):
             fun = frame.f_code.co_name
             log.info('Calling: %r' % fun)
-            self.send('Echo|%s' % dump({
+            init = 'Echo|%s' % dump({
                 'for': '__call__',
-                'val': fun}))
-            self.interaction(frame)
+                'val': fun})
+            self.interaction(
+                frame, init=init,
+                exception_description='Calling %s' % fun)
 
     def user_line(self, frame):
         """This function is called when we stop or break at this line."""
@@ -387,13 +373,17 @@ class Wdb(Bdb):
         """This function is called when a return trap is set here."""
         self.obj_cache[id(return_value)] = return_value
         self.extra_vars['__return__'] = return_value
+        fun = frame.f_code.co_name
         log.info('Returning from %r with value: %r' % (
-            frame.f_code.co_name, return_value))
-        self.send('Echo|%s' % dump({
+            fun, return_value))
+        init = 'Echo|%s' % dump({
             'for': '__return__',
             'val': return_value
-        }))
-        self.interaction(frame)
+        })
+        self.interaction(
+            frame, init=init,
+            exception_description='Returning from %s with value %s' % (
+                fun, return_value))
 
     def user_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
@@ -409,13 +399,14 @@ class Wdb(Bdb):
         self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__
         exception_description = str(value)
-        self.send('Echo|%s' % dump({
+        init = 'Echo|%s' % dump({
             'for': '__exception__',
             'val': escape('%s: %s') % (
-                exception, exception_description)}))
+                exception, exception_description)})
         # User exception is 4 frames away from exception
         frame = frame or sys._getframe().f_back.f_back.f_back.f_back
-        self.interaction(frame, tb, exception, exception_description)
+        self.interaction(
+            frame, tb, exception, exception_description, init=init)
 
     def do_clear(self, arg):
         """Breakpoint clearing implementation"""
@@ -442,7 +433,36 @@ class Wdb(Bdb):
 
 def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
-    Wdb.settrace(frame or sys._getframe().f_back)
+    wdb = Wdb.get()
+    sys.settrace(None)
+    # Removing current global tracing function if any
+    frame = frame or sys._getframe().f_back
+    # Clear previous tracing
+    wdb.stop_trace()
+    # Set trace to the top frame
+    wdb.set_trace(frame)
+
+
+def start_trace(full=False, frame=None):
+    """Start tracing program at callee level
+       breaking on exception/breakpoints"""
+    Wdb.get().start_trace(full, frame or sys._getframe().f_back)
+
+
+def stop_trace(frame=None):
+    """Start tracing program at callee level
+       breaking on exception/breakpoints"""
+    Wdb.get().stop_trace(frame or sys._getframe().f_back)
+
+
+@contextmanager
+def trace(full=False, frame=None):
+    """Make a tracing context with `with trace():`"""
+    # Contextmanager -> 2 calls to get here
+    frame = frame or sys._getframe().f_back.f_back
+    start_trace(full, frame)
+    yield
+    stop_trace(frame)
 
 
 @atexit.register
