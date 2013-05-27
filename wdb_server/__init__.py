@@ -25,6 +25,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     websockets = {}
     sockets = {}
 
+    def send(self, message):
+        socket = WebSocketHandler.sockets.get(self.uuid)
+        log.info('websocket -> socket: %s' % message)
+        data = message.encode('utf-8')
+        socket.write(pack("!i", len(data)))
+        socket.write(data)
+
     def open(self, uuid):
         self.uuid = uuid.decode('utf-8')
         log.info('Websocket opened for %s' % self.uuid)
@@ -35,14 +42,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         WebSocketHandler.websockets[self.uuid] = self
 
     def on_message(self, message):
-        socket = WebSocketHandler.sockets.get(self.uuid)
-        log.info('websocket -> socket: %s' % message)
-        data = message.encode('utf-8')
-        socket.write(pack("!i", len(data)))
-        socket.write(data)
+        self.send(message)
 
     def on_close(self):
-        pass
+        self.send('Continue')
+        WebSocketHandler.sockets.get(self.uuid).close()
 
 
 server = tornado.web.Application(
