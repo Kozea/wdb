@@ -106,7 +106,7 @@ class Wdb(Bdb):
         self.start_trace()
         self.set_break(fn, 1, 1, None)
         try:
-            exec(cmd, globals, locals)
+            execute(cmd, globals, locals)
         except BdbQuit:
             pass
         finally:
@@ -494,14 +494,3 @@ def trace(full=False, frame=None, below=False, close_on_exit=False):
 def cleanup():
     for socket in Wdb._sockets:
         socket.close()
-
-
-def add_w_builtin():
-    class w(object):
-        """Global shortcuts"""
-        tf = set_trace
-        start = start_trace
-        stop = stop_trace
-        trace = trace
-
-    __builtins__['w'] = w
