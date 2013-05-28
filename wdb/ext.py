@@ -8,9 +8,10 @@ class WdbMiddleware(object):
     def __call__(self, environ, start_response):
         appiter = None
         try:
-            with trace():
+            with trace(close_on_exit=True):
                 appiter = self.app(environ, start_response)
-                for item in appiter:
-                    yield item
+
+            for item in appiter:
+                yield item
         finally:
             hasattr(appiter, 'close') and appiter.close()

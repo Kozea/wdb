@@ -49,10 +49,12 @@ class Wdb(Bdb):
 
     @staticmethod
     def get():
-        wdb = Wdb._instances.get(threading.current_thread())
+        thread = threading.current_thread()
+        wdb = Wdb._instances.get(thread)
         if not wdb:
             wdb = Wdb()
-            Wdb._instances[threading.current_thread()] = wdb
+            wdb.thread = thread
+            Wdb._instances[thread] = wdb
         return wdb
 
     def __init__(self, skip=None):
@@ -117,8 +119,15 @@ class Wdb(Bdb):
     def start_trace(self, full=False, frame=None):
         """Make an instance of Wdb and trace all code below"""
         sys.settrace(None)
+        log.info('Starting trace on %r' % self.thread)
+        frame = frame or sys._getframe().f_back
+
+        iter_frame = frame
+        while iter_frame:
+            del iter_frame.f_trace
+            iter_frame = iter_frame.f_back
+
         self.reset()
-        self.stop_trace()
 
         def trace(frame, event, arg):
             rv = self.trace_dispatch(frame, event, arg)
@@ -146,11 +155,13 @@ class Wdb(Bdb):
         sys.settrace(trace)
 
     def stop_trace(self, frame=None):
-        sys.settrace(None)
+        self.tracing = False
         frame = frame or sys._getframe().f_back
         while frame and frame is not self.botframe:
             del frame.f_trace
             frame = frame.f_back
+        sys.settrace(None)
+        log.info('Stopping trace on  %r' % self.thread)
 
     def set_continue(self):
         self._set_stopinfo(self.botframe, None, -1)
@@ -310,14 +321,14 @@ class Wdb(Bdb):
 
     def send(self, data):
         """Send data through websocket"""
-        log.info('Sending %s' % data)
+        log.debug('Sending %s' % data)
         self._socket.send_bytes(data.encode('utf-8'))
 
     def receive(self):
         """Receive data through websocket"""
-        log.info('Receiving')
+        log.debug('Receiving')
         data = self._socket.recv_bytes()
-        log.info('Got %s' % data)
+        log.debug('Got %s' % data)
         return data.decode('utf-8')
 
     def interaction(
@@ -326,11 +337,11 @@ class Wdb(Bdb):
             init=None):
         """User interaction handling blocking on socket receive"""
 
-        log.debug('Interaction for %r %r %r %r' % (
-            frame, tb, exception, exception_description))
+        log.info('Interaction for %r -> %r %r %r %r' % (
+            self.thread, frame, tb, exception, exception_description))
 
         if not self.connected:
-            log.info('Launching browser and wait for connection')
+            log.debug('Launching browser and wait for connection')
             webbrowser.open(
                 'http://localhost:1984/debug/session/%s' % self.uuid)
             self.connected = True
@@ -449,20 +460,24 @@ def start_trace(full=False, frame=None):
     Wdb.get().start_trace(full, frame or sys._getframe().f_back)
 
 
-def stop_trace(frame=None):
+def stop_trace(frame=None, close_on_exit=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     Wdb.get().stop_trace(frame or sys._getframe().f_back)
+    if close_on_exit:
+        Wdb.get().send('Die')
 
 
 @contextmanager
-def trace(full=False, frame=None):
+def trace(full=False, frame=None, close_on_exit=False):
     """Make a tracing context with `with trace():`"""
     # Contextmanager -> 2 calls to get here
     frame = frame or sys._getframe().f_back.f_back
     start_trace(full, frame)
-    yield
-    stop_trace(frame)
+    try:
+        yield
+    finally:
+        stop_trace(frame, close_on_exit=close_on_exit)
 
 
 @atexit.register
