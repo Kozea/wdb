@@ -66,6 +66,7 @@ class Wdb(Bdb):
         self.begun = False
         self.quitting = False
         self.connected = False
+        self.stepping = False
         self.extra_vars = {}
         self.last_obj = None
         self.reset()
@@ -340,9 +341,9 @@ class Wdb(Bdb):
             exception='Wdb', exception_description='Stepping',
             init=None):
         """User interaction handling blocking on socket receive"""
-
         log.info('Interaction for %r -> %r %r %r %r' % (
             self.thread, frame, tb, exception, exception_description))
+        self.stepping = True
 
         if not self.connected:
             log.debug('Launching browser and wait for connection')
@@ -448,10 +449,9 @@ class Wdb(Bdb):
 
 def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
+    frame = frame or sys._getframe().f_back
     wdb = Wdb.get()
     sys.settrace(None)
-    # Removing current global tracing function if any
-    frame = frame or sys._getframe().f_back
     # Clear previous tracing
     wdb.stop_trace()
     # Set trace to the top frame
@@ -461,15 +461,19 @@ def set_trace(frame=None):
 def start_trace(full=False, frame=None, below=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
-    Wdb.get().start_trace(full, frame or sys._getframe().f_back, below=below)
+    wdb = Wdb.get()
+    if not wdb.stepping:
+        wdb.start_trace(full, frame or sys._getframe().f_back, below=below)
 
 
 def stop_trace(frame=None, close_on_exit=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
-    Wdb.get().stop_trace(frame or sys._getframe().f_back)
-    if close_on_exit:
-        Wdb.get().send('Die')
+    wdb = Wdb.get()
+    if not wdb.stepping:
+        wdb.stop_trace(frame or sys._getframe().f_back)
+        if close_on_exit:
+            wdb.send('Die')
 
 
 @contextmanager
