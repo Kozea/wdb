@@ -81,8 +81,7 @@ class Wdb(Bdb):
                 log.info('Resetting break %s' % repr(args))
         self.connect()
 
-    @staticmethod
-    def run_file(filename):
+    def run_file(self, filename):
         import __main__
         __main__.__dict__.clear()
         __main__.__dict__.update({
@@ -90,26 +89,29 @@ class Wdb(Bdb):
             "__file__": filename,
             "__builtins__": __builtins__,
         })
-        __main__.__dict__['__builtins__']['wtf'] = set_trace
         with open(filename, "rb") as fp:
-            statement = "exec(compile(%r, %r, 'exec'))" % \
-                        (fp.read(), filename)
-        Wdb.run(statement)
+            statement = "exec(compile(%r, %r, 'exec'))" % (
+                fp.read(), filename)
+        self.run(statement, filename)
 
-    @staticmethod
-    def run(cmd, globals=None, locals=None):
+    def run(self, cmd, fn, globals=None, locals=None):
         if globals is None:
             import __main__
             globals = __main__.__dict__
         if locals is None:
             locals = globals
-
+        self.reset()
         if isinstance(cmd, str):
             cmd = compile(cmd, "<string>", "exec")
+        self.start_trace()
+        self.set_break(fn, 1, 1, None)
         try:
-            execute(cmd, globals, locals)
+            exec(cmd, globals, locals)
         except BdbQuit:
             pass
+        finally:
+            self.stop_trace()
+            self.quitting = True
 
     def connect(self):
         log.info('Connecting socket')
@@ -492,3 +494,14 @@ def trace(full=False, frame=None, below=False, close_on_exit=False):
 def cleanup():
     for socket in Wdb._sockets:
         socket.close()
+
+
+def add_w_builtin():
+    class w(object):
+        """Global shortcuts"""
+        tf = set_trace
+        start = start_trace
+        stop = stop_trace
+        trace = trace
+
+    __builtins__['w'] = w
