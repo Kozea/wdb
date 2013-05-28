@@ -3,24 +3,21 @@ wdb
 
 ![](https://raw.github.com/Kozea/wdb/master/wdb.png)
 
+
 Description
 -----------
 
-**wdb** is a complete web debugger for wsgi projects (implemented as a wsgi middleware).
+**wdb** is a full featured web debugger based on a client-server architecture.
 
-Unlike other web debuggers, **wdb** is based on the [python bdb debugger framework](http://docs.python.org/2/library/bdb.html). (The one used by [pdb](http://docs.python.org/2/library/pdb.html))
+The wdb server which is responsible of managing debugging instances along with browser connections (through websockets) is based on [Tornado](http://www.tornadoweb.org/).
+The wdb clients allow step by step debugging, in-program python code execution, code edition (based on [CodeMirror](http://codemirror.net/)) setting breakpoints...
 
-This allows step by step debugging during the rendering of the page as well as exception inspection in the very state the exception occurred.
+Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
-In other words it's an enhanced version of pdb directly in your browser with nice features.
+**wdb** works with python 2, python 3 and pypy.
+Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa.
 
-
-How is it possible ?
---------------------
-
-*WebSockets*! 
-All debug information between web page and web server transits through a websocket opened on a random port.
-Server request processing is blocked by the websocket and then resumed when the debugging is over.
+In other words it's a very enhanced version of pdb directly in your browser with nice features.
 
 
 Installation:
@@ -34,22 +31,62 @@ Installation:
 Try it already
 --------------
 
-Now type:
+Firstly you have to start the wdb server:
 
 ```
-    $ pip install flask
-    $ python -m wdb.test
+    $ wdb.server.py
 ```
 
-And open this <http://localhost:1984/> in your browser. It will stop at a division by zero error.
+Next run:
 
-You can also go to <http://localhost:1984/wtf> and try step-by-step debugging right in your browser.
+```
+    $ python -m wdb your_file.py
+```
+
+Wdb will open a debugging window right in your browser, paused at the beginning of your program.
+
+NB: You have to start the server only once. Multiple Debugging sessions can be run simultaneously without problem.
+
+This is not the only way to debug a program, see below.
 
 
 Usage
 -----
 
-To try it on another wsgi application, use the `Wdb` middleware:
+### Setting trace
+
+To debug any program, with the server on, just add:
+
+```python
+    import wdb
+    wdb.set_trace()
+```
+
+anywhere in your code. Your program will stop at the set_trace line. (Just like pdb)
+
+
+### Tracing code
+
+To inspect your code on exception, you can do the following:
+
+```python
+    from wdb import trace
+    with trace():
+        wrong_code()
+```
+
+Any exception during `wrong_code` will launch a debugging session.
+
+You can also use the `start_trace()` and `stop_trace` methods.
+(It's better to put the `stop_trace` in a finally block to avoid tracing all you program after an exception.)
+
+
+### Debugging web servers
+
+wdb provides some tools to make it work nicely with different webservers:
+
+
+For wsgi servers you can use the `WdbMiddleware`:
 
 ```python
     from wdb import Wdb
@@ -58,7 +95,7 @@ To try it on another wsgi application, use the `Wdb` middleware:
     my_app.serve_forever()
 ```
 
-### Using flask:
+or using Flask:
 
 ```python
     from wdb import Wdb
@@ -68,9 +105,9 @@ To try it on another wsgi application, use the `Wdb` middleware:
     app.run(use_debugger=False) # Disable builtin Werkzeug debugger
 ```
 
-### Using django:
+or using django:
 
-In your `wsgi.py`, add the middleware:
+Add the middleware in your `wsgi.py`:
 
 After:
 
@@ -89,22 +126,24 @@ Add this:
     application = Wdb(application)
 ```
 
-In your `settings.py`, activate exception propagation:
+And in your `settings.py`, activate exception propagation:
 
 ```python
     DEBUG = True
     DEBUG_PROPAGATE_EXCEPTIONS = True
 ```
 
-### Breaking
-
-You can now put some breakpoints in a request code:
+In tornado, which is not a wsgi server, you can use the `wdb_tornado` function which will monkey patch the execute methon on RequestHandlers:
 
 ```python
-    do_something()
-    import wdb; wdb.set_trace()
-    return
+    from wdb.ext import wdb_tornado
+    if options.debug:
+        wdb_tornado()
 ```
+
+
+In browser usage
+----------------
 
 Once you are in a breakpoint or in an exception, you can eval all you want in the prompt under the code.
 Multi-lines are partially supported using `[Shift] + [Enter]`.
@@ -135,21 +174,11 @@ You can add/remove a breakpoint by clicking on the line number.
 NB: Hotkeys with arrows are purposely not triggered in the eval prompt to avoid conflicts when typing.
 
 
-It is sloooow
--------------
+Wdb Server
+----------
 
-If wdb slows down too much of your application (tracing all the things takes time), you can start it disabled with:
-
-```python
-    my_app = Wdb(wsgi_app, start_disabled=True)
-```
-
-Now when you encounter an exception or a set_trace, a page will appear asking you if you want to reload the page with wdb enabled.
-
-Manual activation/deactivation can be done anytime with:
-
-* <http://yourserver/__wdb/on>
-* <http://yourserver/__wdb/off>
+To see which debugging session are currently open, open your browser at <http://localhost:1984/>.
+You can also close crashed session.
 
 
 Where's the white theme ?
@@ -157,7 +186,7 @@ Where's the white theme ?
 
 Here:
 ```python
-    my_app = Wdb(wsgi_app, theme='light')
+    wdb.server --theme=white
 ```
 
 But it is less polished than the dark theme.
