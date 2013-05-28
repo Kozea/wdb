@@ -272,6 +272,7 @@ class Interaction(object):
         return True
 
     def do_continue(self, data):
+        self.db.stepping = False
         if hasattr(self.db, 'botframe'):
             self.db.set_continue()
         return True
@@ -435,5 +436,6 @@ class Interaction(object):
                 }))
 
     def do_quit(self, data):
+        self.db.stepping = False
         self.db.stop_trace()
         return True
