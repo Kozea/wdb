@@ -14,6 +14,24 @@ body, html
 a
   color: $fg
 
+table
+  width: 100%
+  tr td
+    padding: .25em
+    border: 1px solid darken($bg, 10%)
+
+input
+  border: 1px solid darken($bg, 10%)
+  background-color: $bg
+  color: $fg
+  padding: .25em
+  &[name=debug_file]
+    width: 500px
+  &[type=submit]
+    font-weight: bold
+    padding-left: .5em
+    padding-right: .5em
+
 h1, #waiter
   margin-top: .67em
   margin-bottom: .67em
