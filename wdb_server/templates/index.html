@@ -1,0 +1,39 @@
+{% extends _layout.html %}
+
+{% block main %}
+  <h1>WDB
+    <small>Home</small>
+  </h1>
+  {% from wdb_server import Sockets %}
+  {% set uuids = set(Sockets.sockets.keys()) | set(Sockets.websockets.keys()) %}
+  <h2>Active sessions</h2>
+  {% if uuids %}
+    <table>
+      <thead>
+        <tr>
+          <th>Session id</th>
+          <th>Socket open</th>
+          <th>Websocket open</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for uuid in uuids %}
+          <tr>
+            <td>{{ uuid }}</td>
+            <td>{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
+            <td>{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
+            <td><a href="/uuid/{{ uuid }}/close">Force close</a></td>
+          </tr>
+        {% end %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No active session</p>
+  {% end %}
+  <h2>Debug a file</h2>
+  <form method="post">
+    <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
+    <input type="submit" value="Start debugging" />
+  </form>
+{% end %}
