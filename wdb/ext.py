@@ -8,7 +8,7 @@ class WdbMiddleware(object):
     def __call__(self, environ, start_response):
         appiter = None
         try:
-            with trace(close_on_exit=True):
+            with trace(below=True, close_on_exit=True):
                 appiter = self.app(environ, start_response)
 
             for item in appiter:

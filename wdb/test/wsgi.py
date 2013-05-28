@@ -138,6 +138,11 @@ def import_():
     import importtest
 
 
+# @app.route("/favicon.ico")
+# def fav():
+#     1/0
+
+
 def init():
     from log_colorizer import make_colored_stream_handler
     handler = make_colored_stream_handler()
