@@ -116,13 +116,13 @@ class Wdb(Bdb):
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
-    def start_trace(self, full=False, frame=None):
+    def start_trace(self, full=False, frame=None, below=False):
         """Make an instance of Wdb and trace all code below"""
         sys.settrace(None)
         log.info('Starting trace on %r' % self.thread)
-        frame = frame or sys._getframe().f_back
+        start_frame = frame or sys._getframe().f_back
 
-        iter_frame = frame
+        iter_frame = start_frame
         while iter_frame:
             del iter_frame.f_trace
             iter_frame = iter_frame.f_back
@@ -130,6 +130,11 @@ class Wdb(Bdb):
         self.reset()
 
         def trace(frame, event, arg):
+            if below:
+                if frame == start_frame:
+                    return trace
+                elif frame.f_back == start_frame:
+                    self.stop_frame = frame
             rv = self.trace_dispatch(frame, event, arg)
             fn = frame.f_code.co_filename
             if (rv is None and not
@@ -141,15 +146,14 @@ class Wdb(Bdb):
 
             return trace
 
-        # Prepare full tracing
-        frame = frame or sys._getframe().f_back
         # Stop frame is the calling one
         self.stoplineno = -1
-        self.stopframe = frame
-        while frame:
-            frame.f_trace = trace
-            self.botframe = frame
-            frame = frame.f_back
+        self.stopframe = start_frame
+        iter_frame = start_frame
+        while iter_frame:
+            iter_frame.f_trace = trace
+            self.botframe = iter_frame
+            iter_frame = iter_frame.f_back
 
         # Set trace with wdb
         sys.settrace(trace)
@@ -454,10 +458,10 @@ def set_trace(frame=None):
     wdb.set_trace(frame)
 
 
-def start_trace(full=False, frame=None):
+def start_trace(full=False, frame=None, below=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
-    Wdb.get().start_trace(full, frame or sys._getframe().f_back)
+    Wdb.get().start_trace(full, frame or sys._getframe().f_back, below=below)
 
 
 def stop_trace(frame=None, close_on_exit=False):
@@ -469,11 +473,11 @@ def stop_trace(frame=None, close_on_exit=False):
 
 
 @contextmanager
-def trace(full=False, frame=None, close_on_exit=False):
+def trace(full=False, frame=None, below=False, close_on_exit=False):
     """Make a tracing context with `with trace():`"""
     # Contextmanager -> 2 calls to get here
     frame = frame or sys._getframe().f_back.f_back
-    start_trace(full, frame)
+    start_trace(full, frame, below)
     try:
         yield
     finally:
