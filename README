@@ -78,7 +78,7 @@ To inspect your code on exception, you can do the following:
 Any exception during `wrong_code` will launch a debugging session.
 
 You can also use the `start_trace()` and `stop_trace` methods.
-(It's better to put the `stop_trace` in a finally block to avoid tracing all you program after an exception.)
+(It's better to put the `stop_trace` in a finally block to avoid tracing all your program after an exception.)
 
 
 ### Debugging web servers
@@ -137,9 +137,26 @@ In tornado, which is not a wsgi server, you can use the `wdb_tornado` function w
 
 ```python
     from wdb.ext import wdb_tornado
+    from tornado.web import Application
+    my_app = Application([(r"/", MainHandler)])
     if options.debug:
-        wdb_tornado()
+        wdb_tornado(my_app)
+    my_app.listen(8888)
 ```
+
+
+It is sloooow
+-------------
+
+If wdb slows down too much of your application (tracing all the things takes time), you can start it disabled with:
+
+```python
+    my_app = WdbMiddleware(wsgi_app, start_disabled=True)
+    # or
+    wdb_tornado(my_app, start_disabled=True)
+```
+
+Then when you get an exception just click on the on/off button.
 
 
 In browser usage
@@ -186,7 +203,11 @@ Where's the white theme ?
 
 Here:
 ```python
-    wdb.server --theme=white
+    wdb.server --theme=light
+    # and if you disable the debugger
+    WdbMiddleware(app, theme='light')
+    # or
+    wdb_tornado(app, theme='light')
 ```
 
 But it is less polished than the dark theme.

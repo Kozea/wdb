@@ -435,6 +435,14 @@ class Interaction(object):
                     'val': 'Wrote %s' % fn
                 }))
 
+    def do_disable(self, data):
+        self.db.__class__.enabled = False
+        self.db.stepping = False
+        self.db.stop_trace()
+        self.db.send('Die')
+        self.db.__class__.pop()
+        return True
+
     def do_quit(self, data):
         self.db.stepping = False
         self.db.stop_trace()
