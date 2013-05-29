@@ -214,9 +214,7 @@
       var dot;
 
       $('#deactivate').click(function() {
-        $.get('/__wdb/off').done(function() {
-          return location.reload(true);
-        });
+        send('Disable');
         return false;
       });
       $('#waiter').html('Wdb is tracing your request.<small>It may take some time.</small>');

@@ -150,7 +150,7 @@ make_ws = ->
 $ =>
     setTimeout(->
         $('#deactivate').click () ->
-            $.get('/__wdb/off').done(() -> location.reload(true))
+            send('Disable')
             false
 
         $('#waiter').html('Wdb is tracing your request.<small>It may take some time.</small>')

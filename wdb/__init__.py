@@ -46,6 +46,7 @@ class Wdb(Bdb):
     """Wdb debugger main class"""
     _instances = {}
     _sockets = []
+    enabled = True
 
     @staticmethod
     def get():
@@ -56,6 +57,11 @@ class Wdb(Bdb):
             wdb.thread = thread
             Wdb._instances[thread] = wdb
         return wdb
+
+    @staticmethod
+    def pop():
+        thread = threading.current_thread()
+        Wdb._instances.pop(thread)
 
     def __init__(self, skip=None):
         self.obj_cache = {}
@@ -157,6 +163,7 @@ class Wdb(Bdb):
             iter_frame.f_trace = trace
             self.botframe = iter_frame
             iter_frame = iter_frame.f_back
+        self.botframe = None
 
         # Set trace with wdb
         sys.settrace(trace)
@@ -434,8 +441,12 @@ class Wdb(Bdb):
     def dispatch_exception(self, frame, arg):
         """Always break on exception (This is different from pdb behaviour)"""
         self.user_exception(frame, arg)
-        if self.quitting:
-            raise BdbQuit
+        return self.trace_dispatch
+
+    def dispatch_call(self, frame, arg):
+        if not (self.stop_here(frame) or self.break_anywhere(frame)):
+            return
+        self.user_call(frame, arg)
         return self.trace_dispatch
 
     def _recursive(self, g, l):
