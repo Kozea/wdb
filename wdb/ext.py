@@ -25,8 +25,8 @@ def _handle_off(theme, silent=False):
         return f.read() % dict(
             theme=theme,
             trace=traceback.format_exc(),
-            title=type_.__name__.replace("'", "\\'"),
-            subtitle=str(value).replace("'", "\\'"),
+            title=type_.__name__.replace("'", "\\'").replace('\n', ' '),
+            subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
             state='',
             trace_dict=dump({
                 'trace': stack,
@@ -57,6 +57,10 @@ class WdbMiddleware(object):
                         appiter = self.app(environ, start_response)
                         for item in appiter:
                             yield item
+                except Exception:
+                    start_response('500 INTERNAL SERVER ERROR', [
+                        ('Content-Type', 'text/html')])
+                    yield _handle_off(self.theme)
                 finally:
                     hasattr(appiter, 'close') and appiter.close()
             return trace_wsgi(environ, start_response)
