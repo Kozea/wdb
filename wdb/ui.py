@@ -298,34 +298,36 @@ class Interaction(object):
         if ',' in lno:
             lno, cond = lno.split(',')
             cond = cond.lstrip()
+        if lno == '':
+            lno = None
+        else:
+            try:
+                lno = int(lno)
+            except:
+                break_fail(
+                    'Wrong breakpoint format must be '
+                    '[file:]lno[,cond].')
+                return
 
-        try:
-            lno = int(lno)
-        except:
-            break_fail(
-                'Wrong breakpoint format must be '
-                '[file:]lno[,cond].')
-            return
-
-        line = getline(
-            fn, lno, self.current_frame.f_globals)
-        if not line:
-            break_fail('Line does not exist')
-            return
-        line = line.strip()
-        if ((not line or (line[0] == '#') or
-             (line[:3] == '"""') or
-             line[:3] == "'''")):
-            break_fail('Blank line or comment')
-            return
+            line = getline(
+                fn, lno, self.current_frame.f_globals)
+            if not line:
+                break_fail('Line does not exist')
+                return
+            line = line.strip()
+            if ((not line or (line[0] == '#') or
+                 (line[:3] == '"""') or
+                 line[:3] == "'''")):
+                break_fail('Blank line or comment')
+                return
 
         first_rv = rv = self.db.set_break(
-            fn, lno, int(temporary), cond)
+            fn, lno, temporary, cond)
         if rv is not None:
             for path in sys.path:
                 rv = self.db.set_break(
                     os.path.join(path, fn),
-                    lno, int(temporary), cond)
+                    lno, temporary, cond)
                 if rv is None:
                     return True
         if rv is None:
