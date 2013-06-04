@@ -34,7 +34,7 @@ Try it already
 Firstly you have to start the wdb server:
 
 ```
-    $ wdb.server.py
+    $ wdb.server.py &
 ```
 
 Next run:

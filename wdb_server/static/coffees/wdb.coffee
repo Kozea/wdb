@@ -161,19 +161,6 @@ $ =>
         dot()
     , 250)
 
-    # Try getting the original page
-    end = (page) ->
-        stop = true
-        if ws
-            try
-                send('Quit')
-                ws.close()
-            catch e
-                {}
-        document.open()
-        document.write page
-        document.close()
-
     @ws = ws = make_ws()
 
 start = ->
@@ -246,6 +233,7 @@ get_mode = (fn) ->
         'python'
     else if ext == 'jinja2'
         'jinja2'
+    'python'
 
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->

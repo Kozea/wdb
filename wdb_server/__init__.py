@@ -80,7 +80,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 tornado.options.define('theme', default="dark", help="wdb theme to use")
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.parse_command_line()
-log.setLevel(10 if tornado.options.options.debug else 30)
+for l in (log, logging.getLogger('tornado.access'),
+          logging.getLogger('tornado.application'),
+          logging.getLogger('tornado.general')):
+    l.setLevel(10 if tornado.options.options.debug else 30)
 
 server = tornado.web.Application(
     [
