@@ -75,6 +75,7 @@ class Wdb(Bdb):
         self.stepping = False
         self.extra_vars = {}
         self.last_obj = None
+        self.break_on_file = None
         self.reset()
         self.uuid = str(uuid4())
 
@@ -110,7 +111,7 @@ class Wdb(Bdb):
         if isinstance(cmd, str):
             cmd = compile(cmd, "<string>", "exec")
         self.start_trace()
-        self.set_break(fn, 1, 1, None)
+        self.break_on_file = fn
         try:
             execute(cmd, globals, locals)
         except BdbQuit:
@@ -144,6 +145,11 @@ class Wdb(Bdb):
                     return trace
                 elif frame.f_back == start_frame:
                     self.stop_frame = frame
+            if (self.break_on_file and
+                    frame.f_code.co_filename == self.break_on_file):
+                self.stopframe = frame
+                self.stoplineno = frame.f_code.co_firstlineno
+                self.break_on_file = None
             rv = self.trace_dispatch(frame, event, arg)
             fn = frame.f_code.co_filename
             if (rv is None and not
@@ -158,12 +164,12 @@ class Wdb(Bdb):
         # Stop frame is the calling one
         self.stoplineno = -1
         self.stopframe = start_frame
+        # self.botframe = None
         iter_frame = start_frame
         while iter_frame:
             iter_frame.f_trace = trace
             self.botframe = iter_frame
             iter_frame = iter_frame.f_back
-        self.botframe = None
 
         # Set trace with wdb
         sys.settrace(trace)

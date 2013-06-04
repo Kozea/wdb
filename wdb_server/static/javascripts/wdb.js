@@ -208,8 +208,6 @@
   };
 
   $(function() {
-    var end;
-
     setTimeout(function() {
       var dot;
 
@@ -226,23 +224,6 @@
       };
       return dot();
     }, 250);
-    end = function(page) {
-      var e;
-
-      stop = true;
-      if (ws) {
-        try {
-          send('Quit');
-          ws.close();
-        } catch (_error) {
-          e = _error;
-          ({});
-        }
-      }
-      document.open();
-      document.write(page);
-      return document.close();
-    };
     return _this.ws = ws = make_ws();
   });
 
@@ -321,10 +302,11 @@
 
     ext = fn.split('.').splice(-1)[0];
     if (ext === 'py') {
-      return 'python';
+      'python';
     } else if (ext === 'jinja2') {
-      return 'jinja2';
+      'jinja2';
     }
+    return 'python';
   };
 
   create_code_mirror = function(file, name, rw) {

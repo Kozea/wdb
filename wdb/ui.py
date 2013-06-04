@@ -446,4 +446,4 @@ class Interaction(object):
     def do_quit(self, data):
         self.db.stepping = False
         self.db.stop_trace()
-        return True
+        sys.exit(1)
