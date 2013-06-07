@@ -52,7 +52,7 @@ class WdbMiddleware(object):
             def trace_wsgi(environ, start_response):
                 appiter = None
                 try:
-                    with trace(below=True, close_on_exit=True):
+                    with trace(close_on_exit=True):
                         appiter = self.app(environ, start_response)
                         for item in appiter:
                             yield item
@@ -95,7 +95,7 @@ def wdb_tornado(application, start_disabled=False, theme='dark'):
     def _wdb_execute(self, transforms, *args, **kwargs):
         from wdb import trace, Wdb
         if Wdb.enabled:
-            with trace(below=True, close_on_exit=True):
+            with trace(close_on_exit=True):
                 old_execute(self, transforms, *args, **kwargs)
         else:
             old_execute(self, transforms, *args, **kwargs)
