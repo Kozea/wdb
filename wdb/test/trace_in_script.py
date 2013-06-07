@@ -1,8 +1,23 @@
-a = 2
-b = 4
-c = a + b
-import wdb; wdb.set_trace()
-print(c)
-d = c / 10
-print(d)
+
+
+def fun1(a):
+    b = 4
+    c = a + b
+    for i in range(10):
+        c += b
+    return c + 1
+
+
+def fun2(l):
+    import wdb; wdb.set_trace()
+    a = 2
+    e = fun1(a)
+    return e
+
+
+def main():
+    fun2(0)
+
+
+main()
 print('The end')

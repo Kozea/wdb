@@ -1,4 +1,8 @@
 import os.path
+from log_colorizer import get_color_logger
+
+log = get_color_logger('wdb-bp')
+log.setLevel(30)
 
 
 def canonic(filename):

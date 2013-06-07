@@ -253,7 +253,7 @@ create_code_mirror = (file, name, rw=false)->
     cm._file = file
 
     cm.on("gutterClick", (cm, n) ->
-        toggle_break n + 1
+        toggle_break ':' + (n + 1)
     )
 
     cm.addClass = (lno, cls) ->
@@ -429,22 +429,33 @@ print_hist = (hist) ->
 
 print_help = ->
     print for: 'Supported commands', result: '''
-.s or [Ctrl] + [↓] or [F11]  : Step into
-.n or [Ctrl] + [→] or [F10]  : Step over (Next)
-.r or [Ctrl] + [↑] or [F9]   : Step out (Return)
-.c or [Ctrl] + [←] or [F8]   : Continue
-.u or [F7]                   : Until (Next over loops)
-.j lineno                    : Jump to lineno (Must be at bottom frame and in the same function)
-.b [file:]lineno[, condition]: Break on file at lineno (file is the current file by default)
-.t [file:]lineno[, condition]: Same as b but break only once
-.f                           : Echo all typed commands in the current debugging session
-.d expression                : Dump the result of expression in a table
-.q                           : Quit
-.h                           : Get some help
-.e                           : Toggle file edition mode
-expr !> file                 : Write the result of expr in file
-!< file                      : Eval the content of file
-[Enter]                      : Eval the current selected text in page, useful to eval code in the source'''
+.s or [Ctrl] + [↓] or [F11]    : Step into
+.n or [Ctrl] + [→] or [F10]    : Step over (Next)
+.r or [Ctrl] + [↑] or [F9]     : Step out (Return)
+.c or [Ctrl] + [←] or [F8]     : Continue
+.u or [F7]                     : Until (Next over loops)
+.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)
+.b arg                         : Set a session breakpoint, see below for what arg can be*
+.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b
+.f                             : Echo all typed commands in the current debugging session
+.d expression                  : Dump the result of expression in a table
+.q                             : Quit
+.h                             : Get some help
+.e                             : Toggle file edition mode
+expr !> file                   : Write the result of expr in file
+!< file                        : Eval the content of file
+[Enter]                        : Eval the current selected text in page, useful to eval code in the source
+
+* arg is using the following syntax:
+  [file][:lineno][#function][,condition]
+which means:
+  - [file]                  : Break if any line of `file` is executed
+  - [file]:lineno           : Break on `file` at `lineno`
+  - [file]:lineno,condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)
+  - [file]#function         : Break when inside `function` function
+
+File is always current file by default.
+'''
 
 termscroll = ->
     $('#interpreter').stop(true).animate((scrollTop: $('#scrollback').height()), 1000)
@@ -493,6 +504,7 @@ breakset = (data) ->
     if data.lno
         cm.removeClass(data.lno, 'ask-breakpoint')
         cm.addClass(data.lno, 'breakpoint')
+        cm.addMark(data.lno, 'breakpoint', if data.temporary then '○' else '●')
 
         if data.cond
             $line.attr('title', "On [#{data.cond}]")
@@ -506,11 +518,23 @@ breakunset = (data) ->
     if $eval.val().indexOf('.b ') == 0
         $eval.val('')
 
-toggle_break = (lno, temporary) ->
+toggle_break = (arg, temporary) ->
     cmd = if temporary then 'TBreak' else 'Break'
-    if ('' + lno).indexOf(':') > -1
-        send(cmd + '|' + lno)
+    lno = NaN
+    if arg.indexOf(':') > -1
+        lno = arg.split(':')[1]
+        if lno.indexOf(',') > -1
+            lno = arg.split(',')[0]
+        if lno.indexOf('#') > -1
+            lno = arg.split('#')[0]
+        lno = parseInt(lno)
+
+    if isNaN lno
+        # If lno is not a number
+        # Can't set line info here, returning
+        send(cmd + '|' + arg)
         return
+
     cls = cm.lineInfo(lno - 1).bgClass or ''
     if cls.split(' ').indexOf('breakpoint') > -1
         cm.removeMark(lno)
@@ -518,9 +542,8 @@ toggle_break = (lno, temporary) ->
         cm.addClass(lno, 'ask-breakpoint')
         send('Unbreak|' + lno)
     else
-        cm.addClass(lno, 'breakpoint')
-        cm.addMark(lno, 'breakpoint', if temporary then '○' else '●')
-        send(cmd + '|' + lno)
+        cm.addClass(lno, 'ask-breakpoint')
+        send(cmd + '|' + arg)
 
 
 format_fun = (p) ->
