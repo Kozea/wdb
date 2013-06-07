@@ -58,6 +58,10 @@ class Interaction(object):
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
 
     @property
+    def top(self):
+        return self.trace[-1]
+
+    @property
     def current(self):
         return self.trace[self.index]
 
@@ -169,7 +173,8 @@ class Interaction(object):
             'trace': self.trace
         }))
         self.db.send('Select|%s' % dump({
-            'frame': self.current,
+            'frame': self.top,
+            'current': self.current,
             'breaks': self.db.get_breaks_lno(self.current_file),
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
