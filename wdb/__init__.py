@@ -93,6 +93,7 @@ class Wdb(object):
         self.breakpoints = set()
         self.state = Running(None)
         self.full = False
+        self.below = False
         self.connect()
 
     def run_file(self, filename):
@@ -138,9 +139,10 @@ class Wdb(object):
         fun = getattr(self, 'handle_' + event)
         if fun and (
                 (event is 'line' and self.breaks(frame)) or
-                (event is 'exception'
-                 and (self.full or frame == self.state.frame)) or
-                self.state.stops(frame, event)):
+                (event is 'exception' and (
+                    self.full or frame == self.state.frame or (
+                        self.below and frame.f_back == self.state.frame))
+             ) or self.state.stops(frame, event)):
             fun(frame, arg)
 
         if event is 'return' and frame == self.state.frame:
@@ -152,7 +154,8 @@ class Wdb(object):
             # Threading / Multiprocessing support
             if ((self.state.frame.f_code.co_filename.endswith(
                     'threading.py') and
-                 self.state.frame.f_code.co_name == '__bootstrap_inner') or (
+                 self.state.frame.f_code.co_name.endswith('_bootstrap_inner')
+             ) or (
                      self.state.frame.f_code.co_filename.endswith(
                          os.path.join('multiprocessing', 'process.py')) and
                      self.state.frame.f_code.co_name == '_bootstrap')):
@@ -161,8 +164,10 @@ class Wdb(object):
                 self.send('Die')
                 return
         if (event is 'call' and not self.stepping and not self.full and
+                not (self.below and frame.f_back == self.state.frame) and
                 not self.get_file_breaks(frame.f_code.co_filename)):
             # Don't trace anymore here
+            trace_log.debug("Don't trace %s" % pretty_frame(frame))
             return
         return self.trace_dispatch
 
@@ -171,7 +176,7 @@ class Wdb(object):
             pretty_frame(frame), event, arg))
         trace_log.debug('state %r breaks ? %s stops ? %s' % (
             self.state,
-            self.breaks(frame),
+            self.breaks(frame, no_remove=True),
             self.state.stops(frame, event)
         ))
         if event is 'return':
@@ -182,7 +187,7 @@ class Wdb(object):
         if self.trace_dispatch(frame, event, arg):
             return self.trace_debug_dispatch
 
-    def start_trace(self, full=False, frame=None):
+    def start_trace(self, full=False, frame=None, below=False):
         """Make an instance of Wdb and trace all code below"""
         if self.tracing:
             return
@@ -191,6 +196,7 @@ class Wdb(object):
         # Setting trace without pausing
         self.set_trace(frame, break_=False)
         self.tracing = True
+        self.below = below
         self.full = full
 
     def set_trace(self, frame=None, break_=True):
@@ -526,10 +532,10 @@ class Wdb(object):
         self.interaction(
             frame, tb, exception, exception_description, init=init)
 
-    def breaks(self, frame):
+    def breaks(self, frame, no_remove=False):
         for breakpoint in set(self.breakpoints):
             if breakpoint.breaks(frame):
-                if breakpoint.temporary:
+                if breakpoint.temporary and not no_remove:
                     self.breakpoints.remove(breakpoint)
                 return True
         return False
@@ -539,10 +545,11 @@ class Wdb(object):
                 if breakpoint.on_file(filename)]
 
     def get_breaks_lno(self, filename):
-        return filter(lambda x: x is not None,
-                      [getattr(breakpoint, 'line', None)
-                       for breakpoint in self.breakpoints
-                       if breakpoint.on_file(filename)])
+        return list(
+            filter(lambda x: x is not None,
+                   [getattr(breakpoint, 'line', None)
+                    for breakpoint in self.breakpoints
+                    if breakpoint.on_file(filename)]))
 
     def clear_break(self, filename, line):
         for breakpoint in set(self.breakpoints):
@@ -562,30 +569,30 @@ def set_trace(frame=None):
     wdb.set_trace(frame)
 
 
-def start_trace(full=False, frame=None):
+def start_trace(full=False, frame=None, below=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     wdb = Wdb.get()
     if not wdb.stepping:
-        wdb.start_trace(full, frame or sys._getframe().f_back)
+        wdb.start_trace(full, frame or sys._getframe().f_back, below)
 
 
 def stop_trace(frame=None, close_on_exit=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     wdb = Wdb.get()
-    if not wdb.stepping:
+    if not wdb.stepping or close_on_exit:
         wdb.stop_trace(frame or sys._getframe().f_back)
         if close_on_exit:
             wdb.send('Die')
 
 
 @contextmanager
-def trace(full=False, frame=None, close_on_exit=False):
+def trace(full=False, frame=None, below=False, close_on_exit=False):
     """Make a tracing context with `with trace():`"""
     # Contextmanager -> 2 calls to get here
     frame = frame or sys._getframe().f_back.f_back
-    start_trace(full, frame)
+    start_trace(full, frame, below)
     try:
         yield
     finally:
