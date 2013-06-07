@@ -17,6 +17,10 @@ from __future__ import with_statement
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from ._compat import execute
+
+from .breakpoint import (
+    Breakpoint, LineBreakpoint,
+    ConditionalBreakpoint, FunctionBreakpoint)
 from .ui import Interaction, dump
 from .utils import pretty_frame
 from .state import Running, Step, Next, Until, Return
@@ -25,12 +29,10 @@ from cgi import escape
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
 from multiprocessing.connection import Client
-from breakpoint import (
-    Breakpoint, LineBreakpoint,
-    ConditionalBreakpoint, FunctionBreakpoint)
 from uuid import uuid4
 import dis
 import os
+import logging
 import sys
 import threading
 import webbrowser
@@ -42,9 +44,17 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
-trace_log = get_color_logger('wdb-trace')
-log.setLevel(30)
-trace_log.setLevel(30)
+trace_log = get_color_logger('wdb.trace')
+
+for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
+    logging.getLogger(
+        'wdb.%s' % log_name if log_name != 'main' else 'wdb'
+    ).setLevel(
+        getattr(logging,
+                os.getenv(
+                    'WDB_%s_LOG' % log_name.upper(),
+                    os.getenv('WDB_LOG', 'WARN')).upper(),
+                'WARN'))
 
 
 class Wdb(object):
