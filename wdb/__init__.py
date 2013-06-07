@@ -18,10 +18,11 @@ from __future__ import with_statement
 
 from ._compat import execute
 from .ui import Interaction, dump
+from .utils import pretty_frame
+from .state import Running, Step, Next, Until, Return
 from io import StringIO
 from cgi import escape
 from contextlib import contextmanager
-from linecache import checkcache, getlines, getline
 from log_colorizer import get_color_logger
 from multiprocessing.connection import Client
 from breakpoint import (
@@ -41,7 +42,9 @@ BASE_PATH = os.path.join(
 RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
+trace_log = get_color_logger('wdb-trace')
 log.setLevel(30)
+trace_log.setLevel(30)
 
 
 class Wdb(object):
@@ -52,6 +55,7 @@ class Wdb(object):
 
     @staticmethod
     def get():
+        # Thread local singleton
         thread = threading.current_thread()
         wdb = Wdb._instances.get(thread)
         if not wdb:
@@ -66,16 +70,18 @@ class Wdb(object):
         Wdb._instances.pop(thread)
 
     def __init__(self):
+        log.debug('New wdb instance %r' % self)
         self.obj_cache = {}
+        self.tracing = False
         self.begun = False
         self.connected = False
         self.stepping = False
         self.extra_vars = {}
         self.last_obj = None
-        self.break_on_file = None
         self.reset()
         self.uuid = str(uuid4())
-        self.breaks = set()
+        self.breakpoints = set()
+        self.state = Running(None)
         self.connect()
 
     def run_file(self, filename):
@@ -101,7 +107,7 @@ class Wdb(object):
         if isinstance(cmd, str):
             cmd = compile(cmd, "<string>", "exec")
         self.start_trace()
-        self.break_on_file = fn
+        self.breakpoints.add(Breakpoint(fn, temporary=True))
         try:
             execute(cmd, globals, locals)
         finally:
@@ -110,8 +116,6 @@ class Wdb(object):
     def reset(self):
         import linecache
         linecache.checkcache()
-        self.botframe = None
-        self._set_stopinfo(None, None)
 
     def connect(self):
         log.info('Connecting socket')
@@ -120,28 +124,40 @@ class Wdb(object):
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
     def trace_dispatch(self, frame, event, arg):
-        if event == 'line':
-            return self.dispatch_line(frame)
-        if event == 'call':
-            return self.dispatch_call(frame, arg)
-        if event == 'return':
-            return self.dispatch_return(frame, arg)
-        if event == 'exception':
-            return self.dispatch_exception(frame, arg)
-        if event == 'c_call':
-            return self.trace_dispatch
-        if event == 'c_exception':
-            return self.trace_dispatch
-        if event == 'c_return':
-            return self.trace_dispatch
-        self.log.warn(
-            'Unknown debugging event: %r' % event)
+        fun = getattr(self, 'handle_' + event)
+        if fun and (
+                (event is 'line' and self.breaks(frame)) or
+                self.state.stops(frame, event)):
+            fun(frame, arg)
+
+        if event is 'return' and frame == self.state.frame:
+            # Upping state
+            if self.state.up():
+                # No more frames
+                self.stop_trace()
+                return
+        if (event is 'call' and not self.stepping and
+                not self.get_file_breaks(frame.f_code.co_filename)):
+            # Don't trace anymore here
+            return
         return self.trace_dispatch
+
+    def trace_debug_dispatch(self, frame, event, arg):
+        trace_log.info('Frame:%s. Event: %s. Arg: %r' % (
+            pretty_frame(frame), event, arg))
+        trace_log.debug('state %r breaks ? %s stops ? %s' % (
+            self.state,
+            self.breaks(frame),
+            self.state.stops(frame, event)
+        ))
+        if self.trace_dispatch(frame, event, arg):
+            return self.trace_debug_dispatch
 
     def start_trace(self, full=False, frame=None, below=False):
         """Make an instance of Wdb and trace all code below"""
         sys.settrace(None)
         log.info('Starting trace on %r' % self.thread)
+        self.tracing = True
         start_frame = frame or sys._getframe().f_back
 
         iter_frame = start_frame
@@ -157,11 +173,6 @@ class Wdb(object):
                     return trace
                 elif frame.f_back == start_frame:
                     self.stop_frame = frame
-            if (self.break_on_file and
-                    frame.f_code.co_filename == self.break_on_file):
-                self.stopframe = frame
-                self.stoplineno = frame.f_code.co_firstlineno
-                self.break_on_file = None
             rv = self.trace_dispatch(frame, event, arg)
             fn = frame.f_code.co_filename
             if (rv is None and not
@@ -174,84 +185,78 @@ class Wdb(object):
             return trace
 
         # Stop frame is the calling one
-        self.stoplineno = -1
-        self.stopframe = start_frame
-        # self.botframe = None
         iter_frame = start_frame
         while iter_frame:
             iter_frame.f_trace = trace
-            self.botframe = iter_frame
             iter_frame = iter_frame.f_back
 
         # Set trace with wdb
         sys.settrace(trace)
 
     def set_trace(self, frame=None):
-        """Start debugging from `frame`.
-
-        If frame is not specified, debugging starts from caller's frame.
-        """
+        """Break at current state"""
+        # We are already tracing, do nothing
+        if self.tracing:
+            return
+        trace = (self.trace_dispatch
+                 if trace_log.level >= 30 else self.trace_debug_dispatch)
         if frame is None:
             frame = sys._getframe().f_back
+        trace_frame = frame
         self.reset()
         while frame:
-            frame.f_trace = self.trace_dispatch
-            self.botframe = frame
+            frame.f_trace = trace
             frame = frame.f_back
-        self.set_step()
-        sys.settrace(self.trace_dispatch)
+        self.set_step(trace_frame)
+        sys.settrace(trace)
 
     def stop_trace(self, frame=None):
         self.tracing = False
         frame = frame or sys._getframe().f_back
-        while frame and frame is not self.botframe:
+        while frame:
             del frame.f_trace
             frame = frame.f_back
         sys.settrace(None)
         log.info('Stopping trace on  %r' % self.thread)
 
     def set_until(self, frame, lineno=None):
-        """Stop when the line with the line no greater than the current one is
-        reached or when returning from current frame"""
-        # the name "until" is borrowed from gdb
-        if lineno is None:
-            lineno = frame.f_lineno + 1
-        self._set_stopinfo(frame, frame, lineno)
+        self.state = Until(frame, frame.f_lineno)
 
-    def set_step(self):
+    def set_step(self, frame):
         """Stop after one line of code."""
-        self._set_stopinfo(None, None)
+        self.state = Step(frame)
 
     def set_next(self, frame):
         """Stop on the next line in or below the given frame."""
-        self._set_stopinfo(frame, None)
+        self.state = Next(frame)
 
     def set_return(self, frame):
         """Stop when returning from the given frame."""
-        self._set_stopinfo(frame.f_back, frame)
+        self.state = Return(frame)
 
-    def set_continue(self):
-        self.stopframe = self.botframe
-        self._set_stopinfo(self.botframe, None, -1)
-
-    def _set_stopinfo(self, stopframe, returnframe, stoplineno=0):
-        self.stopframe = stopframe
-        self.returnframe = returnframe
-        self.stoplineno = stoplineno
+    def set_continue(self, frame):
+        self.state = Running(frame)
+        if not self.tracing and not self.breakpoints:
+            # If we were in a set_trace and there's no breakpoint to trace for
+            # Run without trace
+            self.stop_trace()
 
     def set_break(self, filename, lineno=None, temporary=False, cond=None,
                   funcname=None):
+        log.info('Setting break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
+            filename, lineno, temporary, cond, funcname))
         if lineno:
             if cond:
                 breakpoint = ConditionalBreakpoint(
                     filename, lineno, cond, temporary)
             else:
-                breakpoint = LineBreakpoint(filename, lineno, cond, temporary)
+                breakpoint = LineBreakpoint(filename, lineno, temporary)
         elif funcname:
             breakpoint = FunctionBreakpoint(filename, funcname, temporary)
         else:
             breakpoint = Breakpoint(filename, temporary)
-        self.breaks.add(breakpoint)
+        self.breakpoints.add(breakpoint)
+        log.info('Breakpoint %r added' % breakpoint)
 
     def safe_repr(self, obj):
         """Like a repr but without exception"""
@@ -374,8 +379,9 @@ class Wdb(object):
 
     def get_file(self, filename):
         """Get file source from cache"""
-        checkcache(filename)
-        return ''.join(getlines(filename))
+        import linecache
+        linecache.checkcache(filename)
+        return ''.join(linecache.getlines(filename))
 
     def get_stack(self, f, t):
         stack = []
@@ -383,8 +389,6 @@ class Wdb(object):
             t = t.tb_next
         while f is not None:
             stack.append((f, f.f_lineno))
-            if f is self.botframe:
-                break
             f = f.f_back
         stack.reverse()
         i = max(0, len(stack) - 1)
@@ -397,6 +401,7 @@ class Wdb(object):
 
     def get_trace(self, frame, tb, w_code=None):
         """Get a dict of the traceback for wdb.js use"""
+        import linecache
         frames = []
         stack, current = self.get_stack(frame, tb)
 
@@ -406,8 +411,8 @@ class Wdb(object):
             if filename == '<wdb>' and w_code:
                 line = w_code
             else:
-                checkcache(filename)
-                line = getline(filename, lno, frame.f_globals)
+                linecache.checkcache(filename)
+                line = linecache.getline(filename, lno, frame.f_globals)
                 line = line and line.strip()
 
             startlnos = dis.findlinestarts(code)
@@ -464,28 +469,24 @@ class Wdb(object):
             self.begun = True
         interaction.loop()
 
-    def user_call(self, frame, argument_list):
+    def handle_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
         that we ever need to stop in this function."""
-        if self.stop_here(frame):
-            fun = frame.f_code.co_name
-            log.info('Calling: %r' % fun)
-            init = 'Echo|%s' % dump({
-                'for': '__call__',
-                'val': fun})
-            self.interaction(
-                frame, init=init,
-                exception_description='Calling %s' % fun)
+        fun = frame.f_code.co_name
+        log.info('Calling: %r' % fun)
+        init = 'Echo|%s' % dump({
+            'for': '__call__',
+            'val': fun})
+        self.interaction(
+            frame, init=init,
+            exception_description='Calling %s' % fun)
 
-    def user_line(self, frame):
+    def handle_line(self, frame, arg):
         """This function is called when we stop or break at this line."""
-        log.debug('LINE')
-        log.info('Stopping at line %r:%d' % (
-            frame.f_code.co_filename, frame.f_lineno))
-        log.debug('User Line Interaction for %r' % frame)
+        log.info('Stopping at line %s' % pretty_frame(frame))
         self.interaction(frame)
 
-    def user_return(self, frame, return_value):
+    def handle_return(self, frame, return_value):
         """This function is called when a return trap is set here."""
         self.obj_cache[id(return_value)] = return_value
         self.extra_vars['__return__'] = return_value
@@ -501,7 +502,7 @@ class Wdb(object):
             exception_description='Returning from %s with value %s' % (
                 fun, return_value))
 
-    def user_exception(self, frame, exc_info):
+    def handle_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
         but only if we are to stop at or just below this level."""
         type_, value, tb = exc_info
@@ -524,54 +525,29 @@ class Wdb(object):
         self.interaction(
             frame, tb, exception, exception_description, init=init)
 
-    def stop_here(self, frame):
-        if frame is self.stopframe:
-            if self.stoplineno == -1:
-                return False
-            return frame.f_lineno >= self.stoplineno
-        while frame is not None and frame is not self.stopframe:
-            if frame is self.botframe:
-                return True
-            frame = frame.f_back
-        return False
-
-    def break_here(self, frame):
-        for breakpoint in set(self.breaks):
+    def breaks(self, frame):
+        for breakpoint in set(self.breakpoints):
             if breakpoint.breaks(frame):
                 if breakpoint.temporary:
-                    self.breaks.remove(breakpoint)
+                    self.breakpoints.remove(breakpoint)
                 return True
         return False
 
     def get_file_breaks(self, filename):
-        return [breakpoint for breakpoint in self.breaks
+        return [breakpoint for breakpoint in self.breakpoints
                 if breakpoint.on_file(filename)]
 
-    def dispatch_line(self, frame):
-        if self.stop_here(frame) or self.break_here(frame):
-            self.user_line(frame)
-        return self.trace_dispatch
+    def get_breaks_lno(self, filename):
+        return filter(lambda x: x is not None,
+                      [getattr(breakpoint, 'line', None)
+                       for breakpoint in self.breakpoints
+                       if breakpoint.on_file(filename)])
 
-    def dispatch_return(self, frame, arg):
-        if self.stop_here(frame) or frame == self.returnframe:
-            try:
-                self.frame_returning = frame
-                self.user_return(frame, arg)
-            finally:
-                self.frame_returning = None
-        return self.trace_dispatch
-
-    def dispatch_call(self, frame, arg):
-        if not (self.stop_here(frame) or
-                self.get_file_breaks(frame.f_code.co_filename)):
-            return
-        self.user_call(frame, arg)
-        return self.trace_dispatch
-
-    def dispatch_exception(self, frame, arg):
-        """Always break on exception"""
-        self.user_exception(frame, arg)
-        return self.trace_dispatch
+    def clear_break(self, filename, line):
+        for breakpoint in set(self.breakpoints):
+            if getattr(breakpoint, 'line', None):
+                if breakpoint.line == line:
+                    self.breakpoints.remove(breakpoint)
 
 
 def set_trace(frame=None):

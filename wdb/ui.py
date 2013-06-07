@@ -94,7 +94,7 @@ class Interaction(object):
         }))
         self.db.send('Select|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_file_breaks(self.current_file),
+            'breaks': self.db.get_breaks_lno(self.current_file),
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
         }))
@@ -171,7 +171,7 @@ class Interaction(object):
         }))
         self.db.send('Select|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_file_breaks(self.current_file),
+            'breaks': self.db.get_breaks_lno(self.current_file),
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
         }))
@@ -183,7 +183,7 @@ class Interaction(object):
         self.index = int(data)
         self.db.send('Select|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_file_breaks(self.current_file),
+            'breaks': self.db.get_breaks_lno(self.current_file),
             'file': self.db.get_file(self.current_file),
             'name': self.current_file
         }))
@@ -262,58 +262,67 @@ class Interaction(object):
         self.db.send('Pong')
 
     def do_step(self, data):
-        if hasattr(self.db, 'botframe'):
-            self.db.set_step()
+        self.db.set_step(self.current_frame)
         return True
 
     def do_next(self, data):
-        if hasattr(self.db, 'botframe'):
-            self.db.set_next(self.current_frame)
+        self.db.set_next(self.current_frame)
         return True
 
     def do_continue(self, data):
         self.db.stepping = False
-        if hasattr(self.db, 'botframe'):
-            self.db.set_continue()
+        self.db.set_continue(self.current_frame)
         return True
 
     def do_return(self, data):
-        if hasattr(self.db, 'botframe'):
-            self.db.set_return(self.current_frame)
+        self.db.set_return(self.current_frame)
         return True
 
     def do_until(self, data):
-        if hasattr(self.db, 'botframe'):
-            self.db.set_until(self.current_frame)
+        self.db.set_until(self.current_frame)
         return True
 
     def do_break(self, data, temporary=False):
         break_fail = lambda x: fail(
             self.db, 'Break', 'Break on %s failed' % data, message=x)
+
+        lno = cond = funcname = None
+        remaining = data
+
+        if ',' in data:
+            remaining, cond = remaining.split(',')
+            cond = cond.strip()
+
+        if '#' in data:
+            remaining, funcname = remaining.split('#')
+
         if ':' in data:
-            fn, lno = data.split(':')
-        else:
-            fn, lno = self.current_file, data
-        cond = None
-        if ',' in lno:
-            lno, cond = lno.split(',')
-            cond = cond.lstrip()
-        if lno == '':
-            lno = None
-        else:
+            remaining, lno = remaining.split(':')
+
+        fn = remaining or self.current_file
+
+        if lno is not None:
             try:
                 lno = int(lno)
             except:
                 break_fail(
                     'Wrong breakpoint format must be '
-                    '[file:]lno[,cond].')
+                    '[file][:lineno][#function][,condition].')
                 return
 
             line = getline(
                 fn, lno, self.current_frame.f_globals)
             if not line:
+                for path in sys.path:
+                    line = getline(
+                        os.path.join(path, fn),
+                        lno, self.current_frame.f_globals)
+                    if line:
+                        break
+            if not line:
                 break_fail('Line does not exist')
                 return
+
             line = line.strip()
             if ((not line or (line[0] == '#') or
                  (line[:3] == '"""') or
@@ -321,25 +330,17 @@ class Interaction(object):
                 break_fail('Blank line or comment')
                 return
 
-        first_rv = rv = self.db.set_break(
-            fn, lno, temporary, cond)
-        if rv is not None:
-            for path in sys.path:
-                rv = self.db.set_break(
-                    os.path.join(path, fn),
-                    lno, temporary, cond)
-                if rv is None:
-                    return True
-        if rv is None:
-            log.info('Break set at %s:%d [%s]' % (fn, lno, rv))
-            if fn == self.current_file:
-                self.db.send('BreakSet|%s' % dump({
-                    'lno': lno, 'cond': cond
-                }))
-            else:
-                self.db.send('BreakSet|%s' % dump({}))
+        self.db.set_break(
+            fn, lno, temporary, cond, funcname)
+
+        if fn == self.current_file:
+            self.db.send('BreakSet|%s' % dump({
+                'lno': lno, 'cond': cond, 'temporary': temporary
+            }))
         else:
-            break_fail(first_rv)
+            self.db.send('BreakSet|%s' % dump({
+                'temporary': temporary
+            }))
 
     def do_tbreak(self, data):
         return self.do_break(data, True)
@@ -368,7 +369,7 @@ class Interaction(object):
         }))
         self.db.send('Select|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_file_breaks(self.current_file)
+            'breaks': self.db.get_breaks_lno(self.current_file)
         }))
 
     def do_complete(self, data):

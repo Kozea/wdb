@@ -333,7 +333,7 @@
     cm._fn = name;
     cm._file = file;
     cm.on("gutterClick", function(cm, n) {
-      return toggle_break(n + 1);
+      return toggle_break(':' + (n + 1));
     });
     cm.addClass = function(lno, cls) {
       cm.addLineClass(lno - 1, 'background', cls);
@@ -594,7 +594,7 @@
   print_help = function() {
     return print({
       "for": 'Supported commands',
-      result: '.s or [Ctrl] + [↓] or [F11]  : Step into\n.n or [Ctrl] + [→] or [F10]  : Step over (Next)\n.r or [Ctrl] + [↑] or [F9]   : Step out (Return)\n.c or [Ctrl] + [←] or [F8]   : Continue\n.u or [F7]                   : Until (Next over loops)\n.j lineno                    : Jump to lineno (Must be at bottom frame and in the same function)\n.b [file:]lineno[, condition]: Break on file at lineno (file is the current file by default)\n.t [file:]lineno[, condition]: Same as b but break only once\n.f                           : Echo all typed commands in the current debugging session\n.d expression                : Dump the result of expression in a table\n.q                           : Quit\n.h                           : Get some help\n.e                           : Toggle file edition mode\nexpr !> file                 : Write the result of expr in file\n!< file                      : Eval the content of file\n[Enter]                      : Eval the current selected text in page, useful to eval code in the source'
+      result: '.s or [Ctrl] + [↓] or [F11]    : Step into\n.n or [Ctrl] + [→] or [F10]    : Step over (Next)\n.r or [Ctrl] + [↑] or [F9]     : Step out (Return)\n.c or [Ctrl] + [←] or [F8]     : Continue\n.u or [F7]                     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint, see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.f                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\nexpr !> file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n\n* arg is using the following syntax:\n  [file][:lineno][#function][,condition]\nwhich means:\n  - [file]                  : Break if any line of `file` is executed\n  - [file]:lineno           : Break on `file` at `lineno`\n  - [file]:lineno,condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n  - [file]#function         : Break when inside `function` function\n\nFile is always current file by default.'
     });
   };
 
@@ -678,6 +678,7 @@
     if (data.lno) {
       cm.removeClass(data.lno, 'ask-breakpoint');
       cm.addClass(data.lno, 'breakpoint');
+      cm.addMark(data.lno, 'breakpoint', data.temporary ? '○' : '●');
       if (data.cond) {
         $line.attr('title', "On [" + data.cond + "]");
       }
@@ -698,12 +699,23 @@
     }
   };
 
-  toggle_break = function(lno, temporary) {
-    var cls, cmd;
+  toggle_break = function(arg, temporary) {
+    var cls, cmd, lno;
 
     cmd = temporary ? 'TBreak' : 'Break';
-    if (('' + lno).indexOf(':') > -1) {
-      send(cmd + '|' + lno);
+    lno = NaN;
+    if (arg.indexOf(':') > -1) {
+      lno = arg.split(':')[1];
+      if (lno.indexOf(',') > -1) {
+        lno = arg.split(',')[0];
+      }
+      if (lno.indexOf('#') > -1) {
+        lno = arg.split('#')[0];
+      }
+      lno = parseInt(lno);
+    }
+    if (isNaN(lno)) {
+      send(cmd + '|' + arg);
       return;
     }
     cls = cm.lineInfo(lno - 1).bgClass || '';
@@ -713,9 +725,8 @@
       cm.addClass(lno, 'ask-breakpoint');
       return send('Unbreak|' + lno);
     } else {
-      cm.addClass(lno, 'breakpoint');
-      cm.addMark(lno, 'breakpoint', temporary ? '○' : '●');
-      return send(cmd + '|' + lno);
+      cm.addClass(lno, 'ask-breakpoint');
+      return send(cmd + '|' + arg);
     }
   };
 
