@@ -11,8 +11,7 @@ import os
 import sys
 import time
 import traceback
-log = get_color_logger('wdb-ui')
-log.setLevel(30)
+log = get_color_logger('wdb.ui')
 
 
 class ReprEncoder(JSONEncoder):
@@ -389,7 +388,7 @@ class Interaction(object):
         try:
             completions = script.complete()
         except:
-            log.exception('Completion failed')
+            log.info('Completion failed', exc_info=True)
             self.db.send('Log|%s' % dump({
                 'message': 'Completion failed for %s' %
                 '\n'.join(reversed(segments))

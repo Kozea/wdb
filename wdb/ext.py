@@ -6,8 +6,7 @@ import traceback
 import sys
 
 
-log = get_color_logger('wdb')
-log.setLevel(30)
+log = get_color_logger('wdb.ext')
 
 
 def _handle_off(theme, silent=False):
