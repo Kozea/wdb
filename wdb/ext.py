@@ -95,7 +95,7 @@ def wdb_tornado(application, start_disabled=False, theme='dark'):
     def _wdb_execute(self, transforms, *args, **kwargs):
         from wdb import trace, Wdb
         if Wdb.enabled:
-            with trace(close_on_exit=True):
+            with trace(close_on_exit=True, below=True):
                 old_execute(self, transforms, *args, **kwargs)
         else:
             old_execute(self, transforms, *args, **kwargs)
