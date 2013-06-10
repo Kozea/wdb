@@ -138,11 +138,15 @@ class Wdb(object):
     def trace_dispatch(self, frame, event, arg):
         fun = getattr(self, 'handle_' + event)
         if fun and (
-                (event is 'line' and self.breaks(frame)) or
-                (event is 'exception' and (
-                    self.full or frame == self.state.frame or (
-                        self.below and frame.f_back == self.state.frame))
-             ) or self.state.stops(frame, event)):
+                (
+                    event is 'line' and self.breaks(frame)
+                ) or (
+                    event is 'exception' and (
+                        self.full or frame == self.state.frame or (
+                            self.below and frame.f_back == self.state.frame
+                        )
+                    )
+                ) or self.state.stops(frame, event)):
             fun(frame, arg)
 
         if event is 'return' and frame == self.state.frame:
@@ -152,16 +156,16 @@ class Wdb(object):
                 self.stop_trace()
                 return
             # Threading / Multiprocessing support
-            if ((self.state.frame.f_code.co_filename.endswith(
-                    'threading.py') and
-                 self.state.frame.f_code.co_name.endswith('_bootstrap_inner')
-             ) or (
-                     self.state.frame.f_code.co_filename.endswith(
-                         os.path.join('multiprocessing', 'process.py')) and
-                     self.state.frame.f_code.co_name == '_bootstrap')):
+            co = self.state.frame.f_code
+            if ((
+                    co.co_filename.endswith('threading.py') and
+                    co.co_name.endswith('_bootstrap_inner')
+            ) or (self.state.frame.f_code.co_filename.endswith(
+                os.path.join('multiprocessing', 'process.py')) and
+                    self.state.frame.f_code.co_name == '_bootstrap')):
                 # Thread / Process is dead
                 self.stop_trace()
-                self.send('Die')
+                self.die()
                 return
         if (event is 'call' and not self.stepping and not self.full and
                 not (self.below and frame.f_back == self.state.frame) and
@@ -557,6 +561,15 @@ class Wdb(object):
                 if breakpoint.line == line:
                     self.breakpoints.remove(breakpoint)
 
+    def die(self):
+        """Time to quit"""
+        try:
+            self.send('Die')
+        except:
+            pass
+        self._socket.close()
+        self.pop()
+
 
 def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
@@ -584,7 +597,7 @@ def stop_trace(frame=None, close_on_exit=False):
     if not wdb.stepping or close_on_exit:
         wdb.stop_trace(frame or sys._getframe().f_back)
         if close_on_exit:
-            wdb.send('Die')
+            wdb.die()
 
 
 @contextmanager
