@@ -117,19 +117,19 @@ def add_w_builtin():
         """Global shortcuts"""
 
         @property
-        def tf(self):
-            set_trace(sys._getframe().f_back)
+        def tf(self, *args, **kwargs):
+            set_trace(sys._getframe().f_back, *args, **kwargs)
 
         @property
-        def start(self):
-            start_trace(sys._getframe().f_back)
+        def start(self, *args, **kwargs):
+            start_trace(sys._getframe().f_back, *args, **kwargs)
 
         @property
-        def stop(self):
-            stop_trace(sys._getframe().f_back)
+        def stop(self, *args, **kwargs):
+            stop_trace(sys._getframe().f_back, *args, **kwargs)
 
         @property
-        def trace(self):
-            trace(sys._getframe().f_back)
+        def trace(self, *args, **kwargs):
+            trace(sys._getframe().f_back, *args, **kwargs)
 
     __builtins__['w'] = w()
