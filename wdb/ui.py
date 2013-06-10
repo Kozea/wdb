@@ -2,6 +2,7 @@
 from ._compat import dumps, JSONEncoder, quote, execute, to_unicode
 from bdb import BdbQuit
 from cgi import escape
+from hashlib import sha512
 from jedi import Script
 from linecache import getline
 from log_colorizer import get_color_logger
@@ -95,19 +96,19 @@ class Interaction(object):
         return globals_
 
     def init(self):
+        self.db.send('Title|%s' % dump({
+            'title': self.exception,
+            'subtitle': self.exception_description
+        }))
         self.db.send('Trace|%s' % dump({
             'trace': self.trace,
             'cwd': os.getcwd()
         }))
-        self.db.send('Select|%s' % dump({
+        self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
             'breaks': self.db.get_breaks_lno(self.current_file),
-            'file': self.db.get_file(self.current_file),
-            'name': self.current_file
-        }))
-        self.db.send('Title|%s' % dump({
-            'title': self.exception,
-            'subtitle': self.exception_description
+            'name': self.current_file,
+            'sha512': sha512(self.current_file).hexdigest()
         }))
 
     def parse_command(self, message):
@@ -176,12 +177,12 @@ class Interaction(object):
         self.db.send('Trace|%s' % dump({
             'trace': self.trace
         }))
-        self.db.send('Select|%s' % dump({
+        self.db.send('SelectCheck|%s' % dump({
             'frame': self.top,
             'current': self.current,
             'breaks': self.db.get_breaks_lno(self.top_file),
-            'file': self.db.get_file(self.top_file),
-            'name': self.top_file
+            'name': self.top_file,
+            'sha512': sha512(self.top_file).hexdigest()
         }))
         if self.init_message:
             self.db.send(self.init_message)
@@ -189,12 +190,25 @@ class Interaction(object):
 
     def do_select(self, data):
         self.index = int(data)
-        self.db.send('Select|%s' % dump({
+        self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
             'breaks': self.db.get_breaks_lno(self.current_file),
-            'file': self.db.get_file(self.current_file),
-            'name': self.current_file
+            'name': self.current_file,
+            'sha512': sha512(self.current_file).hexdigest()
         }))
+
+    def do_file(self, data):
+        fn = data
+        file = self.db.get_file(fn)
+
+        self.db.send('Select|%s' % dump({
+            'frame': self.current,
+            'breaks': self.db.get_breaks_lno(fn),
+            'name': fn,
+            'file': file,
+            'sha512': sha512(fn).hexdigest()
+        }))
+
 
     def do_inspect(self, data):
         try:
@@ -375,9 +389,11 @@ class Interaction(object):
         self.db.send('Trace|%s' % dump({
             'trace': self.trace
         }))
-        self.db.send('Select|%s' % dump({
+        self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(self.current_file)
+            'breaks': self.db.get_breaks_lno(self.current_file),
+            'name': self.current_file,
+            'sha512': sha512(self.current_file).hexdigest()
         }))
 
     def do_complete(self, data):

@@ -50,11 +50,14 @@ fallback = ->
 if not @indexedDB
     fallback()
 else
-    open = @indexedDB.open('wdbdb', 2)
+    open = @indexedDB.open('wdbdb', 3)
     open.onerror = (event) -> console.log('Error when opening wdbdb', event)
     open.onupgradeneeded = (event) ->
         db = event.target.result
-        db.createObjectStore("cmd", { keyPath: "name" })
+        console.log event
+        if event.oldVersion < 2
+            db.createObjectStore("cmd", { keyPath: "name" })
+        db.createObjectStore("file", { keyPath: "name" })
 
     open.onsuccess = (event) =>
         console.info 'wdbdb is open'
@@ -128,18 +131,19 @@ make_ws = ->
             cmd = message
         console.log time(), '<-', cmd
         treat = switch cmd
-            when 'Init'       then init
-            when 'Title'      then title
-            when 'Trace'      then trace
-            when 'Select'     then select
-            when 'Print'      then print
-            when 'Echo'       then echo
-            when 'BreakSet'   then breakset
-            when 'BreakUnset' then breakunset
-            when 'Dump'       then dump
-            when 'Suggest'    then suggest
-            when 'Log'        then log
-            when 'Die'        then die
+            when 'Init'        then init
+            when 'Title'       then title
+            when 'Trace'       then trace
+            when 'Select'      then select
+            when 'SelectCheck' then select_check
+            when 'Print'       then print
+            when 'Echo'        then echo
+            when 'BreakSet'    then breakset
+            when 'BreakUnset'  then breakunset
+            when 'Dump'        then dump
+            when 'Suggest'     then suggest
+            when 'Log'         then log
+            when 'Die'         then die
         if not treat
             console.log 'Unknown command', cmd
         else
@@ -251,6 +255,8 @@ create_code_mirror = (file, name, rw=false)->
     cm._rw = rw
     cm._fn = name
     cm._file = file
+    cm._fun = null
+    cm._last_hl = null
 
     cm.on("gutterClick", (cm, n) ->
         toggle_break ':' + (n + 1)
@@ -288,13 +294,28 @@ toggle_edition = (rw) ->
         cm.addMark(lno, cls, char)
     $('#source .CodeMirror-scroll').scrollTop(scroll)
 
-select = (data) ->
+select_check = (data) ->
+    @get('file')(data.name,
+        ((file) ->
+            if file.sha512 != data.sha512
+                send("File|#{data.name}")
+            else
+                # We already have file
+                data.file = file.file
+                select(data, false)
+        ), (->
+            send("File|#{data.name}")))
+
+
+select = (data, reset_file=true) ->
+    if reset_file
+        set('file')(name: data.name, file: data.file, sha512: data.sha512)
     $source = $ '#source'
     current_frame = data.frame
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
-    
+
     if data.current
         $('#trace-' + data.current.level).addClass('real-selected')
 
@@ -303,14 +324,21 @@ select = (data) ->
     else
         cm = window.cm
         if cm._fn == data.name
-            for lno of cm._bg_marks.cls
-                cm.removeLineClass(lno - 1, 'background')
+            if cm._fun != current_frame.function
+                for lno of cm._bg_marks.cls
+                    cm.removeLineClass(lno - 1, 'background')
+
             for lno of cm._bg_marks.marks
                 cm.setGutterMarker(lno - 1, 'breakpoints', null)
+            if cm._last_hl
+                cm.removeLineClass(lno - 1, 'background')
+                cm.addLineClass(lno - 1, 'background', 'highlighted-other')
         else
             cm.setValue data.file
             cm._fn = data.name
+            cm._fun = current_frame.function
             cm._file = data.file
+            cm._last_hl = null
         cm._bg_marks.cls = {}
         cm._bg_marks.marks = {}
 
@@ -319,13 +347,15 @@ select = (data) ->
 
     cm.addClass(current_frame.lno, 'highlighted')
     cm.addMark(current_frame.lno, 'highlighted', '➤')
-
-    for lno in [current_frame.flno...current_frame.llno + 1]
-        cm.addClass(lno, 'ctx')
-        if lno == current_frame.flno
-            cm.addClass(lno, 'ctx-top')
-        else if lno == current_frame.llno
-            cm.addClass(lno, 'ctx-bottom')
+    if cm._fun != current_frame.function and current_frame.function != '<module>'
+        for lno in [current_frame.flno...current_frame.llno + 1]
+            cm.addClass(lno, 'ctx')
+            if lno == current_frame.flno
+                cm.addClass(lno, 'ctx-top')
+            else if lno == current_frame.llno
+                cm.addClass(lno, 'ctx-bottom')
+        cm._fun = current_frame.function
+    cm._last_hl = current_frame.lno
 
     cm.scrollIntoView(line: current_frame.lno, ch: 1, 1)
     $scroll = $ '#source .CodeMirror-scroll'
