@@ -450,8 +450,7 @@ class Interaction(object):
         self.db.__class__.enabled = False
         self.db.stepping = False
         self.db.stop_trace()
-        self.db.send('Die')
-        self.db.__class__.pop()
+        self.db.die()
         return True
 
     def do_quit(self, data):
