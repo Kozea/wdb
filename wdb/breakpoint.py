@@ -13,6 +13,8 @@ def canonic(filename):
 
 
 class Breakpoint(object):
+    """Simple breakpoint that breaks if in file"""
+
     def __init__(self, file, temporary=False):
         self.file = canonic(file)
         self.temporary = temporary
@@ -25,6 +27,7 @@ class Breakpoint(object):
 
 
 class LineBreakpoint(Breakpoint):
+    """Simple breakpoint that breaks if in file at line"""
     def __init__(self, file, line, temporary=False):
         self.line = line
         super(LineBreakpoint, self).__init__(file, temporary)
@@ -35,6 +38,7 @@ class LineBreakpoint(Breakpoint):
 
 
 class ConditionalBreakpoint(LineBreakpoint):
+    """Breakpoint that breaks if condition is True at line in file"""
     def __init__(self, file, line, condition, temporary=False):
         self.condition = condition
         super(ConditionalBreakpoint, self).__init__(file, line, temporary)
@@ -49,6 +53,7 @@ class ConditionalBreakpoint(LineBreakpoint):
 
 
 class FunctionBreakpoint(Breakpoint):
+    """Breakpoint that breaks if in file in function"""
     def __init__(self, file, function, temporary=False):
         self.function = function
         super(FunctionBreakpoint, self).__init__(file, temporary)

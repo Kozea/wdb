@@ -115,9 +115,21 @@ def wdb_tornado(application, start_disabled=False, theme='dark'):
 def add_w_builtin():
     class w(object):
         """Global shortcuts"""
-        tf = set_trace
-        start = start_trace
-        stop = stop_trace
-        trace = trace
 
-    __builtins__['w'] = w
+        @property
+        def tf(self):
+            set_trace(sys._getframe().f_back)
+
+        @property
+        def start(self):
+            start_trace(sys._getframe().f_back)
+
+        @property
+        def stop(self):
+            stop_trace(sys._getframe().f_back)
+
+        @property
+        def trace(self):
+            trace(sys._getframe().f_back)
+
+    __builtins__['w'] = w()
