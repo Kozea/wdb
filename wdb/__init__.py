@@ -65,7 +65,7 @@ class Wdb(object):
 
     @staticmethod
     def get():
-        # Thread local singleton
+        """Get the thread local singleton"""
         thread = threading.current_thread()
         wdb = Wdb._instances.get(thread)
         if not wdb:
@@ -76,6 +76,7 @@ class Wdb(object):
 
     @staticmethod
     def pop():
+        """Remove instance from instance list"""
         thread = threading.current_thread()
         Wdb._instances.pop(thread)
 
@@ -90,6 +91,7 @@ class Wdb(object):
         self.last_obj = None
         self.reset()
         self.uuid = str(uuid4())
+        # TODO?: Make it global to break anywhere in threads
         self.breakpoints = set()
         self.state = Running(None)
         self.full = False
@@ -97,6 +99,7 @@ class Wdb(object):
         self.connect()
 
     def run_file(self, filename):
+        """Run the file `filename` with trace"""
         import __main__
         __main__.__dict__.clear()
         __main__.__dict__.update({
@@ -110,6 +113,7 @@ class Wdb(object):
         self.run(statement, filename)
 
     def run(self, cmd, fn, globals=None, locals=None):
+        """Run the cmd `cmd` with trace"""
         if globals is None:
             import __main__
             globals = __main__.__dict__
@@ -126,16 +130,20 @@ class Wdb(object):
             self.stop_trace()
 
     def reset(self):
+        """Refresh linecache"""
         import linecache
         linecache.checkcache()
 
     def connect(self):
+        """Connect to wdb server"""
         log.info('Connecting socket')
         self._socket = Client(('localhost', 19840))
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
     def trace_dispatch(self, frame, event, arg):
+        """This function is called every line,
+        function call, function return and exception during trace"""
         fun = getattr(self, 'handle_' + event)
         if fun and (
                 (
@@ -176,6 +184,7 @@ class Wdb(object):
         return self.trace_dispatch
 
     def trace_debug_dispatch(self, frame, event, arg):
+        """Utility function to add debug to tracing"""
         trace_log.info('Frame:%s. Event: %s. Arg: %r' % (
             pretty_frame(frame), event, arg))
         trace_log.debug('state %r breaks ? %s stops ? %s' % (
@@ -192,7 +201,7 @@ class Wdb(object):
             return self.trace_debug_dispatch
 
     def start_trace(self, full=False, frame=None, below=False):
-        """Make an instance of Wdb and trace all code below"""
+        """Start tracing from here"""
         if self.tracing:
             return
         log.info('Starting trace on %r' % self.thread)
@@ -206,7 +215,7 @@ class Wdb(object):
     def set_trace(self, frame=None, break_=True):
         """Break at current state"""
         # We are already tracing, do nothing
-        if self.tracing:
+        if self.stepping:
             return
         trace = (self.trace_dispatch
                  if trace_log.level >= 30 else self.trace_debug_dispatch)
@@ -219,6 +228,7 @@ class Wdb(object):
         sys.settrace(trace)
 
     def stop_trace(self, frame=None):
+        """Stop tracing from here"""
         self.tracing = False
         self.full = False
         frame = frame or sys._getframe().f_back
@@ -226,17 +236,18 @@ class Wdb(object):
             del frame.f_trace
             frame = frame.f_back
         sys.settrace(None)
-        log.info('Stopping trace on  %r' % self.thread)
+        log.info('Stopping trace on %r' % self.thread)
 
     def set_until(self, frame, lineno=None):
+        """Stop on the next line number."""
         self.state = Until(frame, frame.f_lineno)
 
     def set_step(self, frame):
-        """Stop after one line of code."""
+        """Stop on the next line."""
         self.state = Step(frame)
 
     def set_next(self, frame):
-        """Stop on the next line in or below the given frame."""
+        """Stop on the next line in current frame."""
         self.state = Next(frame)
 
     def set_return(self, frame):
@@ -244,6 +255,7 @@ class Wdb(object):
         self.state = Return(frame)
 
     def set_continue(self, frame):
+        """Don't stop anymore"""
         self.state = Running(frame)
         if not self.tracing and not self.breakpoints:
             # If we were in a set_trace and there's no breakpoint to trace for
@@ -252,6 +264,7 @@ class Wdb(object):
 
     def set_break(self, filename, lineno=None, temporary=False, cond=None,
                   funcname=None):
+        """Put a breakpoint for filename"""
         log.info('Setting break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
             filename, lineno, temporary, cond, funcname))
         if lineno:
@@ -393,6 +406,7 @@ class Wdb(object):
         return ''.join(linecache.getlines(filename))
 
     def get_stack(self, f, t):
+        """Build the stack from frame and traceback"""
         stack = []
         if t and t.tb_frame is f:
             t = t.tb_next
@@ -537,6 +551,7 @@ class Wdb(object):
             frame, tb, exception, exception_description, init=init)
 
     def breaks(self, frame, no_remove=False):
+        """Return True if there's a breakpoint at frame"""
         for breakpoint in set(self.breakpoints):
             if breakpoint.breaks(frame):
                 if breakpoint.temporary and not no_remove:
@@ -545,10 +560,12 @@ class Wdb(object):
         return False
 
     def get_file_breaks(self, filename):
+        """List all file `filename` breakpoints"""
         return [breakpoint for breakpoint in self.breakpoints
                 if breakpoint.on_file(filename)]
 
     def get_breaks_lno(self, filename):
+        """List all line numbers that have a breakpoint"""
         return list(
             filter(lambda x: x is not None,
                    [getattr(breakpoint, 'line', None)
@@ -556,6 +573,7 @@ class Wdb(object):
                     if breakpoint.on_file(filename)]))
 
     def clear_break(self, filename, line):
+        """Remove a breakpoint"""
         for breakpoint in set(self.breakpoints):
             if getattr(breakpoint, 'line', None):
                 if breakpoint.line == line:
@@ -563,6 +581,7 @@ class Wdb(object):
 
     def die(self):
         """Time to quit"""
+        log.info('Time to die')
         try:
             self.send('Die')
         except:
@@ -575,10 +594,6 @@ def set_trace(frame=None):
     """Set trace on current line, or on given frame"""
     frame = frame or sys._getframe().f_back
     wdb = Wdb.get()
-    sys.settrace(None)
-    # Clear previous tracing
-    wdb.stop_trace()
-    # Set trace to the top frame
     wdb.set_trace(frame)
 
 
@@ -593,8 +608,10 @@ def start_trace(full=False, frame=None, below=False):
 def stop_trace(frame=None, close_on_exit=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
+    log.info('Stopping trace?')
     wdb = Wdb.get()
     if not wdb.stepping or close_on_exit:
+        log.info('Stopping trace')
         wdb.stop_trace(frame or sys._getframe().f_back)
         if close_on_exit:
             wdb.die()
@@ -614,5 +631,6 @@ def trace(full=False, frame=None, below=False, close_on_exit=False):
 
 @atexit.register
 def cleanup():
+    """Close all sockets at exit"""
     for socket in Wdb._sockets:
         socket.close()
