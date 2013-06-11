@@ -75,6 +75,8 @@ class WdbMiddleware(object):
                     ('Content-Type', 'text/html')])
                 yield _handle_off(self.theme)
             finally:
+                # Close set_trace debuggers
+                stop_trace(close_on_exit=True)
                 hasattr(appiter, 'close') and appiter.close()
 
         return catch(environ, start_response)
@@ -92,13 +94,15 @@ def wdb_tornado(application, start_disabled=False, theme='dark'):
 
     old_execute = RequestHandler._execute
 
-    def _wdb_execute(self, transforms, *args, **kwargs):
+    def _wdb_execute(self, transforms):
         from wdb import trace, Wdb
         if Wdb.enabled:
             with trace(close_on_exit=True, below=True):
-                old_execute(self, transforms, *args, **kwargs)
+                old_execute(self, transforms)
         else:
-            old_execute(self, transforms, *args, **kwargs)
+            old_execute(self, transforms)
+            # Close set_trace debuggers
+            stop_trace(close_on_exit=True)
 
     RequestHandler._execute = _wdb_execute
 
@@ -117,19 +121,19 @@ def add_w_builtin():
         """Global shortcuts"""
 
         @property
-        def tf(self, *args, **kwargs):
-            set_trace(sys._getframe().f_back, *args, **kwargs)
+        def tf(self):
+            set_trace(sys._getframe().f_back)
 
         @property
-        def start(self, *args, **kwargs):
-            start_trace(sys._getframe().f_back, *args, **kwargs)
+        def start(self):
+            start_trace(sys._getframe().f_back)
 
         @property
-        def stop(self, *args, **kwargs):
-            stop_trace(sys._getframe().f_back, *args, **kwargs)
+        def stop(self):
+            stop_trace(sys._getframe().f_back)
 
         @property
-        def trace(self, *args, **kwargs):
-            trace(sys._getframe().f_back, *args, **kwargs)
+        def trace(self):
+            trace(sys._getframe().f_back)
 
     __builtins__['w'] = w()

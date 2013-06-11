@@ -24,75 +24,27 @@ cm = null
 cm_theme = 'tomorrow-night'
 
 started = false
-stop = false
 ws = null
 cwd = null
 backsearch = null
-cmd_hist = {}
+
+cmd_hist = []
+try
+    cmd_hist = JSON.parse(localStorage['cmd_hist'])
+catch e
+    console.log e
+
 session_cmd_hist = {}
+file_cache = {}
+
 waited_for_ws = 0
 $source = null
 $traceback = null
 
+
 send = (msg) ->
     console.log time(), '->', msg
     ws.send msg
-
-@indexedDB = @indexedDB or @mozIndexedDB or @webkitIndexedDB or @msIndexedDB
-@IDBTransaction = @IDBTransaction or @webkitIDBTransaction or @msIDBTransaction
-@IDBKeyRange = @IDBKeyRange or @webkitIDBKeyRange or @msIDBKeyRange
-
-fallback = ->
-    file_cache = {}
-    @get = (type) -> (obj, callback) -> callback(obj of file_cache and file_cache[obj])
-    @set = (type) -> (obj) -> file_cache[obj.name] = obj
-
-if not @indexedDB
-    fallback()
-else
-    open = @indexedDB.open('wdbdb', 3)
-    open.onerror = (event) -> console.log('Error when opening wdbdb', event)
-    open.onupgradeneeded = (event) ->
-        db = event.target.result
-        console.log event
-        if event.oldVersion < 2
-            db.createObjectStore("cmd", { keyPath: "name" })
-        db.createObjectStore("file", { keyPath: "name" })
-
-    open.onsuccess = (event) =>
-        console.info 'wdbdb is open'
-        @wdbdb = open.result
-        @get = (type) ->
-            (key, callback, notfound, always) ->
-                rq = @wdbdb.transaction([type]).objectStore(type).get(key)
-                rq.onsuccess = (event) ->
-                    if event.target.result
-                        callback(event.target.result)
-                    else
-                        notfound and notfound()
-                    always and always()
-                if notfound
-                    rq.onerror = (event) ->
-                        notfound()
-                        always and always()
-                null
-        @set = (type) ->
-            (obj) ->
-                rq = @wdbdb.transaction([type], 'readwrite')
-                os = rq.objectStore(type)
-                os.put(obj)
-                rq.onerror = (event) -> console.log('Add error', event)
-                null
-
-        @wdbdb.transaction(['cmd']).objectStore('cmd').openCursor().onsuccess = (event) ->
-            cursor = event.target.result
-            if cursor
-                cmd_hist[cursor.value.name] = cursor.value.history
-                cursor.continue()
-
-    open.onerror = (event) ->
-        console.log('Error when opening wdbdb', event)
-        fallback()
 
 make_ws = ->
     # Open a websocket in case of request break
@@ -119,8 +71,6 @@ make_ws = ->
         $('#eval').focus()
 
     new_ws.onmessage = (m) ->
-        if stop
-            return
         # Open a websocket in case of request break
         message = m.data
         pipe = message.indexOf('|')
@@ -176,7 +126,8 @@ init = (data) ->
     cwd = data.cwd
 
 title = (data) ->
-    $('#title').text(data.title).append($('<small>').text(data.subtitle))
+    $('#title').text(data.title).attr('title', data.title)
+        .append($('<small>').text(data.subtitle).attr('title', data.subtitle))
     $('#source').css(height: $(window).height() - $('#title').outerHeight(true) - 10)
     $traceback.css(height: $(window).height() - $('#title').outerHeight(true) - 10)
 
@@ -295,21 +246,13 @@ toggle_edition = (rw) ->
     $('#source .CodeMirror-scroll').scrollTop(scroll)
 
 select_check = (data) ->
-    @get('file')(data.name,
-        ((file) ->
-            if file.sha512 != data.sha512
-                send("File|#{data.name}")
-            else
-                # We already have file
-                data.file = file.file
-                select(data, false)
-        ), (->
-            send("File|#{data.name}")))
+    if data.name not of file_cache
+        send("File|#{data.name}")
+    else
+        data.file = file_cache[data.name]
+        select data
 
-
-select = (data, reset_file=true) ->
-    if reset_file
-        set('file')(name: data.name, file: data.file, sha512: data.sha512)
+select = (data) ->
     $source = $ '#source'
     current_frame = data.frame
     $('.traceline').removeClass('selected')
@@ -332,7 +275,7 @@ select = (data, reset_file=true) ->
                 cm.setGutterMarker(lno - 1, 'breakpoints', null)
             if cm._last_hl
                 cm.removeLineClass(lno - 1, 'background')
-                cm.addLineClass(lno - 1, 'background', 'highlighted-other')
+                cm.addLineClass(lno - 1, 'background', 'footstep')
         else
             cm.setValue data.file
             cm._fn = data.name
@@ -402,18 +345,16 @@ code = (parent, code, classes=[], html=false) ->
 
 historize = (snippet) ->
     filename = $('.selected .tracefile').text()
-    if not (filename of cmd_hist)
-        cmd_hist[filename] = []
     if not (filename of session_cmd_hist)
         session_cmd_hist[filename] = []
 
-    while (index = cmd_hist[filename].indexOf(snippet)) != -1
-        cmd_hist[filename].splice(index, 1)
+    while (index = cmd_hist.indexOf(snippet)) != -1
+        cmd_hist.splice(index, 1)
 
-    cmd_hist[filename].unshift snippet
+    cmd_hist.unshift snippet
     session_cmd_hist[filename].unshift snippet
 
-    set('cmd')(name: filename, history: cmd_hist[filename])
+    localStorage and localStorage['cmd_hist'] = JSON.stringify(cmd_hist)
 
 last_cmd = null
 execute = (snippet) ->
@@ -632,7 +573,7 @@ searchback = ->
     suggest_stop()
     index = backsearch
     val = $('#eval').val()
-    for h in cmd_hist[$('.selected .tracefile').text()]
+    for h in cmd_hist
         re = new RegExp('(' + val + ')', 'gi')
         if re.test(h)
             index--
@@ -757,32 +698,30 @@ register_handlers = ->
             $eval = $(@)
             filename = $('.selected .tracefile').text()
             if not e.shiftKey
-                if filename of cmd_hist
-                    index = parseInt($eval.attr('data-index')) + 1
-                    if index >= 0 and index < cmd_hist[filename].length
-                        to_set = cmd_hist[filename][index]
-                        if index == 0
-                            $eval.attr('data-current', $eval.val())
-                        $eval.val(to_set)
-                            .attr('data-index', index)
-                            .attr('rows', to_set.split('\n').length)
-                        return false
+                index = parseInt($eval.attr('data-index')) + 1
+                if index >= 0 and index < cmd_hist.length
+                    to_set = cmd_hist[index]
+                    if index == 0
+                        $eval.attr('data-current', $eval.val())
+                    $eval.val(to_set)
+                        .attr('data-index', index)
+                        .attr('rows', to_set.split('\n').length)
+                    return false
 
         else if e.keyCode == 40  # Down
             $eval = $(@)
             filename = $('.selected .tracefile').text()
             if not e.shiftKey
-                if filename of cmd_hist
-                    index = parseInt($eval.attr('data-index')) - 1
-                    if index >= -1 and index < cmd_hist[filename].length
-                        if index == -1
-                            to_set = $eval.attr('data-current')
-                        else
-                            to_set = cmd_hist[filename][index]
-                        $eval.val(to_set)
-                            .attr('data-index', index)
-                            .attr('rows', to_set.split('\n').length)
-                        return false
+                index = parseInt($eval.attr('data-index')) - 1
+                if index >= -1 and index < cmd_hist.length
+                    if index == -1
+                        to_set = $eval.attr('data-current')
+                    else
+                        to_set = cmd_hist[index]
+                    $eval.val(to_set)
+                        .attr('data-index', index)
+                        .attr('rows', to_set.split('\n').length)
+                    return false
 
 
     $("#scrollback").on('click', 'a.inspect', ->
@@ -832,6 +771,5 @@ register_handlers = ->
             suggest_stop()
     ).on('blur', ->
         searchback_stop()
-        # suggest_stop()
     )
 

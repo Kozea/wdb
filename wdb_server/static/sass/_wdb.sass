@@ -39,10 +39,21 @@ h1, #waiter
   font-weight: bold
   color: $fg
   font-variant: small-caps
+
+  max-width: 100%
+  white-space: nowrap
+  text-overflow: ellipsis
+  overflow: hidden
+
   small
     color: $alt-fg
     display: block
     font-size: .5em
+
+    max-width: 100%
+    white-space: nowrap
+    text-overflow: ellipsis
+    overflow: hidden
 
 code
   font: $code-font
@@ -242,7 +253,7 @@ code
     &:before
       color: $lno-fg
       background-color: $code-ctx-bg
-  &.highlighted-other
+  &.footstep
     color: $code-hl-other-fg
     background-color: $code-hl-other-bg !important
   &.breakpoint
@@ -250,10 +261,7 @@ code
     background-color: $code-hl-break-bg !important
   &.highlighted
     color: $code-hl-fg
-    background-color: $code-hl-bg
-    &:before
-      color: $code-hl-fg
-      background-color: $code-hl-bg
+    background-color: $code-hl-bg !important
   &.ask-breakpoint
     color: $code-hl-break-ask-fg
 

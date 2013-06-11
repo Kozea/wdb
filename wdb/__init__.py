@@ -64,11 +64,11 @@ class Wdb(object):
     enabled = True
 
     @staticmethod
-    def get():
+    def get(no_create=False):
         """Get the thread local singleton"""
         thread = threading.current_thread()
         wdb = Wdb._instances.get(thread)
-        if not wdb:
+        if not wdb and not no_create:
             wdb = Wdb()
             wdb.thread = thread
             Wdb._instances[thread] = wdb
@@ -204,6 +204,7 @@ class Wdb(object):
         """Start tracing from here"""
         if self.tracing:
             return
+        self.reset()
         log.info('Starting trace on %r' % self.thread)
         frame = frame or sys._getframe().f_back
         # Setting trace without pausing
@@ -217,10 +218,10 @@ class Wdb(object):
         # We are already tracing, do nothing
         if self.stepping:
             return
+        self.reset()
         trace = (self.trace_dispatch
                  if trace_log.level >= 30 else self.trace_debug_dispatch)
         trace_frame = frame = frame or sys._getframe().f_back
-        self.reset()
         while frame:
             frame.f_trace = trace
             frame = frame.f_back
@@ -402,7 +403,6 @@ class Wdb(object):
     def get_file(self, filename):
         """Get file source from cache"""
         import linecache
-        linecache.checkcache(filename)
         return ''.join(linecache.getlines(filename))
 
     def get_stack(self, f, t):
@@ -609,8 +609,8 @@ def stop_trace(frame=None, close_on_exit=False):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     log.info('Stopping trace?')
-    wdb = Wdb.get()
-    if not wdb.stepping or close_on_exit:
+    wdb = Wdb.get(True)  # Do not create an istance if there's None
+    if wdb and (not wdb.stepping or close_on_exit):
         log.info('Stopping trace')
         wdb.stop_trace(frame or sys._getframe().f_back)
         if close_on_exit:
