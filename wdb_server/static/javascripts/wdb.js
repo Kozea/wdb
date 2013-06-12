@@ -291,7 +291,11 @@
       _ref = marks[lno], cls = _ref[0], char = _ref[1];
       cm.addMark(lno, cls, char);
     }
-    return $('#source .CodeMirror-scroll').scrollTop(scroll);
+    $('#source .CodeMirror-scroll').scrollTop(scroll);
+    return print({
+      "for": "Toggling edition",
+      result: "Edit mode " + (rw ? 'on' : 'off')
+    });
   };
 
   select_check = function(data) {
@@ -942,10 +946,7 @@
     }).on('click', '.toggle', function() {
       return $(this).add($(this).next()).toggleClass('hidden', 'shown');
     });
-    $("#source").on('dblclick', function(e) {
-      return !cm._rw && toggle_edition(true);
-    });
-    $("#sourcecode").on('mouseup', 'span', function(e) {
+    $("#source").on('mouseup', 'span', function(e) {
       var target;
 
       if (e.which === 2) {
@@ -961,7 +962,8 @@
         sel = document.getSelection().toString().trim();
         if (sel) {
           historize(sel);
-          return send('Dump|' + sel);
+          send('Eval|' + sel);
+          return false;
         }
       }
     });

@@ -62,6 +62,7 @@ class Wdb(object):
     _instances = {}
     _sockets = []
     enabled = True
+    breakpoints = set()
 
     @staticmethod
     def get(no_create=False):
@@ -91,8 +92,6 @@ class Wdb(object):
         self.last_obj = None
         self.reset()
         self.uuid = str(uuid4())
-        # TODO?: Make it global to break anywhere in threads
-        self.breakpoints = set()
         self.state = Running(None)
         self.full = False
         self.below = False

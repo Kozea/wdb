@@ -61,24 +61,30 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         socket.write(pack("!i", len(data)))
         socket.write(data)
 
+    def write(self, message):
+        log.debug('socket -> websocket: %s' % message)
+        self.write_message(message)
+
     def open(self, uuid):
         self.uuid = uuid.decode('utf-8')
         log.info('Websocket opened for %s' % self.uuid)
         Sockets.websockets[self.uuid] = self
 
     def on_message(self, message):
-        log.debug('socket -> websocket: %s' % message)
         self.send(message)
 
     def on_close(self):
+        log.info('Websocket closed for %s' % self.uuid)
         socket = Sockets.sockets.get(self.uuid)
-        if socket:
+        if socket and not tornado.options.options.detached_session:
             self.send('Continue')
             socket.close()
 
 
 tornado.options.define('theme', default="dark", help="wdb theme to use")
 tornado.options.define("debug", default=False, help="Debug mode")
+tornado.options.define("detached_session", default=False,
+                       help="Whether to continue program on browser close")
 tornado.options.parse_command_line()
 for l in (log, logging.getLogger('tornado.access'),
           logging.getLogger('tornado.application'),
