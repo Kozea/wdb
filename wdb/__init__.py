@@ -44,9 +44,9 @@ SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
 SOCKET_PORT = int(os.getenv('WDB_SOCKET_PORT', '19840'))
 
 # Get wdb web server host
-WEB_SERVER = os.getenv('WDB_WEB_SERVER', 'localhost')
+WEB_SERVER = os.getenv('WDB_WEB_SERVER')
 # and port
-WEB_PORT = int(os.getenv('WDB_WEB_PORT', '1984'))
+WEB_PORT = int(os.getenv('WDB_WEB_PORT', 0))
 
 WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
 
@@ -487,12 +487,26 @@ class Wdb(object):
         if not self.connected:
             log.debug('Launching browser and wait for connection')
             web_url = 'http://%s:%d/debug/session/%s' % (
-                WEB_SERVER, WEB_PORT, self.uuid)
-            if WDB_NO_BROWSER_AUTO_OPEN:
-                log.warn('You can now launch your browser')
+                WEB_SERVER or 'localhost',
+                WEB_PORT or 1984,
+                self.uuid)
 
-            if not webbrowser.open(web_url):
-                log.warn('Unable to open browser, please go to %s' % web_url)
+            server = WEB_SERVER or '[wdb.server]'
+            if WEB_PORT:
+                server += ':%s' % WEB_PORT
+
+            if WDB_NO_BROWSER_AUTO_OPEN:
+                log.warn('You can now launch your browser at '
+                         'http://%s/debug/session/%s' % (
+                             server,
+                             self.uuid))
+
+            elif not webbrowser.open(web_url):
+                log.warn('Unable to open browser, '
+                         'please go to http://%s/debug/session/%s' % (
+                             server,
+                             self.uuid))
+
             self.connected = True
 
         interaction = Interaction(
