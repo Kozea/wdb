@@ -18,7 +18,7 @@ The wdb clients allow step by step debugging, in-program python code execution, 
 Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
 **wdb** works with python 2, python 3 and pypy.
-Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa.
+Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
 
 In other words it's a very enhanced version of pdb directly in your browser with nice features.
 
@@ -155,9 +155,8 @@ In tornado, which is not a wsgi server, you can use the `wdb_tornado` function w
     my_app.listen(8888)
 ```
 
+### It is slow ?
 
-It is sloooow
--------------
 
 If wdb slows down too much of your application (tracing all the things takes time), you can start it disabled with:
 
@@ -168,6 +167,43 @@ If wdb slows down too much of your application (tracing all the things takes tim
 ```
 
 Then when you get an exception just click on the on/off button.
+
+
+Remote debugging
+----------------
+
+You can easily do remote debugging with wdb:
+
+Let's say you want to run a program `p.py` on computer A and you want to debug it on computer B.
+
+Start wdb server on computer A and launch this:
+
+```
+    WDB_NO_BROWSER_AUTO_OPEN=True python -m wdb p.py
+```
+
+And open a browser on computer B at the url given by wdb log.
+
+
+Now you can also run wdb server on a computer C and run on computer A:
+
+```
+    WDB_NO_BROWSER_AUTO_OPEN=True WDB_SOCKET_SERVER=computerC.addr WDB_SOCKET_PORT=19840 python -m wdb p.py
+```
+
+And go with computer B to http://computerC/debug/session/[uuid in log] there you can step into p.py running in computer A. Yay !
+
+You can use different configurations:
+
+See `wdb.server.py --help` for changing ports on server and these environnement vars for wdb instances:
+
+```
+WDB_SOCKET_SERVER         # WDB server host
+WDB_SOCKET_PORT           # WDB server socket port
+WDB_WEB_SERVER            # WDB server host for browser openning
+WDB_WEB_PORT              # WDB server http port
+WDB_NO_BROWSER_AUTO_OPEN  # To disable the automagic browser openning (which can't be done if the browser is not on the same machine)
+```
 
 
 In browser usage
