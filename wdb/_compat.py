@@ -37,3 +37,9 @@ else:
 
     def from_bytes(bytes_):
         return bytes_.decode('utf-8')
+
+
+def u(s):
+    if python_version == 2:
+        return s.decode('utf-8')
+    return s

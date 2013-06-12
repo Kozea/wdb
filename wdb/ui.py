@@ -1,5 +1,5 @@
 # *-* coding: utf-8 *-*
-from ._compat import dumps, JSONEncoder, quote, execute, to_unicode
+from ._compat import dumps, JSONEncoder, quote, execute, to_unicode, u
 from bdb import BdbQuit
 from cgi import escape
 from jedi import Script
@@ -232,7 +232,7 @@ class Interaction(object):
             return
         else:
             self.db.send('Dump|%s' % dump({
-                'for': u'%s ⟶ %s ' % (data, repr(thing)),
+                'for': u('%s ⟶ %s ') % (data, repr(thing)),
                 'val': self.db.dmp(thing)}))
 
     def do_trace(self, data):
@@ -406,10 +406,10 @@ class Interaction(object):
         indent = len(line_before) - len(line_before.lstrip())
         segments = data.splitlines()
         for segment in reversed(segments):
-            line = u' ' * indent + segment
+            line = u(' ') * indent + segment
             lines.insert(lno - 1, line)
         script = Script(
-            u'\n'.join(lines), lno - 1 + len(segments),
+            u('\n').join(lines), lno - 1 + len(segments),
             len(segments[-1]) + indent, '')
         try:
             completions = script.complete()
