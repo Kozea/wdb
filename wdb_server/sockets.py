@@ -30,7 +30,7 @@ def on_close(stream, uuid):
 def read_frame(stream, uuid, frame):
     websocket = Sockets.websockets.get(uuid)
     if websocket:
-        websocket.write_message(frame)
+        websocket.write(frame)
     else:
         log.error('Web socket is unknown for frame %s' % frame)
     stream.read_bytes(4, partial(read_header, stream, uuid))

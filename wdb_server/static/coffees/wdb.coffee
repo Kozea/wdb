@@ -244,6 +244,7 @@ toggle_edition = (rw) ->
         [cls, char] = marks[lno]
         cm.addMark(lno, cls, char)
     $('#source .CodeMirror-scroll').scrollTop(scroll)
+    print for: "Toggling edition", result: "Edit mode #{if rw then 'on' else 'off'}"
 
 select_check = (data) ->
     if data.name not of file_cache
@@ -736,11 +737,7 @@ register_handlers = ->
         $(@).add($(@).next()).toggleClass('hidden', 'shown')
     )
 
-    $("#source").on('dblclick', (e) ->
-        not cm._rw and toggle_edition(true)
-    )
-
-    $("#sourcecode").on('mouseup', 'span', (e) ->
+    $("#source").on('mouseup', 'span', (e) ->
         if e.which == 2 # Middle
             target = $(@).text().trim()
             historize target
@@ -752,7 +749,8 @@ register_handlers = ->
             sel = document.getSelection().toString().trim()
             if sel
                 historize sel
-                send 'Dump|' + sel
+                send 'Eval|' + sel
+                false
     )
 
     $('#eval').on('input', ->

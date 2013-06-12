@@ -400,11 +400,11 @@ class Interaction(object):
     def do_complete(self, data):
         file_ = self.db.get_file(self.current_file)
         file_ = to_unicode(file_)
-        lines = file_.split(u'\n')
+        lines = file_.splitlines()
         lno = self.current['lno']
         line_before = lines[lno - 1]
         indent = len(line_before) - len(line_before.lstrip())
-        segments = data.split(u'\n')
+        segments = data.splitlines()
         for segment in reversed(segments):
             line = u' ' * indent + segment
             lines.insert(lno - 1, line)
