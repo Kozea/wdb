@@ -1,9 +1,9 @@
-# wdb
+# wdb - Web Debugger
 
 ![](https://raw.github.com/Kozea/wdb/master/wdb.png)
 
 
-- [wdb](#wdb)
+- [wdb - Web Debugger](#wdb---web-debugger)
     - [Description](#description)
     - [Installation:](#installation)
     - [Quick test](#quick-test)
@@ -14,19 +14,13 @@
             - [Wsgi servers](#wsgi-servers)
                 - [Flask](#flask)
                 - [Django](#django)
-- [This application object is used by any WSGI server configured to use this](#this-application-object-is-used-by-any-wsgi-server-configured-to-use-this)
-- [file. This includes Django's development server, if the WSGI_APPLICATION](#file-this-includes-djangos-development-server-if-the-wsgiapplication)
-- [setting points here.](#setting-points-here)
             - [Tornado](#tornado)
             - [Page loading time become slow](#page-loading-time-become-slow)
-- [or](#or)
     - [Remote debugging](#remote-debugging)
     - [In browser usage](#in-browser-usage)
     - [Wdb Server](#wdb-server)
     - [Importing wdb each time is exhausting](#importing-wdb-each-time-is-exhausting)
     - [Theming](#theming)
-- [and if you disable the debugger](#and-if-you-disable-the-debugger)
-- [or](#or)
     - [Code completion](#code-completion)
     - [Contribute](#contribute)
     - [Author](#author)
@@ -117,9 +111,9 @@ wdb provides some tools to make it work nicely with different webservers:
 For wsgi servers you can use the `WdbMiddleware`:
 
 ```python
-    from wdb import Wdb
+    from wdb.ext import WdbMiddleware
     wsgi_app = Whathever_wsgi_server_lib()
-    my_app = Wdb(wsgi_app)
+    my_app = WdbMiddleware(wsgi_app)
     my_app.serve_forever()
 ```
 
@@ -128,10 +122,10 @@ For wsgi servers you can use the `WdbMiddleware`:
 or using Flask:
 
 ```python
-    from wdb import Wdb
+    from wdb.ext import WdbMiddleware
     app = Flask(__name__)
     app.debug = True
-    app.wsgi_app = Wdb(app.wsgi_app)
+    app.wsgi_app = WdbMiddleware(app.wsgi_app)
     app.run(use_debugger=False) # Disable builtin Werkzeug debugger
 ```
 
@@ -144,9 +138,6 @@ Add the middleware in your `wsgi.py`:
 After:
 
 ```python
-    # This application object is used by any WSGI server configured to use this
-    # file. This includes Django's development server, if the WSGI_APPLICATION
-    # setting points here.
     from django.core.wsgi import get_wsgi_application
     application = get_wsgi_application()
 ```
@@ -154,8 +145,8 @@ After:
 Add this:
 
 ```python
-    from wdb import Wdb
-    application = Wdb(application)
+    from wdb.ext import WdbMiddleware
+    application = WdbMiddleware(application)
 ```
 
 And in your `settings.py`, activate exception propagation:
@@ -184,8 +175,7 @@ In tornado, which is not a wsgi server, you can use the `wdb_tornado` function w
 If wdb slows down too much of your application (tracing all the things takes time), you can start it disabled with:
 
 ```python
-    my_app = WdbMiddleware(wsgi_app, start_disabled=True)
-    # or
+    my_app = WdbMiddleware(wsgi_app, start_disabled=True)  # or
     wdb_tornado(my_app, start_disabled=True)
 ```
 
@@ -295,10 +285,8 @@ you can now use the `w` object any where in your code:
 
 You can use the light theme like that:
 ```python
-    wdb.server --theme=light
-    # and if you disable the debugger
-    WdbMiddleware(app, theme='light')
-    # or
+    wdb.server --theme=light  # and if you disable the debugger
+    WdbMiddleware(app, theme='light') # or
     wdb_tornado(app, theme='light')
 ```
 
