@@ -38,6 +38,17 @@ import threading
 import webbrowser
 import atexit
 
+# Get wdb server host
+SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
+# and port
+SOCKET_PORT = int(os.getenv('WDB_SOCKET_PORT', '19840'))
+
+# Get wdb web server host
+WEB_SERVER = os.getenv('WDB_WEB_SERVER', 'localhost')
+# and port
+WEB_PORT = int(os.getenv('WDB_WEB_PORT', '1984'))
+
+WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
 
 BASE_PATH = os.path.join(
     os.path.abspath(os.path.dirname(__file__)))
@@ -135,8 +146,8 @@ class Wdb(object):
 
     def connect(self):
         """Connect to wdb server"""
-        log.info('Connecting socket')
-        self._socket = Client(('localhost', 19840))
+        log.info('Connecting socket on %s:%d' % (SOCKET_SERVER, SOCKET_PORT))
+        self._socket = Client((SOCKET_SERVER, SOCKET_PORT))
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
@@ -475,8 +486,13 @@ class Wdb(object):
 
         if not self.connected:
             log.debug('Launching browser and wait for connection')
-            webbrowser.open(
-                'http://localhost:1984/debug/session/%s' % self.uuid)
+            web_url = 'http://%s:%d/debug/session/%s' % (
+                WEB_SERVER, WEB_PORT, self.uuid)
+            if WDB_NO_BROWSER_AUTO_OPEN:
+                log.warn('You can now launch your browser')
+
+            if not webbrowser.open(web_url):
+                log.warn('Unable to open browser, please go to %s' % web_url)
             self.connected = True
 
         interaction = Interaction(

@@ -14,7 +14,7 @@ log.setLevel(10 if options.debug else 30)
 ioloop = IOLoop.instance()
 
 log.debug('Binding sockets')
-sockets = bind_sockets(19840)
+sockets = bind_sockets(options.socket_port)
 
 log.debug('Accepting')
 for socket in sockets:
@@ -22,7 +22,7 @@ for socket in sockets:
 
 
 log.debug('Listening')
-server.listen(1984)
+server.listen(options.server_port)
 
 log.debug('Starting loop')
 ioloop.start()

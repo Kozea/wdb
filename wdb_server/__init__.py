@@ -85,6 +85,12 @@ tornado.options.define('theme', default="dark", help="wdb theme to use")
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
+
+tornado.options.define("socket_port", default=19840,
+                       help="Port used to communicate with wdb instances")
+tornado.options.define("server_port", default=1984,
+                       help="Port used to serve debugging pages")
+
 tornado.options.parse_command_line()
 for l in (log, logging.getLogger('tornado.access'),
           logging.getLogger('tornado.application'),
