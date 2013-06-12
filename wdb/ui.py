@@ -58,14 +58,6 @@ class Interaction(object):
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
 
     @property
-    def top(self):
-        return self.trace[-1]
-
-    @property
-    def top_file(self):
-        return self.top['file']
-
-    @property
     def current(self):
         return self.trace[self.index]
 
@@ -175,11 +167,13 @@ class Interaction(object):
         self.db.send('Trace|%s' % dump({
             'trace': self.trace
         }))
+
+        # In case of exception always be at top frame to start
+        self.index = len(self.stack) - 1
         self.db.send('SelectCheck|%s' % dump({
-            'frame': self.top,
-            'current': self.current,
-            'breaks': self.db.get_breaks_lno(self.top_file),
-            'name': self.top_file
+            'frame': self.current,
+            'breaks': self.db.get_breaks_lno(self.current_file),
+            'name': self.current_file
         }))
         if self.init_message:
             self.db.send(self.init_message)

@@ -315,9 +315,6 @@
     $('.traceline').removeClass('selected');
     $('#trace-' + current_frame.level).addClass('selected');
     $('#eval').val('').attr('data-index', -1).attr('rows', 1);
-    if (data.current) {
-      $('#trace-' + data.current.level).addClass('real-selected');
-    }
     if (!window.cm) {
       create_code_mirror(data.file, data.name);
     } else {
