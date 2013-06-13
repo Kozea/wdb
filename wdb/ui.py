@@ -190,21 +190,12 @@ class Interaction(object):
     def do_file(self, data):
         fn = data
         file = self.db.get_file(fn)
-        if fn != self.current_file:
-            self.db.send('Select|%s' % dump({
-                'frame': self.top,
-                'current': self.current,
-                'breaks': self.db.get_breaks_lno(fn),
-                'name': fn,
-                'file': file
-            }))
-        else:
-            self.db.send('Select|%s' % dump({
-                'frame': self.current,
-                'breaks': self.db.get_breaks_lno(fn),
-                'name': fn,
-                'file': file
-            }))
+        self.db.send('Select|%s' % dump({
+            'frame': self.current,
+            'breaks': self.db.get_breaks_lno(fn),
+            'name': fn,
+            'file': file
+        }))
 
     def do_inspect(self, data):
         try:
