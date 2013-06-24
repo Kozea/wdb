@@ -81,7 +81,8 @@ class Wdb(object):
         thread = threading.current_thread()
         wdb = Wdb._instances.get(thread)
         if not wdb and not no_create:
-            wdb = Wdb()
+            wdb = object.__new__(Wdb)
+            Wdb.__init__(wdb)
             wdb.thread = thread
             Wdb._instances[thread] = wdb
         return wdb
@@ -91,6 +92,9 @@ class Wdb(object):
         """Remove instance from instance list"""
         thread = threading.current_thread()
         Wdb._instances.pop(thread)
+
+    def __new__(cls):
+        return cls.get()
 
     def __init__(self):
         log.debug('New wdb instance %r' % self)
@@ -424,16 +428,19 @@ class Wdb(object):
             stack.append((f, f.f_lineno))
             f = f.f_back
         stack.reverse()
+        i = max(0, len(stack) - 1)
         while t is not None:
             stack.append((t.tb_frame, t.tb_lineno))
             t = t.tb_next
-        return stack
+        if f is None:
+            i = max(0, len(stack) - 1)
+        return stack, i
 
     def get_trace(self, frame, tb, w_code=None):
         """Get a dict of the traceback for wdb.js use"""
         import linecache
         frames = []
-        stack = self.get_stack(frame, tb)
+        stack, _ = self.get_stack(frame, tb)
         current = 0
 
         for i, (stack_frame, lno) in enumerate(stack):
