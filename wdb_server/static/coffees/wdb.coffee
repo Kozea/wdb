@@ -138,7 +138,8 @@ trace = (data) ->
             .addClass('traceline')
             .attr('id', 'trace-' + frame.level)
             .attr('data-level', frame.level)
-
+        if frame.current
+            $traceline.addClass('real-selected')
         $tracefile = $('<span>').addClass('tracefile').text(frame.file)
         $tracelno = $('<span>').addClass('tracelno').text(frame.lno)
         $tracefun = $('<span>').addClass('tracefun').text(frame.function)
