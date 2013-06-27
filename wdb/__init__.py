@@ -446,7 +446,9 @@ class Wdb(object):
         for i, (stack_frame, lno) in enumerate(stack):
             if frame == stack_frame:
                 current = i
+                break
 
+        for i, (stack_frame, lno) in enumerate(stack):
             code = stack_frame.f_code
             filename = code.co_filename
             if filename == '<wdb>' and w_code:
@@ -465,8 +467,12 @@ class Wdb(object):
                 'llno': lastlineno,
                 'lno': lno,
                 'code': line,
-                'level': i
+                'level': i,
+                'current': current == i
             })
+
+        # While in exception always put the context to the top
+        current = len(frames) - 1
 
         return stack, frames, current
 

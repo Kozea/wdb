@@ -7,7 +7,7 @@ wdb
 
 from setuptools import setup, find_packages
 
-VERSION = "0.9.9"
+VERSION = "1.0.0"
 
 
 options = dict(
@@ -46,7 +46,7 @@ options = dict(
         ]
     },
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
