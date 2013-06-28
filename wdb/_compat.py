@@ -13,6 +13,11 @@ except ImportError:
     from urllib import quote
 
 if python_version == 2:
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
+if python_version == 2:
     def execute(cmd, globals_, locals_):
         exec('exec cmd in globals_, locals_')
 else:

@@ -16,7 +16,7 @@ from __future__ import with_statement
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from ._compat import execute
+from ._compat import execute, StringIO
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -24,7 +24,6 @@ from .breakpoint import (
 from .ui import Interaction, dump
 from .utils import pretty_frame
 from .state import Running, Step, Next, Until, Return
-from io import StringIO
 from cgi import escape
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
