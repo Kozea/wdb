@@ -373,7 +373,7 @@ class Wdb(object):
 
         def display_hook(obj):
             # That's some dirty hack
-            self.hooked += self.safe_better_repr(obj)
+            self.hooked += self.safe_better_repr(obj) + '\n'
             self.last_obj = obj
 
         stdout, stderr = sys.stdout, sys.stderr

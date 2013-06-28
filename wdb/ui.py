@@ -228,6 +228,10 @@ class Interaction(object):
     def do_eval(self, data):
         redir = None
         raw_data = data = data.strip()
+        # Keep spaces
+        raw_data = raw_data.replace(' ', u(' '))
+        # Compensate prompt for multi line
+        raw_data = raw_data.replace('\n', '\n' + u(' ' * 4))
         if '!>' in data:
             data, redir = data.split('!>')
             data = data.strip()
