@@ -391,7 +391,9 @@ class Interaction(object):
         file_ = to_unicode(file_)
         lines = file_.splitlines()
         lno = self.current['lno']
-        line_before = lines[lno - 1]
+        line_before = ''
+        if len(lines) >= lno:
+            line_before = lines[lno - 1]
         indent = len(line_before) - len(line_before.lstrip())
         segments = data.splitlines()
         for segment in reversed(segments):

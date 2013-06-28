@@ -4,15 +4,17 @@
 """
 wdb
 """
-
+import os
+import re
 from setuptools import setup, find_packages
 
-VERSION = "1.0.1"
-
+ROOT = os.path.dirname(__file__)
+with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
+    __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
 
 options = dict(
     name="wdb",
-    version=VERSION,
+    version=__version__,
     description="An improbable web debugger through WebSockets",
     long_description="See http://github.com/Kozea/wdb",
     author="Florian Mounier @ kozea",
