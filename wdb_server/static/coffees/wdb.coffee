@@ -27,6 +27,7 @@ started = false
 ws = null
 cwd = null
 backsearch = null
+complete_timeout = null
 
 cmd_hist = []
 try
@@ -439,6 +440,7 @@ print = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result, [], true)
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
+    $('#completions').attr('style', '')
     termscroll()
 
 echo = (data) ->
@@ -536,8 +538,10 @@ format_fun = (p) ->
 
 suggest = (data) ->
     $eval = $('#eval')
+    $comp_wrapper = $('#completions')
     $comp = $('#completions table').empty()
     $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
+    height = $comp_wrapper.height()
     added = []
     if data.params
         $('#comp-desc').append(format_fun(data.params))
@@ -558,8 +562,8 @@ suggest = (data) ->
         if not completion.complete
             $td.addClass('active complete')
             $('#comp-desc').html($td.attr('title'))
-
     $comp.append($tbody)
+    $comp_wrapper.height(Math.max(height, $comp.height()))
     termscroll()
 
 suggest_stop = ->
@@ -705,6 +709,8 @@ register_handlers = ->
                     $eval.val(to_set)
                         .attr('data-index', index)
                         .attr('rows', to_set.split('\n').length)
+                    suggest_stop()
+                    termscroll()
                     return false
 
         else if e.keyCode == 40  # Down
@@ -720,6 +726,8 @@ register_handlers = ->
                     $eval.val(to_set)
                         .attr('data-index', index)
                         .attr('rows', to_set.split('\n').length)
+                    suggest_stop()
+                    termscroll()
                     return false
 
 
@@ -753,6 +761,8 @@ register_handlers = ->
 
     $('#eval').on('input', ->
         txt = $(@).val()
+        if complete_timeout != null
+            clearTimeout(complete_timeout)
         if backsearch
             if not txt
                 searchback_stop()
@@ -762,10 +772,11 @@ register_handlers = ->
             return
         hist = session_cmd_hist[$('.selected .tracefile').text()] or []
         if txt and txt[0] != '.'
-            send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)
+            complete_timeout = setTimeout((->
+                complete_timeout = null
+                send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)), 500)
         else
             suggest_stop()
     ).on('blur', ->
         searchback_stop()
     )
-
