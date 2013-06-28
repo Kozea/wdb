@@ -27,7 +27,6 @@ started = false
 ws = null
 cwd = null
 backsearch = null
-complete_timeout = null
 
 cmd_hist = []
 try
@@ -761,8 +760,6 @@ register_handlers = ->
 
     $('#eval').on('input', ->
         txt = $(@).val()
-        if complete_timeout != null
-            clearTimeout(complete_timeout)
         if backsearch
             if not txt
                 searchback_stop()
@@ -772,9 +769,8 @@ register_handlers = ->
             return
         hist = session_cmd_hist[$('.selected .tracefile').text()] or []
         if txt and txt[0] != '.'
-            complete_timeout = setTimeout((->
                 complete_timeout = null
-                send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)), 500)
+                send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)
         else
             suggest_stop()
     ).on('blur', ->

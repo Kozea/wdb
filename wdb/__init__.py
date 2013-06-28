@@ -15,6 +15,7 @@ from __future__ import with_statement
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+__version__ = '1.0.2'
 
 from ._compat import execute, StringIO
 
@@ -77,20 +78,23 @@ class Wdb(object):
     @staticmethod
     def get(no_create=False):
         """Get the thread local singleton"""
+        pid = os.getpid()
         thread = threading.current_thread()
-        wdb = Wdb._instances.get(thread)
+        wdb = Wdb._instances.get((pid, thread))
         if not wdb and not no_create:
             wdb = object.__new__(Wdb)
             Wdb.__init__(wdb)
+            wdb.pid = pid
             wdb.thread = thread
-            Wdb._instances[thread] = wdb
+            Wdb._instances[(pid, thread)] = wdb
         return wdb
 
     @staticmethod
     def pop():
         """Remove instance from instance list"""
+        pid = os.getpid()
         thread = threading.current_thread()
-        Wdb._instances.pop(thread)
+        Wdb._instances.pop((pid, thread))
 
     def __new__(cls):
         return cls.get()
