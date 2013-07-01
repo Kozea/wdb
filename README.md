@@ -14,6 +14,7 @@
             - [Wsgi servers](#wsgi-servers)
                 - [Flask](#flask)
                 - [Django](#django)
+                - [CherryPy](#cherrypy)
             - [Tornado](#tornado)
             - [Page loading time become slow](#page-loading-time-become-slow)
     - [Remote debugging](#remote-debugging)
@@ -154,6 +155,27 @@ And in your `settings.py`, activate exception propagation:
 ```python
     DEBUG = True
     DEBUG_PROPAGATE_EXCEPTIONS = True
+```
+
+##### CherryPy
+
+or using CherryPy:
+
+```python
+import cherrypy
+from wdb.ext import WdbMiddleware
+
+class HelloWorld(object):
+    @cherrypy.expose
+    def index(self):
+        undefined_method() # This will fail
+        return "Hello World!"
+
+cherrypy.config.update({'global':{'request.throw_errors': True}})
+app = cherrypy.Application(HelloWorld())
+app.wsgiapp.pipeline.append(('debugger', WdbMiddleware))
+
+cherrypy.quickstart(app)
 ```
 
 #### Tornado
