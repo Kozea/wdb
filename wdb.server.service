@@ -1,0 +1,10 @@
+[Unit]
+Description=Wdb server
+After=syslog.target
+
+[Service]
+ExecStart=/usr/bin/wdb.server.py
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
