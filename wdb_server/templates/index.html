@@ -20,7 +20,11 @@
       <tbody>
         {% for uuid in uuids %}
           <tr>
+            {% if Sockets.sockets.get(uuid) %}
+            <td><a href="/debug/session/{{ uuid }}">{{ uuid }}</a></td>
+            {% else %}
             <td>{{ uuid }}</td>
+            {% end %}
             <td>{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
             <td>{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
             <td><a href="/uuid/{{ uuid }}/close">Force close</a></td>
