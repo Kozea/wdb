@@ -2,6 +2,8 @@ import sys
 
 python_version = sys.version_info[0]
 
+
+
 try:
     from json import dumps, JSONEncoder
 except ImportError:
@@ -25,8 +27,35 @@ else:
         exec(cmd, globals_, locals_)
 
 if python_version == 2:
+    import codecs
+    import re
+    _cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
+
+    def _detect_encoding(filename):
+        import linecache
+        lines = linecache.getlines(filename)
+
+        if not lines or lines[0].startswith("\xef\xbb\xbf"):
+            return "utf-8"
+        magic = _cookie_search("".join(lines[:2]))
+        if magic is None:
+            return 'utf-8'
+        encoding = magic.group(1)
+        try:
+            codecs.lookup(encoding)
+        except LookupError:
+            return 'utf-8'
+        return encoding
+
     def to_unicode(string):
         return string.decode('utf-8')
+
+    def to_unicode_string(string, filename):
+        encoding = _detect_encoding(filename)
+        if encoding != 'utf-8' and string:
+            return string.decode(encoding).encode('utf-8')
+        else:
+            return string
 
     def to_bytes(string):
         return string
@@ -35,6 +64,9 @@ if python_version == 2:
         return bytes_
 else:
     def to_unicode(string):
+        return string
+
+    def to_unicode_string(string, filename):
         return string
 
     def to_bytes(string):

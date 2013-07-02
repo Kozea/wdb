@@ -1,6 +1,5 @@
 # *-* coding: utf-8 *-*
 from ._compat import dumps, JSONEncoder, quote, execute, to_unicode, u
-from bdb import BdbQuit
 from cgi import escape
 from jedi import Script
 from linecache import getline
@@ -113,11 +112,6 @@ class Interaction(object):
         while not stop:
             try:
                 stop = self.interact()
-            except BdbQuit:
-                # This will be handled by caller
-                raise
-            # except WsError:
-            #     stop = True
             except Exception:
                 log.exception('Error in loop')
                 try:
@@ -265,10 +259,15 @@ class Interaction(object):
                 'result': escape('Written to file %s' % redir)
             }))
         else:
+            rv = escape('\n'.join(out) + '\n'.join(err))
+            try:
+                _ = dump(rv)
+            except:
+                rv = rv.decode('ascii', 'ignore')
+
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
-                'result': self.db.hooked + escape(
-                    '\n'.join(out) + '\n'.join(err))
+                'result': self.db.hooked + rv
             }))
 
     def do_ping(self, data):
