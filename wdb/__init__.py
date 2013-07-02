@@ -15,9 +15,9 @@ from __future__ import with_statement
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
-from ._compat import execute, StringIO
+from ._compat import execute, StringIO, to_unicode_string
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -420,7 +420,8 @@ class Wdb(object):
     def get_file(self, filename):
         """Get file source from cache"""
         import linecache
-        return ''.join(linecache.getlines(filename))
+        return to_unicode_string(
+            ''.join(linecache.getlines(filename)), filename)
 
     def get_stack(self, f, t):
         """Build the stack from frame and traceback"""
@@ -459,6 +460,7 @@ class Wdb(object):
             else:
                 linecache.checkcache(filename)
                 line = linecache.getline(filename, lno, stack_frame.f_globals)
+                line = to_unicode_string(line, filename)
                 line = line and line.strip()
 
             startlnos = dis.findlinestarts(code)
