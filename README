@@ -101,11 +101,25 @@ For wsgi servers you can use the `WdbMiddleware`:
 or using Flask:
 
 ```python
+    from flask import Flask
     from wdb.ext import WdbMiddleware
     app = Flask(__name__)
     app.debug = True
     app.wsgi_app = WdbMiddleware(app.wsgi_app)
     app.run(use_debugger=False) # Disable builtin Werkzeug debugger
+```
+
+you can also use the [Flask-Wdb](https://github.com/techniq/flask-wdb/) extension
+
+```python
+    from flask import Flask
+    from flask_wdb import Wdb
+
+    app = Flask(__name__)
+    app.debug = True
+    Wdb(app)
+
+    app.run()
 ```
 
 ##### Django
@@ -133,6 +147,27 @@ And in your `settings.py`, activate exception propagation:
 ```python
     DEBUG = True
     DEBUG_PROPAGATE_EXCEPTIONS = True
+```
+
+##### CherryPy
+
+or using CherryPy:
+
+```python
+import cherrypy
+from wdb.ext import WdbMiddleware
+
+class HelloWorld(object):
+    @cherrypy.expose
+    def index(self):
+        undefined_method() # This will fail
+        return "Hello World!"
+
+cherrypy.config.update({'global':{'request.throw_errors': True}})
+app = cherrypy.Application(HelloWorld())
+app.wsgiapp.pipeline.append(('debugger', WdbMiddleware))
+
+cherrypy.quickstart(app)
 ```
 
 #### Tornado

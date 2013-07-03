@@ -123,11 +123,25 @@ For wsgi servers you can use the `WdbMiddleware`:
 or using Flask:
 
 ```python
+    from flask import Flask
     from wdb.ext import WdbMiddleware
     app = Flask(__name__)
     app.debug = True
     app.wsgi_app = WdbMiddleware(app.wsgi_app)
     app.run(use_debugger=False) # Disable builtin Werkzeug debugger
+```
+
+you can also use the [Flask-Wdb](https://github.com/techniq/flask-wdb/) extension
+
+```python
+    from flask import Flask
+    from flask_wdb import Wdb
+
+    app = Flask(__name__)
+    app.debug = True
+    Wdb(app)
+
+    app.run()
 ```
 
 ##### Django
