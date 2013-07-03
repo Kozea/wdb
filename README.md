@@ -23,6 +23,7 @@
     - [Importing wdb each time is exhausting](#importing-wdb-each-time-is-exhausting)
     - [Theming](#theming)
     - [Code completion](#code-completion)
+    - [Browser Support](#browser-support)
     - [Contribute](#contribute)
     - [Author](#author)
     - [Licence](#licence)
@@ -333,6 +334,20 @@ If you like writing css feel free to make your own and pull request it to me, cs
 ## Code completion
 
 Wdb has dynamic code completion in eval prompt thanks to [jedi](https://github.com/davidhalter/jedi).
+
+
+## Browser Support
+
+wdb is based on websockets so it *should* work on :
+
+- Chrome 14
+- Firefox 11
+- IE 10
+- Safari 6
+- Opera 12.1
+
+Better update you browser in any case.
+If it doesn't work with one of these version please report it.
 
 
 ## Contribute
