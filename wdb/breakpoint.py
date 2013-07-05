@@ -1,5 +1,6 @@
 import os.path
 from log_colorizer import get_color_logger
+from hashlib import sha1
 
 log = get_color_logger('wdb.bp')
 
@@ -9,13 +10,30 @@ def canonic(filename):
         return filename
     canonic = os.path.abspath(filename)
     canonic = os.path.normcase(canonic)
+    if canonic.endswith(('.pyc', '.pyo')):
+        canonic = canonic[:-1]
     return canonic
+
+
+def file_from_import(filename, function=None):
+    try:
+        module = __import__(filename)
+    except ImportError:
+        return filename
+    if function is None:
+        return module.__file__
+    fun = getattr(module, function, None)
+    if not fun:
+        return filename
+    return fun.__code__.co_filename
 
 
 class Breakpoint(object):
     """Simple breakpoint that breaks if in file"""
 
     def __init__(self, file, temporary=False):
+        if not file.endswith(('.py', '.pyc', '.pyo')):
+            file = file_from_import(file)
         self.file = canonic(file)
         self.temporary = temporary
 
@@ -24,6 +42,20 @@ class Breakpoint(object):
 
     def breaks(self, frame):
         return self.on_file(frame.f_code.co_filename)
+
+    def __repr__(self):
+        s = 'Temporary ' if self.temporary else ''
+        s += self.__class__.__name__
+        s += ' on file %s' % self.file
+        return s
+
+    def __eq__(self, other):
+        return self.file == other.file and self.temporary == other.temporary
+
+    def __hash__(self):
+        s = sha1()
+        s.update(repr(self))
+        return int(s.hexdigest(), 16)
 
 
 class LineBreakpoint(Breakpoint):
@@ -35,6 +67,14 @@ class LineBreakpoint(Breakpoint):
     def breaks(self, frame):
         return (super(LineBreakpoint, self).breaks(frame) and
                 frame.f_lineno == self.line)
+
+    def __repr__(self):
+        return (super(LineBreakpoint, self).__repr__() +
+                ' on line %d' % self.line)
+
+    def __eq__(self, other):
+        return super(LineBreakpoint, self).__eq__(
+            other) and self.line == other.line
 
 
 class ConditionalBreakpoint(LineBreakpoint):
@@ -51,13 +91,32 @@ class ConditionalBreakpoint(LineBreakpoint):
             # Break in case of
             return True
 
+    def __repr__(self):
+        return (super(ConditionalBreakpoint, self).__repr__() +
+                ' under the condition %s' % self.condition)
+
+    def __eq__(self, other):
+        return super(ConditionalBreakpoint, self).__eq__(
+            other) and self.condition == other.condition
+
 
 class FunctionBreakpoint(Breakpoint):
     """Breakpoint that breaks if in file in function"""
     def __init__(self, file, function, temporary=False):
         self.function = function
-        super(FunctionBreakpoint, self).__init__(file, temporary)
+        if not file.endswith(('.py', '.pyc', '.pyo')):
+            file = file_from_import(file, function)
+        self.file = canonic(file)
+        self.temporary = temporary
 
     def breaks(self, frame):
-        return (super(LineBreakpoint, self).breaks(frame) and
+        return (super(FunctionBreakpoint, self).breaks(frame) and
                 frame.f_code.co_name == self.function)
+
+    def __repr__(self):
+        return (super(FunctionBreakpoint, self).__repr__() +
+                ' in function %s' % self.function)
+
+    def __eq__(self, other):
+        return super(FunctionBreakpoint, self).__eq__(
+            other) and self.function == other.function

@@ -280,23 +280,45 @@ class Wdb(object):
             # Run without trace
             self.stop_trace()
 
+    def get_break(self, filename, lineno, temporary, cond, funcname):
+        if lineno:
+            if cond:
+                return ConditionalBreakpoint(
+                    filename, lineno, cond, temporary)
+            else:
+                return LineBreakpoint(filename, lineno, temporary)
+        elif funcname:
+            return FunctionBreakpoint(filename, funcname, temporary)
+        else:
+            return Breakpoint(filename, temporary)
+
     def set_break(self, filename, lineno=None, temporary=False, cond=None,
                   funcname=None):
         """Put a breakpoint for filename"""
         log.info('Setting break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
             filename, lineno, temporary, cond, funcname))
-        if lineno:
-            if cond:
-                breakpoint = ConditionalBreakpoint(
-                    filename, lineno, cond, temporary)
-            else:
-                breakpoint = LineBreakpoint(filename, lineno, temporary)
-        elif funcname:
-            breakpoint = FunctionBreakpoint(filename, funcname, temporary)
-        else:
-            breakpoint = Breakpoint(filename, temporary)
+        breakpoint = self.get_break(
+            filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
         log.info('Breakpoint %r added' % breakpoint)
+
+    def clear_break(self, filename, lineno=None, temporary=False, cond=None,
+                    funcname=None):
+        """Remove a breakpoint"""
+        log.info('Removing break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
+            filename, lineno, temporary, cond, funcname))
+
+        breakpoint = self.get_break(
+            filename, lineno, temporary or False, cond, funcname)
+        if temporary is None and breakpoint not in self.breakpoints:
+            breakpoint = self.get_break(
+                filename, lineno, True, cond, funcname)
+
+        try:
+            self.breakpoints.remove(breakpoint)
+            log.info('Breakpoint %r removed' % breakpoint)
+        except:
+            log.info('Breakpoint %r not removed: not found' % breakpoint)
 
     def safe_repr(self, obj):
         """Like a repr but without exception"""
@@ -618,13 +640,6 @@ class Wdb(object):
                    [getattr(breakpoint, 'line', None)
                     for breakpoint in self.breakpoints
                     if breakpoint.on_file(filename)]))
-
-    def clear_break(self, filename, line):
-        """Remove a breakpoint"""
-        for breakpoint in set(self.breakpoints):
-            if getattr(breakpoint, 'line', None):
-                if breakpoint.line == line:
-                    self.breakpoints.remove(breakpoint)
 
     def die(self):
         """Time to quit"""
