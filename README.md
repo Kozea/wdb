@@ -270,7 +270,7 @@ As of now the following special commands are supported during breakpoint:
     * .j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)
     * .b arg                         : Set a session breakpoint, see below for what arg can be*
     * .t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b
-    * .d arg                         : Delete existing breakpoint
+    * .z arg                         : Delete existing breakpoint
     * .l                             : List active breakpoints
     * .f                             : Echo all typed commands in the current debugging session
     * .d expression                  : Dump the result of expression in a table
