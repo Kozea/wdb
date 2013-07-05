@@ -381,7 +381,7 @@ execute = (snippet) ->
             when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
-            when 'd' then cmd 'Unbreak|' + data
+            when 'z' then cmd 'Unbreak|' + data
             when 'l' then cmd 'Breakpoints'
             when 'f' then print_hist session_cmd_hist[$('.selected .tracefile').text()]
             when 'd' then cmd 'Dump|' + data
@@ -412,7 +412,7 @@ print_help = ->
 .j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)
 .b arg                         : Set a session breakpoint, see below for what arg can be*
 .t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b
-.d arg                         : Delete existing breakpoint
+.z arg                         : Delete existing breakpoint
 .l                             : List active breakpoints
 .f                             : Echo all typed commands in the current debugging session
 .d expression                  : Dump the result of expression in a table
