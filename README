@@ -239,23 +239,34 @@ Multi-lines are partially supported using `[Shift] + [Enter]`.
 
 As of now the following special commands are supported during breakpoint:
 
-   * `.s or [Ctrl] + [↓] or [F11]  `: Step into
-   * `.n or [Ctrl] + [→] or [F10]  `: Step over (Next)
-   * `.r or [Ctrl] + [↑] or [F9]   `: Step out (Return)
-   * `.c or [Ctrl] + [←] or [F8]   `: Continue
-   * `.u or [F7]                   `: Until (Next over loops)
-   * `.j lineno                    `: Jump to lineno (Must be at bottom frame and in the same function)
-   * `.b [file:]lineno[, condition]`: Break on file at lineno (file is the current file by default)
-   * `.t [file:]lineno[, condition]`: Same as b but break only once
-   * `.f                           `: Echo all typed commands in the current debugging session
-   * `.d expression                `: Dump the result of expression in a table
-   * `.q                           `: Quit
-   * `.h                           `: Get some help
-   * `expr !> file                 `: Write the result of expr in file
-   * `!< file                      `: Eval the content of file
-   * `[Enter]                      `: Eval the current selected text in page, useful to eval code in the source
-   * `[Ctrl] + [r]                 `: Search back in command history
-   * `[Ctrl] + [Shift] + [r]       `: Search forward in command history
+    * .s or [Ctrl] + [↓] or [F11]    : Step into
+    * .n or [Ctrl] + [→] or [F10]    : Step over (Next)
+    * .r or [Ctrl] + [↑] or [F9]     : Step out (Return)
+    * .c or [Ctrl] + [←] or [F8]     : Continue
+    * .u or [F7]                     : Until (Next over loops)
+    * .j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)
+    * .b arg                         : Set a session breakpoint, see below for what arg can be*
+    * .t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b
+    * .d arg                         : Delete existing breakpoint
+    * .l                             : List active breakpoints
+    * .f                             : Echo all typed commands in the current debugging session
+    * .d expression                  : Dump the result of expression in a table
+    * .q                             : Quit
+    * .h                             : Get some help
+    * .e                             : Toggle file edition mode
+    * expr !> file                   : Write the result of expr in file
+    * !< file                        : Eval the content of file
+    * [Enter]                        : Eval the current selected text in page, useful to eval code in the source
+    *
+    * * arg is using the following syntax:
+    *   [file/module][:lineno][#function][,condition]
+    * which means:
+    *   - [file]                  : Break if any line of `file` is executed
+    *   - [file]:lineno           : Break on `file` at `lineno`
+    *   - [file]:lineno,condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)
+    *   - [file]#function         : Break when inside `function` function
+    *
+    * File is always current file by default and you can also specify a module like `logging.config`.
 
 You can also eval a variable in the source by middle clicking on it.
 You can add/remove a breakpoint by clicking on the line number.

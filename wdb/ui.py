@@ -358,10 +358,31 @@ class Interaction(object):
         return self.do_break(data, True)
 
     def do_unbreak(self, data):
-        lno = int(data)
-        log.info('Break unset at %s:%d' % (self.current_file, lno))
-        self.db.clear_break(self.current_file, lno)
-        self.db.send('BreakUnset|%s' % dump({'lno': lno}))
+        lno = cond = funcname = None
+        remaining = data
+
+        if ',' in data:
+            remaining, cond = remaining.split(',')
+            cond = cond.strip()
+
+        if '#' in data:
+            remaining, funcname = remaining.split('#')
+
+        if ':' in data:
+            remaining, lno = remaining.split(':')
+
+        fn = remaining or self.current_file
+        self.db.clear_break(
+            fn, lno, None, cond, funcname)
+
+        if fn == self.current_file:
+            self.db.send('BreakUnset|%s' % dump({'lno': lno}))
+
+    def do_breakpoints(self, data):
+        self.db.send('Print|%s' % dump({
+            'for': 'Breakpoints',
+            'result': self.db.breakpoints
+        }))
 
     def do_jump(self, data):
         lno = int(data)

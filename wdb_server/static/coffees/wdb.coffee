@@ -381,6 +381,8 @@ execute = (snippet) ->
             when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
             when 't' then toggle_break(data, true)
+            when 'd' then cmd 'Unbreak|' + data
+            when 'l' then cmd 'Breakpoints'
             when 'f' then print_hist session_cmd_hist[$('.selected .tracefile').text()]
             when 'd' then cmd 'Dump|' + data
             when 'e' then toggle_edition(not cm._rw)
@@ -410,6 +412,8 @@ print_help = ->
 .j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)
 .b arg                         : Set a session breakpoint, see below for what arg can be*
 .t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b
+.d arg                         : Delete existing breakpoint
+.l                             : List active breakpoints
 .f                             : Echo all typed commands in the current debugging session
 .d expression                  : Dump the result of expression in a table
 .q                             : Quit
@@ -420,14 +424,14 @@ expr !> file                   : Write the result of expr in file
 [Enter]                        : Eval the current selected text in page, useful to eval code in the source
 
 * arg is using the following syntax:
-  [file][:lineno][#function][,condition]
+  [file/module][:lineno][#function][,condition]
 which means:
   - [file]                  : Break if any line of `file` is executed
   - [file]:lineno           : Break on `file` at `lineno`
   - [file]:lineno,condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)
   - [file]#function         : Break when inside `function` function
 
-File is always current file by default.
+File is always current file by default and you can also specify a module like `logging.config`.
 '''
 
 termscroll = ->
@@ -514,7 +518,7 @@ toggle_break = (arg, temporary) ->
         cm.removeMark(lno)
         cm.removeClass(lno, 'breakpoint')
         cm.addClass(lno, 'ask-breakpoint')
-        send('Unbreak|' + lno)
+        send('Unbreak|:' + lno)
     else
         cm.addClass(lno, 'ask-breakpoint')
         send(cmd + '|' + arg)
