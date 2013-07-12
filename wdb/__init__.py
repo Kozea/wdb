@@ -113,7 +113,7 @@ class Wdb(object):
         self.state = Running(None)
         self.full = False
         self.below = False
-        self.connect()
+        self._socket = None
 
     def run_file(self, filename):
         """Run the file `filename` with trace"""
@@ -525,6 +525,7 @@ class Wdb(object):
         self.stepping = True
 
         if not self.connected:
+            self.connect()
             log.debug('Launching browser and wait for connection')
             web_url = 'http://%s:%d/debug/session/%s' % (
                 WEB_SERVER or 'localhost',
@@ -644,11 +645,12 @@ class Wdb(object):
     def die(self):
         """Time to quit"""
         log.info('Time to die')
-        try:
-            self.send('Die')
-        except:
-            pass
-        self._socket.close()
+        if self.connected:
+            try:
+                self.send('Die')
+            except:
+                pass
+            self._socket.close()
         self.pop()
 
 

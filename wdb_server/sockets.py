@@ -1,6 +1,6 @@
 
 from wdb_server import Sockets
-from tornado.iostream import IOStream
+from tornado.iostream import IOStream, StreamClosedError
 from tornado.ioloop import IOLoop
 from functools import partial
 from logging import getLogger
@@ -33,12 +33,19 @@ def read_frame(stream, uuid, frame):
         websocket.write(frame)
     else:
         log.error('Web socket is unknown for frame %s' % frame)
-    stream.read_bytes(4, partial(read_header, stream, uuid))
+
+    try:
+        stream.read_bytes(4, partial(read_header, stream, uuid))
+    except StreamClosedError:
+        pass
 
 
 def read_header(stream, uuid, length):
     length, = unpack("!i", length)
-    stream.read_bytes(length, partial(read_frame, stream, uuid))
+    try:
+        stream.read_bytes(length, partial(read_frame, stream, uuid))
+    except StreamClosedError:
+        pass
 
 
 def assign_stream(stream, uuid):
@@ -46,17 +53,24 @@ def assign_stream(stream, uuid):
     log.debug('Assigning stream to %s' % uuid)
     Sockets.sockets[uuid] = stream
     stream.set_close_callback(partial(on_close, stream, uuid))
-    stream.read_bytes(4, partial(read_header, stream, uuid))
-
+    try:
+        stream.read_bytes(4, partial(read_header, stream, uuid))
+    except StreamClosedError:
+        pass
 
 def read_uuid_size(stream, length):
     length, = unpack("!i", length)
     assert length == 36, 'Wrong uuid'
-    stream.read_bytes(length, partial(assign_stream, stream))
-
+    try:
+        stream.read_bytes(length, partial(assign_stream, stream))
+    except StreamClosedError:
+        pass
 
 def handle_connection(connection, address):
     log.info('Connection received from %s' % str(address))
     stream = IOStream(connection, ioloop)
     # Getting uuid
-    stream.read_bytes(4, partial(read_uuid_size, stream))
+    try:
+        stream.read_bytes(4, partial(read_uuid_size, stream))
+    except StreamClosedError:
+        pass
