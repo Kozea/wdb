@@ -1,11 +1,21 @@
 # *-* coding: utf-8 *-*
-from ._compat import dumps, JSONEncoder, quote, execute, to_unicode, u
+from ._compat import (
+    dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO)
+from tokenize import generate_tokens, untokenize
+import token as tokens
+import ast
 from cgi import escape
 from jedi import Script
 from linecache import getline
 from log_colorizer import get_color_logger
 from shutil import move
 from tempfile import gettempdir
+
+try:
+    from cutter import cut
+except ImportError:
+    cut = None
+
 import os
 import sys
 import time
@@ -45,6 +55,22 @@ def fail(db, cmd, title=None, message=None):
     }))
 
 
+class CutWrapper(ast.NodeTransformer):
+
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        if hasattr(node.func, 'attr') and (
+                node.func.attr == '_ast_replace_me_with_cut'):
+            new_node = ast.Call(
+                func=ast.Name(id='cut', ctx=ast.Load()),
+                args=[node.func.value],
+                keywords=[], starargs=None, kwargs=None)
+            ast.copy_location(new_node, node)
+            ast.fix_missing_locations(new_node)
+            return new_node
+        return node
+
+
 class Interaction(object):
     def __init__(
             self, db, frame, tb, exception, exception_description, init=None):
@@ -76,6 +102,8 @@ class Interaction(object):
         """Get enriched globals"""
         globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
+        if cut is not None:
+            globals_['cut'] = cut
         # For meta debuging purpose
         globals_['___wdb'] = self.db
         # Hack for function scope eval
@@ -220,17 +248,50 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
-        redir = None
-        raw_data = data = data.strip()
+        raw_data = data.strip()
+        raw_io = StringIO()
+        raw_io.write(raw_data)
+        raw_io.seek(0)
+        tokenized = []
+        before_redir = None
+
+        last_token = ''
+        for token_type, token, srowcol, erowcol, line in generate_tokens(
+                raw_io.read):
+            if token_type == tokens.ERRORTOKEN:
+                if token == '!' and srowcol != (1, 0):
+                    if last_token == '>':
+                        tokenized.pop()
+                        before_redir = tokenized
+                        tokenized = []
+                    elif cut is not None:
+                        tokenized.append((tokens.OP, '.'))
+                        tokenized.append((tokens.NAME,
+                                          '_ast_replace_me_with_cut'))
+                        tokenized.append((tokens.OP, '('))
+                        tokenized.append((tokens.OP, ')'))
+                        last_token = '!!'
+                        continue
+
+            if last_token == '!!' and token != '[':
+                tokenized.append((tokens.OP, '.'))
+
+            last_token = token
+            tokenized.append((token_type, token))
+
+        if before_redir:
+            data = untokenize(before_redir)
+            redir = untokenize(tokenized)
+        else:
+            data = untokenize(tokenized)
+            redir = None
+
         # Keep spaces
         raw_data = raw_data.replace(' ', u(' '))
         # Compensate prompt for multi line
         raw_data = raw_data.replace('\n', '\n' + u(' ' * 4))
-        if '!>' in data:
-            data, redir = data.split('!>')
-            data = data.strip()
-            redir = redir.strip()
-        elif data.startswith('!<'):
+
+        if data.startswith('!<'):
             filename = data[2:].strip()
             try:
                 with open(filename, 'r') as f:
@@ -238,6 +299,9 @@ class Interaction(object):
             except Exception:
                 fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
                 return
+        if cut is not None:
+            data = ast.parse(data, mode='single')
+            data = CutWrapper().visit(data)
 
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
