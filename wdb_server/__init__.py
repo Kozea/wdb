@@ -49,8 +49,18 @@ class MainHandler(tornado.web.RequestHandler):
         self.render('wdb.html', uuid=uuid)
 
 
-class WebSocketHandler(tornado.websocket.WebSocketHandler):
+class SelfHandler(tornado.web.RequestHandler):
+    def get(self):
+        from multiprocessing import Process
 
+        def self_shell(variables):
+            import wdb
+            wdb.set_trace()
+
+        Process(target=self_shell, args=(globals(),)).start()
+
+
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def send(self, message):
         socket = Sockets.sockets.get(self.uuid)
         if not socket:
@@ -103,6 +113,7 @@ server = tornado.web.Application(
         (r"/uuid/([^/]+)/([^/]+)", ActionHandler),
         (r"/debug/session/(.+)", MainHandler),
         (r"/websocket/(.+)", WebSocketHandler),
+        (r"/self", SelfHandler),
     ],
     debug=tornado.options.options.debug,
     static_path=os.path.join(os.path.dirname(__file__), "static"),

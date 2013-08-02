@@ -24,6 +24,7 @@ cm = null
 cm_theme = 'tomorrow-night'
 
 started = false
+to_complete = null
 ws = null
 cwd = null
 backsearch = null
@@ -419,7 +420,8 @@ print_help = ->
 .q                             : Quit
 .h                             : Get some help
 .e                             : Toggle file edition mode
-expr !> file                   : Write the result of expr in file
+iterable!sthg                  : If cutter is installed, executes cut(iterable).sthg
+expr >! file                   : Write the result of expr in file
 !< file                        : Eval the content of file
 [Enter]                        : Eval the current selected text in page, useful to eval code in the source
 
@@ -568,6 +570,11 @@ suggest = (data) ->
     $comp.append($tbody)
     $comp_wrapper.height(Math.max(height, $comp.height()))
     termscroll()
+    if to_complete
+        send('Complete|' + to_complete)
+        to_complete = false
+    else
+        to_complete = null
 
 suggest_stop = ->
     $('#completions table').empty()
@@ -601,7 +608,7 @@ die = ->
     $('#source,#traceback').remove()
     $('h1').html('Dead<small>Program has exited</small>')
     ws.close()
-    setTimeout (-> close()), 1000
+    setTimeout (-> close()), 10
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
@@ -773,8 +780,12 @@ register_handlers = ->
             return
         hist = session_cmd_hist[$('.selected .tracefile').text()] or []
         if txt and txt[0] != '.'
-                complete_timeout = null
-                send('Complete|' + hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt)
+            comp = hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n') + '\n' + txt
+            if to_complete == null
+                send('Complete|' + comp)
+                to_complete = false
+            else
+                to_complete = comp
         else
             suggest_stop()
     ).on('blur', ->
