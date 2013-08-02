@@ -698,3 +698,22 @@ def cleanup():
     """Close all sockets at exit"""
     for socket in Wdb._sockets:
         socket.close()
+
+
+# Pdb compatibility
+
+def post_mortem(t=None):
+    if t is None:
+        t = sys.exc_info()[2]
+        if t is None:
+            raise ValueError(
+                "A valid traceback must be passed if no "
+                "exception is being handled")
+
+    wdb = Wdb.get()
+    wdb.reset()
+    wdb.interaction(None, t)
+
+
+def pm():
+    post_mortem(sys.last_traceback)
