@@ -1,4 +1,4 @@
-from wdb import Wdb, set_trace
+from wdb import *
 
 
 class Pdb(Wdb):
