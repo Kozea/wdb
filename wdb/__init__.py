@@ -17,7 +17,7 @@ from __future__ import with_statement
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 __version__ = '1.0.3'
 
-from ._compat import execute, StringIO, to_unicode_string
+from ._compat import execute, StringIO, to_unicode_string, escape
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -25,7 +25,6 @@ from .breakpoint import (
 from .ui import Interaction, dump
 from .utils import pretty_frame
 from .state import Running, Step, Next, Until, Return
-from cgi import escape
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
 from multiprocessing.connection import Client
@@ -64,8 +63,8 @@ for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
         getattr(logging,
                 os.getenv(
                     'WDB_%s_LOG' % log_name.upper(),
-                    os.getenv('WDB_LOG', 'WARN')).upper(),
-                'WARN'))
+                    os.getenv('WDB_LOG', 'WARNING')).upper(),
+                'WARNING'))
 
 
 class Wdb(object):
@@ -537,16 +536,16 @@ class Wdb(object):
                 server += ':%s' % WEB_PORT
 
             if WDB_NO_BROWSER_AUTO_OPEN:
-                log.warn('You can now launch your browser at '
-                         'http://%s/debug/session/%s' % (
-                             server,
-                             self.uuid))
+                log.warning('You can now launch your browser at '
+                            'http://%s/debug/session/%s' % (
+                                server,
+                                self.uuid))
 
             elif not webbrowser.open(web_url):
-                log.warn('Unable to open browser, '
-                         'please go to http://%s/debug/session/%s' % (
-                             server,
-                             self.uuid))
+                log.warning('Unable to open browser, '
+                            'please go to http://%s/debug/session/%s' % (
+                                server,
+                                self.uuid))
 
             self.connected = True
 
@@ -615,7 +614,7 @@ class Wdb(object):
             'val': escape('%s: %s') % (
                 exception, exception_description)})
         # User exception is 4 frames away from exception
-        log.warn(pretty_frame(frame))
+        log.warning(pretty_frame(frame))
         frame = frame or sys._getframe().f_back.f_back.f_back.f_back
         self.interaction(
             frame, tb, exception, exception_description, init=init)

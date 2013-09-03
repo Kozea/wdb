@@ -14,6 +14,11 @@ try:
 except ImportError:
     from urllib import quote
 
+try:
+    from html import escape
+except ImportError:
+    from cgi import escape
+
 if python_version == 2:
     from StringIO import StringIO
 else:

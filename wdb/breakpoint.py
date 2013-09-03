@@ -54,7 +54,7 @@ class Breakpoint(object):
 
     def __hash__(self):
         s = sha1()
-        s.update(repr(self))
+        s.update(repr(self).encode('utf-8'))
         return int(s.hexdigest(), 16)
 
 

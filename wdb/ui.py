@@ -1,10 +1,10 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
-    dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO)
-from tokenize import generate_tokens, untokenize
+    dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
+    to_unicode_string)
+from tokenize import generate_tokens, untokenize, TokenError
 import token as tokens
 import ast
-from cgi import escape
 from jedi import Script
 from linecache import getline
 from log_colorizer import get_color_logger
@@ -53,6 +53,52 @@ def fail(db, cmd, title=None, message=None):
         'for': escape(title or '%s failed' % cmd),
         'val': message
     }))
+
+
+def tokenize_eval(raw_data):
+    raw_io = StringIO()
+    raw_io.write(raw_data)
+    raw_io.seek(0)
+    tokenized = []
+    has_redir = False
+    append = False
+    redir = ''
+
+    last_token = ''
+    for token_type, token, srowcol, erowcol, line in generate_tokens(
+            raw_io.read):
+        if has_redir:
+            redir += token
+            continue
+
+        if token_type == tokens.ERRORTOKEN:
+            if token == '!' and srowcol != (1, 0):
+                if last_token == '>' or last_token == '>>':
+                    tokenized.pop()
+                    has_redir = True
+                    append = last_token == '>>'
+                    continue
+                if cut is not None:
+                    tokenized.append((tokens.OP, '.'))
+                    tokenized.append((tokens.NAME,
+                                      '_ast_replace_me_with_cut'))
+                    tokenized.append((tokens.OP, '('))
+                    tokenized.append((tokens.OP, ')'))
+                    last_token = '!!'
+                    continue
+
+        if last_token == '!!' and token != '[':
+            tokenized.append((tokens.OP, '.'))
+
+        if last_token == '>' and token == '>':
+            last_token = '>>'
+        else:
+            last_token = token
+
+        tokenized.append((token_type, token))
+
+    data = untokenize(tokenized)
+    return data, (redir or None), append
 
 
 class CutWrapper(ast.NodeTransformer):
@@ -176,7 +222,7 @@ class Interaction(object):
         if fun:
             return fun(data)
 
-        log.warn('Unknown command %s' % cmd)
+        log.warning('Unknown command %s' % cmd)
 
     def do_start(self, data):
         self.db.send('Init|%s' % dump({
@@ -248,43 +294,15 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
+        token_error = False
         raw_data = data.strip()
-        raw_io = StringIO()
-        raw_io.write(raw_data)
-        raw_io.seek(0)
-        tokenized = []
-        before_redir = None
-
-        last_token = ''
-        for token_type, token, srowcol, erowcol, line in generate_tokens(
-                raw_io.read):
-            if token_type == tokens.ERRORTOKEN:
-                if token == '!' and srowcol != (1, 0):
-                    if last_token == '>':
-                        tokenized.pop()
-                        before_redir = tokenized
-                        tokenized = []
-                    elif cut is not None:
-                        tokenized.append((tokens.OP, '.'))
-                        tokenized.append((tokens.NAME,
-                                          '_ast_replace_me_with_cut'))
-                        tokenized.append((tokens.OP, '('))
-                        tokenized.append((tokens.OP, ')'))
-                        last_token = '!!'
-                        continue
-
-            if last_token == '!!' and token != '[':
-                tokenized.append((tokens.OP, '.'))
-
-            last_token = token
-            tokenized.append((token_type, token))
-
-        if before_redir:
-            data = untokenize(before_redir)
-            redir = untokenize(tokenized)
-        else:
-            data = untokenize(tokenized)
+        try:
+            data, redir, append = tokenize_eval(raw_data)
+        except TokenError:
+            token_error = True
+            data = raw_data
             redir = None
+            append = False
 
         # Keep spaces
         raw_data = raw_data.replace(' ', u(' '))
@@ -299,9 +317,13 @@ class Interaction(object):
             except Exception:
                 fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
                 return
-        if cut is not None:
-            data = ast.parse(data, mode='single')
-            data = CutWrapper().visit(data)
+
+        if cut is not None and not token_error:
+            try:
+                data = ast.parse(data, mode='single')
+                data = CutWrapper().visit(data)
+            except:
+                pass
 
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
@@ -313,14 +335,15 @@ class Interaction(object):
                 self.db.hooked = handle_exc()
         if redir:
             try:
-                with open(redir, 'w') as f:
+                with open(redir, 'a' if append else 'w') as f:
                     f.write('\n'.join(out) + '\n'.join(err) + '\n')
             except Exception:
                 fail(self.db, 'Eval', 'Unable to write to file %s' % redir)
                 return
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
-                'result': escape('Written to file %s' % redir)
+                'result': escape('%s to file %s' % (
+                    'Appended' if append else 'Written', redir))
             }))
         else:
             rv = escape('\n'.join(out) + '\n'.join(err))
@@ -526,7 +549,7 @@ class Interaction(object):
                         dn.replace(os.path.sep, '!') + bn +
                         '-wdb-back-%d' % time.time()))
                 with open(fn, 'w') as f:
-                    f.write(src.encode('utf-8'))
+                    f.write(to_unicode_string(src, fn))
             except OSError as e:
                 self.db.send('Echo|%s' % dump({
                     'for': 'Error during save',
