@@ -1,5 +1,6 @@
 from wdb import trace, start_trace, stop_trace, set_trace, Wdb
 from wdb.ui import dump
+from wdb._compat import to_bytes
 from log_colorizer import get_color_logger
 import os
 import traceback
@@ -21,15 +22,17 @@ def _handle_off(theme, silent=False):
                 os.path.abspath(os.path.dirname(__file__)),
                 'res',
                 '500.html')) as f:
-        return f.read() % dict(
-            theme=theme,
-            trace=traceback.format_exc(),
-            title=type_.__name__.replace("'", "\\'").replace('\n', ' '),
-            subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
-            state='',
-            trace_dict=dump({
-                'trace': stack,
-            })
+        return to_bytes(
+            f.read() % dict(
+                theme=theme,
+                trace=traceback.format_exc(),
+                title=type_.__name__.replace("'", "\\'").replace('\n', ' '),
+                subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
+                state='',
+                trace_dict=dump({
+                    'trace': stack,
+                })
+            )
         )
 
 
