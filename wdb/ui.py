@@ -262,7 +262,6 @@ class Interaction(object):
 
     def do_eval(self, data):
         raw_data = data.strip()
-        print(']%s[' % raw_data)
         if raw_data.startswith('!<'):
             filename = raw_data[2:].strip()
             try:
