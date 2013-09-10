@@ -4,7 +4,6 @@ from ._compat import (
     to_unicode_string)
 from tokenize import generate_tokens, untokenize, TokenError
 import token as tokens
-import ast
 from jedi import Script
 from linecache import getline
 from log_colorizer import get_color_logger
@@ -13,6 +12,7 @@ from tempfile import gettempdir
 
 try:
     from cutter import cut
+    from cutter.utils import bang_compile as compile
 except ImportError:
     cut = None
 
@@ -55,66 +55,34 @@ def fail(db, cmd, title=None, message=None):
     }))
 
 
-def tokenize_eval(raw_data):
+def tokenize_redir(raw_data):
     raw_io = StringIO()
     raw_io.write(raw_data)
     raw_io.seek(0)
     tokenized = []
-    has_redir = False
     append = False
-    redir = ''
+    redir = None
 
     last_token = ''
-    for token_type, token, srowcol, erowcol, line in generate_tokens(
-            raw_io.read):
-        if has_redir:
+    for token_type, token, _, _, _ in generate_tokens(raw_io.read):
+        if redir is not None:
             redir += token
             continue
 
-        if token_type == tokens.ERRORTOKEN:
-            if token == '!' and srowcol != (1, 0):
-                if last_token == '>' or last_token == '>>':
-                    tokenized.pop()
-                    has_redir = True
-                    append = last_token == '>>'
-                    continue
-                if cut is not None:
-                    tokenized.append((tokens.OP, '.'))
-                    tokenized.append((tokens.NAME,
-                                      '_ast_replace_me_with_cut'))
-                    tokenized.append((tokens.OP, '('))
-                    tokenized.append((tokens.OP, ')'))
-                    last_token = '!!'
-                    continue
+        if (token_type == tokens.ERRORTOKEN and
+                token == '!' and
+                last_token in ('>', '>>')):
+            append = last_token == '>>'
+            tokenized.pop()
+            redir = ''
+            continue
 
-        if last_token == '!!' and token != '[':
-            tokenized.append((tokens.OP, '.'))
-
-        if last_token == '>' and token == '>':
-            last_token = '>>'
-        else:
-            last_token = token
+        last_token = token
 
         tokenized.append((token_type, token))
 
     data = untokenize(tokenized)
     return data, (redir or None), append
-
-
-class CutWrapper(ast.NodeTransformer):
-
-    def visit_Call(self, node):
-        self.generic_visit(node)
-        if hasattr(node.func, 'attr') and (
-                node.func.attr == '_ast_replace_me_with_cut'):
-            new_node = ast.Call(
-                func=ast.Name(id='cut', ctx=ast.Load()),
-                args=[node.func.value],
-                keywords=[], starargs=None, kwargs=None)
-            ast.copy_location(new_node, node)
-            ast.fix_missing_locations(new_node)
-            return new_node
-        return node
 
 
 class Interaction(object):
@@ -148,8 +116,7 @@ class Interaction(object):
         """Get enriched globals"""
         globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
-        if cut is not None:
-            globals_['cut'] = cut
+        globals_['cut'] = cut
         # For meta debuging purpose
         globals_['___wdb'] = self.db
         # Hack for function scope eval
@@ -294,12 +261,20 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
-        token_error = False
         raw_data = data.strip()
+        print(']%s[' % raw_data)
+        if raw_data.startswith('!<'):
+            filename = raw_data[2:].strip()
+            try:
+                with open(filename, 'r') as f:
+                    raw_data = f.read()
+            except Exception:
+                fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
+                return
+
         try:
-            data, redir, append = tokenize_eval(raw_data)
+            data, redir, append = tokenize_redir(raw_data)
         except TokenError:
-            token_error = True
             data = raw_data
             redir = None
             append = False
@@ -308,22 +283,6 @@ class Interaction(object):
         raw_data = raw_data.replace(' ', u(' '))
         # Compensate prompt for multi line
         raw_data = raw_data.replace('\n', '\n' + u(' ' * 4))
-
-        if data.startswith('!<'):
-            filename = data[2:].strip()
-            try:
-                with open(filename, 'r') as f:
-                    data = f.read()
-            except Exception:
-                fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
-                return
-
-        if cut is not None and not token_error:
-            try:
-                data = ast.parse(data, mode='single')
-                data = CutWrapper().visit(data)
-            except:
-                pass
 
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
