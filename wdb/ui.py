@@ -475,23 +475,33 @@ class Interaction(object):
                 'message': 'Completion failed for %s' %
                 '\n'.join(reversed(segments))
             }))
-        else:
+            return
+
+        try:
             fun = script.get_in_function_call()
-            self.db.send('Suggest|%s' % dump({
-                'params': {
-                    'params': [p.get_code().replace('\n', '')
-                               for p in fun.params],
-                    'index': fun.index,
-                    'module': fun.module.path,
-                    'call_name': fun.call_name} if fun else None,
-                'completions': [{
-                    'base': comp.word[
-                        :len(comp.word) - len(comp.complete)],
-                    'complete': comp.complete,
-                    'description': comp.description
-                } for comp in completions if comp.word.endswith(
-                    comp.complete)]
+        except:
+            log.info('Completion of function failed', exc_info=True)
+            self.db.send('Log|%s' % dump({
+                'message': 'Completion of function failed for %s' %
+                '\n'.join(reversed(segments))
             }))
+            return
+
+        self.db.send('Suggest|%s' % dump({
+            'params': {
+                'params': [p.get_code().replace('\n', '')
+                           for p in fun.params],
+                'index': fun.index,
+                'module': fun.module.path,
+                'call_name': fun.call_name} if fun else None,
+            'completions': [{
+                'base': comp.word[
+                    :len(comp.word) - len(comp.complete)],
+                'complete': comp.complete,
+                'description': comp.description
+            } for comp in completions if comp.word.endswith(
+                comp.complete)]
+        }))
 
     def do_save(self, data):
         pipe = data.index('|')
