@@ -191,6 +191,12 @@ class Interaction(object):
 
         log.warning('Unknown command %s' % cmd)
 
+    def notify_exc(self, msg):
+        log.info(msg, exc_info=True)
+        self.db.send('Log|%s' % dump({
+            'message': '%s\n%s' % (msg, traceback.format_exc())
+        }))
+
     def do_start(self, data):
         self.db.send('Init|%s' % dump({
             'cwd': os.getcwd()
@@ -468,40 +474,43 @@ class Interaction(object):
             u('\n').join(lines), lno - 1 + len(segments),
             len(segments[-1]) + indent, '')
         try:
-            completions = script.complete()
+            completions = script.completions()
         except:
-            log.info('Completion failed', exc_info=True)
-            self.db.send('Log|%s' % dump({
-                'message': 'Completion failed for %s' %
-                '\n'.join(reversed(segments))
-            }))
+            self.db.send('Suggest')
+            self.notify_exc('Completion failed for %s' % (
+                '\n'.join(reversed(segments))))
             return
 
         try:
-            fun = script.get_in_function_call()
+            funs = script.call_signatures() or []
         except:
-            log.info('Completion of function failed', exc_info=True)
-            self.db.send('Log|%s' % dump({
-                'message': 'Completion of function failed for %s' %
-                '\n'.join(reversed(segments))
-            }))
+            self.db.send('Suggest')
+            self.notify_exc('Completion of function failed for %s' % (
+                '\n'.join(reversed(segments))))
             return
 
-        self.db.send('Suggest|%s' % dump({
-            'params': {
-                'params': [p.get_code().replace('\n', '')
-                           for p in fun.params],
-                'index': fun.index,
-                'module': fun.module.path,
-                'call_name': fun.call_name} if fun else None,
-            'completions': [{
-                'base': comp.word[
-                    :len(comp.word) - len(comp.complete)],
-                'complete': comp.complete,
-                'description': comp.description
-            } for comp in completions if comp.word.endswith(
-                comp.complete)]
-        }))
+        try:
+            suggest_obj = {
+                'params': [{
+                    'params': [p.get_code().replace('\n', '')
+                               for p in fun.params],
+                    'index': fun.index,
+                    'module': fun.module.path,
+                    'call_name': fun.call_name} for fun in funs],
+                'completions': [{
+                    'base': comp.name[
+                        :len(comp.name) - len(comp.complete)],
+                    'complete': comp.complete,
+                    'description': comp.description
+                } for comp in completions if comp.name.endswith(
+                    comp.complete)]
+            }
+            self.db.send('Suggest|%s' % dump(suggest_obj))
+        except:
+            self.db.send('Suggest')
+            self.notify_exc('Completion generation failed for %s' % (
+                '\n'.join(reversed(segments))))
+
 
     def do_save(self, data):
         pipe = data.index('|')

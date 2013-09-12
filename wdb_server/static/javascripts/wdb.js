@@ -545,7 +545,7 @@
     snippet = $('#eval').val();
     code($('#scrollback'), data["for"], ['prompted']);
     code($('#scrollback'), data.result, [], true);
-    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1);
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1).focus();
     $('#completions').attr('style', '');
     return termscroll();
   };
@@ -603,7 +603,7 @@
     }
     code($('#scrollback'), $container.html(), [], true);
     termscroll();
-    return $('#eval').val('').prop('disabled', false);
+    return $('#eval').val('').prop('disabled', false).focus();
   };
 
   breakset = function(data) {
@@ -618,7 +618,7 @@
     }
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0 || $eval.val().indexOf('.t ') === 0) {
-      return $eval.val('').prop('disabled', false);
+      return $eval.val('').prop('disabled', false).focus();
     }
   };
 
@@ -627,7 +627,7 @@
     cm.removeClass(data.lno, 'ask-breakpoint');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
-      return $eval.val('').prop('disabled', false);
+      return $eval.val('').prop('disabled', false).focus();
     }
   };
 
@@ -694,42 +694,46 @@
   };
 
   suggest = function(data) {
-    var $appender, $comp, $comp_wrapper, $eval, $tbody, $td, added, base_len, completion, height, index, _i, _len, _ref, _ref1;
-    $eval = $('#eval');
-    $comp_wrapper = $('#completions');
-    $comp = $('#completions table').empty();
-    $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
-    height = $comp_wrapper.height();
-    added = [];
-    if (data.params) {
-      $('#comp-desc').append(format_fun(data.params));
-    }
-    if (data.completions.length) {
-      $tbody = $('<tbody>');
-      base_len = data.completions[0].base.length;
-      $eval.data({
-        root: $eval.val().substr(0, $eval.val().length - base_len)
-      });
-    }
-    _ref = data.completions;
-    for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-      completion = _ref[index];
-      if (_ref1 = completion.base + completion.complete, __indexOf.call(added, _ref1) >= 0) {
-        continue;
+    var $appender, $comp, $comp_wrapper, $eval, $tbody, $td, added, base_len, completion, height, index, param, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+    if (data) {
+      $eval = $('#eval');
+      $comp_wrapper = $('#completions');
+      $comp = $('#completions table').empty();
+      $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
+      height = $comp_wrapper.height();
+      added = [];
+      _ref = data.params;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        param = _ref[_i];
+        $('#comp-desc').append(format_fun(param));
       }
-      added.push(completion.base + completion.complete);
-      if (index % 5 === 0) {
-        $tbody.append($appender = $('<tr>'));
+      if (data.completions.length) {
+        $tbody = $('<tbody>');
+        base_len = data.completions[0].base.length;
+        $eval.data({
+          root: $eval.val().substr(0, $eval.val().length - base_len)
+        });
       }
-      $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
-      if (!completion.complete) {
-        $td.addClass('active complete');
-        $('#comp-desc').html($td.attr('title'));
+      _ref1 = data.completions;
+      for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
+        completion = _ref1[index];
+        if (_ref2 = completion.base + completion.complete, __indexOf.call(added, _ref2) >= 0) {
+          continue;
+        }
+        added.push(completion.base + completion.complete);
+        if (index % 5 === 0) {
+          $tbody.append($appender = $('<tr>'));
+        }
+        $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
+        if (!completion.complete) {
+          $td.addClass('active complete');
+          $('#comp-desc').html($td.attr('title'));
+        }
       }
+      $comp.append($tbody);
+      $comp_wrapper.height(Math.max(height, $comp.height()));
+      termscroll();
     }
-    $comp.append($tbody);
-    $comp_wrapper.height(Math.max(height, $comp.height()));
-    termscroll();
     if (to_complete) {
       send('Complete|' + to_complete);
       return to_complete = false;
