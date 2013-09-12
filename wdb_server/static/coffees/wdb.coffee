@@ -445,7 +445,7 @@ print = (data) ->
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result, [], true)
-    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1)
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1).focus()
     $('#completions').attr('style', '')
     termscroll()
 
@@ -479,7 +479,7 @@ dump = (data) ->
             .append($('<td>').html(val.val)))
     code($('#scrollback'), $container.html(), [], true)
     termscroll()
-    $('#eval').val('').prop('disabled', false)
+    $('#eval').val('').prop('disabled', false).focus()
 
 breakset = (data) ->
     if data.lno
@@ -491,13 +491,13 @@ breakset = (data) ->
             $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
-        $eval.val('').prop('disabled', false)
+        $eval.val('').prop('disabled', false).focus()
 
 breakunset = (data) ->
     cm.removeClass(data.lno, 'ask-breakpoint')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
-        $eval.val('').prop('disabled', false)
+        $eval.val('').prop('disabled', false).focus()
 
 toggle_break = (arg, temporary) ->
     cmd = if temporary then 'TBreak' else 'Break'
@@ -543,34 +543,36 @@ format_fun = (p) ->
     tags
 
 suggest = (data) ->
-    $eval = $('#eval')
-    $comp_wrapper = $('#completions')
-    $comp = $('#completions table').empty()
-    $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
-    height = $comp_wrapper.height()
-    added = []
-    if data.params
-        $('#comp-desc').append(format_fun(data.params))
-    if data.completions.length
-        $tbody = $('<tbody>')
-        base_len = data.completions[0].base.length
-        $eval.data(root: $eval.val().substr(0, $eval.val().length - base_len))
-    for completion, index in data.completions
-        if (completion.base + completion.complete) in added
-            continue
-        added.push(completion.base + completion.complete)
-        if index % 5 == 0
-            $tbody.append($appender = $('<tr>'))
+    if data
+        $eval = $('#eval')
+        $comp_wrapper = $('#completions')
+        $comp = $('#completions table').empty()
+        $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
+        height = $comp_wrapper.height()
+        added = []
+        for param in data.params
+            $('#comp-desc').append(format_fun(param))
 
-        $appender.append($td = $('<td>').attr('title', completion.description)
-            .append($('<span>').addClass('base').text(completion.base))
-            .append($('<span>').addClass('completion').text(completion.complete)))
-        if not completion.complete
-            $td.addClass('active complete')
-            $('#comp-desc').html($td.attr('title'))
-    $comp.append($tbody)
-    $comp_wrapper.height(Math.max(height, $comp.height()))
-    termscroll()
+        if data.completions.length
+            $tbody = $('<tbody>')
+            base_len = data.completions[0].base.length
+            $eval.data(root: $eval.val().substr(0, $eval.val().length - base_len))
+        for completion, index in data.completions
+            if (completion.base + completion.complete) in added
+                continue
+            added.push(completion.base + completion.complete)
+            if index % 5 == 0
+                $tbody.append($appender = $('<tr>'))
+
+            $appender.append($td = $('<td>').attr('title', completion.description)
+                .append($('<span>').addClass('base').text(completion.base))
+                .append($('<span>').addClass('completion').text(completion.complete)))
+            if not completion.complete
+                $td.addClass('active complete')
+                $('#comp-desc').html($td.attr('title'))
+        $comp.append($tbody)
+        $comp_wrapper.height(Math.max(height, $comp.height()))
+        termscroll()
     if to_complete
         send('Complete|' + to_complete)
         to_complete = false
