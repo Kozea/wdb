@@ -512,7 +512,8 @@
       return;
     }
     if (snippet) {
-      return send("Eval|" + snippet);
+      send("Eval|" + snippet);
+      return $('#eval').val($('#eval').val() + '...').prop('disabled', true);
     }
   };
 
@@ -544,7 +545,7 @@
     snippet = $('#eval').val();
     code($('#scrollback'), data["for"], ['prompted']);
     code($('#scrollback'), data.result, [], true);
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1);
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1);
     $('#completions').attr('style', '');
     return termscroll();
   };
@@ -602,7 +603,7 @@
     }
     code($('#scrollback'), $container.html(), [], true);
     termscroll();
-    return $('#eval').val('');
+    return $('#eval').val('').prop('disabled', false);
   };
 
   breakset = function(data) {
@@ -617,7 +618,7 @@
     }
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0 || $eval.val().indexOf('.t ') === 0) {
-      return $eval.val('');
+      return $eval.val('').prop('disabled', false);
     }
   };
 
@@ -626,7 +627,7 @@
     cm.removeClass(data.lno, 'ask-breakpoint');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
-      return $eval.val('');
+      return $eval.val('').prop('disabled', false);
     }
   };
 

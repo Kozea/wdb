@@ -399,6 +399,7 @@ execute = (snippet) ->
         return
     if snippet
         send("Eval|#{snippet}")
+        $('#eval').val($('#eval').val() + '...').prop('disabled', true)
 
 print_hist = (hist) ->
     print for: 'History', result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
@@ -444,7 +445,7 @@ print = (data) ->
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result, [], true)
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1)
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1)
     $('#completions').attr('style', '')
     termscroll()
 
@@ -478,7 +479,7 @@ dump = (data) ->
             .append($('<td>').html(val.val)))
     code($('#scrollback'), $container.html(), [], true)
     termscroll()
-    $('#eval').val('')
+    $('#eval').val('').prop('disabled', false)
 
 breakset = (data) ->
     if data.lno
@@ -490,13 +491,13 @@ breakset = (data) ->
             $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
-        $eval.val('')
+        $eval.val('').prop('disabled', false)
 
 breakunset = (data) ->
     cm.removeClass(data.lno, 'ask-breakpoint')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
-        $eval.val('')
+        $eval.val('').prop('disabled', false)
 
 toggle_break = (arg, temporary) ->
     cmd = if temporary then 'TBreak' else 'Break'
