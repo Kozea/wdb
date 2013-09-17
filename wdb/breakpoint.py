@@ -76,6 +76,9 @@ class LineBreakpoint(Breakpoint):
         return super(LineBreakpoint, self).__eq__(
             other) and self.line == other.line
 
+    def __hash__(self):
+        return super(LineBreakpoint, self).__hash__()
+
 
 class ConditionalBreakpoint(LineBreakpoint):
     """Breakpoint that breaks if condition is True at line in file"""
@@ -99,6 +102,9 @@ class ConditionalBreakpoint(LineBreakpoint):
         return super(ConditionalBreakpoint, self).__eq__(
             other) and self.condition == other.condition
 
+    def __hash__(self):
+        return super(LineBreakpoint, self).__hash__()
+
 
 class FunctionBreakpoint(Breakpoint):
     """Breakpoint that breaks if in file in function"""
@@ -120,3 +126,6 @@ class FunctionBreakpoint(Breakpoint):
     def __eq__(self, other):
         return super(FunctionBreakpoint, self).__eq__(
             other) and self.function == other.function
+
+    def __hash__(self):
+        return super(LineBreakpoint, self).__hash__()
