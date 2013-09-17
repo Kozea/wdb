@@ -42,6 +42,12 @@ waited_for_ws = 0
 $source = null
 $traceback = null
 
+working = ->
+    $('.state').addClass('on')
+
+chilling = ->
+    $('.state').removeClass('on')
+
 
 send = (msg) ->
     console.log time(), '->', msg
@@ -304,6 +310,7 @@ select = (data) ->
     $scroll = $ '#source .CodeMirror-scroll'
     $hline = $ '#source .highlighted'
     $scroll.scrollTop $hline.offset().top - $scroll.offset().top + $scroll.scrollTop() - $scroll.height() / 2
+    chilling()
 
 ellipsize = (code_elt) ->
     code_elt.find('span.cm-string').each ->
@@ -400,6 +407,7 @@ execute = (snippet) ->
     if snippet
         send("Eval|#{snippet}")
         $('#eval').val($('#eval').val() + '...').prop('disabled', true)
+        working()
 
 print_hist = (hist) ->
     print for: 'History', result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
@@ -445,14 +453,16 @@ print = (data) ->
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result, [], true)
-    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1)
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1).focus()
     $('#completions').attr('style', '')
     termscroll()
+    chilling()
 
 echo = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.val or '', [], true)
     termscroll()
+    chilling()
 
 dump = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
@@ -478,8 +488,9 @@ dump = (data) ->
             .append($('<td>').text(key))
             .append($('<td>').html(val.val)))
     code($('#scrollback'), $container.html(), [], true)
+    $('#eval').val('').prop('disabled', false).focus()
     termscroll()
-    $('#eval').val('').prop('disabled', false)
+    chilling()
 
 breakset = (data) ->
     if data.lno
@@ -491,13 +502,15 @@ breakset = (data) ->
             $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
-        $eval.val('').prop('disabled', false)
+        $eval.val('').prop('disabled', false).focus()
+    chilling()
 
 breakunset = (data) ->
     cm.removeClass(data.lno, 'ask-breakpoint')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
-        $eval.val('').prop('disabled', false)
+        $eval.val('').prop('disabled', false).focus()
+    chilling()
 
 toggle_break = (arg, temporary) ->
     cmd = if temporary then 'TBreak' else 'Break'
@@ -543,34 +556,36 @@ format_fun = (p) ->
     tags
 
 suggest = (data) ->
-    $eval = $('#eval')
-    $comp_wrapper = $('#completions')
-    $comp = $('#completions table').empty()
-    $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
-    height = $comp_wrapper.height()
-    added = []
-    if data.params
-        $('#comp-desc').append(format_fun(data.params))
-    if data.completions.length
-        $tbody = $('<tbody>')
-        base_len = data.completions[0].base.length
-        $eval.data(root: $eval.val().substr(0, $eval.val().length - base_len))
-    for completion, index in data.completions
-        if (completion.base + completion.complete) in added
-            continue
-        added.push(completion.base + completion.complete)
-        if index % 5 == 0
-            $tbody.append($appender = $('<tr>'))
+    if data
+        $eval = $('#eval')
+        $comp_wrapper = $('#completions')
+        $comp = $('#completions table').empty()
+        $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
+        height = $comp_wrapper.height()
+        added = []
+        for param in data.params
+            $('#comp-desc').append(format_fun(param))
 
-        $appender.append($td = $('<td>').attr('title', completion.description)
-            .append($('<span>').addClass('base').text(completion.base))
-            .append($('<span>').addClass('completion').text(completion.complete)))
-        if not completion.complete
-            $td.addClass('active complete')
-            $('#comp-desc').html($td.attr('title'))
-    $comp.append($tbody)
-    $comp_wrapper.height(Math.max(height, $comp.height()))
-    termscroll()
+        if data.completions.length
+            $tbody = $('<tbody>')
+            base_len = data.completions[0].base.length
+            $eval.data(root: $eval.val().substr(0, $eval.val().length - base_len))
+        for completion, index in data.completions
+            if (completion.base + completion.complete) in added
+                continue
+            added.push(completion.base + completion.complete)
+            if index % 5 == 0
+                $tbody.append($appender = $('<tr>'))
+
+            $appender.append($td = $('<td>').attr('title', completion.description)
+                .append($('<span>').addClass('base').text(completion.base))
+                .append($('<span>').addClass('completion').text(completion.complete)))
+            if not completion.complete
+                $td.addClass('active complete')
+                $('#comp-desc').html($td.attr('title'))
+        $comp.append($tbody)
+        $comp_wrapper.height(Math.max(height, $comp.height()))
+        termscroll()
     if to_complete
         send('Complete|' + to_complete)
         to_complete = false
@@ -617,19 +632,18 @@ register_handlers = ->
             return true
         if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
             send('Continue')
-            return false
-        if (e.ctrlKey and e.keyCode == 38) or e.keyCode == 120 # ctrl + up    or F9
+        else if (e.ctrlKey and e.keyCode == 38) or e.keyCode == 120 # ctrl + up    or F9
             send('Return')
-            return false
-        if (e.ctrlKey and e.keyCode == 39) or e.keyCode == 121 # ctrl + right or F10
+        else if (e.ctrlKey and e.keyCode == 39) or e.keyCode == 121 # ctrl + right or F10
             send('Next')
-            return false
-        if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122 # ctrl + down  or F11
+        else if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122 # ctrl + down  or F11
             send('Step')
-            return false
-        if e.keyCode == 118 # F7
+        else if e.keyCode == 118 # F7
             send('Until')
-            return false
+        else
+            return true
+        working()
+        false
 
     $('#eval').on 'keydown', (e) ->
         $eval = $(@)
@@ -651,6 +665,8 @@ register_handlers = ->
                 return false
             else if e.keyCode == 67 # C
                 searchback_stop()
+            else if e.keyCode == 68 # D
+                send('Quit')
             else
                 e.stopPropagation()
                 return

@@ -188,6 +188,7 @@ input[type=submit] {
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000333}}
 h1, #waiter {
+  margin-left: 80px;
   margin-top: 0.67em;
   margin-bottom: 0.67em;
   font-size: 2em;
@@ -204,6 +205,7 @@ h1 small, #waiter small {
   color: #777777;
   display: block;
   font-size: 0.5em;
+  margin-left: 15px;
   max-width: 100%;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -776,6 +778,145 @@ code, code span {
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003398}}
 .cm-searching {
   background: #35393c;
+}
+
+/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003404}}
+.state {
+  background-color: rgba(0, 0, 0, 0);
+  border: 5px solid rgba(0, 183, 229, 0.9);
+  opacity: 0.9;
+  border-right: 5px solid rgba(0, 0, 0, 0);
+  border-left: 5px solid rgba(0, 0, 0, 0);
+  border-radius: 50px;
+  box-shadow: 0 0 35px #2187e7;
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  width: 50px;
+  height: 50px;
+  -moz-animation: spinPulse 1s infinite ease-in-out paused;
+  -webkit-animation: spinPulse 1s infinite linear paused;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003420}}
+.state.inner {
+  width: 30px;
+  height: 30px;
+  top: 30px;
+  left: 20px;
+  -moz-animation: spinoffPulse 1s infinite linear paused;
+  -webkit-animation: spinoffPulse 1s infinite linear paused;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003428}}
+.state.on {
+  -moz-animation-play-state: running;
+  -webkit-animation-play-state: running;
+}
+
+@-moz-keyframes, spinPulse {
+  /* line 434, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(145deg);
+    -moz-transform: rotate(145deg);
+    -ms-transform: rotate(145deg);
+    -o-transform: rotate(145deg);
+    transform: rotate(145deg);
+    opacity: 1;
+  }
+
+  /* line 437, ../sass/_wdb.sass */
+  50% {
+    -webkit-transform: rotate(-120deg);
+    -moz-transform: rotate(-120deg);
+    -ms-transform: rotate(-120deg);
+    -o-transform: rotate(-120deg);
+    transform: rotate(-120deg);
+    opacity: 0;
+  }
+
+  /* line 440, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(160deg);
+    -moz-transform: rotate(160deg);
+    -ms-transform: rotate(160deg);
+    -o-transform: rotate(160deg);
+    transform: rotate(160deg);
+    opacity: 0;
+    box-shadow: 0 0 1px #2187e7;
+  }
+}
+
+@-moz-keyframes spinoffPulse {
+  /* line 446, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+
+  /* line 448, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spinPulse {
+  /* line 434, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(145deg);
+    -moz-transform: rotate(145deg);
+    -ms-transform: rotate(145deg);
+    -o-transform: rotate(145deg);
+    transform: rotate(145deg);
+    opacity: 1;
+  }
+
+  /* line 437, ../sass/_wdb.sass */
+  50% {
+    -webkit-transform: rotate(-120deg);
+    -moz-transform: rotate(-120deg);
+    -ms-transform: rotate(-120deg);
+    -o-transform: rotate(-120deg);
+    transform: rotate(-120deg);
+    opacity: 0;
+  }
+
+  /* line 440, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(160deg);
+    -moz-transform: rotate(160deg);
+    -ms-transform: rotate(160deg);
+    -o-transform: rotate(160deg);
+    transform: rotate(160deg);
+    opacity: 0;
+    box-shadow: 0 0 1px #2187e7;
+  }
+}
+
+@-webkit-keyframes spinoffPulse {
+  /* line 446, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(0);
+    -moz-transform: rotate(0);
+    -ms-transform: rotate(0);
+    -o-transform: rotate(0);
+    transform: rotate(0);
+  }
+
+  /* line 448, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-dark\.sass}line{font-family:\000035}}
