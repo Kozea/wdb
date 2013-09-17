@@ -490,6 +490,7 @@ dump = (data) ->
     code($('#scrollback'), $container.html(), [], true)
     $('#eval').val('').prop('disabled', false).focus()
     termscroll()
+    $('#eval').val('').prop('disabled', false).focus()
     chilling()
 
 breakset = (data) ->
