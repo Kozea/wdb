@@ -2,7 +2,7 @@
 from ._compat import (
     dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string)
-from tokenize import generate_tokens, untokenize, TokenError
+from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
 from linecache import getline
@@ -59,30 +59,17 @@ def tokenize_redir(raw_data):
     raw_io = StringIO()
     raw_io.write(raw_data)
     raw_io.seek(0)
-    tokenized = []
-    append = False
-    redir = None
-
     last_token = ''
-    for token_type, token, _, _, _ in generate_tokens(raw_io.read):
-        if redir is not None:
-            redir += token
-            continue
 
+    for token_type, token, src, erc, line in generate_tokens(raw_io.readline):
         if (token_type == tokens.ERRORTOKEN and
                 token == '!' and
                 last_token in ('>', '>>')):
-            append = last_token == '>>'
-            tokenized.pop()
-            redir = ''
-            continue
-
+            return (line[:src[1] - 1],
+                    line[erc[1]:].lstrip(),
+                    last_token == '>>')
         last_token = token
-
-        tokenized.append((token_type, token))
-
-    data = untokenize(tokenized)
-    return data, (redir or None), append
+    return
 
 
 class Interaction(object):
@@ -158,12 +145,13 @@ class Interaction(object):
                 try:
                     exc = handle_exc()
                     type_, value = sys.exc_info()[:2]
-                    link = ('<a href="https://github.com/Kozea/wdb/issues/new?'
-                            'title=%s&body=%s&labels=defect" class="nogood">'
-                            'Please click here to report it on Github</a>') % (
-                                quote('%s: %s' % (type_.__name__, str(value))),
-                                quote('```\n%s\n```\n' %
-                                      traceback.format_exc()))
+                    link = (
+                        '<a href="https://github.com/Kozea/wdb/issues/new?'
+                        'title=%s&body=%s&labels=defect" class="nogood">'
+                        'Please click here to report it on Github</a>') % (
+                        quote('%s: %s' % (type_.__name__, str(value))),
+                        quote('```\n%s\n```\n' %
+                              traceback.format_exc()))
                     self.db.send('Echo|%s' % dump({
                         'for': 'Error in Wdb, this is bad',
                         'val': exc + '<br>' + link
@@ -190,6 +178,12 @@ class Interaction(object):
             return fun(data)
 
         log.warning('Unknown command %s' % cmd)
+
+    def notify_exc(self, msg):
+        log.info(msg, exc_info=True)
+        self.db.send('Log|%s' % dump({
+            'message': '%s\n%s' % (msg, traceback.format_exc())
+        }))
 
     def do_start(self, data):
         self.db.send('Init|%s' % dump({
@@ -261,6 +255,7 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
+        redir = None
         raw_data = data.strip()
         if raw_data.startswith('!<'):
             filename = raw_data[2:].strip()
@@ -271,13 +266,18 @@ class Interaction(object):
                 fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
                 return
 
-        try:
-            data, redir, append = tokenize_redir(raw_data)
-        except TokenError:
-            data = raw_data
-            redir = None
-            append = False
-
+        lines = raw_data.split('\n')
+        if '>!' in lines[-1]:
+            try:
+                last_line, redir, append = tokenize_redir(raw_data)
+            except TokenError:
+                last_line = redir = None
+                append = False
+            if redir and last_line:
+                indent = len(lines[-1]) - len(lines[-1].lstrip())
+                lines[-1] = indent * u(' ') + last_line
+                raw_data = '\n'.join(lines)
+        data = raw_data
         # Keep spaces
         raw_data = raw_data.replace(' ', u(' '))
         # Compensate prompt for multi line
@@ -286,12 +286,14 @@ class Interaction(object):
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
             try:
+                print
                 compiled_code = compile(data, '<stdin>', 'single')
                 l = self.locals[self.index]
                 execute(compiled_code, self.get_globals(), l)
             except Exception:
                 self.db.hooked = handle_exc()
-        if redir:
+
+        if redir and not self.db.hooked:
             try:
                 with open(redir, 'a' if append else 'w') as f:
                     f.write('\n'.join(out) + '\n'.join(err) + '\n')
@@ -418,7 +420,7 @@ class Interaction(object):
 
         fn = remaining or self.current_file
         self.db.clear_break(
-            fn, lno, None, cond, funcname)
+            fn, int(lno), None, cond, funcname)
 
         if fn == self.current_file:
             self.db.send('BreakUnset|%s' % dump({'lno': lno}))
@@ -468,40 +470,42 @@ class Interaction(object):
             u('\n').join(lines), lno - 1 + len(segments),
             len(segments[-1]) + indent, '')
         try:
-            completions = script.complete()
+            completions = script.completions()
         except:
-            log.info('Completion failed', exc_info=True)
-            self.db.send('Log|%s' % dump({
-                'message': 'Completion failed for %s' %
-                '\n'.join(reversed(segments))
-            }))
+            self.db.send('Suggest')
+            self.notify_exc('Completion failed for %s' % (
+                '\n'.join(reversed(segments))))
             return
 
         try:
-            fun = script.get_in_function_call()
+            funs = script.call_signatures() or []
         except:
-            log.info('Completion of function failed', exc_info=True)
-            self.db.send('Log|%s' % dump({
-                'message': 'Completion of function failed for %s' %
-                '\n'.join(reversed(segments))
-            }))
+            self.db.send('Suggest')
+            self.notify_exc('Completion of function failed for %s' % (
+                '\n'.join(reversed(segments))))
             return
 
-        self.db.send('Suggest|%s' % dump({
-            'params': {
-                'params': [p.get_code().replace('\n', '')
-                           for p in fun.params],
-                'index': fun.index,
-                'module': fun.module.path,
-                'call_name': fun.call_name} if fun else None,
-            'completions': [{
-                'base': comp.word[
-                    :len(comp.word) - len(comp.complete)],
-                'complete': comp.complete,
-                'description': comp.description
-            } for comp in completions if comp.word.endswith(
-                comp.complete)]
-        }))
+        try:
+            suggest_obj = {
+                'params': [{
+                    'params': [p.get_code().replace('\n', '')
+                               for p in fun.params],
+                    'index': fun.index,
+                    'module': fun.module.path,
+                    'call_name': fun.call_name} for fun in funs],
+                'completions': [{
+                    'base': comp.name[
+                        :len(comp.name) - len(comp.complete)],
+                    'complete': comp.complete,
+                    'description': comp.description
+                } for comp in completions if comp.name.endswith(
+                    comp.complete)]
+            }
+            self.db.send('Suggest|%s' % dump(suggest_obj))
+        except:
+            self.db.send('Suggest')
+            self.notify_exc('Completion generation failed for %s' % (
+                '\n'.join(reversed(segments))))
 
     def do_save(self, data):
         pipe = data.index('|')
