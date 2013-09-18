@@ -317,6 +317,7 @@
     var $hline, $scroll, current_frame, lno, _i, _j, _len, _ref, _ref1, _ref2;
     $source = $('#source');
     current_frame = data.frame;
+    $('#interpreter').show();
     $('.traceline').removeClass('selected');
     $('#trace-' + current_frame.level).addClass('selected');
     $('#eval').val('').attr('data-index', -1).attr('rows', 1);
@@ -974,7 +975,7 @@
     $(document).on('keydown', function(e) {
       var sel;
       if (e.keyCode === 13) {
-        sel = document.getSelection().toString().trim();
+        sel = cm.getSelection().trim();
         if (sel) {
           historize(sel);
           send('Eval|' + sel);

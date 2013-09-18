@@ -264,6 +264,7 @@ select_check = (data) ->
 select = (data) ->
     $source = $ '#source'
     current_frame = data.frame
+    $('#interpreter').show()
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     $('#eval').val('').attr('data-index', -1).attr('rows', 1)
@@ -780,7 +781,7 @@ register_handlers = ->
 
     $(document).on('keydown', (e) ->
         if e.keyCode == 13
-            sel = document.getSelection().toString().trim()
+            sel = cm.getSelection().trim()
             if sel
                 historize sel
                 send 'Eval|' + sel
