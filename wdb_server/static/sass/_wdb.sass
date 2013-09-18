@@ -414,21 +414,30 @@ code, code span
   left: 10px
   width: 50px
   height: 50px
-  -moz-animation: spinPulse 1s infinite ease-in-out paused
-  -webkit-animation: spinPulse 1s infinite linear paused
+  -moz-animation: spinPulse 1s infinite ease-in-out
+  -webkit-animation: spinPulse 1s infinite linear
+  animation: spinPulse 1s infinite linear
+
+  -moz-animation-play-state: paused
+  -webkit-animation-play-state: paused
+  animation-play-state: paused
 
   &.inner
     width: 30px
     height: 30px
     top: 30px
     left: 20px
-    -moz-animation: spinoffPulse 1s infinite linear paused
-    -webkit-animation: spinoffPulse 1s infinite linear paused
+    -moz-animation: spinoffPulse 1s infinite linear
+    -webkit-animation: spinoffPulse 1s infinite linear
+    animation: spinoffPulse 1s infinite linear
+    -moz-animation-play-state: paused
+    -webkit-animation-play-state: paused
+    animation-play-state: paused
 
   &.on
     -moz-animation-play-state: running
     -webkit-animation-play-state: running
-
+    animation-play-state: running
 
 @mixin pulse()
   0%
@@ -444,11 +453,11 @@ code, code span
 
 @mixin pulseoff()
   0%
-    +rotate(0)
+    +rotate(0deg)
   100%
     +rotate(360deg)
 
-@-moz-keyframes, spinPulse
+@-moz-keyframes spinPulse
   +pulse
 
 @-moz-keyframes spinoffPulse
