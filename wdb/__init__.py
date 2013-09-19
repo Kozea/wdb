@@ -22,6 +22,8 @@ from ._compat import execute, StringIO, to_unicode_string, escape
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
     ConditionalBreakpoint, FunctionBreakpoint)
+
+from collections import defaultdict
 from .ui import Interaction, dump
 from .utils import pretty_frame
 from .state import Running, Step, Next, Until, Return
@@ -73,6 +75,7 @@ class Wdb(object):
     _sockets = []
     enabled = True
     breakpoints = set()
+    watchers = defaultdict(list)
 
     @staticmethod
     def get(no_create=False):

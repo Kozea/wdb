@@ -397,6 +397,7 @@ execute = (snippet) ->
             when 'e' then toggle_edition(not cm._rw)
             when 'q' then cmd 'Quit'
             when 'h' then print_help()
+            when 'w' then cmd 'Watch|' + data
         return
     else if snippet.indexOf('?') == 0
         cmd 'Dump|' + snippet.slice(1).trim()
@@ -427,6 +428,7 @@ print_help = ->
 .l                             : List active breakpoints
 .f                             : Echo all typed commands in the current debugging session
 .d expression                  : Dump the result of expression in a table
+.w expression                  : Watch expression in curent file
 .q                             : Quit
 .h                             : Get some help
 .e                             : Toggle file edition mode
