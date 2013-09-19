@@ -73,6 +73,11 @@ def tokenize_redir(raw_data):
 
 
 class Interaction(object):
+
+    hooks = {
+        'update_watchers': ['init', 'eval']
+    }
+
     def __init__(
             self, db, frame, tb, exception, exception_description, init=None):
         self.db = db
@@ -83,6 +88,10 @@ class Interaction(object):
         # Copy locals to avoid strange cpython behaviour
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
 
+    def hook(self, kind):
+        for hook, event in self.hooks.items():
+            if kind in event:
+                getattr(self, hook)()
     @property
     def current(self):
         return self.trace[self.index]
@@ -127,6 +136,7 @@ class Interaction(object):
             'breaks': self.db.get_breaks_lno(self.current_file),
             'name': self.current_file
         }))
+        self.hook('init')
 
     def parse_command(self, message):
         # Parse received message
@@ -172,12 +182,26 @@ class Interaction(object):
             message = 'Quit'
 
         cmd, data = self.parse_command(message)
+        cmd = cmd.lower()
         log.debug('Cmd %s #Data %d' % (cmd, len(data)))
-        fun = getattr(self, 'do_' + cmd.lower(), None)
+        fun = getattr(self, 'do_' + cmd, None)
         if fun:
-            return fun(data)
+            rv = fun(data)
+            self.hook(cmd)
+            return rv
 
         log.warning('Unknown command %s' % cmd)
+
+    def update_watchers(self):
+        for watcher in self.db.watchers[self.current_file]:
+            try:
+                value = eval(
+                    watcher, self.get_globals(), self.locals[self.index])
+            except Exception as e:
+                value = type(e).__name__
+            self.db.send('Log|%s' % dump({
+                'message': '%s = %s' % (watcher, value)
+            }))
 
     def notify_exc(self, msg):
         log.info(msg, exc_info=True)
@@ -312,9 +336,16 @@ class Interaction(object):
             except:
                 rv = rv.decode('ascii', 'ignore')
 
+            if rv and self.db.last_obj is None:
+                result = rv
+            elif not rv:
+                result = self.db.hooked
+            else:
+                result = self.db.hooked + '\n' + rv
+
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
-                'result': self.db.hooked + rv
+                'result': result
             }))
 
     def do_ping(self, data):
@@ -430,6 +461,9 @@ class Interaction(object):
             'for': 'Breakpoints',
             'result': self.db.breakpoints
         }))
+
+    def do_watch(self, data):
+        self.db.watchers[self.current_file].append(data)
 
     def do_jump(self, data):
         lno = int(data)
