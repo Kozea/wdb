@@ -112,7 +112,8 @@ class Interaction(object):
         """Get enriched globals"""
         globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
-        globals_['cut'] = cut
+        if cut is not None:
+            globals_['cut'] = cut
         # For meta debuging purpose
         globals_['___wdb'] = self.db
         # Hack for function scope eval
