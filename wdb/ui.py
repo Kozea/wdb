@@ -75,7 +75,8 @@ def tokenize_redir(raw_data):
 class Interaction(object):
 
     hooks = {
-        'update_watchers': ['init', 'eval']
+        'update_watchers': [
+            'start', 'eval', 'watch', 'init', 'select', 'unwatch']
     }
 
     def __init__(
@@ -89,9 +90,10 @@ class Interaction(object):
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
 
     def hook(self, kind):
-        for hook, event in self.hooks.items():
-            if kind in event:
+        for hook, events in self.hooks.items():
+            if kind in events:
                 getattr(self, hook)()
+
     @property
     def current(self):
         return self.trace[self.index]
@@ -194,15 +196,15 @@ class Interaction(object):
         log.warning('Unknown command %s' % cmd)
 
     def update_watchers(self):
+        watched = {}
         for watcher in self.db.watchers[self.current_file]:
             try:
-                value = eval(
-                    watcher, self.get_globals(), self.locals[self.index])
+                watched[watcher] = self.db.safe_better_repr(eval(
+                    watcher, self.get_globals(), self.locals[self.index]))
             except Exception as e:
-                value = type(e).__name__
-            self.db.send('Log|%s' % dump({
-                'message': '%s = %s' % (watcher, value)
-            }))
+                watched[watcher] = type(e).__name__
+
+        self.db.send('Watched|%s' % dump(watched))
 
     def notify_exc(self, msg):
         log.info(msg, exc_info=True)
@@ -465,6 +467,10 @@ class Interaction(object):
 
     def do_watch(self, data):
         self.db.watchers[self.current_file].append(data)
+        self.db.send('Ack')
+
+    def do_unwatch(self, data):
+        self.db.watchers[self.current_file].remove(data)
 
     def do_jump(self, data):
         lno = int(data)

@@ -1,14 +1,3 @@
-.CodeMirror-scroll {
-  height: 100%;
-  min-height:300px;
-}
- 
-.cm-s-tomorrow-night{
-  /* font-family:'Menlo', 'Consolas', "Vera Mono", monospace; */
-  /* font-size:12px; */
-  font-weight: bold;
-}
-
 .cm-s-tomorrow-night { background: none; color: hsl(140,2%,77%); }
 .cm-s-tomorrow-night div.CodeMirror-selected { background: hsl(216, 8%, 24%) !important; }
 .cm-s-tomorrow-night .CodeMirror-gutter { background: hsl(210,6%,12%); border-right: 1px solid hsl(0, 0%, 19%); }
