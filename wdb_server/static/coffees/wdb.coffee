@@ -99,6 +99,8 @@ make_ws = ->
             when 'BreakUnset'  then breakunset
             when 'Dump'        then dump
             when 'Suggest'     then suggest
+            when 'Watched'     then watched
+            when 'Ack'         then ack
             when 'Log'         then log
             when 'Die'         then die
         if not treat
@@ -113,13 +115,6 @@ $ =>
         $('#deactivate').click () ->
             send('Disable')
             false
-
-        $('#waiter').html('Wdb is tracing your request.<small>It may take some time.</small>')
-        dot = ->
-            if $('#waiter').length
-                $('#waiter small').text($('#waiter small').text() + '.')
-                setTimeout(dot, 250)
-        dot()
     , 250)
 
     @ws = ws = make_ws()
@@ -135,8 +130,6 @@ init = (data) ->
 title = (data) ->
     $('#title').text(data.title).attr('title', data.title)
         .append($('<small>').text(data.subtitle).attr('title', data.subtitle))
-    $('#source').css(height: $(window).height() - $('#title').outerHeight(true) - 10)
-    $traceback.css(height: $(window).height() - $('#title').outerHeight(true) - 10)
 
 trace = (data) ->
     $traceback.empty()
@@ -200,7 +193,7 @@ get_mode = (fn) ->
 
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
-        $('#source').prepend(elt)
+        $('#source-editor').prepend(elt)
         $(elt).addClass(if rw then 'rw' else 'ro')
         ) , (
         value: file,
@@ -428,7 +421,7 @@ print_help = ->
 .l                             : List active breakpoints
 .f                             : Echo all typed commands in the current debugging session
 .d expression                  : Dump the result of expression in a table
-.w expression                  : Watch expression in curent file
+.w expression                  : Watch expression in curent file (Click on the name to remove)
 .q                             : Quit
 .h                             : Get some help
 .e                             : Toggle file edition mode
@@ -599,6 +592,29 @@ suggest = (data) ->
 suggest_stop = ->
     $('#completions table').empty()
 
+watched = (data) ->
+    $watchers = $('#watchers')
+    for own watcher, value of data
+        $watcher = $watchers.find(".watching").filter((e) -> $(e).attr('data-expr') == watcher)
+        if not $watcher.size()
+            $name = $('<code>', class: "name")
+            $value = $('<div>', class: "value")
+            $watchers.append(
+                $watcher = $('<div>', class: "watching")
+                    .attr('data-expr', watcher)
+                    .append($name.text(watcher), $('<code>').text(': '), $value))
+            code($value, value.toString(), [], true)
+        else
+            $watcher.find('.value code').remove()
+            code($watcher.find('.value'), value.toString(), [], true)
+        $watcher.addClass('updated')
+    $watchers.find('.watching:not(.updated)').remove()
+    $watchers.find('.watching').removeClass('updated')
+
+
+ack = ->
+    $('#eval').val('')
+
 log = (data) ->
     console.log data.message
 
@@ -762,7 +778,7 @@ register_handlers = ->
                     return false
 
 
-    $("#scrollback").on('click', 'a.inspect', ->
+    $("#scrollback, #watchers").on('click', 'a.inspect', ->
         send('Inspect|' + $(@).attr('href'))
         false
     ).on('click', '.short.close', ->
@@ -772,6 +788,10 @@ register_handlers = ->
         elt.hide('fast').prev('.short').removeClass('open').addClass('close')
     ).on('click', '.toggle', ->
         $(@).add($(@).next()).toggleClass('hidden', 'shown')
+    )
+
+    $("#watchers").on('click', '.watching .name', (e) ->
+        send('Unwatch|' + $(@).closest('.watching').attr('data-expr'))
     )
 
     $("#source").on('mouseup', 'span', (e) ->

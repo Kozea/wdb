@@ -8,6 +8,68 @@
 body, html
   color: $fg
   background-color: $bg
+  height: 100%
+  margin: 0
+
+
+#wdb
+  display: flex
+  flex-direction: column
+  height: 100%
+
+  > header
+    height: 100px
+    display: flex
+    align-items: center
+
+    #activity
+      width: 100px
+
+    #title
+      flex: 1
+      margin: 0
+
+  > article
+    flex: 1
+    display: flex
+
+    #source
+      flex: 7
+      display: flex
+      flex-direction: column
+      margin-left: 5px
+
+      #source-editor
+        flex: 1
+        position: relative
+
+        .CodeMirror
+          position: absolute
+          height: 100%
+          width: 100%
+
+      #interpreter
+        flex: 1
+
+    #traceback
+      flex: 3
+      overflow-y: auto
+
+  #watchers
+    display: flex
+    flex-flow: row wrap
+
+    > div
+      margin-left: 5px
+      margin-right: 2em
+      display: flex
+
+      .name
+        color: #fff
+        cursor: pointer
+
+      .value
+        flex: 1
 
 a
   color: $fg
@@ -30,15 +92,11 @@ input
     padding-left: .5em
     padding-right: .5em
 
-h1, #waiter
-  margin-left: 80px
-  margin-top: .67em
-  margin-bottom: .67em
+h1
   font-size: 2em
   font-weight: bold
   color: $fg
   font-variant: small-caps
-  max-width: 100%
   white-space: nowrap
   text-overflow: ellipsis
   overflow: hidden
@@ -48,7 +106,6 @@ h1, #waiter
     display: block
     font-size: .5em
     margin-left: 15px
-    max-width: 100%
     white-space: nowrap
     text-overflow: ellipsis
     overflow: hidden
@@ -58,16 +115,12 @@ code
   display: block
   white-space: pre
 
-#source
-  overflow: hidden
-  width: 70%
-  float: left
-  position: relative
 
+#source-editor
   > .CodeMirror
     font-family: "Source Code Pro" !important
+    font-weight: bold
     font-size: 15px
-    height: 50%
     +box-shadow(inset -8px 0 20px $source-shadow)
 
     &.rw:after
@@ -82,22 +135,12 @@ code
       padding: .2em 3em
       +rotate(45deg)
 
-    .CodeMirror-scroll
-      overflow-x: auto
-
-    .CodeMirror-hscrollbar
-      bottom: -1px
-
     .CodeMirror-linebackground
       +transition(250ms)
 
     .breakpoints
       width: .6em
       border: none
-
-#sourcecode, #interpreter
-  overflow: auto
-  height: 50%
 
 #eval
   width: 94%
@@ -147,12 +190,6 @@ code
 
 .trace
   font: $code-font
-
-#traceback
-  overflow-y: auto
-  float: right
-  width: 30%
-  height: 100%
 
 @mixin traceline($col)
   background-color: $col
@@ -364,18 +401,14 @@ code, code span
 
 
 #activate, #deactivate
-  position: absolute
   display: block
-  top: 40px
-  right: 40px
   width: 80px
-  height: 20px
+  margin: 0 10px
   text-decoration: none
   background-color: lighten($bg, 5%)
 
   &:before
     display: block
-    height: 20px
     width: 40px
     text-align: center
     color: white
