@@ -14,7 +14,7 @@
     });
     $('#title').text(_title).append($('<small>').text(_subtitle));
     if (trace.trace) {
-      $('body').append($trace = $('<div>', {
+      $('#wdb').append($trace = $('<div>', {
         "class": 'trace_500'
       }));
       _ref = trace.trace;

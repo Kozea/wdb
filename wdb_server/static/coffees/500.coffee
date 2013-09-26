@@ -8,7 +8,7 @@ $ ->
 
     $('#title').text(_title).append($('<small>').text(_subtitle))
     if trace.trace
-        $('body').append($trace = $('<div>', class: 'trace_500'))
+        $('#wdb').append($trace = $('<div>', class: 'trace_500'))
 
         for [file, lno, fun, code] in trace.trace
             $trace.append($('<div>', class: 'traceline').append(
