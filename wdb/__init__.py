@@ -36,6 +36,7 @@ import os
 import logging
 import sys
 import threading
+import socket
 import webbrowser
 import atexit
 
@@ -59,14 +60,11 @@ log = get_color_logger('wdb')
 trace_log = logging.getLogger('wdb.trace')
 
 for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
-    logging.getLogger(
-        'wdb.%s' % log_name if log_name != 'main' else 'wdb'
-    ).setLevel(
-        getattr(logging,
-                os.getenv(
-                    'WDB_%s_LOG' % log_name.upper(),
-                    os.getenv('WDB_LOG', 'WARNING')).upper(),
-                'WARNING'))
+    logger = 'wdb.%s' % log_name if log_name != 'main' else 'wdb'
+    level = os.getenv(
+        'WDB_%s_LOG' % log_name.upper(),
+        os.getenv('WDB_LOG', 'WARNING')).upper()
+    logging.getLogger(logger).setLevel(getattr(logging, level, 'WARNING'))
 
 
 class Wdb(object):
@@ -156,7 +154,21 @@ class Wdb(object):
     def connect(self):
         """Connect to wdb server"""
         log.info('Connecting socket on %s:%d' % (SOCKET_SERVER, SOCKET_PORT))
-        self._socket = Client((SOCKET_SERVER, SOCKET_PORT))
+        tries = 0
+        while not self._socket and tries < 10:
+            try:
+                self._socket = Client((SOCKET_SERVER, SOCKET_PORT))
+            except socket.error:
+                tries += 1
+                log.warning(
+                    'You must start wdb.server. '
+                    '(Retrying on %s:%d) [Try #%d]' % (
+                        SOCKET_SERVER, SOCKET_PORT, tries))
+
+        if not self._socket:
+            log.error('Could not connect to server')
+            sys.exit(2)
+
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
 
@@ -165,15 +177,11 @@ class Wdb(object):
         function call, function return and exception during trace"""
         fun = getattr(self, 'handle_' + event)
         if fun and (
-                (
-                    event is 'line' and self.breaks(frame)
-                ) or (
-                    event is 'exception' and (
-                        self.full or frame == self.state.frame or (
-                            self.below and frame.f_back == self.state.frame
-                        )
-                    )
-                ) or self.state.stops(frame, event)):
+                (event is 'line' and self.breaks(frame)) or
+                (event is 'exception' and
+                 (self.full or frame == self.state.frame or
+                  (self.below and frame.f_back == self.state.frame))) or
+                self.state.stops(frame, event)):
             fun(frame, arg)
 
         if event is 'return' and frame == self.state.frame:
@@ -198,7 +206,6 @@ class Wdb(object):
                 not (self.below and frame.f_back == self.state.frame) and
                 not self.get_file_breaks(frame.f_code.co_filename)):
             # Don't trace anymore here
-            trace_log.debug("Don't trace %s" % pretty_frame(frame))
             return
         return self.trace_dispatch
 
@@ -218,6 +225,7 @@ class Wdb(object):
                     pretty_frame(self.state.frame.f_back)))
         if self.trace_dispatch(frame, event, arg):
             return self.trace_debug_dispatch
+        trace_log.debug("No trace %s" % pretty_frame(frame))
 
     def start_trace(self, full=False, frame=None, below=False):
         """Start tracing from here"""
