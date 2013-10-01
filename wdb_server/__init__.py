@@ -64,7 +64,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def send(self, message):
         socket = Sockets.sockets.get(self.uuid)
         if not socket:
-            self.close()
+            if self.ws_connection:
+                self.close()
             return
         log.debug('websocket -> socket: %s' % message)
         data = message.encode('utf-8')
