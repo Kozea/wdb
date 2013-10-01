@@ -409,7 +409,7 @@ class Wdb(object):
 
         def display_hook(obj):
             # That's some dirty hack
-            self.hooked += self.safe_better_repr(obj) + '\n'
+            self.hooked += self.safe_better_repr(obj)
             self.last_obj = obj
 
         stdout, stderr = sys.stdout, sys.stderr
@@ -422,7 +422,7 @@ class Wdb(object):
         try:
             yield out, err
         finally:
-            out.extend(sys.stdout.getvalue().splitlines())
+            out.extend(sys.stdout.getvalue().splitlines()[1:])
             err.extend(sys.stderr.getvalue().splitlines())
             if with_hook:
                 sys.displayhook = d_hook

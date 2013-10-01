@@ -339,7 +339,7 @@ class Interaction(object):
             except:
                 rv = rv.decode('ascii', 'ignore')
 
-            if rv and self.db.last_obj is None:
+            if rv and self.db.last_obj is None or not self.db.hooked:
                 result = rv
             elif not rv:
                 result = self.db.hooked

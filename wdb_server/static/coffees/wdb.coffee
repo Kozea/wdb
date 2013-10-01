@@ -75,7 +75,7 @@ make_ws = ->
 
         $('#waiter').remove()
         $('#wdb').show()
-        $('#eval').focus()
+        $('#eval').autosize().focus()
 
     new_ws.onmessage = (m) ->
         # Open a websocket in case of request break
@@ -260,7 +260,7 @@ select = (data) ->
     $('#interpreter').show()
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1)
+    $('#eval').val('').attr('data-index', -1).trigger('autosize.resize')
 
     if not window.cm
         create_code_mirror data.file, data.name
@@ -306,42 +306,45 @@ select = (data) ->
     $scroll.scrollTop $hline.offset().top - $scroll.offset().top + $scroll.scrollTop() - $scroll.height() / 2
     chilling()
 
-ellipsize = (code_elt) ->
-    code_elt.find('span.cm-string').each ->
+ellipsize = ($code) ->
+    $code.find('span.cm-string').each ->
         txt = $(@).text()
         if txt.length > 128
             $(@).text ''
             $(@).append $('<span class="short close">').text(txt.substr(0, 128))
             $(@).append $('<span class="long">').text(txt.substr(128))
 
-code = (parent, code, classes=[], html=false) ->
+code = (parent, src, classes=[], html=false) ->
     if html
-        code_elt = $('<code>', 'class': 'cm-s-' + cm_theme).html(code)
-        for cls in classes
-            code_elt.addClass(cls)
-        parent.append code_elt
-        code_elt.add(code_elt.find('*')).contents().filter(->
-            @nodeType == 3 and @nodeValue.length > 0
+        if src[0] != '<' or src.slice(-1) != '>'
+            $node = $('<div>', class: 'out').html(src)
+        else
+            $node = $(src)
+        parent.append $node
+        $node.add($node.find('*')).contents().filter(->
+            @nodeType == 3 and @nodeValue.length > 0 and not $(@parentElement).closest('thead').size()
         )
-        .wrap('<span>')
+        .wrap('<code>')
         .parent()
         .each ->
-            span = @
-            $(span).addClass('waiting_for_hl')
+            $code = $(@)
+            $code.addClass('waiting_for_hl').addClass('cm-s-' + cm_theme)
+            for cls in classes
+                $code.addClass(cls)
             setTimeout (->
-                CodeMirror.runMode $(span).text(), "python", span
-                $(span).removeClass('waiting_for_hl')
-                ellipsize code_elt
+                CodeMirror.runMode $code.text(), "python", $code.get(0)
+                $code.removeClass('waiting_for_hl')
+                ellipsize $code
             ), 50
     else
-        code_elt = $('<code>', 'class': 'cm-s-' + cm_theme)
+        $code = $('<code>', 'class': 'cm-s-' + cm_theme)
         for cls in classes
-            code_elt.addClass(cls)
-        parent.append code_elt
-        CodeMirror.runMode code, "python", code_elt.get(0)
-        ellipsize code_elt
+            $code.addClass(cls)
+        parent.append $code
+        CodeMirror.runMode src, "python", $code.get(0)
+        ellipsize $code
 
-    code_elt
+    $code
 
 
 historize = (snippet) ->
@@ -394,6 +397,7 @@ execute = (snippet) ->
         return
     else if snippet.indexOf('?') == 0
         cmd 'Dump|' + snippet.slice(1).trim()
+        working()
         suggest_stop()
         return
     else if snippet == '' and last_cmd
@@ -401,7 +405,7 @@ execute = (snippet) ->
         return
     if snippet
         send("Eval|#{snippet}")
-        $('#eval').val($('#eval').val() + '...').prop('disabled', true)
+        $('#eval').val($('#eval').val() + '...').trigger('autosize.resize').prop('disabled', true)
         working()
 
 print_hist = (hist) ->
@@ -449,7 +453,7 @@ print = (data) ->
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
     code($('#scrollback'), data.result, [], true)
-    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1).focus()
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus()
     $('#completions').attr('style', '')
     termscroll()
     chilling()
@@ -464,13 +468,13 @@ dump = (data) ->
     code($('#scrollback'), data.for, ['prompted'])
     $container = $('<div>')
     $table = $('<table>', class: 'object').appendTo($container)
-    $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'core', colspan: 2).text('Core Members'))))
+    $table.append($('<thead>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'core', colspan: 2).text('Core Members'))))
     $core_tbody = $('<tbody>', class: 'core hidden').appendTo($table)
 
-    $table.append($('<tbody>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'method', colspan: 2).text('Methods'))))
+    $table.append($('<thead>', class: 'toggle hidden').append($('<tr>').append($('<td>', class: 'method', colspan: 2).text('Methods'))))
     $method_tbody = $('<tbody>', class: 'method hidden').appendTo($table)
 
-    $table.append($('<tbody>', class: 'toggle shown').append($('<tr>').append($('<td>', class: 'attr', colspan: 2).text('Attributes'))))
+    $table.append($('<thead>', class: 'toggle shown').append($('<tr>').append($('<td>', class: 'attr', colspan: 2).text('Attributes'))))
     $attr_tbody = $('<tbody>', class: 'attr shown').appendTo($table)
 
     for key, val of data.val
@@ -484,9 +488,8 @@ dump = (data) ->
             .append($('<td>').text(key))
             .append($('<td>').html(val.val)))
     code($('#scrollback'), $container.html(), [], true)
-    $('#eval').val('').prop('disabled', false).focus()
     termscroll()
-    $('#eval').val('').prop('disabled', false).focus()
+    $('#eval').val('').prop('disabled', false).trigger('autosize.resize').focus()
     chilling()
 
 breakset = (data) ->
@@ -499,14 +502,14 @@ breakset = (data) ->
             $line.attr('title', "On [#{data.cond}]")
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0 or $eval.val().indexOf('.t ') == 0
-        $eval.val('').prop('disabled', false).focus()
+        $eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
     chilling()
 
 breakunset = (data) ->
     cm.removeClass(data.lno, 'ask-breakpoint')
     $eval = $('#eval')
     if $eval.val().indexOf('.b ') == 0
-        $eval.val('').prop('disabled', false).focus()
+        $eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
     chilling()
 
 toggle_break = (arg, temporary) ->
@@ -613,7 +616,7 @@ watched = (data) ->
 
 
 ack = ->
-    $('#eval').val('')
+    $('#eval').val('').trigger('autosize.resize')
 
 log = (data) ->
     console.log data.message
@@ -636,7 +639,7 @@ searchback = ->
 
 searchback_stop = (validate) ->
     if validate
-        $('#eval').val($('#backsearch').text())
+        $('#eval').val($('#backsearch').text()).trigger('autosize.resize')
     $('#backsearch').html('')
     backsearch = null
 
@@ -702,9 +705,6 @@ register_handlers = ->
             if not e.shiftKey
                 execute $eval.val()
                 return false
-            else
-                $eval.attr('rows', parseInt($eval.attr('rows')) + 1)
-                termscroll()
 
         else if e.keyCode == 27 # Escape
             suggest_stop()
@@ -718,9 +718,9 @@ register_handlers = ->
                 startPos = txtarea.selectionStart
                 endPos = txtarea.selectionEnd
                 if startPos or startPos == '0'
-                    $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length))
+                    $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length)).trigger('autosize.resize')
                 else
-                    $eval.val($eval.val() + '    ')
+                    $eval.val($eval.val() + '    ').trigger('autosize.resize')
                 return false
             if backsearch
                 return false
@@ -739,7 +739,7 @@ register_handlers = ->
                     $active = $tds.eq(index).addClass('active')
                 base = $active.find('.base').text()
                 completion = $active.find('.completion').text()
-                $eval.val($eval.data().root + base + completion)
+                $eval.val($eval.data().root + base + completion).trigger('autosize.resize')
                 $('#comp-desc').text($active.attr('title'))
                 termscroll()
             return false
@@ -754,8 +754,7 @@ register_handlers = ->
                     if index == 0
                         $eval.attr('data-current', $eval.val())
                     $eval.val(to_set)
-                        .attr('data-index', index)
-                        .attr('rows', to_set.split('\n').length)
+                        .attr('data-index', index).trigger('autosize.resize')
                     suggest_stop()
                     termscroll()
                     return false
@@ -771,8 +770,7 @@ register_handlers = ->
                     else
                         to_set = cmd_hist[index]
                     $eval.val(to_set)
-                        .attr('data-index', index)
-                        .attr('rows', to_set.split('\n').length)
+                        .attr('data-index', index).trigger('autosize.resize')
                     suggest_stop()
                     termscroll()
                     return false
@@ -780,6 +778,7 @@ register_handlers = ->
 
     $("#scrollback, #watchers").on('click', 'a.inspect', ->
         send('Inspect|' + $(@).attr('href'))
+        working()
         false
     ).on('click', '.short.close', ->
         $(@).addClass('open').removeClass('close').next('.long').show('fast')
@@ -792,6 +791,7 @@ register_handlers = ->
 
     $("#watchers").on('click', '.watching .name', (e) ->
         send('Unwatch|' + $(@).closest('.watching').attr('data-expr'))
+        working()
     )
 
     $("#source").on('mouseup', 'span', (e) ->
@@ -799,6 +799,7 @@ register_handlers = ->
             target = $(@).text().trim()
             historize target
             send 'Dump|' + target
+            working()
     )
 
     $(document).on('keydown', (e) ->

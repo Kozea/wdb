@@ -78,7 +78,7 @@
       start();
       $('#waiter').remove();
       $('#wdb').show();
-      return $('#eval').focus();
+      return $('#eval').autosize().focus();
     };
     new_ws.onmessage = function(m) {
       var cmd, data, message, pipe, treat;
@@ -310,7 +310,7 @@
     $('#interpreter').show();
     $('.traceline').removeClass('selected');
     $('#trace-' + current_frame.level).addClass('selected');
-    $('#eval').val('').attr('data-index', -1).attr('rows', 1);
+    $('#eval').val('').attr('data-index', -1).trigger('autosize.resize');
     if (!window.cm) {
       create_code_mirror(data.file, data.name);
     } else {
@@ -367,8 +367,8 @@
     return chilling();
   };
 
-  ellipsize = function(code_elt) {
-    return code_elt.find('span.cm-string').each(function() {
+  ellipsize = function($code) {
+    return $code.find('span.cm-string').each(function() {
       var txt;
       txt = $(this).text();
       if (txt.length > 128) {
@@ -379,8 +379,8 @@
     });
   };
 
-  code = function(parent, code, classes, html) {
-    var cls, code_elt, _i, _j, _len, _len1;
+  code = function(parent, src, classes, html) {
+    var $code, $node, cls, _i, _len;
     if (classes == null) {
       classes = [];
     }
@@ -388,39 +388,43 @@
       html = false;
     }
     if (html) {
-      code_elt = $('<code>', {
-        'class': 'cm-s-' + cm_theme
-      }).html(code);
-      for (_i = 0, _len = classes.length; _i < _len; _i++) {
-        cls = classes[_i];
-        code_elt.addClass(cls);
+      if (src[0] !== '<' || src.slice(-1) !== '>') {
+        $node = $('<div>', {
+          "class": 'out'
+        }).html(src);
+      } else {
+        $node = $(src);
       }
-      parent.append(code_elt);
-      code_elt.add(code_elt.find('*')).contents().filter(function() {
-        return this.nodeType === 3 && this.nodeValue.length > 0;
-      }).wrap('<span>').parent().each(function() {
-        var span;
-        span = this;
-        $(span).addClass('waiting_for_hl');
+      parent.append($node);
+      $node.add($node.find('*')).contents().filter(function() {
+        return this.nodeType === 3 && this.nodeValue.length > 0 && !$(this.parentElement).closest('thead').size();
+      }).wrap('<code>').parent().each(function() {
+        var $code, cls, _i, _len;
+        $code = $(this);
+        $code.addClass('waiting_for_hl').addClass('cm-s-' + cm_theme);
+        for (_i = 0, _len = classes.length; _i < _len; _i++) {
+          cls = classes[_i];
+          $code.addClass(cls);
+        }
         return setTimeout((function() {
-          CodeMirror.runMode($(span).text(), "python", span);
-          $(span).removeClass('waiting_for_hl');
-          return ellipsize(code_elt);
+          CodeMirror.runMode($code.text(), "python", $code.get(0));
+          $code.removeClass('waiting_for_hl');
+          return ellipsize($code);
         }), 50);
       });
     } else {
-      code_elt = $('<code>', {
+      $code = $('<code>', {
         'class': 'cm-s-' + cm_theme
       });
-      for (_j = 0, _len1 = classes.length; _j < _len1; _j++) {
-        cls = classes[_j];
-        code_elt.addClass(cls);
+      for (_i = 0, _len = classes.length; _i < _len; _i++) {
+        cls = classes[_i];
+        $code.addClass(cls);
       }
-      parent.append(code_elt);
-      CodeMirror.runMode(code, "python", code_elt.get(0));
-      ellipsize(code_elt);
+      parent.append($code);
+      CodeMirror.runMode(src, "python", $code.get(0));
+      ellipsize($code);
     }
-    return code_elt;
+    return $code;
   };
 
   historize = function(snippet) {
@@ -508,6 +512,7 @@
       return;
     } else if (snippet.indexOf('?') === 0) {
       cmd('Dump|' + snippet.slice(1).trim());
+      working();
       suggest_stop();
       return;
     } else if (snippet === '' && last_cmd) {
@@ -516,7 +521,7 @@
     }
     if (snippet) {
       send("Eval|" + snippet);
-      $('#eval').val($('#eval').val() + '...').prop('disabled', true);
+      $('#eval').val($('#eval').val() + '...').trigger('autosize.resize').prop('disabled', true);
       return working();
     }
   };
@@ -549,7 +554,7 @@
     snippet = $('#eval').val();
     code($('#scrollback'), data["for"], ['prompted']);
     code($('#scrollback'), data.result, [], true);
-    $('#eval').val('').prop('disabled', false).attr('data-index', -1).attr('rows', 1).focus();
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
     $('#completions').attr('style', '');
     termscroll();
     return chilling();
@@ -569,7 +574,7 @@
     $table = $('<table>', {
       "class": 'object'
     }).appendTo($container);
-    $table.append($('<tbody>', {
+    $table.append($('<thead>', {
       "class": 'toggle hidden'
     }).append($('<tr>').append($('<td>', {
       "class": 'core',
@@ -578,7 +583,7 @@
     $core_tbody = $('<tbody>', {
       "class": 'core hidden'
     }).appendTo($table);
-    $table.append($('<tbody>', {
+    $table.append($('<thead>', {
       "class": 'toggle hidden'
     }).append($('<tr>').append($('<td>', {
       "class": 'method',
@@ -587,7 +592,7 @@
     $method_tbody = $('<tbody>', {
       "class": 'method hidden'
     }).appendTo($table);
-    $table.append($('<tbody>', {
+    $table.append($('<thead>', {
       "class": 'toggle shown'
     }).append($('<tr>').append($('<td>', {
       "class": 'attr',
@@ -608,9 +613,8 @@
       $tbody.append($('<tr>').append($('<td>').text(key)).append($('<td>').html(val.val)));
     }
     code($('#scrollback'), $container.html(), [], true);
-    $('#eval').val('').prop('disabled', false).focus();
     termscroll();
-    $('#eval').val('').prop('disabled', false).focus();
+    $('#eval').val('').prop('disabled', false).trigger('autosize.resize').focus();
     return chilling();
   };
 
@@ -626,7 +630,7 @@
     }
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0 || $eval.val().indexOf('.t ') === 0) {
-      $eval.val('').prop('disabled', false).focus();
+      $eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
     }
     return chilling();
   };
@@ -636,7 +640,7 @@
     cm.removeClass(data.lno, 'ask-breakpoint');
     $eval = $('#eval');
     if ($eval.val().indexOf('.b ') === 0) {
-      $eval.val('').prop('disabled', false).focus();
+      $eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
     }
     return chilling();
   };
@@ -787,7 +791,7 @@
   };
 
   ack = function() {
-    return $('#eval').val('');
+    return $('#eval').val('').trigger('autosize.resize');
   };
 
   log = function(data) {
@@ -819,7 +823,7 @@
 
   searchback_stop = function(validate) {
     if (validate) {
-      $('#eval').val($('#backsearch').text());
+      $('#eval').val($('#backsearch').text()).trigger('autosize.resize');
     }
     $('#backsearch').html('');
     return backsearch = null;
@@ -898,9 +902,6 @@
         if (!e.shiftKey) {
           execute($eval.val());
           return false;
-        } else {
-          $eval.attr('rows', parseInt($eval.attr('rows')) + 1);
-          return termscroll();
         }
       } else if (e.keyCode === 27) {
         suggest_stop();
@@ -913,9 +914,9 @@
           startPos = txtarea.selectionStart;
           endPos = txtarea.selectionEnd;
           if (startPos || startPos === '0') {
-            $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length));
+            $eval.val($eval.val().substring(0, startPos) + '    ' + $eval.val().substring(endPos, $eval.val().length)).trigger('autosize.resize');
           } else {
-            $eval.val($eval.val() + '    ');
+            $eval.val($eval.val() + '    ').trigger('autosize.resize');
           }
           return false;
         }
@@ -939,7 +940,7 @@
           }
           base = $active.find('.base').text();
           completion = $active.find('.completion').text();
-          $eval.val($eval.data().root + base + completion);
+          $eval.val($eval.data().root + base + completion).trigger('autosize.resize');
           $('#comp-desc').text($active.attr('title'));
           termscroll();
         }
@@ -954,7 +955,7 @@
             if (index === 0) {
               $eval.attr('data-current', $eval.val());
             }
-            $eval.val(to_set).attr('data-index', index).attr('rows', to_set.split('\n').length);
+            $eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
             suggest_stop();
             termscroll();
             return false;
@@ -971,7 +972,7 @@
             } else {
               to_set = cmd_hist[index];
             }
-            $eval.val(to_set).attr('data-index', index).attr('rows', to_set.split('\n').length);
+            $eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
             suggest_stop();
             termscroll();
             return false;
@@ -981,6 +982,7 @@
     });
     $("#scrollback, #watchers").on('click', 'a.inspect', function() {
       send('Inspect|' + $(this).attr('href'));
+      working();
       return false;
     }).on('click', '.short.close', function() {
       return $(this).addClass('open').removeClass('close').next('.long').show('fast');
@@ -992,14 +994,16 @@
       return $(this).add($(this).next()).toggleClass('hidden', 'shown');
     });
     $("#watchers").on('click', '.watching .name', function(e) {
-      return send('Unwatch|' + $(this).closest('.watching').attr('data-expr'));
+      send('Unwatch|' + $(this).closest('.watching').attr('data-expr'));
+      return working();
     });
     $("#source").on('mouseup', 'span', function(e) {
       var target;
       if (e.which === 2) {
         target = $(this).text().trim();
         historize(target);
-        return send('Dump|' + target);
+        send('Dump|' + target);
+        return working();
       }
     });
     $(document).on('keydown', function(e) {
