@@ -24,6 +24,8 @@
     - [Theming](#theming)
     - [Code completion](#code-completion)
     - [Browser Support](#browser-support)
+    - [FAQ](#faq)
+        - [In Firefox opened debugging pages are not closed when done](#in-firefox-opened-debugging-pages-are-not-closed-when-done)
     - [Contribute](#contribute)
     - [Author](#author)
     - [Licence](#licence)
@@ -361,6 +363,14 @@ wdb is based on websockets so it *should* work on :
 
 Better update you browser in any case.
 If it doesn't work with one of these version please report it.
+
+
+## FAQ
+
+### In Firefox opened debugging pages are not closed when done
+
+It's a firefox config flag, visit `about:config` and set:
+`dom.allow_scripts_to_close_windows` to `true`
 
 
 ## Contribute

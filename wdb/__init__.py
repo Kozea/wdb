@@ -129,7 +129,7 @@ class Wdb(object):
                 fp.read(), filename)
         self.run(statement, filename)
 
-    def run(self, cmd, fn, globals=None, locals=None):
+    def run(self, cmd, fn=None, globals=None, locals=None):
         """Run the cmd `cmd` with trace"""
         if globals is None:
             import __main__
@@ -138,7 +138,7 @@ class Wdb(object):
             locals = globals
         self.reset()
         if isinstance(cmd, str):
-            cmd = compile(cmd, "<string>", "exec")
+            cmd = compile(cmd, fn or "<wdb>", "exec")
         self.start_trace()
         self.breakpoints.add(Breakpoint(fn, temporary=True))
         try:
@@ -472,7 +472,7 @@ class Wdb(object):
             i = max(0, len(stack) - 1)
         return stack, i
 
-    def get_trace(self, frame, tb, w_code=None):
+    def get_trace(self, frame, tb):
         """Get a dict of the traceback for wdb.js use"""
         import linecache
         frames = []
@@ -487,14 +487,10 @@ class Wdb(object):
         for i, (stack_frame, lno) in enumerate(stack):
             code = stack_frame.f_code
             filename = code.co_filename
-            if filename == '<wdb>' and w_code:
-                line = w_code
-            else:
-                linecache.checkcache(filename)
-                line = linecache.getline(filename, lno, stack_frame.f_globals)
-                line = to_unicode_string(line, filename)
-                line = line and line.strip()
-
+            linecache.checkcache(filename)
+            line = linecache.getline(filename, lno, stack_frame.f_globals)
+            line = to_unicode_string(line, filename)
+            line = line and line.strip()
             startlnos = dis.findlinestarts(code)
             lastlineno = list(startlnos)[-1][1]
             frames.append({

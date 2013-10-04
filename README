@@ -340,6 +340,14 @@ Better update you browser in any case.
 If it doesn't work with one of these version please report it.
 
 
+## FAQ
+
+### In Firefox opened debugging pages are not closed when done
+
+It's a firefox config flag, visit `about:config` and set:
+`dom.allow_scripts_to_close_windows` to `true`
+
+
 ## Contribute
 
 All contributions are more than welcomed, use the fork luke !

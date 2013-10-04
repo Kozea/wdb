@@ -261,7 +261,7 @@ select = (data) ->
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     $('#eval').val('').attr('data-index', -1).trigger('autosize.resize')
-
+    file_cache[data.name] = data.file
     if not window.cm
         create_code_mirror data.file, data.name
     else
