@@ -255,6 +255,7 @@ As of now the following special commands are supported during breakpoint:
     * .q                             : Quit
     * .h                             : Get some help
     * .e                             : Toggle file edition mode
+    * .g                             : Clear prompt
     * iterable!sthg                  : If cutter is installed, executes cut(iterable).sthg
     * expr >! file                   : Write the result of expr in file
     * !< file                        : Eval the content of file

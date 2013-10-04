@@ -75,7 +75,7 @@ make_ws = ->
 
         $('#waiter').remove()
         $('#wdb').show()
-        $('#eval').autosize().focus()
+        $('#eval').autosize()
 
     new_ws.onmessage = (m) ->
         # Open a websocket in case of request break
@@ -264,6 +264,7 @@ select = (data) ->
     file_cache[data.name] = data.file
     if not window.cm
         create_code_mirror data.file, data.name
+        $('#eval').focus()
     else
         cm = window.cm
         if cm._fn == data.name
@@ -378,22 +379,23 @@ execute = (snippet) ->
             key = snippet.substr(1)
             data = ''
         switch key
-            when 's' then cmd 'Step'
-            when 'n' then cmd 'Next'
-            when 'r' then cmd 'Return'
-            when 'c' then cmd 'Continue'
-            when 'u' then cmd 'Until'
-            when 'j' then cmd 'Jump|' + data
             when 'b' then toggle_break data
-            when 't' then toggle_break(data, true)
-            when 'z' then cmd 'Unbreak|' + data
-            when 'l' then cmd 'Breakpoints'
-            when 'f' then print_hist session_cmd_hist[$('.selected .tracefile').text()]
+            when 'c' then cmd 'Continue'
             when 'd' then cmd 'Dump|' + data
             when 'e' then toggle_edition(not cm._rw)
-            when 'q' then cmd 'Quit'
+            when 'f' then print_hist session_cmd_hist[$('.selected .tracefile').text()]
+            when 'g' then cls()
             when 'h' then print_help()
+            when 'j' then cmd 'Jump|' + data
+            when 'l' then cmd 'Breakpoints'
+            when 'n' then cmd 'Next'
+            when 'q' then cmd 'Quit'
+            when 'r' then cmd 'Return'
+            when 's' then cmd 'Step'
+            when 't' then toggle_break(data, true)
+            when 'u' then cmd 'Until'
             when 'w' then cmd 'Watch|' + data
+            when 'z' then cmd 'Unbreak|' + data
         return
     else if snippet.indexOf('?') == 0
         cmd 'Dump|' + snippet.slice(1).trim()
@@ -407,6 +409,11 @@ execute = (snippet) ->
         send("Eval|#{snippet}")
         $('#eval').val($('#eval').val() + '...').trigger('autosize.resize').prop('disabled', true)
         working()
+
+cls = ->
+    $('#completions').height($('#interpreter').height() - $('#prompt').innerHeight())
+    termscroll()
+    $('#eval').val('').trigger('autosize.resize')
 
 print_hist = (hist) ->
     print for: 'History', result: hist.slice(0).reverse().filter((e) -> e.indexOf('.') != 0).join('\n')
@@ -429,6 +436,7 @@ print_help = ->
 .q                             : Quit
 .h                             : Get some help
 .e                             : Toggle file edition mode
+.g                             : Clear prompt
 iterable!sthg                  : If cutter is installed, executes cut(iterable).sthg
 expr >! file                   : Write the result of expr in file
 !< file                        : Eval the content of file
