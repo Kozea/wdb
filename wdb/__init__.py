@@ -177,14 +177,13 @@ class Wdb(object):
         function call, function return and exception during trace"""
         fun = getattr(self, 'handle_' + event)
         if fun and (
-                (event is 'line' and self.breaks(frame)) or
-                (event is 'exception' and
+                (event == 'line' and self.breaks(frame)) or
+                (event == 'exception' and
                  (self.full or frame == self.state.frame or
                   (self.below and frame.f_back == self.state.frame))) or
                 self.state.stops(frame, event)):
             fun(frame, arg)
-
-        if event is 'return' and frame == self.state.frame:
+        if event == 'return' and frame == self.state.frame:
             # Upping state
             if self.state.up():
                 # No more frames
@@ -202,7 +201,7 @@ class Wdb(object):
                 self.stop_trace()
                 self.die()
                 return
-        if (event is 'call' and not self.stepping and not self.full and
+        if (event == 'call' and not self.stepping and not self.full and
                 not (self.below and frame.f_back == self.state.frame) and
                 not self.get_file_breaks(frame.f_code.co_filename)):
             # Don't trace anymore here
@@ -218,7 +217,7 @@ class Wdb(object):
             self.breaks(frame, no_remove=True),
             self.state.stops(frame, event)
         ))
-        if event is 'return':
+        if event == 'return':
             trace_log.debug(
                 'Return: frame: %s, state: %s, state.f_back: %s' % (
                     pretty_frame(frame), pretty_frame(self.state.frame),
@@ -458,7 +457,7 @@ class Wdb(object):
     def get_stack(self, f, t):
         """Build the stack from frame and traceback"""
         stack = []
-        if t and t.tb_frame is f:
+        if t and t.tb_frame == f:
             t = t.tb_next
         while f is not None:
             stack.append((f, f.f_lineno))

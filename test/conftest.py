@@ -2,7 +2,7 @@ from multiprocessing import Process
 from multiprocessing.connection import Listener
 from log_colorizer import get_color_logger
 from pytest import fixture
-import logging
+import signal
 import json
 import os
 
@@ -22,13 +22,13 @@ class Slave(Process):
         self.port = port
         super(Slave, self).__init__()
 
-    def run(self, *args):
+    def run(self):
         import os
         os.environ['WDB_SOCKET_SERVER'] = self.host
         os.environ['WDB_SOCKET_PORT'] = str(self.port)
         os.environ['WDB_NO_BROWSER_AUTO_OPEN'] = 'Yes'
 
-        with open(self.file) as file:
+        with open(self.file, 'rb') as file:
             exec(compile(file.read(), self.file, 'exec'),
                  GLOBALS, LOCALS)
 
@@ -52,11 +52,23 @@ class Message(object):
 
 class Socket(object):
 
-    def __init__(self, host='localhost', port=19999):
+    def __init__(self, slave, host='localhost', port=19999):
+        self.slave = slave
+        self.slave.start()
+        self.started = False
+        self.host = host
+        self.port = port
+
+    def start(self):
         log.info('Opening socket')
-        self.listener = Listener((host, port))
+        self.listener = Listener((self.host, self.port))
         log.info('Accepting')
-        self.connection = self.listener.accept()
+        try:
+            self.connection = self.listener.accept()
+        except:
+            self.listener.close()
+            raise
+        self.started = True
         log.info('Connection get')
         # uuid is a particular case
         self.uuid = self.receive().command
@@ -71,20 +83,38 @@ class Socket(object):
         self.connection.send_bytes(message.encode('utf-8'))
 
     def close(self):
-        self.connection.close()
-        self.listener.close()
+        self.slave.terminate()
+        if self.started:
+            self.connection.close()
+            self.listener.close()
+
+
+class use(object):
+    def __init__(self, file):
+        self.file = file
+
+    def __call__(self, fun):
+        fun._wdb_file = self.file
+        return fun
+
+
+def timeout_handler(signum, frame):
+    raise Exception('Timeout')
+
+signal.signal(signal.SIGALRM, timeout_handler)
 
 
 @fixture(scope="function")
 def socket(request):
     log.info('Fixture')
-    slave = Slave('error_in_script.py')
-    slave.start()
-    socket = Socket()
+    socket = Socket(Slave(request.function._wdb_file))
+
+    # If it takes more than 5 seconds, it must be an error
+    signal.alarm(5)
 
     def end_socket():
+        signal.alarm(0)
         socket.close()
-        slave.terminate()
 
     request.addfinalizer(end_socket)
     return socket
