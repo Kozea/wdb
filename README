@@ -16,7 +16,7 @@ The wdb clients allow step by step debugging, in-program python code execution, 
 
 Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
-**wdb** works with python 2, python 3 and pypy.
+**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3) and pypy.
 Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
 
 In other words it's a very enhanced version of pdb directly in your browser with nice features.
@@ -329,13 +329,11 @@ Wdb has dynamic code completion in eval prompt thanks to [jedi](https://github.c
 
 ## Browser Support
 
-wdb is based on websockets so it *should* work on :
+wdb is based on websockets and since 3812417 its layout relies on flexbox, browser requirement is now :
 
-- Chrome 14
-- Firefox 11
-- IE 10
-- Safari 6
-- Opera 12.1
+- Chrome 29
+- Firefox 22
+- IE 11
 
 Better update you browser in any case.
 If it doesn't work with one of these version please report it.
@@ -353,6 +351,17 @@ It's a firefox config flag, visit `about:config` and set:
 
 All contributions are more than welcomed, use the fork luke !
 
+
+## Test
+
+Wdb is now partially tested, so if you want to contribute be sure to run the test suite:
+
+```
+    $ pip install pytest
+    $ py.test
+```
+
+Feel free to add tests !
 
 ## Author
 

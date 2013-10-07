@@ -1,8 +1,10 @@
 # *-* coding: utf-8 *-*
-from .utils import division_by_zero_message
+from .conftest import use
 
 
-def test_init(socket):
+@use('error_in_script.py')
+def test_with_error(socket):
+    socket.start()
     msg = socket.receive()
     assert msg.command == 'Init'
     assert 'cwd' in msg.data
@@ -10,7 +12,7 @@ def test_init(socket):
     msg = socket.receive()
     assert msg.command == 'Title'
     assert msg.data.title == 'ZeroDivisionError'
-    assert msg.data.subtitle == division_by_zero_message
+    assert 'division' in msg.data.subtitle
 
     msg = socket.receive()
     assert msg.command == 'Trace'
@@ -32,8 +34,7 @@ def test_init(socket):
     msg = socket.receive()
     assert msg.command == 'Echo'
     assert msg.data['for'] == '__exception__'
-    assert msg.data.val == ("ZeroDivisionError: %s" %
-                            division_by_zero_message)
+    assert 'ZeroDivisionError:' in msg.data.val
 
     msg = socket.receive()
     assert msg.command == 'Watched'
