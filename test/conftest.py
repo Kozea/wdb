@@ -2,6 +2,7 @@ from multiprocessing import Process
 from multiprocessing.connection import Listener
 from log_colorizer import get_color_logger
 from pytest import fixture
+from logging import getLevelName
 import signal
 import json
 import os
@@ -9,6 +10,7 @@ import os
 
 log = get_color_logger('wdb.test')
 log.info('Conftest')
+log.setLevel(getLevelName(os.getenv('WDB_TEST_LOG', 'WARNING')))
 GLOBALS = globals()
 LOCALS = locals()
 
@@ -73,6 +75,18 @@ class Socket(object):
         # uuid is a particular case
         self.uuid = self.receive().command
         self.send('Start')
+
+    def init(self):
+        self.start()
+        assert self.receive().command == 'Init'
+        assert self.receive().command == 'Title'
+        assert self.receive().command == 'Trace'
+        assert self.receive().command == 'SelectCheck'
+        assert self.receive().command == 'Echo'
+        echo_watched = self.receive().command
+        if echo_watched == 'Echo':
+            echo_watched = self.receive().command
+        assert echo_watched == 'Watched'
 
     def receive(self):
         return Message(self.connection.recv_bytes().decode('utf-8'))
