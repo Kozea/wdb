@@ -6,6 +6,7 @@ from logging import getLevelName
 import signal
 import json
 import os
+import sys
 
 
 log = get_color_logger('wdb.test')
@@ -54,8 +55,8 @@ class Message(object):
 
 class Socket(object):
 
-    def __init__(self, slave, host='localhost', port=19999):
-        self.slave = slave
+    def __init__(self, testfile, host='localhost', port=19999):
+        self.slave = Slave(testfile, host, port)
         self.slave.start()
         self.started = False
         self.host = host
@@ -121,7 +122,8 @@ signal.signal(signal.SIGALRM, timeout_handler)
 @fixture(scope="function")
 def socket(request):
     log.info('Fixture')
-    socket = Socket(Slave(request.function._wdb_file))
+    socket = Socket(request.function._wdb_file,
+                    port=sys.hexversion % 60000 + 1024)
 
     # If it takes more than 5 seconds, it must be an error
     signal.alarm(5)
