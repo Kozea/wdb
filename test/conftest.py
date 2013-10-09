@@ -61,21 +61,31 @@ class Socket(object):
         self.started = False
         self.host = host
         self.port = port
+        self.connections = {}
+        self.listener = None
+
+    def connection(self, uuid):
+        if uuid is None and len(self.connections) == 1:
+            return list(self.connections.values())[0]
+        else:
+            return self.connections[uuid]
 
     def start(self):
-        log.info('Opening socket')
-        self.listener = Listener((self.host, self.port))
         log.info('Accepting')
+        if not self.listener:
+            self.listener = Listener((self.host, self.port))
         try:
-            self.connection = self.listener.accept()
+            connection = self.listener.accept()
         except:
             self.listener.close()
             raise
         self.started = True
+
         log.info('Connection get')
-        # uuid is a particular case
-        self.uuid = self.receive().command
-        self.send('Start')
+        uuid = connection.recv_bytes().decode('utf-8')
+        self.connections[uuid] = connection
+        self.send('Start', uuid=uuid)
+        return uuid
 
     def init(self):
         self.start()
@@ -89,18 +99,19 @@ class Socket(object):
             echo_watched = self.receive().command
         assert echo_watched == 'Watched'
 
-    def receive(self):
-        return Message(self.connection.recv_bytes().decode('utf-8'))
+    def receive(self, uuid=None):
+        return Message(self.connection(uuid).recv_bytes().decode('utf-8'))
 
-    def send(self, command, data=None):
+    def send(self, command, data=None, uuid=None):
         message = '%s|%s' % (command, data) if data else command
         log.info('Sending %s' % message)
-        self.connection.send_bytes(message.encode('utf-8'))
+        self.connection(uuid).send_bytes(message.encode('utf-8'))
 
     def close(self):
         self.slave.terminate()
         if self.started:
-            self.connection.close()
+            for connection in self.connections.values():
+                connection.close()
             self.listener.close()
 
 

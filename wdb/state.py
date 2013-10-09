@@ -1,3 +1,4 @@
+from .utils import pretty_frame
 
 
 class State(object):
@@ -9,6 +10,10 @@ class State(object):
         if self.frame:
             self.frame = self.frame.f_back
             return self.frame is None
+
+    def __repr__(self):
+        return '<State is %s for %s>' % (
+            self.__class__.__name__, pretty_frame(self.frame))
 
 
 class Running(State):
