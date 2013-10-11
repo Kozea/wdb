@@ -11,6 +11,12 @@ import os
 import sys
 
 
+def u(s):
+    if sys.version_info[0] == 2:
+        return s.decode('utf-8')
+    return s
+
+
 log = get_color_logger('wdb.test')
 log.info('Conftest')
 log.setLevel(getLevelName(os.getenv('WDB_TEST_LOG', 'WARNING')))
