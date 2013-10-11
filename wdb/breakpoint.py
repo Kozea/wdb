@@ -80,18 +80,22 @@ class LineBreakpoint(Breakpoint):
         return super(LineBreakpoint, self).__hash__()
 
 
-class ConditionalBreakpoint(LineBreakpoint):
+class ConditionalBreakpoint(Breakpoint):
     """Breakpoint that breaks if condition is True at line in file"""
     def __init__(self, file, line, condition, temporary=False):
+        self.line = line
         self.condition = condition
-        super(ConditionalBreakpoint, self).__init__(file, line, temporary)
+        super(ConditionalBreakpoint, self).__init__(file, temporary)
 
     def breaks(self, frame):
         try:
-            return (super(ConditionalBreakpoint, self).breaks(frame) and
-                    eval(self.condition, frame.f_globals, frame.f_locals))
+            return (
+                super(ConditionalBreakpoint, self).breaks(frame) and
+                (self.line is None or frame.f_lineno == self.line) and
+                eval(self.condition, frame.f_globals, frame.f_locals))
         except:
             # Break in case of
+            log.warning('Error in conditional break', exc_info=True)
             return True
 
     def __repr__(self):
@@ -103,7 +107,7 @@ class ConditionalBreakpoint(LineBreakpoint):
             other) and self.condition == other.condition
 
     def __hash__(self):
-        return super(LineBreakpoint, self).__hash__()
+        return super(ConditionalBreakpoint, self).__hash__()
 
 
 class FunctionBreakpoint(Breakpoint):
@@ -128,4 +132,4 @@ class FunctionBreakpoint(Breakpoint):
             other) and self.function == other.function
 
     def __hash__(self):
-        return super(LineBreakpoint, self).__hash__()
+        return super(FunctionBreakpoint, self).__hash__()

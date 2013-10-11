@@ -47,7 +47,4 @@ def test_with_error(socket):
     assert len(msg.data.file) == 259
 
     socket.send('Continue')
-    try:
-        msg = socket.receive()
-    except Exception as e:
-        assert type(e) == EOFError
+    socket.join()

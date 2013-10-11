@@ -84,7 +84,4 @@ def test_with_trace(socket):
     assert len(msg.data.file) == 261
 
     socket.send('Continue')
-    try:
-        msg = socket.receive()
-    except Exception as e:
-        assert type(e) == EOFError
+    socket.join()

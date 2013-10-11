@@ -1,11 +1,7 @@
 # *-* coding: utf-8 *-*
 from .conftest import use
-from pytest import mark
-import sys
 
 
-# @mark.skipif('PyPy' in sys.version,
-             # reason="PyPy make some troubles with forks")
 @use('forks.py')
 def test_with_forks(socket):
     uuid1 = socket.start()
@@ -94,3 +90,6 @@ def test_with_forks(socket):
     assert current_trace.function == '<module>'
     assert current_trace.llno == 30
     assert current_trace.lno == 30
+
+    socket.send('Continue', uuid=last_uuid)
+    socket.join()

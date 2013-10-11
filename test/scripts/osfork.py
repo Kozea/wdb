@@ -1,4 +1,6 @@
 import os
+from wdb import set_trace as wtf
+
 
 print('Forking')
 
@@ -6,11 +8,11 @@ pid = os.fork()
 
 if pid == 0:
     print('In children')
-    import wdb; wdb.set_trace()
+    wtf()
     print('Children dead')
 else:
     print('In parent')
-    import wdb; wdb.set_trace()
+    wtf()
     print('Parent dead')
 
 print('The End')
