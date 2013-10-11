@@ -454,7 +454,7 @@ class Interaction(object):
 
         fn = remaining or self.current_file
         self.db.clear_break(
-            fn, int(lno), None, cond, funcname)
+            fn, lno and int(lno), None, cond, funcname)
 
         if fn == self.current_file:
             self.db.send('BreakUnset|%s' % dump({'lno': lno}))

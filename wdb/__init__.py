@@ -292,12 +292,11 @@ class Wdb(object):
             self.stop_trace()
 
     def get_break(self, filename, lineno, temporary, cond, funcname):
-        if lineno:
-            if cond:
-                return ConditionalBreakpoint(
-                    filename, lineno, cond, temporary)
-            else:
-                return LineBreakpoint(filename, lineno, temporary)
+        if lineno and not cond:
+            return LineBreakpoint(filename, lineno, temporary)
+        elif cond:
+            return ConditionalBreakpoint(
+                filename, lineno, cond, temporary)
         elif funcname:
             return FunctionBreakpoint(filename, funcname, temporary)
         else:

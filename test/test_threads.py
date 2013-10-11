@@ -94,3 +94,6 @@ def test_with_threads(socket):
     assert current_trace.function == '<module>'
     assert current_trace.llno == 30
     assert current_trace.lno == 30
+
+    socket.send('Continue', uuid=last_uuid)
+    socket.join()

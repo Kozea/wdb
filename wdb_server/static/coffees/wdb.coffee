@@ -445,11 +445,10 @@ expr >! file                   : Write the result of expr in file
 * arg is using the following syntax:
   [file/module][:lineno][#function][,condition]
 which means:
-  - [file]                  : Break if any line of `file` is executed
-  - [file]:lineno           : Break on `file` at `lineno`
-  - [file]:lineno,condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)
-  - [file]#function         : Break when inside `function` function
-
+  - [file]                    : Break if any line of `file` is executed
+  - [file]:lineno             : Break on `file` at `lineno`
+  - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)
+  - [file]#function           : Break when inside `function` function
 File is always current file by default and you can also specify a module like `logging.config`.
 '''
 

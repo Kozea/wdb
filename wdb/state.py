@@ -47,4 +47,4 @@ class Until(State):
 class Return(Next):
     """Returning state: Stop on return event if same frame"""
     def stops(self, frame, event):
-        return self.frame == frame and event is 'return'
+        return self.frame == frame and event == 'return'
