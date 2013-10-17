@@ -16,7 +16,7 @@ The wdb clients allow step by step debugging, in-program python code execution, 
 
 Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
-**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3) and pypy.
+**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4α) and pypy.
 Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
 
 In other words it's a very enhanced version of pdb directly in your browser with nice features.
