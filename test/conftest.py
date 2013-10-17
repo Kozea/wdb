@@ -4,7 +4,7 @@ from log_colorizer import get_color_logger
 from pytest import fixture
 from pytest import mark
 
-from logging import getLevelName
+import logging
 import signal
 import json
 import os
@@ -19,7 +19,7 @@ def u(s):
 
 log = get_color_logger('wdb.test')
 log.info('Conftest')
-log.setLevel(getLevelName(os.getenv('WDB_TEST_LOG', 'WARNING')))
+log.setLevel(getattr(logging, os.getenv('WDB_TEST_LOG', 'WARNING')))
 GLOBALS = globals()
 LOCALS = locals()
 
