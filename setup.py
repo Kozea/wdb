@@ -24,7 +24,7 @@ options = dict(
     platforms="Any",
     scripts=['wdb.server.py'],
     packages=find_packages(),
-    install_requires=["tornado", "log_colorizer", "jedi"],
+    install_requires=["tornado", "log_colorizer", "jedi", "filemagic"],
     package_data={
         'wdb_server': [
             'static/fonts/*',

@@ -17,6 +17,11 @@ try:
 except ImportError:
     cut = None
 
+try:
+    import magic
+except ImportError:
+    magic = None
+
 import os
 import sys
 import time
@@ -582,6 +587,7 @@ class Interaction(object):
             data = data[pipe + 1:]
         else:
             mime = 'text/html'
+
         try:
             thing = eval(
                 data, self.get_globals(), self.locals[self.index])
@@ -589,8 +595,11 @@ class Interaction(object):
             fail(self.db, 'Display')
             return
         else:
+            if magic:
+                with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
+                    mime = m.id_buffer(thing)
             self.db.send('Display|%s' % dump({
-                'for': u('%s') % data,
+                'for': u('%s (%s)') % (data, mime),
                 'val': b64encode(thing),
                 'type': mime}))
 
