@@ -98,6 +98,7 @@ make_ws = ->
             when 'BreakSet'    then breakset
             when 'BreakUnset'  then breakunset
             when 'Dump'        then dump
+            when 'Display'     then display
             when 'Suggest'     then suggest
             when 'Watched'     then watched
             when 'Ack'         then ack
@@ -392,6 +393,7 @@ execute = (snippet) ->
             when 'q' then cmd 'Quit'
             when 'r' then cmd 'Return'
             when 's' then cmd 'Step'
+            when 'i' then cmd 'Display|' + data
             when 't' then toggle_break(data, true)
             when 'u' then cmd 'Until'
             when 'w' then cmd 'Watch|' + data
@@ -437,6 +439,7 @@ print_help = ->
 .h                             : Get some help
 .e                             : Toggle file edition mode
 .g                             : Clear prompt
+.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"
 iterable!sthg                  : If cutter is installed, executes cut(iterable).sthg
 expr >! file                   : Write the result of expr in file
 !< file                        : Eval the content of file
@@ -627,6 +630,18 @@ ack = ->
 
 log = (data) ->
     console.log data.message
+
+display = (data) ->
+    suggest_stop()
+    snippet = $('#eval').val()
+    code($('#scrollback'), data.for, ['prompted'])
+    tag = if data.type == 'text/html' then 'iframe' else 'embed'
+    $('#scrollback').append(
+        $("<#{tag}>", src: "data:#{data.type};charset=UTF-8;base64,#{data.val}"))
+    $('#eval').val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus()
+    $('#completions').attr('style', '')
+    termscroll()
+    chilling()
 
 searchback = ->
     suggest_stop()
