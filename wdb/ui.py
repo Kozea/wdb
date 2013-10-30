@@ -1,7 +1,7 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
     dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
-    to_unicode_string)
+    to_unicode_string, from_bytes, force_bytes)
 from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
@@ -595,12 +595,13 @@ class Interaction(object):
             fail(self.db, 'Display')
             return
         else:
+            thing = force_bytes(thing)
             if magic:
                 with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
                     mime = m.id_buffer(thing)
             self.db.send('Display|%s' % dump({
                 'for': u('%s (%s)') % (data, mime),
-                'val': b64encode(thing),
+                'val': from_bytes(b64encode(thing)),
                 'type': mime}))
 
     def do_disable(self, data):

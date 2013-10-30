@@ -67,6 +67,11 @@ if python_version == 2:
 
     def from_bytes(bytes_):
         return bytes_
+
+    def force_bytes(bytes_):
+        if isinstance(bytes_, unicode):
+            return bytes_.encode('utf-8')
+        return bytes_
 else:
     def to_unicode(string):
         return string
@@ -80,6 +85,10 @@ else:
     def from_bytes(bytes_):
         return bytes_.decode('utf-8')
 
+    def force_bytes(bytes_):
+        if isinstance(bytes_, str):
+            return bytes_.encode('utf-8')
+        return bytes_
 
 def u(s):
     if python_version == 2:
