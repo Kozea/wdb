@@ -155,6 +155,19 @@ code
 #interpreter
   font: $code-font
 
+#scrollback
+  embed
+    border: 1px solid $code-ctx-border
+    +box-shadow(inset -8px 0 20px $source-shadow)
+
+  iframe
+    +box-shadow(inset -8px 0 20px $source-shadow)
+    background-color: white
+    width: 100%
+    min-height: 300px
+    border: 1px solid $code-ctx-border
+    resize: both
+
 #prompt, .prompted
   padding: 0.5em 0 0 0
   &:before

@@ -1,1 +1,1015 @@
-@charset "UTF-8";@font-face{font-family:"Source Code Pro";src:url('/static/fonts/SourceCodePro-Regular.eot');src:url('/static/fonts/SourceCodePro-Regular.eot?#iefix') format('eot'),url('/static/fonts/SourceCodePro-Regular.woff') format('woff'), url('/static/fonts/SourceCodePro-Regular.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Regular.svg') format('svg');font-weight:400}@font-face{font-family:"Source Code Pro";src:url('/static/fonts/SourceCodePro-Semibold.eot');src:url('/static/fonts/SourceCodePro-Semibold.eot?#iefix') format('eot'),url('/static/fonts/SourceCodePro-Semibold.woff') format('woff'), url('/static/fonts/SourceCodePro-Semibold.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Semibold.svg') format('svg');font-weight:700}@font-face{font-family:"Source Code Pro";src:url('/static/fonts/SourceCodePro-Bold.eot');src:url('/static/fonts/SourceCodePro-Bold.eot?#iefix') format('eot'),url('/static/fonts/SourceCodePro-Bold.woff') format('woff'), url('/static/fonts/SourceCodePro-Bold.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Bold.svg') format('svg');font-weight:900}.prettyprint{font:12px/1.5 "Source Code Pro",monospace;border:5px solid #ddd;padding:7px 0 5px;font-size:14px;white-space:pre;overflow:auto;max-height:500px;width:100%;display:block}.prettyprint ol,.prettyprint ul{list-style:none}.prettyprint ol.linenums{margin-top:0;margin-bottom:0;list-style:decimal outside;padding-left:47px;color:#afafaf;font-size:12px}.prettyprint ol.linenums li{padding-left:15px;border-left:3px #6ce26c solid}.prettyprint li>*{font-size:14px}.prettyprint ol,.prettyprint ul{padding:5px 0}.prettyprint li.L0,.prettyprint li.L1,.prettyprint li.L2,.prettyprint li.L3,.prettyprint li.L4,.prettyprint li.L5,.prettyprint li.L6,.prettyprint li.L7,.prettyprint li.L8,.prettyprint li.L9{list-style:inherit;background:0}.prettyprint.alternate .prettyprint.alternate li.L1{background:#f5f5f5}.prettyprint.alternate li.L3,.prettyprint.alternate li.L5,.prettyprint.alternate li.L7,.prettyprint.alternate li.L9{background:#f5f5f5}.pln{color:#c5c8c6}.str{color:#b5bd68}.kwd{color:#b294bb}.com{color:#969896}.typ{color:#81a2be}.lit{color:#de935f}.pun{color:#c5c8c6}.opn{color:#c5c8c6}.clo{color:#c5c8c6}.tag{color:#c66}.atn{color:#de935f}.atv{color:#8abeb7}.dec{color:#de935f}.var{color:#c66}.fun{color:#81a2be}body,html{color:#ccc;background-color:#1d1f21;height:100%;margin:0}#wdb{display:flex;flex-direction:column;height:100%}#wdb>header{height:100px;display:flex;align-items:center}#wdb>header #activity{width:100px}#wdb>header #title{flex:1;margin:0}#wdb>article{flex:1;display:flex}#wdb>article #source{flex:7;display:flex;flex-direction:column;margin-left:5px}#wdb>article #source #source-editor{flex:1;position:relative}#wdb>article #source #source-editor .CodeMirror{position:absolute;height:100%;width:100%}#wdb>article #source #interpreter{flex:1;overflow-y:auto}#wdb>article #traceback{flex:3;overflow-y:auto}#wdb #watchers{display:flex;flex-flow:row wrap}#wdb #watchers>div{margin-left:5px;margin-right:2em;display:flex}#wdb #watchers>div .name{color:#fff;cursor:pointer}#wdb #watchers>div .value{flex:1}a{color:#ccc}table{width:100%}table tr td{padding:0.25em;border:1px solid #050606}input{border:1px solid #050606;background-color:#1d1f21;color:#ccc;padding:0.25em}input[name=debug_file]{width:500px}input[type=submit]{font-weight:bold;padding-left:0.5em;padding-right:0.5em}h1{font-size:2em;font-weight:bold;color:#ccc;font-variant:small-caps;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}h1 small{color:#777;display:block;font-size:0.5em;margin-left:15px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}code{font-family:"Source Code Pro" !important;display:block;white-space:pre-wrap;word-break:break-all}#source-editor>.CodeMirror{font-family:"Source Code Pro" !important;font-weight:bold;font-size:15px;-webkit-box-shadow:inset -8px 0 20px #000;-moz-box-shadow:inset -8px 0 20px #000;box-shadow:inset -8px 0 20px #000}#source-editor>.CodeMirror.rw:after{position:absolute;top:2em;right:-2em;content:"Edit Mode";background:#000;color:#777;border-top:1px solid #555;border-bottom:1px solid #555;padding:0.2em 3em;-webkit-transform:rotate(45deg);-moz-transform:rotate(45deg);-ms-transform:rotate(45deg);-o-transform:rotate(45deg);transform:rotate(45deg)}#source-editor>.CodeMirror .CodeMirror-linebackground{-webkit-transition:250ms;-moz-transition:250ms;-o-transition:250ms;transition:250ms}#source-editor>.CodeMirror .breakpoints{width:0.6em;border:none}#eval{background-color:transparent;border:none;flex:1;margin:0;outline:none;overflow:hidden;padding:0;vertical-align:top}#interpreter{font:12px/1.5 "Source Code Pro",monospace}#prompt,.prompted{padding:0.5em 0 0 0}#prompt:before,.prompted:before{font:12px/1.5 "Source Code Pro",monospace;color:#c5c8c6;content:">>> "}#prompt{display:flex}#prompt textarea{color:#c5c8c6;font:12px/1.5 "Source Code Pro",monospace;margin-left:0.5em;resize:none}#completions .base{color:#ccc}#completions .completion{color:#777}#completions td{padding:0.25em}#completions td.active .base{color:red}#completions td.active .completion{color:#ff4500}#completions td.active.complete .base{color:#c66}#comp-desc,#backsearch{color:#81a2be;font-style:italic}.trace{font:12px/1.5 "Source Code Pro",monospace}.traceline{-webkit-transition:border 750ms;-moz-transition:border 750ms;-o-transition:border 750ms;transition:border 750ms;margin:0 0 1em 1em;font:12px/1.5 "Source Code Pro",monospace;clear:both;overflow:hidden;background-color:#1b1b1b}.traceline:before{background-color:#1b1b1b;border-color:#1b1b1b #1b1b1b #1d1f21 #1d1f21}.traceline .tracefunfun{background-color:#1d1f21}.traceline .tracefunfun .tracefun{background-color:#1b1b1b}.traceline .tracefunfun .tracefun:before{border-color:#1b1b1b #1b1b1b #1d1f21 #1d1f21}.traceline:nth-child(odd){background-color:#181818}.traceline:nth-child(odd):before{background-color:#181818;border-color:#181818 #181818 #1d1f21 #1d1f21}.traceline:nth-child(odd) .tracefunfun{background-color:#1d1f21}.traceline:nth-child(odd) .tracefunfun .tracefun{background-color:#181818}.traceline:nth-child(odd) .tracefunfun .tracefun:before{border-color:#181818 #181818 #1d1f21 #1d1f21}.traceline:hover{background-color:#0e0e0e}.traceline:hover:before{background-color:#0e0e0e;border-color:#0e0e0e #0e0e0e #1d1f21 #1d1f21}.traceline:hover .tracefunfun{background-color:#1d1f21}.traceline:hover .tracefunfun .tracefun{background-color:#0e0e0e}.traceline:hover .tracefunfun .tracefun:before{border-color:#0e0e0e #0e0e0e #1d1f21 #1d1f21}.traceline.selected{background-color:#010101;background-color:#010101}.traceline.selected:before{background-color:#010101;border-color:#010101 #010101 #1d1f21 #1d1f21}.traceline.selected .tracefunfun{background-color:#1d1f21}.traceline.selected .tracefunfun .tracefun{background-color:#010101}.traceline.selected .tracefunfun .tracefun:before{border-color:#010101 #010101 #1d1f21 #1d1f21}.traceline.real-selected{background-color:#0e0e0e;background-color:#0e0e0e}.traceline.real-selected:before{background-color:#0e0e0e;border-color:#0e0e0e #0e0e0e #1d1f21 #1d1f21}.traceline.real-selected .tracefunfun{background-color:#1d1f21}.traceline.real-selected .tracefunfun .tracefun{background-color:#0e0e0e}.traceline.real-selected .tracefunfun .tracefun:before{border-color:#0e0e0e #0e0e0e #1d1f21 #1d1f21}.traceline .tracecode{padding:0.5em;padding-top:0.25em;clear:both}.traceline .tracecode>code{white-space:nowrap}.traceline .tracefunfun{overflow:hidden}.traceline .tracefunfun .tracefun{font-weight:bolder;font-size:0.8em;text-align:right;float:right;line-height:1.2;color:#88f}.traceline .tracefunfun .tracefun:before{content:"";width:0;height:0;border-style:solid;border-width:0.7em;display:inline-block;vertical-align:top}.traceline .tracefilelno{padding:0.5em;padding-bottom:0.25em}.traceline .tracefilelno .tracefile{color:#555}.traceline .tracefilelno .tracelno{color:#999}.traceline .tracefilelno .tracelno:before{content:": "}.prettyprint{border:none !important}.CodeMirror-linenumber{font-size:14px}.CodeMirror-linebackground{-webkit-transition:1s;-moz-transition:1s;-o-transition:1s;transition:1s}.CodeMirror-linebackground:hover{-webkit-transition:1s;-moz-transition:1s;-o-transition:1s;transition:1s;color:#8cedff}.CodeMirror-linebackground.ctx{color:#fff;background-color:#181818}.CodeMirror-linebackground.ctx.ctx-top{border-top:1px solid #000}.CodeMirror-linebackground.ctx.ctx-bottom{border-bottom:1px solid #000}.CodeMirror-linebackground.ctx:before{color:#fff;background-color:#181818}.CodeMirror-linebackground.footstep{color:#000;background-color:#111 !important}.CodeMirror-linebackground.breakpoint{color:#ff5995;background-color:rgba(255,89,149,0.15) !important}.CodeMirror-linebackground.highlighted{color:#b6e354;background-color:#000 !important}.CodeMirror-linebackground.ask-breakpoint{color:#ff0}a.inspect{display:inline-block;text-decoration:none;background-color:#181818;border:1px solid #111}a.inspect:hover{background-color:#111;border:1px solid #000}.long{display:none}.short.close:after{content:'…"'}#comp-desc{text-align:left}#comp-desc .fun_name{color:#fff}#comp-desc .fun_punct{color:#fff}#comp-desc .fun_param{color:#969896}#comp-desc .fun_param.active{color:#de935f}.backsearched{text-decoration:underline}.out code,.out a{display:inline}.object{border:1px solid #191919;border-spacing:0;border-collapse:collapse;width:100%;font-size:0.85em}.object thead.toggle:hover{background-color:#111}.object thead.toggle td{text-align:center}.object thead.toggle td:after{content:"[-]";float:right}.object thead.toggle.hidden td:after{content:"[+]"}.object tbody td,.object thead td{border:2px solid #111;padding:0.2em 0.5em;min-width:100px}.object tbody.hidden{display:none}.object tbody tr>:first-child{vertical-align:top}.object tbody table td{border:none}.object .core{background-color:#0e0e0e}.object .method{background-color:#141414}.object .attr{background-color:#181818}.nogood{color:red !important}.nogood>.pln,.nogood>.typ{color:red !important}.waiting_for_hl{opacity:0.4}code,code span{-webkit-transition:opacity 50ms;-moz-transition:opacity 50ms;-o-transition:opacity 50ms;transition:opacity 50ms}.trace_500{padding:1em}.trace_500 .flno{color:#777;font-size:1.3em;float:left}.trace_500 .fun{font-size:1.2em;float:right}.trace_500 code{font-size:1.3em;padding:0.5em;clear:left}#activate,#deactivate{display:block;width:80px;margin:0 10px;text-decoration:none;background-color:#292c2f}#activate:before,#deactivate:before{display:block;width:40px;text-align:center;color:#fff;font-variant:small-caps;font-weight:bold}#activate:before{content:"Off";background-color:red}#deactivate:before{content:"On";margin-left:40px;background-color:green}.CodeMirror-dialog{background-color:#050606;border-bottom-color:#1d1f21;color:#ccc}.cm-searching{background:#35393c}.state{background-color:rgba(0,0,0,0);border:5px solid rgba(0,183,229,0.9);opacity:0.9;border-right:5px solid rgba(0,0,0,0);border-left:5px solid rgba(0,0,0,0);border-radius:50px;box-shadow:0 0 35px #2187e7;position:absolute;top:20px;left:10px;width:50px;height:50px;-moz-animation:spinPulse 1s infinite ease-in-out;-webkit-animation:spinPulse 1s infinite linear;animation:spinPulse 1s infinite linear;-moz-animation-play-state:paused;-webkit-animation-play-state:paused;animation-play-state:paused}.state.inner{width:30px;height:30px;top:30px;left:20px;-moz-animation:spinoffPulse 1s infinite linear;-webkit-animation:spinoffPulse 1s infinite linear;animation:spinoffPulse 1s infinite linear;-moz-animation-play-state:paused;-webkit-animation-play-state:paused;animation-play-state:paused}.state.on{-moz-animation-play-state:running;-webkit-animation-play-state:running;animation-play-state:running}@-moz-keyframes spinPulse{0%{-webkit-transform:rotate(145deg);-moz-transform:rotate(145deg);-ms-transform:rotate(145deg);-o-transform:rotate(145deg);transform:rotate(145deg);opacity:1}50%{-webkit-transform:rotate(-120deg);-moz-transform:rotate(-120deg);-ms-transform:rotate(-120deg);-o-transform:rotate(-120deg);transform:rotate(-120deg);opacity:0}100%{-webkit-transform:rotate(160deg);-moz-transform:rotate(160deg);-ms-transform:rotate(160deg);-o-transform:rotate(160deg);transform:rotate(160deg);opacity:0;box-shadow:0 0 1px #2187e7}}@-moz-keyframes spinoffPulse{0%{-webkit-transform:rotate(0deg);-moz-transform:rotate(0deg);-ms-transform:rotate(0deg);-o-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}@-webkit-keyframes spinPulse{0%{-webkit-transform:rotate(145deg);-moz-transform:rotate(145deg);-ms-transform:rotate(145deg);-o-transform:rotate(145deg);transform:rotate(145deg);opacity:1}50%{-webkit-transform:rotate(-120deg);-moz-transform:rotate(-120deg);-ms-transform:rotate(-120deg);-o-transform:rotate(-120deg);transform:rotate(-120deg);opacity:0}100%{-webkit-transform:rotate(160deg);-moz-transform:rotate(160deg);-ms-transform:rotate(160deg);-o-transform:rotate(160deg);transform:rotate(160deg);opacity:0;box-shadow:0 0 1px #2187e7}}@-webkit-keyframes spinoffPulse{0%{-webkit-transform:rotate(0deg);-moz-transform:rotate(0deg);-ms-transform:rotate(0deg);-o-transform:rotate(0deg);transform:rotate(0deg)}100%{-webkit-transform:rotate(360deg);-moz-transform:rotate(360deg);-ms-transform:rotate(360deg);-o-transform:rotate(360deg);transform:rotate(360deg)}}::-webkit-scrollbar{background:#1d1f21;border:1px solid #000;width:0.75em;height:0.75em}::-webkit-scrollbar-thumb{background:#181818;border:1px solid #000}
+@charset "UTF-8";
+@font-face {
+  font-family: "Source Code Pro";
+  src: url('/static/fonts/SourceCodePro-Regular.eot');
+  src: url('/static/fonts/SourceCodePro-Regular.eot?#iefix') format('eot'), url('/static/fonts/SourceCodePro-Regular.woff') format('woff'), url('/static/fonts/SourceCodePro-Regular.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Regular.svg') format('svg');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  src: url('/static/fonts/SourceCodePro-Semibold.eot');
+  src: url('/static/fonts/SourceCodePro-Semibold.eot?#iefix') format('eot'), url('/static/fonts/SourceCodePro-Semibold.woff') format('woff'), url('/static/fonts/SourceCodePro-Semibold.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Semibold.svg') format('svg');
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "Source Code Pro";
+  src: url('/static/fonts/SourceCodePro-Bold.eot');
+  src: url('/static/fonts/SourceCodePro-Bold.eot?#iefix') format('eot'), url('/static/fonts/SourceCodePro-Bold.woff') format('woff'), url('/static/fonts/SourceCodePro-Bold.ttf') format('truetype'), url('/static/fonts/SourceCodePro-Bold.svg') format('svg');
+  font-weight: 900;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000031}}
+.prettyprint {
+  font: 12px/1.5 "Source Code Pro", monospace;
+  border: 5px solid #dddddd;
+  padding: 7px 0 5px;
+  font-size: 14px;
+  white-space: pre;
+  overflow: auto;
+  max-height: 500px;
+  width: 100%;
+  display: block;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000034}}
+.prettyprint ol, .prettyprint ul {
+  list-style: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000037}}
+.prettyprint ol.linenums {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style: decimal outside;
+  padding-left: 47px;
+  color: #afafaf;
+  font-size: 12px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000314}}
+.prettyprint ol.linenums li {
+  padding-left: 15px;
+  border-left: 3px #6ce26c solid;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000317}}
+.prettyprint li > * {
+  font-size: 14px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000327}}
+.prettyprint ol, .prettyprint ul {
+  padding: 5px 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000330}}
+.prettyprint li.L0, .prettyprint li.L1, .prettyprint li.L2, .prettyprint li.L3, .prettyprint li.L4, .prettyprint li.L5, .prettyprint li.L6, .prettyprint li.L7, .prettyprint li.L8, .prettyprint li.L9 {
+  list-style: inherit;
+  background: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000334}}
+.prettyprint.alternate .prettyprint.alternate li.L1 {
+  background: whitesmoke;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000337}}
+.prettyprint.alternate li.L3, .prettyprint.alternate li.L5, .prettyprint.alternate li.L7, .prettyprint.alternate li.L9 {
+  background: whitesmoke;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000340}}
+.pln {
+  color: #c5c8c6;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000342}}
+.str {
+  color: #b5bd68;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000344}}
+.kwd {
+  color: #b294bb;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000346}}
+.com {
+  color: #969896;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000348}}
+.typ {
+  color: #81a2be;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000350}}
+.lit {
+  color: #de935f;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000352}}
+.pun {
+  color: #c5c8c6;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000354}}
+.opn {
+  color: #c5c8c6;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000356}}
+.clo {
+  color: #c5c8c6;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000358}}
+.tag {
+  color: #cc6666;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000360}}
+.atn {
+  color: #de935f;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000362}}
+.atv {
+  color: #8abeb7;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000364}}
+.dec {
+  color: #de935f;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000366}}
+.var {
+  color: #cc6666;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000368}}
+.fun {
+  color: #81a2be;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\000038}}
+body, html {
+  color: #cccccc;
+  background-color: #1d1f21;
+  height: 100%;
+  margin: 0;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000314}}
+#wdb {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000319}}
+#wdb > header {
+  height: 100px;
+  display: flex;
+  align-items: center;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000324}}
+#wdb > header #activity {
+  width: 100px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000327}}
+#wdb > header #title {
+  flex: 1;
+  margin: 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000331}}
+#wdb > article {
+  flex: 1;
+  display: flex;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000335}}
+#wdb > article #source {
+  flex: 7;
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000341}}
+#wdb > article #source #source-editor {
+  flex: 1;
+  position: relative;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000345}}
+#wdb > article #source #source-editor .CodeMirror {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000350}}
+#wdb > article #source #interpreter {
+  flex: 1;
+  overflow-y: auto;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000354}}
+#wdb > article #traceback {
+  flex: 3;
+  overflow-y: auto;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000358}}
+#wdb #watchers {
+  display: flex;
+  flex-flow: row wrap;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000362}}
+#wdb #watchers > div {
+  margin-left: 5px;
+  margin-right: 2em;
+  display: flex;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000367}}
+#wdb #watchers > div .name {
+  color: white;
+  cursor: pointer;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000371}}
+#wdb #watchers > div .value {
+  flex: 1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000374}}
+a {
+  color: #cccccc;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000377}}
+table {
+  width: 100%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000379}}
+table tr td {
+  padding: 0.25em;
+  border: 1px solid #050606;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000383}}
+input {
+  border: 1px solid #050606;
+  background-color: #1d1f21;
+  color: #cccccc;
+  padding: 0.25em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000388}}
+input[name=debug_file] {
+  width: 500px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000390}}
+input[type=submit] {
+  font-weight: bold;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000395}}
+h1 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #cccccc;
+  font-variant: small-caps;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003104}}
+h1 small {
+  color: #777777;
+  display: block;
+  font-size: 0.5em;
+  margin-left: 15px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003113}}
+code {
+  font-family: "Source Code Pro" !important;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003120}}
+#source-editor > .CodeMirror {
+  font-family: "Source Code Pro" !important;
+  font-weight: bold;
+  font-size: 15px;
+  -webkit-box-shadow: inset -8px 0 20px black;
+  -moz-box-shadow: inset -8px 0 20px black;
+  box-shadow: inset -8px 0 20px black;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003126}}
+#source-editor > .CodeMirror.rw:after {
+  position: absolute;
+  top: 2em;
+  right: -2em;
+  content: "Edit Mode";
+  background: black;
+  color: #777777;
+  border-top: 1px solid #555555;
+  border-bottom: 1px solid #555555;
+  padding: 0.2em 3em;
+  -webkit-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003138}}
+#source-editor > .CodeMirror .CodeMirror-linebackground {
+  -webkit-transition: 250ms;
+  -moz-transition: 250ms;
+  -o-transition: 250ms;
+  transition: 250ms;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003141}}
+#source-editor > .CodeMirror .breakpoints {
+  width: 0.6em;
+  border: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003145}}
+#eval {
+  background-color: transparent;
+  border: none;
+  flex: 1;
+  margin: 0;
+  outline: none;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: top;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003155}}
+#interpreter {
+  font: 12px/1.5 "Source Code Pro", monospace;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003159}}
+#scrollback embed {
+  border: 1px solid black;
+  -webkit-box-shadow: inset -8px 0 20px black;
+  -moz-box-shadow: inset -8px 0 20px black;
+  box-shadow: inset -8px 0 20px black;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003163}}
+#scrollback iframe {
+  -webkit-box-shadow: inset -8px 0 20px black;
+  -moz-box-shadow: inset -8px 0 20px black;
+  box-shadow: inset -8px 0 20px black;
+  background-color: white;
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid black;
+  resize: both;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003171}}
+#prompt, .prompted {
+  padding: 0.5em 0 0 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003173}}
+#prompt:before, .prompted:before {
+  font: 12px/1.5 "Source Code Pro", monospace;
+  color: #c5c8c6;
+  content: ">>> ";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003178}}
+#prompt {
+  display: flex;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003181}}
+#prompt textarea {
+  color: #c5c8c6;
+  font: 12px/1.5 "Source Code Pro", monospace;
+  margin-left: 0.5em;
+  resize: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003188}}
+#completions .base {
+  color: #cccccc;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003190}}
+#completions .completion {
+  color: #777777;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003193}}
+#completions td {
+  padding: 0.25em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003196}}
+#completions td.active .base {
+  color: red;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003198}}
+#completions td.active .completion {
+  color: orangered;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003200}}
+#completions td.active.complete .base {
+  color: #cc6666;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003203}}
+#comp-desc, #backsearch {
+  color: #81a2be;
+  font-style: italic;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003207}}
+.trace {
+  font: 12px/1.5 "Source Code Pro", monospace;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003224}}
+.traceline {
+  -webkit-transition: border 750ms;
+  -moz-transition: border 750ms;
+  -o-transition: border 750ms;
+  transition: border 750ms;
+  margin: 0 0 1em 1em;
+  font: 12px/1.5 "Source Code Pro", monospace;
+  clear: both;
+  overflow: hidden;
+  background-color: #1b1b1b;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003213}}
+.traceline:before {
+  background-color: #1b1b1b;
+  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003217}}
+.traceline .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
+.traceline .tracefunfun .tracefun {
+  background-color: #1b1b1b;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003221}}
+.traceline .tracefunfun .tracefun:before {
+  border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003232}}
+.traceline:nth-child(odd) {
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003213}}
+.traceline:nth-child(odd):before {
+  background-color: #181818;
+  border-color: #181818 #181818 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003217}}
+.traceline:nth-child(odd) .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
+.traceline:nth-child(odd) .tracefunfun .tracefun {
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003221}}
+.traceline:nth-child(odd) .tracefunfun .tracefun:before {
+  border-color: #181818 #181818 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003235}}
+.traceline:hover {
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003213}}
+.traceline:hover:before {
+  background-color: #0e0e0e;
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003217}}
+.traceline:hover .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
+.traceline:hover .tracefunfun .tracefun {
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003221}}
+.traceline:hover .tracefunfun .tracefun:before {
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003238}}
+.traceline.selected {
+  background-color: #010101;
+  background-color: #010101;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003213}}
+.traceline.selected:before {
+  background-color: #010101;
+  border-color: #010101 #010101 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003217}}
+.traceline.selected .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
+.traceline.selected .tracefunfun .tracefun {
+  background-color: #010101;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003221}}
+.traceline.selected .tracefunfun .tracefun:before {
+  border-color: #010101 #010101 #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003242}}
+.traceline.real-selected {
+  background-color: #0e0e0e;
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003213}}
+.traceline.real-selected:before {
+  background-color: #0e0e0e;
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003217}}
+.traceline.real-selected .tracefunfun {
+  background-color: #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
+.traceline.real-selected .tracefunfun .tracefun {
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003221}}
+.traceline.real-selected .tracefunfun .tracefun:before {
+  border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003246}}
+.traceline .tracecode {
+  padding: 0.5em;
+  padding-top: 0.25em;
+  clear: both;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003251}}
+.traceline .tracecode > code {
+  white-space: nowrap;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003254}}
+.traceline .tracefunfun {
+  overflow: hidden;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003257}}
+.traceline .tracefunfun .tracefun {
+  font-weight: bolder;
+  font-size: 0.8em;
+  text-align: right;
+  float: right;
+  line-height: 1.2;
+  color: #8888ff;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003265}}
+.traceline .tracefunfun .tracefun:before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0.7em;
+  display: inline-block;
+  vertical-align: top;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003274}}
+.traceline .tracefilelno {
+  padding: 0.5em;
+  padding-bottom: 0.25em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003278}}
+.traceline .tracefilelno .tracefile {
+  color: #555555;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003281}}
+.traceline .tracefilelno .tracelno {
+  color: #999999;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003283}}
+.traceline .tracefilelno .tracelno:before {
+  content: ": ";
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003286}}
+.prettyprint {
+  border: none !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003289}}
+.CodeMirror-linenumber {
+  font-size: 14px;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
+.CodeMirror-linebackground {
+  -webkit-transition: 1s;
+  -moz-transition: 1s;
+  -o-transition: 1s;
+  transition: 1s;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003295}}
+.CodeMirror-linebackground:hover {
+  -webkit-transition: 1s;
+  -moz-transition: 1s;
+  -o-transition: 1s;
+  transition: 1s;
+  color: #8cedff;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
+.CodeMirror-linebackground.ctx {
+  color: white;
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003299}}
+.CodeMirror-linebackground.ctx.ctx-top {
+  border-top: 1px solid black;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003301}}
+.CodeMirror-linebackground.ctx.ctx-bottom {
+  border-bottom: 1px solid black;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003305}}
+.CodeMirror-linebackground.ctx:before {
+  color: white;
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003308}}
+.CodeMirror-linebackground.footstep {
+  color: black;
+  background-color: #111111 !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003311}}
+.CodeMirror-linebackground.breakpoint {
+  color: #ff5995;
+  background-color: rgba(255, 89, 149, 0.15) !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003314}}
+.CodeMirror-linebackground.highlighted {
+  color: #b6e354;
+  background-color: black !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003317}}
+.CodeMirror-linebackground.ask-breakpoint {
+  color: yellow;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003320}}
+a.inspect {
+  display: inline-block;
+  text-decoration: none;
+  background-color: #181818;
+  border: 1px solid #111111;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003325}}
+a.inspect:hover {
+  background-color: #111111;
+  border: 1px solid black;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003329}}
+.long {
+  display: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003332}}
+.short.close:after {
+  content: '…"';
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003335}}
+#comp-desc {
+  text-align: left;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003338}}
+#comp-desc .fun_name {
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003341}}
+#comp-desc .fun_punct {
+  color: white;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003344}}
+#comp-desc .fun_param {
+  color: #969896;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003346}}
+#comp-desc .fun_param.active {
+  color: #de935f;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003349}}
+.backsearched {
+  text-decoration: underline;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003353}}
+.out code, .out a {
+  display: inline;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003356}}
+.object {
+  border: 1px solid #191919;
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003365}}
+.object thead.toggle:hover {
+  background-color: #111111;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003367}}
+.object thead.toggle td {
+  text-align: center;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003369}}
+.object thead.toggle td:after {
+  content: "[-]";
+  float: right;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003372}}
+.object thead.toggle.hidden td:after {
+  content: "[+]";
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003376}}
+.object tbody td, .object thead td {
+  border: 2px solid #111111;
+  padding: 0.2em 0.5em;
+  min-width: 100px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003382}}
+.object tbody.hidden {
+  display: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003384}}
+.object tbody tr > :first-child {
+  vertical-align: top;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003387}}
+.object tbody table td {
+  border: none;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003390}}
+.object .core {
+  background-color: #0e0e0e;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003392}}
+.object .method {
+  background-color: #141414;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003394}}
+.object .attr {
+  background-color: #181818;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003397}}
+.nogood {
+  color: red !important;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003400}}
+.nogood > .pln, .nogood > .typ {
+  color: red !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003403}}
+.waiting_for_hl {
+  opacity: 0.4;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003407}}
+code, code span {
+  -webkit-transition: opacity 50ms;
+  -moz-transition: opacity 50ms;
+  -o-transition: opacity 50ms;
+  transition: opacity 50ms;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003411}}
+.trace_500 {
+  padding: 1em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003414}}
+.trace_500 .flno {
+  color: #777777;
+  font-size: 1.3em;
+  float: left;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003419}}
+.trace_500 .fun {
+  font-size: 1.2em;
+  float: right;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003423}}
+.trace_500 code {
+  font-size: 1.3em;
+  padding: 0.5em;
+  clear: left;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003429}}
+#activate, #deactivate {
+  display: block;
+  width: 80px;
+  margin: 0 10px;
+  text-decoration: none;
+  background-color: #292c2f;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003436}}
+#activate:before, #deactivate:before {
+  display: block;
+  width: 40px;
+  text-align: center;
+  color: white;
+  font-variant: small-caps;
+  font-weight: bold;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003444}}
+#activate:before {
+  content: "Off";
+  background-color: red;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003448}}
+#deactivate:before {
+  content: "On";
+  margin-left: 40px;
+  background-color: green;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003453}}
+.CodeMirror-dialog {
+  background-color: #050606;
+  border-bottom-color: #1d1f21;
+  color: #cccccc;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003458}}
+.cm-searching {
+  background: #35393c;
+}
+
+/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003464}}
+.state {
+  background-color: rgba(0, 0, 0, 0);
+  border: 5px solid rgba(0, 183, 229, 0.9);
+  opacity: 0.9;
+  border-right: 5px solid rgba(0, 0, 0, 0);
+  border-left: 5px solid rgba(0, 0, 0, 0);
+  border-radius: 50px;
+  box-shadow: 0 0 35px #2187e7;
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  width: 50px;
+  height: 50px;
+  -moz-animation: spinPulse 1s infinite ease-in-out;
+  -webkit-animation: spinPulse 1s infinite linear;
+  animation: spinPulse 1s infinite linear;
+  -moz-animation-play-state: paused;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003485}}
+.state.inner {
+  width: 30px;
+  height: 30px;
+  top: 30px;
+  left: 20px;
+  -moz-animation: spinoffPulse 1s infinite linear;
+  -webkit-animation: spinoffPulse 1s infinite linear;
+  animation: spinoffPulse 1s infinite linear;
+  -moz-animation-play-state: paused;
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003497}}
+.state.on {
+  -moz-animation-play-state: running;
+  -webkit-animation-play-state: running;
+  animation-play-state: running;
+}
+
+@-moz-keyframes spinPulse {
+  /* line 503, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(145deg);
+    -moz-transform: rotate(145deg);
+    -ms-transform: rotate(145deg);
+    -o-transform: rotate(145deg);
+    transform: rotate(145deg);
+    opacity: 1;
+  }
+
+  /* line 506, ../sass/_wdb.sass */
+  50% {
+    -webkit-transform: rotate(-120deg);
+    -moz-transform: rotate(-120deg);
+    -ms-transform: rotate(-120deg);
+    -o-transform: rotate(-120deg);
+    transform: rotate(-120deg);
+    opacity: 0;
+  }
+
+  /* line 509, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(160deg);
+    -moz-transform: rotate(160deg);
+    -ms-transform: rotate(160deg);
+    -o-transform: rotate(160deg);
+    transform: rotate(160deg);
+    opacity: 0;
+    box-shadow: 0 0 1px #2187e7;
+  }
+}
+
+@-moz-keyframes spinoffPulse {
+  /* line 515, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  /* line 517, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes spinPulse {
+  /* line 503, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(145deg);
+    -moz-transform: rotate(145deg);
+    -ms-transform: rotate(145deg);
+    -o-transform: rotate(145deg);
+    transform: rotate(145deg);
+    opacity: 1;
+  }
+
+  /* line 506, ../sass/_wdb.sass */
+  50% {
+    -webkit-transform: rotate(-120deg);
+    -moz-transform: rotate(-120deg);
+    -ms-transform: rotate(-120deg);
+    -o-transform: rotate(-120deg);
+    transform: rotate(-120deg);
+    opacity: 0;
+  }
+
+  /* line 509, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(160deg);
+    -moz-transform: rotate(160deg);
+    -ms-transform: rotate(160deg);
+    -o-transform: rotate(160deg);
+    transform: rotate(160deg);
+    opacity: 0;
+    box-shadow: 0 0 1px #2187e7;
+  }
+}
+
+@-webkit-keyframes spinoffPulse {
+  /* line 515, ../sass/_wdb.sass */
+  0% {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  /* line 517, ../sass/_wdb.sass */
+  100% {
+    -webkit-transform: rotate(360deg);
+    -moz-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
+    -o-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-dark\.sass}line{font-family:\000035}}
+::-webkit-scrollbar {
+  background: #1d1f21;
+  border: 1px solid black;
+  width: 0.75em;
+  height: 0.75em;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-dark\.sass}line{font-family:\0000311}}
+::-webkit-scrollbar-thumb {
+  background: #181818;
+  border: 1px solid black;
+}

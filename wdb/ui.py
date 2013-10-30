@@ -9,6 +9,7 @@ from linecache import getline
 from log_colorizer import get_color_logger
 from shutil import move
 from tempfile import gettempdir
+from base64 import b64encode
 
 try:
     from cutter import cut
@@ -573,6 +574,25 @@ class Interaction(object):
                     'for': 'Save succesful',
                     'val': 'Wrote %s' % fn
                 }))
+
+    def do_display(self, data):
+        if ';' in data:
+            pipe = data.index(';')
+            mime = data[:pipe]
+            data = data[pipe + 1:]
+        else:
+            mime = 'text/html'
+        try:
+            thing = eval(
+                data, self.get_globals(), self.locals[self.index])
+        except Exception:
+            fail(self.db, 'Display')
+            return
+        else:
+            self.db.send('Display|%s' % dump({
+                'for': u('%s') % data,
+                'val': b64encode(thing),
+                'type': mime}))
 
     def do_disable(self, data):
         self.db.__class__.enabled = False
