@@ -282,7 +282,7 @@ As of now the following special commands are supported during breakpoint:
     * .h                             : Get some help
     * .e                             : Toggle file edition mode
     * .g                             : Clear prompt
-    * .i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"
+    * .i [mime/type;]expression      : Display the result in an embed, mime type is auto detected on linux and defaults to "text/html" otherwise
     * iterable!sthg                  : If cutter is installed, executes cut(iterable).sthg
     * expr >! file                   : Write the result of expr in file
     * !< file                        : Eval the content of file

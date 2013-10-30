@@ -635,9 +635,18 @@ display = (data) ->
     suggest_stop()
     snippet = $('#eval').val()
     code($('#scrollback'), data.for, ['prompted'])
-    tag = if data.type == 'text/html' then 'iframe' else 'embed'
-    $('#scrollback').append(
-        $("<#{tag}>", src: "data:#{data.type};charset=UTF-8;base64,#{data.val}"))
+    if data.type.indexOf('image') >= 0
+        $tag = $("<img>")
+    else if data.type.indexOf('audio') >= 0
+        $tag = $("<audio>", controls: 'controls', autoplay: 'autoplay')
+    else if data.type.indexOf('video') >= 0 or data.type.indexOf('/ogg') >= 0
+        $tag = $("<video>", controls: 'controls', autoplay: 'autoplay')
+    else
+        $tag = $("<iframe>")
+
+    $tag.addClass('display')
+    $tag.attr('src', "data:#{data.type};charset=UTF-8;base64,#{data.val}")
+    $('#scrollback').append($tag)
     $('#eval').val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus()
     $('#completions').attr('style', '')
     termscroll()
