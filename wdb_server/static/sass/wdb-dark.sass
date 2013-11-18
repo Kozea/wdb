@@ -2,6 +2,7 @@
 @import wdb
 
 
+
 \::-webkit-scrollbar
   background: $bg
   border: 1px solid $code-ctx-border
@@ -11,3 +12,76 @@
 \::-webkit-scrollbar-thumb
   background: $code-ctx-bg
   border: 1px solid $code-ctx-border
+
+
+body
+  background-color: #1d1f21
+  border-top: 4px solid rgb(1, 183, 229)
+  padding-top: 4px
+
+#wdb
+  border-top: 1px solid rgb(1, 183, 229)
+
+  >header
+    background: url(../img/bg-left.png) no-repeat top left, url(../img/bg-right.png) no-repeat top right
+    height: 150px
+    position: relative
+    z-index: 5
+
+    &:after
+      background: rgb(1, 183, 229)
+      height: 25px
+      width: 100%
+      display: block
+      position: absolute
+      content: ''
+      left: 0
+      top: 130px
+      z-index: 1
+      +box-shadow(0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset)
+
+    h1#title
+      +text-shadow(1px 1px 1px rgba(0, 0, 0, 0.5))
+      margin-left: 10px
+      margin-top: -20px
+
+      &:first-letter
+        font-size: 1.5em
+        color: rgb(1, 183, 229)
+
+      small
+        color: darken(#1d1f21, 10%)
+        text-transform: capitalize
+        +text-shadow(1px 1px 1px rgba(255, 255, 255, 0.3), -1px -1px 1px rgba(0, 0, 0, 0.5))
+
+
+    #activity
+      +box-shadow(-5px 0 5px -5px #000)
+      margin-left: 50px
+      height: 100px
+      margin-top: -20px
+
+      .state
+        margin: 15px 10px 0 50px
+
+      .inner-state
+        margin: 5px 0 0 50px
+
+    #deactivate, #active
+      +border-radius(5px)
+      +box-shadow(1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset)
+      border: 1px solid lighten(#1d1f21, 5%)
+
+      &:before 
+        font-family: "neuropol-x"
+        font-variant: normal
+        +border-radius(3px)
+        font-size: 0.8em
+        padding: 0.2em 0
+
+    #deactivate
+      &:before 
+        background-color: rgb(1, 183, 229)
+
+  article
+    margin-top: 50px
