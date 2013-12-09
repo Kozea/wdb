@@ -20,50 +20,46 @@
 
 
 {% block main %}
+  <header>
+    <div id="activity">
+      <div class="state on"></div>
+      <div class="inner state on"></div>
+    </div>
+    <h1 id="title">
+      Wdb is tracing your request.
+      <small>
+        It may take some time.
+      </small>
+    </h1>
+    <div id="switch">
+      <a id="deactivate" href=""></a>
+    </div>
+  </header>
 
-  <section id="wdb">
-
-    <header>
-      <div id="activity">
-        <div class="state on"></div>
-        <div class="inner state on"></div>
+  <article class="split">
+    <div id="source">
+      <div id="source-editor">
       </div>
-      <h1 id="title">
-        Wdb is tracing your request.
-        <small>
-          It may take some time.
-        </small>
-      </h1>
-      <div id="switch">
-        <a id="deactivate" href=""></a>
-      </div>
-    </header>
-
-    <article>
-      <div id="source">
-        <div id="source-editor">
+      <div id="interpreter" style="display: none;">
+        <div id="scrollback">
         </div>
-        <div id="interpreter" style="display: none;">
-          <div id="scrollback">
-          </div>
-          <div id="prompt">
-            <textarea data-index="-1" id="eval"></textarea>
-          </div>
-          <div id="completions">
-            <div id="backsearch"></div>
-            <table>
-            </table>
-          </div>
+        <div id="prompt">
+          <textarea data-index="-1" id="eval"></textarea>
+        </div>
+        <div id="completions">
+          <div id="backsearch"></div>
+          <table>
+          </table>
         </div>
       </div>
+    </div>
 
-      <div id="traceback">
-      </div>
-    </article>
+    <div id="traceback">
+    </div>
+  </article>
 
-    <footer>
-      <div id="watchers">
-      </div>
-    </footer>
-  </section>
+  <footer>
+    <div id="watchers">
+    </div>
+  </footer>
 {% end %}

@@ -7,6 +7,9 @@
 
 @import hl
 
+*, :after, :before
+  box-sizing: border-box
+
 body, html
   color: $fg
   background-color: $bg
@@ -36,7 +39,9 @@ body, html
 
   > article
     flex: 1
-    display: flex
+
+    &.split
+      display: flex
 
     #source
       flex: 7
@@ -413,7 +418,7 @@ code, code span
 
 
 .trace_500
-  padding: 1em
+  margin: 0 1em 1em
 
   .flno
     color: $alt-fg
