@@ -665,6 +665,7 @@ def set_trace(frame=None):
     frame = frame or sys._getframe().f_back
     wdb = Wdb.get()
     wdb.set_trace(frame)
+    return wdb
 
 
 def start_trace(full=False, frame=None, below=False):
@@ -673,6 +674,7 @@ def start_trace(full=False, frame=None, below=False):
     wdb = Wdb.get()
     if not wdb.stepping:
         wdb.start_trace(full, frame or sys._getframe().f_back, below)
+    return wdb
 
 
 def stop_trace(frame=None, close_on_exit=False):
@@ -685,6 +687,7 @@ def stop_trace(frame=None, close_on_exit=False):
         wdb.stop_trace(frame or sys._getframe().f_back)
         if close_on_exit:
             wdb.die()
+    return wdb
 
 
 @contextmanager
