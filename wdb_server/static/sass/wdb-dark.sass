@@ -16,15 +16,16 @@
 
 body
   background-color: #1d1f21
+
+#wdb
   border-top: 4px solid rgb(1, 183, 229)
   padding-top: 4px
 
-#wdb
-  border-top: 1px solid rgb(1, 183, 229)
-
   >header
     background: url(../img/bg-left.png) no-repeat top left, url(../img/bg-right.png) no-repeat top right
+    border-top: 1px solid rgb(1, 183, 229)
     height: 150px
+    padding-left: 60px
     position: relative
     z-index: 5
 
@@ -42,7 +43,8 @@ body
 
     h1#title
       +text-shadow(1px 1px 1px rgba(0, 0, 0, 0.5))
-      margin-left: 10px
+      +box-shadow(-5px 0 5px -5px #000)
+      padding-left: 10px
       margin-top: -20px
 
       &:first-letter
@@ -56,9 +58,8 @@ body
 
 
     #activity
-      +box-shadow(-5px 0 5px -5px #000)
-      margin-left: 50px
       height: 100px
+      width: 90px
       margin-top: -20px
 
       .state
@@ -86,5 +87,16 @@ body
   article
     margin-top: 2em
 
+    #source-editor .CodeMirror-scroll
+      border: 1px solid lighten(#1d1f21, 5%)
+      border-left: none
+
 .trace_500
   flex: 1
+
+.traceline
+  +box-shadow(1px 1px 0 rgba(255, 255, 255, .05), 0 0 3px rgba(0, 0, 0, 0.3) inset)
+  padding: 0.3em 0.5em 0
+
+  &:nth-child(even)
+    +box-shadow(0 0 3px rgba(0, 0, 0, 0.3) inset)

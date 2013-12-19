@@ -1,69 +1,59 @@
-.prettyprint
-  font: $code-font
+.cm-s-tomorrow-night
+  background: none
+  color: $tom-night
 
-  ol, ul
-    list-style: none
+div.CodeMirror-selected
+  background: hsl(216, 8%, 24%) !important
 
-  ol.linenums
-    margin-top: 0
-    margin-bottom: 0
-    list-style: decimal outside
-    padding-left: 47px
-    color: #afafaf
-    font-size: 12px
-    li
-      padding-left: 15px
-      border-left: 3px #6ce26c solid
-  li > *
-    font-size: 14px
-  border: 5px solid #dddddd
-  padding: 7px 0 5px
-  font-size: 14px
-  white-space: pre
-  overflow: auto
-  max-height: 500px
-  width: 100%
-  display: block
-  ol, ul
-    padding: 5px 0
-  li
-    &.L0, &.L1, &.L2, &.L3, &.L4, &.L5, &.L6, &.L7, &.L8, &.L9
-      list-style: inherit
-      background: 0
-  &.alternate
-    .prettyprint.alternate li.L1
-      background: #f5f5f5
-    li
-      &.L3, &.L5, &.L7, &.L9
-        background: #f5f5f5
+.CodeMirror-gutter
+  background: hsl(210, 6%, 12%)
+  border-right: 1px solid hsl(0, 0%, 19%)
 
-.pln
-  color: $pln
-.str
-  color: $str
-.kwd
-  color: $kwd
-.com
-  color: $com
-.typ
-  color: $typ
-.lit
-  color: $lit
-.pun
-  color: $pun
-.opn
-  color: $opn
-.clo
-  color: $clo
-.tag
-  color: $tag
-.atn
-  color: $atn
-.atv
-  color: $atv
-.dec
-  color: $dec
-.var
-  color: $var
-.fun
-  color: $fun
+.CodeMirror-gutter-text
+  color: hsl(0, 0%, 29%)
+
+.CodeMirror-cursor
+  border-left: 1px solid white !important
+
+.CodeMirror
+  span
+    &.cm-comment
+      color: $cm-comments
+
+    &.cm-atom
+      color: $cm-atom
+
+    &.cm-number, &.cm-attribute
+      color: $cm-number
+
+    &.cm-keyword
+      color: $cm-keyword
+
+    &.cm-string
+      color: $cm-string
+
+    &.cm-meta
+      color: $cm-meta
+
+    &.cm-variable-2, &.cm-tag
+      color: $cm-tag
+
+    &.cm-variable-3, &.cm-def
+      color: $cm-def
+
+    &.cm-error
+      color: $cm-error
+
+    &.cm-bracket
+      color: $cm-bracket
+
+    &.cm-builtin, &.cm-special
+      color: $cm-builtin
+
+    &.cm-link
+      color: $cm-link
+
+    &.cm-operator
+      color: $cm-operator
+
+

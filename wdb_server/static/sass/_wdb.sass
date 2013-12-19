@@ -7,8 +7,7 @@
 
 @import hl
 
-*, :after, :before
-  box-sizing: border-box
+
 
 body, html
   color: $fg
@@ -17,6 +16,7 @@ body, html
   margin: 0
 
 #wdb
+  box-sizing: border-boxw
   display: flex
   flex-direction: column
   height: 100%
@@ -39,6 +39,76 @@ body, html
 
   > article
     flex: 1
+
+    h2
+      +box-shadow(0 1px 0 lighten($bg, 7%))
+      border-bottom: 1px solid darken($bg, 7%)
+      font-weight: normal
+      color: lighten($bg, 20%)
+      +text-shadow(-1px -1px 0 #000)
+      font-family: "neuropol-x"
+      margin-left: 3%
+      margin-right: 3%
+      margin-top: 25px
+      min-height: 30px
+      position: relative
+
+      &:before
+        content: ''
+        position: relative
+        display: block
+        float: left
+        +border-radius(100%)
+        content: ''
+        background-color: $bg
+        border-left: 3px solid $trace-fun
+        border-right: 3px solid $trace-fun
+        border-top: 3px solid $bg
+        border-bottom: 3px solid $bg
+        display: block
+        float: left
+        width: 25px
+        height: 25px
+        margin-right: 10px
+        +box-shadow(0 0 3px rgba(255, 255, 255, 0.3) inset)
+
+      &:after
+        content: ''
+        background: linear-gradient($trace-fun darken($trace-fun, 8%))
+        border: 1px solid darken($trace-fun, 10%)
+        width: 8px
+        height: 8px
+        display: block
+        +border-radius(100%)
+        position: absolute
+        top: 10px
+        left: 10px
+        +box-shadow(1px 1px 0 rgba(0, 0, 0, 0.5) inset)
+
+    table, form
+      margin: 0 auto
+      width: 90%
+
+    input.open-self
+      +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
+      +border-radius(3px)
+      +box-shadow(0 1px 1px rgba(0, 0, 0, 0.9) inset)
+      +text-shadow(1px 1px 0 $trace-fun)
+      border-color: darken($trace-fun, 10%)
+      color: darken($trace-fun, 25%)
+      margin-left: 5%
+
+      &:hover, &:focus
+        +background(linear-gradient(lighten($trace-fun, 10%), $trace-fun))
+        +text-shadow(1px 1px 0 lighten($trace-fun, 10%))
+
+
+    table
+      width: 90%
+      margin: 0 auto
+
+      a
+        color: $trace-fun
 
     &.split
       display: flex
@@ -181,14 +251,14 @@ code
   padding: 0.5em 0 0 0
   &:before
     font: $code-font
-    color: $pln
+    color: $cm-atom
     content: ">>> "
 
 #prompt
   display: flex
 
   textarea
-    color: $pln
+    color: $cm-atom
     font: $code-font
     margin-left: 0.5em
     resize: none
