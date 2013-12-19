@@ -49,7 +49,15 @@ class WdbMiddleware(object):
             # Enable wdb
             Wdb.enabled = True
             start_response('200 OK', [('Content-Type', 'text/html')])
-            return 'Wdb is now on'
+            return to_bytes('Wdb is now on'),
+
+        if path == '/__wdb/shell':
+            # Enable wdb
+            Wdb.enabled = True
+            wdb = set_trace()
+            start_response('200 OK', [('Content-Type', 'text/html')])
+            wdb.die()
+            return to_bytes('Exited'),
 
         if Wdb.enabled:
             def trace_wsgi(environ, start_response):
