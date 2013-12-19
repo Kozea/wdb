@@ -86,7 +86,7 @@ div.CodeMirror-selected {
   color: #89bdb5;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000338}}
-.CodeMirror span.cm-variable-2, .CodeMirror span.cm-tag {
+.CodeMirror span.cm-vartiable-2, .CodeMirror span.cm-tag {
   color: #006699;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000341}}
