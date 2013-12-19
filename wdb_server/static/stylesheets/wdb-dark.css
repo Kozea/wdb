@@ -124,7 +124,7 @@ body, html {
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000318}}
 #wdb {
-  box-sizing: border-boxw;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   height: 100%;
