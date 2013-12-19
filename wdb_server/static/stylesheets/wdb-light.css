@@ -34,139 +34,87 @@
   font-weight: 400;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000031}}
-.prettyprint {
-  font: 14px/15px "Source Code Pro", monospace;
-  border: 5px solid #dddddd;
-  padding: 7px 0 5px;
-  font-size: 14px;
-  white-space: pre;
-  overflow: auto;
-  max-height: 500px;
-  width: 100%;
-  display: block;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000034}}
-.prettyprint ol, .prettyprint ul {
-  list-style: none;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000037}}
-.prettyprint ol.linenums {
-  margin-top: 0;
-  margin-bottom: 0;
-  list-style: decimal outside;
-  padding-left: 47px;
-  color: #afafaf;
-  font-size: 12px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000314}}
-.prettyprint ol.linenums li {
-  padding-left: 15px;
-  border-left: 3px #6ce26c solid;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000317}}
-.prettyprint li > * {
-  font-size: 14px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000327}}
-.prettyprint ol, .prettyprint ul {
-  padding: 5px 0;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000330}}
-.prettyprint li.L0, .prettyprint li.L1, .prettyprint li.L2, .prettyprint li.L3, .prettyprint li.L4, .prettyprint li.L5, .prettyprint li.L6, .prettyprint li.L7, .prettyprint li.L8, .prettyprint li.L9 {
-  list-style: inherit;
-  background: 0;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000334}}
-.prettyprint.alternate .prettyprint.alternate li.L1 {
-  background: whitesmoke;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000337}}
-.prettyprint.alternate li.L3, .prettyprint.alternate li.L5, .prettyprint.alternate li.L7, .prettyprint.alternate li.L9 {
-  background: whitesmoke;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000340}}
-.pln {
-  color: black;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000342}}
-.str {
-  color: blue;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000344}}
-.kwd {
-  color: #006699;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000346}}
-.com {
-  color: #008200;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000348}}
-.typ {
-  color: #660066;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000350}}
-.lit {
-  color: #006666;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000352}}
-.pun {
-  color: #666666;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000354}}
-.opn {
-  color: black;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000356}}
-.clo {
-  color: black;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000358}}
-.tag {
-  color: #006699;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000360}}
-.atn {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000031}}
+.cm-s-tomorrow-night {
+  background: none;
   color: gray;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000362}}
-.atv {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000035}}
+div.CodeMirror-selected {
+  background: #383c42 !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000038}}
+.CodeMirror-gutter {
+  background: #1d1f20;
+  border-right: 1px solid #303030;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000312}}
+.CodeMirror-gutter-text {
+  color: #4a4a4a;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000315}}
+.CodeMirror-cursor {
+  border-left: 1px solid white !important;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000320}}
+.CodeMirror span.cm-comment {
+  color: #c5c8c6;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000323}}
+.CodeMirror span.cm-atom {
+  color: black;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000326}}
+.CodeMirror span.cm-number, .CodeMirror span.cm-attribute {
   color: blue;
 }
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000364}}
-.dec {
-  color: black;
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000329}}
+.CodeMirror span.cm-keyword {
+  color: blue;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000332}}
+.CodeMirror span.cm-string {
+  color: #b5bc67;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000335}}
+.CodeMirror span.cm-meta {
+  color: #89bdb5;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000338}}
+.CodeMirror span.cm-variable-2, .CodeMirror span.cm-tag {
+  color: #006699;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000341}}
+.CodeMirror span.cm-variable-3, .CodeMirror span.cm-def {
+  color: #efc371;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000344}}
+.CodeMirror span.cm-error {
+  color: #cc6666;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000347}}
+.CodeMirror span.cm-bracket {
+  color: gray;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000350}}
+.CodeMirror span.cm-builtin, .CodeMirror span.cm-special {
+  color: #80a1bc;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000353}}
+.CodeMirror span.cm-link {
+  color: #80a1bc;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000356}}
+.CodeMirror span.cm-operator {
+  color: #80a1bc;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000366}}
-.var {
-  color: black;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000368}}
-.fun {
-  color: black;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000310}}
-*, :after, :before {
-  box-sizing: border-box;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000313}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000312}}
 body, html {
   color: black;
   background-color: white;
@@ -174,23 +122,24 @@ body, html {
   margin: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000319}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000318}}
 #wdb {
+  box-sizing: border-boxw;
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000324}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000324}}
 #wdb > header {
   height: 100px;
   display: flex;
   align-items: center;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000329}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000329}}
 #wdb > header #activity {
   width: 100px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000332}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000332}}
 #wdb > header #title {
   flex: 1;
   margin: 0;
@@ -199,97 +148,202 @@ body, html {
   font-variant: normal;
   text-transform: uppercase;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000340}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000340}}
 #wdb > article {
   flex: 1;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000343}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000343}}
+#wdb > article h2 {
+  -webkit-box-shadow: 0 1px 0 white;
+  -moz-box-shadow: 0 1px 0 white;
+  box-shadow: 0 1px 0 white;
+  border-bottom: 1px solid #ededed;
+  font-weight: normal;
+  color: white;
+  text-shadow: -1px -1px 0 black;
+  font-family: "neuropol-x";
+  margin-left: 3%;
+  margin-right: 3%;
+  margin-top: 25px;
+  min-height: 30px;
+  position: relative;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000356}}
+#wdb > article h2:before {
+  content: "";
+  position: relative;
+  display: block;
+  float: left;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  content: "";
+  background-color: white;
+  border-left: 3px solid #8888ff;
+  border-right: 3px solid #8888ff;
+  border-top: 3px solid white;
+  border-bottom: 3px solid white;
+  display: block;
+  float: left;
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
+  -webkit-box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset;
+  -moz-box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset;
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000375}}
+#wdb > article h2:after {
+  content: "";
+  background: linear-gradient(#8888ff, #5f5fff);
+  border: 1px solid #5555ff;
+  width: 8px;
+  height: 8px;
+  display: block;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  -webkit-box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) inset;
+  -moz-box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) inset;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) inset;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000388}}
+#wdb > article table, #wdb > article form {
+  margin: 0 auto;
+  width: 90%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000392}}
+#wdb > article input.open-self {
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #8888ff), color-stop(100%, #5555ff));
+  background: -webkit-linear-gradient(#8888ff, #5555ff);
+  background: -moz-linear-gradient(#8888ff, #5555ff);
+  background: -o-linear-gradient(#8888ff, #5555ff);
+  background: linear-gradient(#8888ff, #5555ff);
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) inset;
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) inset;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.9) inset;
+  text-shadow: 1px 1px 0 #8888ff;
+  border-color: #5555ff;
+  color: #0909ff;
+  margin-left: 5%;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003101}}
+#wdb > article input.open-self:hover, #wdb > article input.open-self:focus {
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #bbbbff), color-stop(100%, #8888ff));
+  background: -webkit-linear-gradient(#bbbbff, #8888ff);
+  background: -moz-linear-gradient(#bbbbff, #8888ff);
+  background: -o-linear-gradient(#bbbbff, #8888ff);
+  background: linear-gradient(#bbbbff, #8888ff);
+  text-shadow: 1px 1px 0 #bbbbff;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003106}}
+#wdb > article table {
+  width: 90%;
+  margin: 0 auto;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003110}}
+#wdb > article table a {
+  color: #8888ff;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003113}}
 #wdb > article.split {
   display: flex;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000346}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003116}}
 #wdb > article #source {
   flex: 7;
   display: flex;
   flex-direction: column;
   margin-left: 5px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000352}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003122}}
 #wdb > article #source #source-editor {
   flex: 1;
   position: relative;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000356}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003126}}
 #wdb > article #source #source-editor .CodeMirror {
   position: absolute;
   height: 100%;
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000361}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003131}}
 #wdb > article #source #interpreter {
   flex: 1;
   overflow-y: auto;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000365}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003135}}
 #wdb > article #traceback {
   flex: 3;
   overflow-y: auto;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000369}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003139}}
 #wdb #watchers {
   display: flex;
   flex-flow: row wrap;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000373}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003143}}
 #wdb #watchers > div {
   margin-left: 5px;
   margin-right: 2em;
   display: flex;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003148}}
 #wdb #watchers > div .name {
   color: white;
   cursor: pointer;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000382}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003152}}
 #wdb #watchers > div .value {
   flex: 1;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000385}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003155}}
 a {
   color: black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000388}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003158}}
 table {
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000390}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003160}}
 table tr td {
   padding: 0.25em;
   border: 1px solid #e6e6e6;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000394}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003164}}
 input {
   border: 1px solid #e6e6e6;
   background-color: white;
   color: black;
   padding: 0.25em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003169}}
 input[name=debug_file] {
   width: 500px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003101}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003171}}
 input[type=submit] {
   font-weight: bold;
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003106}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003176}}
 h1 {
   font-size: 2em;
   font-weight: bold;
@@ -299,7 +353,7 @@ h1 {
   text-overflow: ellipsis;
   overflow: hidden;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003115}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003185}}
 h1 small {
   color: #cccccc;
   display: block;
@@ -310,7 +364,7 @@ h1 small {
   overflow: hidden;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003124}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003194}}
 code {
   font-family: "Source Code Pro" !important;
   display: block;
@@ -318,7 +372,7 @@ code {
   word-break: break-all;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003131}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003201}}
 #source-editor > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-weight: bold;
@@ -327,7 +381,7 @@ code {
   -moz-box-shadow: inset -8px 0 20px #dddddd;
   box-shadow: inset -8px 0 20px #dddddd;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003137}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003207}}
 #source-editor > .CodeMirror.rw:after {
   position: absolute;
   top: 2em;
@@ -344,20 +398,20 @@ code {
   -o-transform: rotate(45deg);
   transform: rotate(45deg);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003149}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003219}}
 #source-editor > .CodeMirror .CodeMirror-linebackground {
   -webkit-transition: 250ms;
   -moz-transition: 250ms;
   -o-transition: 250ms;
   transition: 250ms;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003152}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
 #source-editor > .CodeMirror .breakpoints {
   width: 0.6em;
   border: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003156}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
 #eval {
   background-color: transparent;
   border: none;
@@ -369,12 +423,12 @@ code {
   vertical-align: top;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003166}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003236}}
 #interpreter {
   font: 14px/15px "Source Code Pro", monospace;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003170}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003240}}
 #scrollback .display {
   -webkit-box-shadow: inset -8px 0 20px #dddddd;
   -moz-box-shadow: inset -8px 0 20px #dddddd;
@@ -383,28 +437,28 @@ code {
   border: 1px solid #bbbbbb;
   resize: both;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003176}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003246}}
 #scrollback iframe.display {
   width: 100%;
   min-height: 300px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003180}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003250}}
 #prompt, .prompted {
   padding: 0.5em 0 0 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003182}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003252}}
 #prompt:before, .prompted:before {
   font: 14px/15px "Source Code Pro", monospace;
   color: black;
   content: ">>> ";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003187}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003257}}
 #prompt {
   display: flex;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003190}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003260}}
 #prompt textarea {
   color: black;
   font: 14px/15px "Source Code Pro", monospace;
@@ -412,43 +466,43 @@ code {
   resize: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003197}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003267}}
 #completions .base {
   color: blue;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003199}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003269}}
 #completions .completion {
   color: #8888ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003202}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003272}}
 #completions td {
   padding: 0.25em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003205}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003275}}
 #completions td.active .base {
   color: red;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003207}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003277}}
 #completions td.active .completion {
   color: orangered;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003209}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003279}}
 #completions td.active.complete .base {
   color: #cc6666;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003212}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003282}}
 #comp-desc, #backsearch {
   color: blue;
   font-style: italic;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003216}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003286}}
 .trace {
   font: 14px/15px "Source Code Pro", monospace;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003233}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003303}}
 .traceline {
   -webkit-transition: border 750ms;
   -moz-transition: border 750ms;
@@ -460,124 +514,124 @@ code {
   overflow: hidden;
   background-color: #eeefff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .traceline:before {
   background-color: #eeefff;
   border-color: #eeefff #eeefff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003296}}
 .traceline .tracefunfun {
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
 .traceline .tracefunfun .tracefun {
   background-color: #eeefff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .traceline .tracefunfun .tracefun:before {
   border-color: #eeefff #eeefff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003241}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003311}}
 .traceline:nth-child(odd) {
   background-color: #fcfcff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .traceline:nth-child(odd):before {
   background-color: #fcfcff;
   border-color: #fcfcff #fcfcff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003296}}
 .traceline:nth-child(odd) .tracefunfun {
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
 .traceline:nth-child(odd) .tracefunfun .tracefun {
   background-color: #fcfcff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .traceline:nth-child(odd) .tracefunfun .tracefun:before {
   border-color: #fcfcff #fcfcff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003244}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003314}}
 .traceline:hover {
   background-color: #d5d7ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .traceline:hover:before {
   background-color: #d5d7ff;
   border-color: #d5d7ff #d5d7ff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003296}}
 .traceline:hover .tracefunfun {
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
 .traceline:hover .tracefunfun .tracefun {
   background-color: #d5d7ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .traceline:hover .tracefunfun .tracefun:before {
   border-color: #d5d7ff #d5d7ff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003247}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003317}}
 .traceline.selected {
   background-color: #bbbfff;
   background-color: #bbbfff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .traceline.selected:before {
   background-color: #bbbfff;
   border-color: #bbbfff #bbbfff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003296}}
 .traceline.selected .tracefunfun {
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
 .traceline.selected .tracefunfun .tracefun {
   background-color: #bbbfff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .traceline.selected .tracefunfun .tracefun:before {
   border-color: #bbbfff #bbbfff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003251}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003321}}
 .traceline.real-selected {
   background-color: #d5d7ff;
   background-color: #d5d7ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003222}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
 .traceline.real-selected:before {
   background-color: #d5d7ff;
   border-color: #d5d7ff #d5d7ff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003296}}
 .traceline.real-selected .tracefunfun {
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003228}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
 .traceline.real-selected .tracefunfun .tracefun {
   background-color: #d5d7ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003230}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003300}}
 .traceline.real-selected .tracefunfun .tracefun:before {
   border-color: #d5d7ff #d5d7ff white white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003255}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003325}}
 .traceline .tracecode {
   padding: 0.5em;
   padding-top: 0.25em;
   clear: both;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003260}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003330}}
 .traceline .tracecode > code {
   white-space: nowrap;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003263}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003333}}
 .traceline .tracefunfun {
   overflow: hidden;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003266}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003336}}
 .traceline .tracefunfun .tracefun {
   font-weight: bolder;
   font-size: 0.8em;
@@ -586,7 +640,7 @@ code {
   line-height: 1.2;
   color: #8888ff;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003274}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003344}}
 .traceline .tracefunfun .tracefun:before {
   content: "";
   width: 0;
@@ -596,42 +650,42 @@ code {
   display: inline-block;
   vertical-align: top;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003283}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003353}}
 .traceline .tracefilelno {
   padding: 0.5em;
   padding-bottom: 0.25em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003287}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003357}}
 .traceline .tracefilelno .tracefile {
   color: #555555;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003290}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003360}}
 .traceline .tracefilelno .tracelno {
   color: #999999;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003292}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003362}}
 .traceline .tracefilelno .tracelno:before {
   content: ": ";
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003295}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003365}}
 .prettyprint {
   border: none !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003298}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003368}}
 .CodeMirror-linenumber {
   font-size: 14px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003301}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003371}}
 .CodeMirror-linebackground {
   -webkit-transition: 1s;
   -moz-transition: 1s;
   -o-transition: 1s;
   transition: 1s;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003304}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003374}}
 .CodeMirror-linebackground:hover {
   -webkit-transition: 1s;
   -moz-transition: 1s;
@@ -639,99 +693,99 @@ code {
   transition: 1s;
   color: blue;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003307}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003377}}
 .CodeMirror-linebackground.ctx {
   color: rgba(0, 125, 50, 0.6);
   background-color: rgba(0, 125, 255, 0.05);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003308}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003378}}
 .CodeMirror-linebackground.ctx.ctx-top {
   border-top: 1px solid #bbbbbb;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003310}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003380}}
 .CodeMirror-linebackground.ctx.ctx-bottom {
   border-bottom: 1px solid #bbbbbb;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003314}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003384}}
 .CodeMirror-linebackground.ctx:before {
   color: rgba(0, 125, 50, 0.6);
   background-color: rgba(0, 125, 255, 0.05);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003387}}
 .CodeMirror-linebackground.footstep {
   color: black;
   background-color: rgba(0, 255, 0, 0.1) !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003320}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003390}}
 .CodeMirror-linebackground.breakpoint {
   color: red;
   background-color: rgba(255, 0, 0, 0.15) !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003323}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003393}}
 .CodeMirror-linebackground.highlighted {
   color: green;
   background-color: rgba(0, 255, 0, 0.25) !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003326}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003396}}
 .CodeMirror-linebackground.ask-breakpoint {
   color: yellow;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003329}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003399}}
 a.inspect {
   display: inline-block;
   text-decoration: none;
   background-color: #f3f3f3;
   border: 1px solid #e3e3e3;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003334}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003404}}
 a.inspect:hover {
   background-color: #e3e3e3;
   border: 1px solid lightgrey;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003338}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003408}}
 .long {
   display: none;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003341}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003411}}
 .short.close:after {
   content: '…"';
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003344}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003414}}
 #comp-desc {
   text-align: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003347}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003417}}
 #comp-desc .fun_name {
   color: blue;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003350}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003420}}
 #comp-desc .fun_punct {
   color: black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003353}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003423}}
 #comp-desc .fun_param {
   color: #005500;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003355}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003425}}
 #comp-desc .fun_param.active {
   color: #00aa00;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003358}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003428}}
 .backsearched {
   text-decoration: underline;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003362}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003432}}
 .out code, .out a {
   display: inline;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003365}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003435}}
 .object {
   border: 1px solid #bbbbbb;
   border-spacing: 0;
@@ -739,69 +793,69 @@ a.inspect:hover {
   width: 100%;
   font-size: 0.85em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003374}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003444}}
 .object thead.toggle:hover {
   background-color: rgba(0, 125, 255, 0.12);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003376}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003446}}
 .object thead.toggle td {
   text-align: center;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003378}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003448}}
 .object thead.toggle td:after {
   content: "[-]";
   float: right;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003381}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003451}}
 .object thead.toggle.hidden td:after {
   content: "[+]";
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003385}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003455}}
 .object tbody td, .object thead td {
   border: 2px solid rgba(0, 125, 255, 0.05);
   padding: 0.2em 0.5em;
   min-width: 100px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003391}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003461}}
 .object tbody.hidden {
   display: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003393}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003463}}
 .object tbody tr > :first-child {
   vertical-align: top;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003396}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003466}}
 .object tbody table td {
   border: none;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003469}}
 .object .core {
   background-color: rgba(0, 125, 255, 0.05);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003401}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003471}}
 .object .method {
   background-color: rgba(0, 125, 255, 0.075);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003403}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003473}}
 .object .attr {
   background-color: rgba(0, 125, 255, 0.1);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003406}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003476}}
 .nogood {
   color: red !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003409}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003479}}
 .nogood > .pln, .nogood > .typ {
   color: red !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003412}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003482}}
 .waiting_for_hl {
   opacity: 0.4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003416}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003486}}
 code, code span {
   -webkit-transition: opacity 50ms;
   -moz-transition: opacity 50ms;
@@ -809,29 +863,29 @@ code, code span {
   transition: opacity 50ms;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003420}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003490}}
 .trace_500 {
   margin: 0 1em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003423}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003493}}
 .trace_500 .flno {
   color: #cccccc;
   font-size: 1.3em;
   float: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003428}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003498}}
 .trace_500 .fun {
   font-size: 1.2em;
   float: right;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003432}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003502}}
 .trace_500 code {
   font-size: 1.3em;
   padding: 0.5em;
   clear: left;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003438}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003508}}
 #activate, #deactivate {
   display: block;
   width: 80px;
@@ -839,7 +893,7 @@ code, code span {
   text-decoration: none;
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003445}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003515}}
 #activate:before, #deactivate:before {
   display: block;
   width: 40px;
@@ -849,33 +903,33 @@ code, code span {
   font-weight: bold;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003453}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003523}}
 #activate:before {
   content: "Off";
   background-color: red;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003457}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003527}}
 #deactivate:before {
   content: "On";
   margin-left: 40px;
   background-color: green;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003462}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003532}}
 .CodeMirror-dialog {
   background-color: #e6e6e6;
   border-bottom-color: white;
   color: black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003467}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003537}}
 .cm-searching {
   background: white;
 }
 
 /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003473}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003543}}
 .state {
   background-color: rgba(0, 0, 0, 0);
   border: 5px solid rgba(0, 183, 229, 0.9);
@@ -896,7 +950,7 @@ code, code span {
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003494}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003564}}
 .state.inner {
   width: 30px;
   height: 30px;
@@ -909,7 +963,7 @@ code, code span {
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003506}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003576}}
 .state.on {
   -moz-animation-play-state: running;
   -webkit-animation-play-state: running;
@@ -917,7 +971,7 @@ code, code span {
 }
 
 @-moz-keyframes spinPulse {
-  /* line 512, ../sass/_wdb.sass */
+  /* line 582, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(145deg);
     -moz-transform: rotate(145deg);
@@ -927,7 +981,7 @@ code, code span {
     opacity: 1;
   }
 
-  /* line 515, ../sass/_wdb.sass */
+  /* line 585, ../sass/_wdb.sass */
   50% {
     -webkit-transform: rotate(-120deg);
     -moz-transform: rotate(-120deg);
@@ -937,7 +991,7 @@ code, code span {
     opacity: 0;
   }
 
-  /* line 518, ../sass/_wdb.sass */
+  /* line 588, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(160deg);
     -moz-transform: rotate(160deg);
@@ -950,7 +1004,7 @@ code, code span {
 }
 
 @-moz-keyframes spinoffPulse {
-  /* line 524, ../sass/_wdb.sass */
+  /* line 594, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -959,7 +1013,7 @@ code, code span {
     transform: rotate(0deg);
   }
 
-  /* line 526, ../sass/_wdb.sass */
+  /* line 596, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
@@ -970,7 +1024,7 @@ code, code span {
 }
 
 @-webkit-keyframes spinPulse {
-  /* line 512, ../sass/_wdb.sass */
+  /* line 582, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(145deg);
     -moz-transform: rotate(145deg);
@@ -980,7 +1034,7 @@ code, code span {
     opacity: 1;
   }
 
-  /* line 515, ../sass/_wdb.sass */
+  /* line 585, ../sass/_wdb.sass */
   50% {
     -webkit-transform: rotate(-120deg);
     -moz-transform: rotate(-120deg);
@@ -990,7 +1044,7 @@ code, code span {
     opacity: 0;
   }
 
-  /* line 518, ../sass/_wdb.sass */
+  /* line 588, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(160deg);
     -moz-transform: rotate(160deg);
@@ -1003,7 +1057,7 @@ code, code span {
 }
 
 @-webkit-keyframes spinoffPulse {
-  /* line 524, ../sass/_wdb.sass */
+  /* line 594, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -1012,7 +1066,7 @@ code, code span {
     transform: rotate(0deg);
   }
 
-  /* line 526, ../sass/_wdb.sass */
+  /* line 596, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
