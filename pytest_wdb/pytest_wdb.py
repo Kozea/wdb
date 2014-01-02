@@ -1,5 +1,6 @@
 """Wdb plugin for pytest."""
 import wdb
+import pytest
 
 
 def pytest_addoption(parser):
@@ -10,18 +11,23 @@ def pytest_addoption(parser):
 def pytest_configure(config):
     if config.getoption('--wdb'):
         config.pluginmanager.register(Trace(), '_wdb')
+        config.pluginmanager.unregister(name='pdb')
 
 
 class Trace(object):
-    def pytest_runtest_call(self, item):
-        testfunction = item.obj
-        if item._isyieldedfunction():
+    @pytest.mark.trylast
+    def pytest_pyfunc_call(self, __multicall__, pyfuncitem):
+        testfunction = pyfuncitem.obj
+        if pyfuncitem._isyieldedfunction():
             with wdb.trace():
-                testfunction(*item._args)
+                testfunction(*pyfuncitem._args)
         else:
-            funcargs = item.funcargs
+            funcargs = pyfuncitem.funcargs
             testargs = {}
-            for arg in item._fixtureinfo.argnames:
+            for arg in pyfuncitem._fixtureinfo.argnames:
                 testargs[arg] = funcargs[arg]
             with wdb.trace():
                 testfunction(**testargs)
+
+        # Avoid multiple test call
+        return True
