@@ -1,6 +1,5 @@
-.cm-s-tomorrow-night
+.cm
   background: none
-  color: $tom-night
 
 div.CodeMirror-selected
   background: hsl(216, 8%, 24%) !important
@@ -15,45 +14,59 @@ div.CodeMirror-selected
 .CodeMirror-cursor
   border-left: 1px solid white !important
 
-.CodeMirror
+.cm
+  color: $hl-default
+  /* Use each loop to hash when sass 3.3 is released
+
+  /* span
+  /*   @each $name, $color in $hl-colors
+  /*     &.cm-# {$name}
+  /*       color: $color
+
   span
-    &.cm-comment
-      color: $cm-comments
-
-    &.cm-atom
-      color: $cm-atom
-
-    &.cm-number, &.cm-attribute
-      color: $cm-number
-
     &.cm-keyword
-      color: $cm-keyword
-
-    &.cm-string
-      color: $cm-string
-
-    &.cm-meta
-      color: $cm-meta
-
-    &.cm-vartiable-2, &.cm-tag
-      color: $cm-tag
-
-    &.cm-variable-3, &.cm-def
-      color: $cm-def
-
-    &.cm-error
-      color: $cm-error
-
-    &.cm-bracket
-      color: $cm-bracket
-
-    &.cm-builtin, &.cm-special
-      color: $cm-builtin
-
-    &.cm-link
-      color: $cm-link
-
+      color: $hl-keyword
+    &.cm-atom
+      color: $hl-atom
+    &.cm-number
+      color: $hl-number
+    &.cm-def
+      color: $hl-def
+    &.cm-variable
+      color: $hl-variable
+    &.cm-variable-2
+      color: $hl-variable-2
+    &.cm-variable-3
+      color: $hl-variable-3
+    &.cm-property
+      color: $hl-property
     &.cm-operator
-      color: $cm-operator
-
-
+      color: $hl-operator
+    &.cm-comment
+      color: $hl-comment
+    &.cm-string
+      color: $hl-string
+    &.cm-string-2
+      color: $hl-string-2
+    &.cm-meta
+      color: $hl-meta
+    &.cm-qualifier
+      color: $hl-qualifier
+    &.cm-builtin
+      color: $hl-builtin
+    &.cm-bracket
+      color: $hl-bracket
+    &.cm-tag
+      color: $hl-tag
+    &.cm-attribute
+      color: $hl-attribute
+    &.cm-header
+      color: $hl-header
+    &.cm-quote
+      color: $hl-quote
+    &.cm-hl
+      color: $hl-hl
+    &.cm-link
+      color: $hl-link
+    &.cm-error
+      color: $hl-error

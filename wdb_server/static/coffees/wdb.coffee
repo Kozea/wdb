@@ -21,7 +21,6 @@ time = ->
     "#{d.getHours()}:#{d.getMinutes()}:#{d.getSeconds()}.#{d.getMilliseconds()}"
 
 cm = null
-cm_theme = 'tomorrow-night'
 
 started = false
 to_complete = null
@@ -195,12 +194,12 @@ get_mode = (fn) ->
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
         $('#source-editor').prepend(elt)
-        $(elt).addClass(if rw then 'rw' else 'ro')
+        $(elt).addClass(if rw then 'rw' else 'ro').addClass('cm')
         ) , (
         value: file,
         mode:  get_mode(name),
         readOnly: !rw,
-        theme: cm_theme,
+        theme: 'wdb',
         keyMap: 'wdb',
         gutters: ["breakpoints", "CodeMirror-linenumbers"],
         lineNumbers: true)
@@ -330,7 +329,7 @@ code = (parent, src, classes=[], html=false) ->
         .parent()
         .each ->
             $code = $(@)
-            $code.addClass('waiting_for_hl').addClass('cm-s-' + cm_theme)
+            $code.addClass('waiting_for_hl').addClass('cm')
             for cls in classes
                 $code.addClass(cls)
             setTimeout (->
@@ -339,7 +338,7 @@ code = (parent, src, classes=[], html=false) ->
                 ellipsize $code
             ), 50
     else
-        $code = $('<code>', 'class': 'cm-s-' + cm_theme)
+        $code = $('<code>', 'class': 'cm')
         for cls in classes
             $code.addClass(cls)
         parent.append $code
