@@ -23,13 +23,13 @@
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000032}}
 .cm.CodeMirror-focused .CodeMirror-selected {
-  background: #383c42;
+  background: #0f1011;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000035}}
 .cm {
   background: none;
-  color: #c3c6c4;
+  color: #01b7e5;
   /* Use each loop to hash when sass 3.3 is released */
   /* span */
   /*   @each $name, $color in $hl-colors */
@@ -38,7 +38,7 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\000039}}
 .cm .CodeMirror-selected {
-  background: #3b3d40;
+  background: #131516;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000312}}
 .cm .CodeMirror-gutter {
@@ -55,7 +55,7 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000330}}
 .cm span.cm-keyword {
-  color: #b092b9;
+  color: #e91861;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000332}}
 .cm span.cm-atom {
@@ -63,7 +63,7 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000334}}
 .cm span.cm-number {
-  color: #dd925f;
+  color: #e56f01;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000336}}
 .cm span.cm-def {
@@ -75,31 +75,31 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000340}}
 .cm span.cm-variable-2 {
-  color: #efc371;
+  color: #b1b4b2;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000342}}
 .cm span.cm-variable-3 {
-  color: #efc371;
+  color: #9fa3a0;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000344}}
 .cm span.cm-property {
-  color: #efc371;
+  color: #c5c8c6;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000346}}
 .cm span.cm-operator {
-  color: #7c7c7c;
+  color: #80a1bc;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000348}}
 .cm span.cm-comment {
-  color: #969696;
+  color: #c5c8c6;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000350}}
 .cm span.cm-string {
-  color: #b5bc67;
+  color: #e56f01;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000352}}
 .cm span.cm-string-2 {
-  color: #b5bc67;
+  color: #e56f01;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000354}}
 .cm span.cm-meta {
@@ -107,7 +107,7 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000356}}
 .cm span.cm-qualifier {
-  color: #b5bc67;
+  color: #89bdb5;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000358}}
 .cm span.cm-builtin {
@@ -115,27 +115,27 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000360}}
 .cm span.cm-bracket {
-  color: gray;
+  color: #80a1bc;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000362}}
 .cm span.cm-tag {
-  color: #efc371;
+  color: #c5c8c6;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000364}}
 .cm span.cm-attribute {
-  color: #dd925f;
+  color: #cc6666;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000366}}
 .cm span.cm-header {
-  color: #969696;
+  color: #cc6666;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000368}}
 .cm span.cm-quote {
-  color: #969696;
+  color: #cc6666;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000370}}
 .cm span.cm-hr {
-  color: #80a1bc;
+  color: #cc6666;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000372}}
 .cm span.cm-link {
@@ -143,7 +143,7 @@
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_hl\.sass}line{font-family:\0000374}}
 .cm span.cm-error {
-  color: #cc6666;
+  color: gray;
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\000038}}
@@ -175,7 +175,7 @@ body, html {
 #wdb > header #title {
   flex: 1;
   margin: 0;
-  font-family: inherit;
+  font-family: "neuropol-x";
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000333}}
 #wdb > article {
@@ -190,7 +190,7 @@ body, html {
   font-weight: normal;
   color: #4d5257;
   text-shadow: -1px -1px 0 #1d1f21;
-  font-family: inherit;
+  font-family: "neuropol-x";
   margin-left: 3%;
   margin-right: 3%;
   margin-top: 25px;
@@ -210,8 +210,8 @@ body, html {
   border-radius: 100%;
   content: "";
   background-color: #1d1f21;
-  border-left: 3px solid #8888ff;
-  border-right: 3px solid #8888ff;
+  border-left: 3px solid #01b7e5;
+  border-right: 3px solid #01b7e5;
   border-top: 3px solid #1d1f21;
   border-bottom: 3px solid #1d1f21;
   display: block;
@@ -226,8 +226,8 @@ body, html {
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000368}}
 #wdb > article h2:after {
   content: "";
-  background: linear-gradient(#8888ff, #5f5fff);
-  border: 1px solid #5555ff;
+  background: linear-gradient(#01b7e5, #0197bc);
+  border: 1px solid #018eb2;
   width: 8px;
   height: 8px;
   display: block;
@@ -250,28 +250,28 @@ body, html {
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000385}}
 #wdb > article input.open-self {
-  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #8888ff), color-stop(100%, #5555ff));
-  background: -webkit-linear-gradient(#8888ff, #5555ff);
-  background: -moz-linear-gradient(#8888ff, #5555ff);
-  background: -o-linear-gradient(#8888ff, #5555ff);
-  background: linear-gradient(#8888ff, #5555ff);
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #01b7e5), color-stop(100%, #018eb2));
+  background: -webkit-linear-gradient(#01b7e5, #018eb2);
+  background: -moz-linear-gradient(#01b7e5, #018eb2);
+  background: -o-linear-gradient(#01b7e5, #018eb2);
+  background: linear-gradient(#01b7e5, #018eb2);
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   -ms-border-radius: 3px;
   -o-border-radius: 3px;
   border-radius: 3px;
-  text-shadow: 1px 1px 0 #8888ff;
-  border-color: #5555ff;
-  color: #0909ff;
+  text-shadow: 1px 1px 0 #01b7e5;
+  border-color: #018eb2;
+  color: #005266;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000392}}
 #wdb > article input.open-self:hover, #wdb > article input.open-self:focus {
-  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #bbbbff), color-stop(100%, #8888ff));
-  background: -webkit-linear-gradient(#bbbbff, #8888ff);
-  background: -moz-linear-gradient(#bbbbff, #8888ff);
-  background: -o-linear-gradient(#bbbbff, #8888ff);
-  background: linear-gradient(#bbbbff, #8888ff);
-  text-shadow: 1px 1px 0 #bbbbff;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #1bd0fe), color-stop(100%, #01b7e5));
+  background: -webkit-linear-gradient(#1bd0fe, #01b7e5);
+  background: -moz-linear-gradient(#1bd0fe, #01b7e5);
+  background: -o-linear-gradient(#1bd0fe, #01b7e5);
+  background: linear-gradient(#1bd0fe, #01b7e5);
+  text-shadow: 1px 1px 0 #1bd0fe;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\0000397}}
 #wdb > article table {
@@ -280,7 +280,7 @@ body, html {
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003101}}
 #wdb > article table a {
-  color: #8888ff;
+  color: #01b7e5;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003104}}
 #wdb > article.split {
@@ -469,7 +469,7 @@ code {
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003241}}
 #prompt:before, .prompted:before {
   font: 12px/1.5 "Source Code Pro", monospace;
-  color: #c3c6c4;
+  color: #01b7e5;
   content: ">>> ";
 }
 
@@ -479,7 +479,7 @@ code {
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003249}}
 #prompt textarea {
-  color: #c3c6c4;
+  color: #01b7e5;
   font: 12px/1.5 "Source Code Pro", monospace;
   margin-left: 0.5em;
   resize: none;
@@ -657,7 +657,7 @@ code {
   text-align: right;
   float: right;
   line-height: 1.2;
-  color: #8888ff;
+  color: #01b7e5;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003333}}
 .traceline .tracefunfun .tracefun:before {
@@ -732,7 +732,7 @@ code {
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003376}}
 .CodeMirror-linebackground.footstep {
-  color: black;
+  color: blackw;
   background-color: #111111 !important;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003379}}
@@ -1095,7 +1095,14 @@ code, code span {
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-dark\.sass}line{font-family:\000034}}
+@font-face {
+  font-family: "neuropol-x";
+  src: url('/static/fonts/neuropol-x.eot');
+  src: url('/static/fonts/neuropol-x.eot?#iefix') format('eot'), url('/static/fonts/neuropol-x.woff') format('woff'), url('/static/fonts/neuropol-x.ttf') format('truetype'), url('/static/fonts/neuropol-x.svg') format('svg');
+  font-weight: 400;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\000037}}
 ::-webkit-scrollbar {
   background: #1d1f21;
   border: 1px solid black;
@@ -1103,8 +1110,136 @@ code, code span {
   height: 0.75em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-dark\.sass}line{font-family:\0000310}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000313}}
 ::-webkit-scrollbar-thumb {
   background: #181818;
   border: 1px solid black;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000318}}
+body {
+  background-color: #1d1f21;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000321}}
+#wdb {
+  border-top: 4px solid #01b7e5;
+  padding-top: 4px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000325}}
+#wdb > header {
+  background: url(../img/bg-left.png) no-repeat top left, url(../img/bg-right.png) no-repeat top right;
+  border-top: 1px solid #01b7e5;
+  height: 150px;
+  padding-left: 60px;
+  position: relative;
+  z-index: 5;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000333}}
+#wdb > header:after {
+  background: #01b7e5;
+  height: 25px;
+  width: 100%;
+  display: block;
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 130px;
+  z-index: 1;
+  -webkit-box-shadow: 0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset;
+  -moz-box-shadow: 0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset;
+  box-shadow: 0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000345}}
+#wdb > header h1#title {
+  text-transform: uppercase;
+  font-variant: normal;
+  font-weight: normal;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: -5px 0 5px -5px black;
+  -moz-box-shadow: -5px 0 5px -5px black;
+  box-shadow: -5px 0 5px -5px black;
+  padding-left: 10px;
+  margin-top: -20px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000354}}
+#wdb > header h1#title:first-letter {
+  font-size: 1.5em;
+  color: #01b7e5;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000358}}
+#wdb > header h1#title small {
+  color: #050606;
+  text-transform: capitalize;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.3), -1px -1px 1px rgba(0, 0, 0, 0.5);
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000364}}
+#wdb > header #activity {
+  height: 100px;
+  width: 90px;
+  margin-top: -20px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000369}}
+#wdb > header #activity .state {
+  margin: 15px 10px 0 50px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000372}}
+#wdb > header #activity .inner-state {
+  margin: 5px 0 0 50px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000375}}
+#wdb > header #deactivate, #wdb > header #activate {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset;
+  -moz-box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset;
+  box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset;
+  border: 1px solid #292c2f;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000380}}
+#wdb > header #deactivate:before, #wdb > header #activate:before {
+  font-family: "neuropol-x";
+  font-variant: normal;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -ms-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  padding: 0.2em 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000388}}
+#wdb > header #deactivate:before {
+  background-color: #01b7e5;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000391}}
+#wdb article {
+  margin-top: 2em;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000394}}
+#wdb article #source-editor .CodeMirror-scroll {
+  border: 1px solid #292c2f;
+  border-left: none;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\0000398}}
+.trace_500 {
+  flex: 1;
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003101}}
+.traceline {
+  -webkit-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05), 0 0 3px rgba(0, 0, 0, 0.3) inset;
+  -moz-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05), 0 0 3px rgba(0, 0, 0, 0.3) inset;
+  box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05), 0 0 3px rgba(0, 0, 0, 0.3) inset;
+  padding: 0.3em 0.5em 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/home\/zero\/kozea\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003105}}
+.traceline:nth-child(even) {
+  -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) inset;
+  -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) inset;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3) inset;
 }

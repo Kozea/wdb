@@ -110,7 +110,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             socket.close()
 
 
-tornado.options.define('theme', default="dark", help="wdb theme to use")
+tornado.options.define('theme', default="curvy",
+                       help="Wdb theme to use amongst %s" %
+                       StyleHandler.themes)
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
