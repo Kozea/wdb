@@ -52,10 +52,6 @@ WEB_PORT = int(os.getenv('WDB_WEB_PORT', 0))
 
 WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
 
-BASE_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)))
-RES_PATH = os.path.join(BASE_PATH, 'resources')
-
 log = get_color_logger('wdb')
 trace_log = logging.getLogger('wdb.trace')
 

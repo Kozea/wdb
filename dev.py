@@ -4,7 +4,7 @@ from subprocess import Popen
 from glob import glob
 import time
 import shlex
-import webbrowser
+from subprocess import call
 
 
 commands = [
@@ -24,7 +24,7 @@ files = ['wdb_server/static/javascripts/', 'wdb_server/static/stylesheets/',
          'wdb_server/templates/']
 watch({'url': 'http://localhost:1984/*'}, files, unwatch_at_exit=True)
 
-webbrowser.open('http://localhost:1984/self')
+call(['curl', 'http://localhost:1984/self'])
 
 try:
     while len(process):

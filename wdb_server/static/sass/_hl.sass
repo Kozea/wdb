@@ -1,21 +1,24 @@
+.cm.CodeMirror-focused
+  .CodeMirror-selected
+    background: $cm-focused-selected
+
 .cm
   background: none
-
-div.CodeMirror-selected
-  background: hsl(216, 8%, 24%) !important
-
-.CodeMirror-gutter
-  background: hsl(210, 6%, 12%)
-  border-right: 1px solid hsl(0, 0%, 19%)
-
-.CodeMirror-gutter-text
-  color: hsl(0, 0%, 29%)
-
-.CodeMirror-cursor
-  border-left: 1px solid white !important
-
-.cm
   color: $hl-default
+
+  .CodeMirror-selected
+    background: $cm-selected
+
+  .CodeMirror-gutter
+    background: $cm-gutter
+    border-right: 1px solid $cm-gutter-border
+
+  .CodeMirror-linenumber
+    color: $cm-gutter-text
+
+  .CodeMirror-cursor
+    border-left: 1px solid $cm-cursor !important
+
   /* Use each loop to hash when sass 3.3 is released
 
   /* span
@@ -64,8 +67,8 @@ div.CodeMirror-selected
       color: $hl-header
     &.cm-quote
       color: $hl-quote
-    &.cm-hl
-      color: $hl-hl
+    &.cm-hr
+      color: $hl-hr
     &.cm-link
       color: $hl-link
     &.cm-error

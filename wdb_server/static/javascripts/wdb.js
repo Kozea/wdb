@@ -887,7 +887,7 @@
 
   register_handlers = function() {
     $('body,html').on('keydown', function(e) {
-      if (cm._rw) {
+      if (cm && cm._rw) {
         return true;
       }
       if ((e.ctrlKey && e.keyCode === 37) || e.keyCode === 119) {

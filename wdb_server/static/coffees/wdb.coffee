@@ -681,7 +681,7 @@ die = ->
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
-        if cm._rw
+        if cm and cm._rw
             return true
         if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
             send('Continue')
