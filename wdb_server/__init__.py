@@ -7,6 +7,7 @@ import logging
 from multiprocessing import Process
 
 log = logging.getLogger('wdb_server')
+static_path = os.path.join(os.path.dirname(__file__), "static")
 
 
 class Sockets(object):
@@ -25,11 +26,18 @@ class IndexHandler(tornado.web.RequestHandler):
                 from wdb import Wdb
                 Wdb.get().run_file(fn[0].decode('utf-8'))
             Process(target=run).start()
+
+        theme = self.request.arguments.get('theme')
+        if theme and theme[0]:
+            StyleHandler.theme = theme[0].decode('utf-8')
         self.redirect('/')
 
 
 class StyleHandler(tornado.web.RequestHandler):
     theme = None
+    themes = [theme.replace('wdb-', '').replace('.css', '')
+              for theme in os.listdir(os.path.join(static_path, 'stylesheets'))
+              if theme.startswith('wdb-')]
 
     def get(self):
         if self.theme is None:
@@ -128,6 +136,6 @@ server = tornado.web.Application(
         (r"/self", SelfHandler),
     ],
     debug=tornado.options.options.debug,
-    static_path=os.path.join(os.path.dirname(__file__), "static"),
+    static_path=static_path,
     template_path=os.path.join(os.path.dirname(__file__), "templates")
 )
