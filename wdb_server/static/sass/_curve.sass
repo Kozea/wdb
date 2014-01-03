@@ -1,4 +1,4 @@
-$font: inherit
+$font: "neuropol-x"
 $code-font: 12px/1.5 "Source Code Pro", monospace
 $fg: #ccc
 $alt-fg: #777
@@ -7,7 +7,7 @@ $trace-bg: #1b1b1b
 $trace-alt-bg: #181818
 $trace-hover: #b6e354
 $trace-sel: #ff5995
-$trace-fun: #88f
+$trace-fun: rgb(1, 183, 229)
 $trace-file: #555
 $trace-lno: #999
 $source-shadow: black
@@ -21,7 +21,7 @@ $code-hl-bg: black
 $code-hl-break-fg: #ff5995
 $code-hl-break-bg: rgba(255, 89, 149, 0.15)
 $code-hl-break-ask-fg: yellow
-$code-hl-other-fg: black
+$code-hl-other-fg: blackw
 $code-hl-other-bg: #111
 
 $inspect-fg: #181818
@@ -50,8 +50,8 @@ $obj-attr-bg: #181818
 $state-inner: rgba(0, 183, 229, 0.9)
 $state-outer: #2187e7
 
-$cm-selected: hsl(216, 4%, 24%)
-$cm-focused-selected: hsl(216, 8%, 24%)
+$cm-selected: darken($bg, 4%)
+$cm-focused-selected: darken($bg, 6%)
 $cm-gutter: hsl(210, 6%, 12%)
 $cm-gutter-border: hsl(0, 0%, 19%)
 $cm-gutter-text: hsl(0, 0%, 29%)
@@ -59,28 +59,28 @@ $cm-cursor: white
 
 /* Change this to hash when sass 3.3 is released
 
-$hl-default: hsl(140,2%,77%)
+$hl-default: #01b7e5
 
-$hl-keyword: hsl(286,22%,65%)
+$hl-keyword: #e91861
 $hl-atom: #845dc4
-$hl-number: hsl(24,65%,62%)
-$hl-def: hsl(39,80%,69%)
-$hl-variable: hsl(140,2%,77%)
-$hl-variable-2: hsl(39,80%,69%)
-$hl-variable-3: hsl(39,80%,69%)
-$hl-property: hsl(39,80%,69%)
-$hl-operator: rgb(124, 124, 124)
-$hl-comment: hsl(120,0%,59%)
-$hl-string: hsl(65,39%,57%)
-$hl-string-2: hsl(65,39%,57%)
-$hl-meta: hsl(171,28%,64%)
-$hl-qualifier: hsl(65,39%,57%)
-$hl-builtin: hsl(207,31%,62%)
-$hl-bracket: hsl(0, 0%, 50%)
-$hl-tag: hsl(39,80%,69%)
-$hl-attribute: hsl(24,65%,62%)
-$hl-header: hsl(120,0%,59%)
-$hl-quote: hsl(120,0%,59%)
-$hl-hr: hsl(207,31%,62%)
-$hl-link: hsl(207,31%,62%)
-$hl-error: hsl(0,50%,60%)
+$hl-number: #E56F01
+$hl-def: hsl(39, 80%, 69%)
+$hl-variable: hsl(140, 2%, 77%)
+$hl-variable-2: hsl(140, 2%, 70%)
+$hl-variable-3: hsl(140, 2%, 63%)
+$hl-property: #c5c8c6
+$hl-operator: hsl(207, 31%, 62%)
+$hl-comment: #c5c8c6
+$hl-string: #e56f01
+$hl-string-2: #e56f01
+$hl-meta: hsl(171, 28%, 64%)
+$hl-qualifier: hsl(171, 28%, 64%)
+$hl-builtin: hsl(207, 31%, 62%)
+$hl-bracket: hsl(207, 31%, 62%)
+$hl-tag: #c5c8c6
+$hl-attribute: hsl(0, 50%, 60%)
+$hl-header: hsl(0, 50%, 60%)
+$hl-quote: hsl(0, 50%, 60%)
+$hl-hr: hsl(0, 50%, 60%)
+$hl-link: hsl(207, 31%, 62%)
+$hl-error: hsl(0, 0%, 50%)

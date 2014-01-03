@@ -2,7 +2,6 @@
 +font-face("Source Code Pro", font-files("SourceCodePro-Regular.woff", "SourceCodePro-Regular.ttf", "SourceCodePro-Regular.svg"), "SourceCodePro-Regular.eot", 400)
 +font-face("Source Code Pro", font-files("SourceCodePro-Semibold.woff", "SourceCodePro-Semibold.ttf", "SourceCodePro-Semibold.svg"), "SourceCodePro-Semibold.eot", 700)
 +font-face("Source Code Pro", font-files("SourceCodePro-Bold.woff", "SourceCodePro-Bold.ttf", "SourceCodePro-Bold.svg"), "SourceCodePro-Bold.eot", 900)
-+font-face("neuropol-x", font-files("neuropol-x.woff", "neuropol-x.ttf", "neuropol-x.svg"), "neuropol-x.eot", 400)
 
 @import hl
 
@@ -29,10 +28,7 @@ body, html
     #title
       flex: 1
       margin: 0
-      font-weight: normal
-      font-family: "neuropol-x"
-      font-variant: normal
-      text-transform: uppercase
+      font-family: $font
 
   > article
     flex: 1
@@ -43,7 +39,7 @@ body, html
       font-weight: normal
       color: lighten($bg, 20%)
       +text-shadow(-1px -1px 0 $bg)
-      font-family: "neuropol-x"
+      font-family: $font
       margin-left: 3%
       margin-right: 3%
       margin-top: 25px
@@ -89,11 +85,9 @@ body, html
     input.open-self
       +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
       +border-radius(3px)
-      +box-shadow(0 1px 1px rgba(0, 0, 0, 0.9) inset)
       +text-shadow(1px 1px 0 $trace-fun)
       border-color: darken($trace-fun, 10%)
       color: darken($trace-fun, 25%)
-      margin-left: 5%
 
       &:hover, &:focus
         +background(linear-gradient(lighten($trace-fun, 10%), $trace-fun))
@@ -183,6 +177,7 @@ h1
     color: $alt-fg
     display: block
     font-size: .5em
+    font-variant: normal
     margin-left: 15px
     white-space: nowrap
     text-overflow: ellipsis
