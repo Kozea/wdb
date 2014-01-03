@@ -28,6 +28,16 @@ class IndexHandler(tornado.web.RequestHandler):
         self.redirect('/')
 
 
+class StyleHandler(tornado.web.RequestHandler):
+    theme = None
+
+    def get(self):
+        if self.theme is None:
+            StyleHandler.theme = tornado.options.options.theme
+        self.redirect(
+            self.static_url('stylesheets/wdb-%s.css' % self.theme))
+
+
 class ActionHandler(tornado.web.RequestHandler):
     def get(self, uuid, action):
         if action == 'close':
@@ -111,6 +121,7 @@ for l in (log, logging.getLogger('tornado.access'),
 server = tornado.web.Application(
     [
         (r"/", IndexHandler),
+        (r"/style.css", StyleHandler),
         (r"/uuid/([^/]+)/([^/]+)", ActionHandler),
         (r"/debug/session/(.+)", MainHandler),
         (r"/websocket/(.+)", WebSocketHandler),
