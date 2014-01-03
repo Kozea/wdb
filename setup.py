@@ -30,17 +30,6 @@ options = dict(
             'static/fonts/*',
             'static/stylesheets/*',
             'static/javascripts/*.js',
-            'static/javascripts/codemirror-3.16/lib/codemirror.js',
-            'static/javascripts/codemirror-3.16/lib/codemirror.css',
-            'static/javascripts/codemirror-3.16/theme/tomorrow.css',
-            'static/javascripts/codemirror-3.16/addon/dialog/dialog.css',
-            'static/javascripts/codemirror-3.16/addon/runmode/runmode.js',
-            'static/javascripts/codemirror-3.16/addon/search/search.js',
-            'static/javascripts/codemirror-3.16/addon/search/searchcursor.js',
-            'static/javascripts/codemirror-3.16/addon/dialog/dialog.js',
-            'static/javascripts/codemirror-3.16/mode/javascript/javascript.js',
-            'static/javascripts/codemirror-3.16/mode/python/python.js',
-            'static/javascripts/codemirror-3.16/mode/jinja2/jinja2.js',
             'templates/*.html'
         ],
         'wdb': [
