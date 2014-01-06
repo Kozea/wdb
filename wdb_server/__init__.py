@@ -33,15 +33,14 @@ class IndexHandler(tornado.web.RequestHandler):
         self.redirect('/')
 
 
+# This handler is for extern server style access (ie: 500 page)
+# Because they cannot know which is the current theme
 class StyleHandler(tornado.web.RequestHandler):
-    theme = None
     themes = [theme.replace('wdb-', '').replace('.css', '')
               for theme in os.listdir(os.path.join(static_path, 'stylesheets'))
               if theme.startswith('wdb-')]
 
     def get(self):
-        if self.theme is None:
-            StyleHandler.theme = tornado.options.options.theme
         self.redirect(
             self.static_url('stylesheets/wdb-%s.css' % self.theme))
 
@@ -110,7 +109,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             socket.close()
 
 
-tornado.options.define('theme', default="curvy",
+tornado.options.define('theme', default="curve",
                        help="Wdb theme to use amongst %s" %
                        StyleHandler.themes)
 tornado.options.define("debug", default=False, help="Debug mode")
@@ -123,6 +122,8 @@ tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
 
 tornado.options.parse_command_line()
+StyleHandler.theme = tornado.options.options.theme
+
 for l in (log, logging.getLogger('tornado.access'),
           logging.getLogger('tornado.application'),
           logging.getLogger('tornado.general')):

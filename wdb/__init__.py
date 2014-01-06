@@ -239,7 +239,8 @@ class Wdb(object):
         """Break at current state"""
         # We are already tracing, do nothing
         trace_log.info('Setting trace %s (stepping %s) (current_trace: %s)' % (
-            pretty_frame(frame or sys._getframe().f_back), self.stepping, sys.gettrace()))
+            pretty_frame(frame or sys._getframe().f_back), self.stepping,
+            sys.gettrace()))
         if self.stepping:
             return
         self.reset()
