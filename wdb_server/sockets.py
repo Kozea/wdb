@@ -11,7 +11,6 @@ from tornado.options import options
 log = getLogger('wdb_server')
 log.setLevel(10 if options.debug else 30)
 
-
 ioloop = IOLoop.instance()
 
 
