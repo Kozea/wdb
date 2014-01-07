@@ -19,7 +19,7 @@
   </header>
 
   <article>
-    {% from wdb_server import Sockets, StyleHandler %}
+    {% from wdb_server import Sockets, StyleHandler, global_breakpoints %}
     {% set uuids = set(Sockets.sockets.keys()) | set(Sockets.websockets.keys()) %}
     <section>
       <h2>Active sessions</h2>
@@ -65,7 +65,7 @@
     </section>
     <section>
       <h2>Debug a file</h2>
-      <form method="post">
+      <form method="post" action="/debug/file/">
         <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
         <input type="submit" value="Start debugging" />
       </form>
@@ -75,6 +75,32 @@
       <form>
         <input type="button" value="Debug me" class="open-self" />
       </form>
+    </section>
+    <section>
+      <h2>Current global breakpoints</h2>
+      {% if global_breakpoints %}
+        <table>
+          <thead>
+            <tr>
+              <th>Breakpoint</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for breakpoint in global_breakpoints %}
+              <tr>
+                <td>{{ breakpoint }}</td>
+                <td>
+                  <a href="/debug/file/{{ breakpoint.file }}">Open</a>
+                  <a href="/breakpoint/{{ id(breakpoint) }}/delete">Remove</a>
+                </td>
+              </tr>
+            {% end %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No global breakpoint</p>
+      {% end %}
     </section>
   </article>
 {% end %}

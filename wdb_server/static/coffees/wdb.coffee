@@ -288,6 +288,7 @@ select = (data) ->
 
     for lno in data.breaks
         cm.addClass(lno, 'breakpoint')
+        cm.addMark(lno, 'breakpoint', '●')
 
     cm.addClass(current_frame.lno, 'highlighted')
     cm.addMark(current_frame.lno, 'highlighted', '➤')
