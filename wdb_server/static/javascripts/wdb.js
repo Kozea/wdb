@@ -348,6 +348,7 @@
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       lno = _ref[_i];
       cm.addClass(lno, 'breakpoint');
+      cm.addMark(lno, 'breakpoint', '●');
     }
     cm.addClass(current_frame.lno, 'highlighted');
     cm.addMark(current_frame.lno, 'highlighted', '➤');

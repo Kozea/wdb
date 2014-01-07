@@ -3,7 +3,7 @@ from multiprocessing.connection import Listener
 from log_colorizer import get_color_logger
 from pytest import fixture
 from pytest import mark
-
+import pickle
 import logging
 import signal
 import json
@@ -62,10 +62,17 @@ class AttrDict(dict):
 class Message(object):
     def __init__(self, message):
         log.info('Received %s' % message)
+        pickled = False
+        if message.startswith('Server|'):
+            message = message.replace('Server|', '')
+            pickled = True
         if '|' in message:
             pipe = message.index('|')
             self.command, self.data = message[:pipe], message[pipe + 1:]
-            self.data = json.loads(self.data, object_hook=AttrDict)
+            if pickled and self.data:
+                self.data = pickle.loads(self.data.encode('utf-8'))
+            else:
+                self.data = json.loads(self.data, object_hook=AttrDict)
         else:
             self.command, self.data = message, ''
 
@@ -144,7 +151,13 @@ class Socket(object):
         assert self.receive().command == 'Watched'
 
     def receive(self, uuid=None):
-        return Message(self.connection(uuid).recv_bytes().decode('utf-8'))
+        received = None
+        # Plug server only commands
+        while not received or received.startswith(b'Server|'):
+            received = self.connection(uuid).recv_bytes()
+            if received == b'Server|GetBreaks':
+                self.connection(uuid).send_bytes(pickle.dumps(set()))
+        return Message(received.decode('utf-8'))
 
     def send(self, command, data=None, uuid=None):
         message = '%s|%s' % (command, data) if data else command

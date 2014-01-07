@@ -39,6 +39,7 @@ import threading
 import socket
 import webbrowser
 import atexit
+import pickle
 
 # Get wdb server host
 SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
@@ -307,6 +308,10 @@ class Wdb(object):
         breakpoint = self.get_break(
             filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
+        if not temporary:
+            self._socket.send_bytes(
+                b'Server|AddBreak|' + pickle.dumps(breakpoint))
+
         log.info('Breakpoint %r added' % breakpoint)
 
     def clear_break(self, filename, lineno=None, temporary=False, cond=None,
@@ -323,6 +328,9 @@ class Wdb(object):
 
         try:
             self.breakpoints.remove(breakpoint)
+            if not temporary:
+                self._socket.send_bytes(
+                    b'Server|RmBreak|' + pickle.dumps(breakpoint))
             log.info('Breakpoint %r removed' % breakpoint)
         except:
             log.info('Breakpoint %r not removed: not found' % breakpoint)
@@ -511,10 +519,14 @@ class Wdb(object):
         log.debug('Sending %s' % data)
         self._socket.send_bytes(data.encode('utf-8'))
 
-    def receive(self):
+    def receive(self, pickled=False):
         """Receive data through websocket"""
         log.debug('Receiving')
         data = self._socket.recv_bytes()
+        if pickled:
+            data = pickle.loads(data)
+            log.debug('Got pickled %r' % data)
+            return data
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 

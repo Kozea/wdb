@@ -6,10 +6,11 @@ from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
 from linecache import getline
-from log_colorizer import get_color_logger
+from logging import getLogger
 from shutil import move
 from tempfile import gettempdir
 from base64 import b64encode
+import pickle
 
 try:
     from cutter import cut
@@ -26,7 +27,7 @@ import os
 import sys
 import time
 import traceback
-log = get_color_logger('wdb.ui')
+log = getLogger('wdb.ui')
 
 
 class ReprEncoder(JSONEncoder):
@@ -219,6 +220,11 @@ class Interaction(object):
         }))
 
     def do_start(self, data):
+        # Getting breakpoints
+        log.debug('Getting breakpoints')
+        self.db.send('Server|GetBreaks')
+        self.db.breakpoints = self.db.receive(True)
+
         self.db.send('Init|%s' % dump({
             'cwd': os.getcwd()
         }))
