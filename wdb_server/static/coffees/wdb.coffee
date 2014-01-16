@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#### Initializations ####
+#*** Initializations ***#
 
 time = ->
     d = new Date()
@@ -54,7 +54,7 @@ send = (msg) ->
 
 make_ws = ->
     # Open a websocket in case of request break
-    sck = "ws://" + document.location.hostname + ':1984/websocket/' + _uuid
+    sck = "ws://" + document.location.host + '/websocket/' + _uuid
     console.log 'Opening new socket', sck
     new_ws = new WebSocket sck
     new_ws.onclose = (m) =>
@@ -109,7 +109,7 @@ make_ws = ->
             treat data
     new_ws
 
-#### Loading ####
+#*** Loading ***#
 $ =>
     setTimeout(->
         $('#deactivate').click () ->
