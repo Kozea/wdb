@@ -1,5 +1,3 @@
-cm_theme = 'tomorrow-night'
-
 $ ->
     $('#activate').click () ->
             # Doesn't work in webkit for POSTS because of https://bugs.webkit.org/show_bug.cgi?id=23735 T_T
@@ -14,6 +12,6 @@ $ ->
             $trace.append($('<div>', class: 'traceline').append(
                 $('<div>', class: 'flno').text('File ' + file + ':' + lno),
                 $('<div>', class: 'fun').text(fun),
-                $code = $('<code>', class: 'cm-s-' + cm_theme)
+                $code = $('<code>', class: 'cm')
             ))
             CodeMirror.runMode code, "python", $code.get(0)

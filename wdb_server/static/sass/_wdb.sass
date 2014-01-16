@@ -2,12 +2,8 @@
 +font-face("Source Code Pro", font-files("SourceCodePro-Regular.woff", "SourceCodePro-Regular.ttf", "SourceCodePro-Regular.svg"), "SourceCodePro-Regular.eot", 400)
 +font-face("Source Code Pro", font-files("SourceCodePro-Semibold.woff", "SourceCodePro-Semibold.ttf", "SourceCodePro-Semibold.svg"), "SourceCodePro-Semibold.eot", 700)
 +font-face("Source Code Pro", font-files("SourceCodePro-Bold.woff", "SourceCodePro-Bold.ttf", "SourceCodePro-Bold.svg"), "SourceCodePro-Bold.eot", 900)
-+font-face("Neuropol", font-files("Neuropol.woff", "Neuropol.ttf", "Neuropol.svg"), "Neuropol.eot", 400)
-+font-face("neuropol-x", font-files("neuropol-x.woff", "neuropol-x.ttf", "neuropol-x.svg"), "neuropol-x.eot", 400)
 
 @import hl
-
-
 
 body, html
   color: $fg
@@ -32,76 +28,15 @@ body, html
     #title
       flex: 1
       margin: 0
-      font-weight: normal
-      font-family: "neuropol-x"
-      font-variant: normal
-      text-transform: uppercase
+      font-family: $font
 
   > article
     flex: 1
 
-    h2
-      +box-shadow(0 1px 0 lighten($bg, 7%))
-      border-bottom: 1px solid darken($bg, 7%)
-      font-weight: normal
-      color: lighten($bg, 20%)
-      +text-shadow(-1px -1px 0 #000)
-      font-family: "neuropol-x"
-      margin-left: 3%
-      margin-right: 3%
-      margin-top: 25px
-      min-height: 30px
-      position: relative
 
-      &:before
-        content: ''
-        position: relative
-        display: block
-        float: left
-        +border-radius(100%)
-        content: ''
-        background-color: $bg
-        border-left: 3px solid $trace-fun
-        border-right: 3px solid $trace-fun
-        border-top: 3px solid $bg
-        border-bottom: 3px solid $bg
-        display: block
-        float: left
-        width: 25px
-        height: 25px
-        margin-right: 10px
-        +box-shadow(0 0 3px rgba(255, 255, 255, 0.3) inset)
-
-      &:after
-        content: ''
-        background: linear-gradient($trace-fun darken($trace-fun, 8%))
-        border: 1px solid darken($trace-fun, 10%)
-        width: 8px
-        height: 8px
-        display: block
-        +border-radius(100%)
-        position: absolute
-        top: 10px
-        left: 10px
-        +box-shadow(1px 1px 0 rgba(0, 0, 0, 0.5) inset)
-
-    table, form
+    table, form, p
       margin: 0 auto
       width: 90%
-
-    input.open-self
-      +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
-      +border-radius(3px)
-      +box-shadow(0 1px 1px rgba(0, 0, 0, 0.9) inset)
-      +text-shadow(1px 1px 0 $trace-fun)
-      border-color: darken($trace-fun, 10%)
-      color: darken($trace-fun, 25%)
-      margin-left: 5%
-
-      &:hover, &:focus
-        +background(linear-gradient(lighten($trace-fun, 10%), $trace-fun))
-        +text-shadow(1px 1px 0 lighten($trace-fun, 10%))
-
 
     table
       width: 90%
@@ -123,7 +58,7 @@ body, html
         flex: 1
         position: relative
 
-        .CodeMirror
+        .cm
           position: absolute
           height: 100%
           width: 100%
@@ -146,7 +81,7 @@ body, html
       display: flex
 
       .name
-        color: #fff
+        color: $fg
         cursor: pointer
 
       .value
@@ -186,6 +121,7 @@ h1
     color: $alt-fg
     display: block
     font-size: .5em
+    font-variant: normal
     margin-left: 15px
     white-space: nowrap
     text-overflow: ellipsis
@@ -198,7 +134,7 @@ code
   word-break: break-all
 
 #source-editor
-  > .CodeMirror
+  > .cm
     font-family: "Source Code Pro" !important
     font-weight: bold
     font-size: 15px
@@ -215,9 +151,6 @@ code
       border-bottom: 1px solid $trace-file
       padding: .2em 3em
       +rotate(45deg)
-
-    .CodeMirror-linebackground
-      +transition(250ms)
 
     .breakpoints
       width: .6em
@@ -252,14 +185,14 @@ code
 
   &:before
     font: $code-font
-    color: $cm-tag
+    color: $hl-default
     content: ">>> "
 
 #prompt
   display: flex
 
   textarea
-    color: $cm-tag
+    color: $hl-default
     font: $code-font
     margin-left: 0.5em
     resize: none
@@ -274,11 +207,11 @@ code
     padding: 0.25em
     &.active
       .base
-        color: red
+        color: $comp-hl-base
       .completion
-        color: orangered
+        color: $comp-hl
       &.complete .base
-        color: #cc6666
+        color: $comp-hl-full
 
 #comp-desc, #backsearch
   color: $mini-prompt-fg
@@ -543,12 +476,12 @@ code, code span
 
 .state
   background-color: rgba(0, 0, 0, 0)
-  border: 5px solid rgba(0, 183, 229, 0.9)
+  border: 5px solid $state-inner
   opacity: .9
   border-right: 5px solid rgba(0, 0, 0, 0)
   border-left: 5px solid rgba(0, 0, 0, 0)
   border-radius: 50px
-  box-shadow: 0 0 35px #2187e7
+  box-shadow: 0 0 35px $state-outer
   position: absolute
   top: 20px
   left: 10px
@@ -589,7 +522,7 @@ code, code span
   100%
     +rotate(160deg)
     opacity: 0
-    box-shadow: 0 0 1px #2187e7
+    box-shadow: 0 0 1px $state-outer
 
 @mixin pulseoff()
   0%

@@ -157,7 +157,7 @@ def init():
         # This is an independant tool for reloading chrome pages
         # through websockets
         # See https://github.com/paradoxxxzero/wsreload
-        import wsreload
+        import wsreload.client
     except ImportError:
         app.logger.debug('wsreload not found')
     else:
@@ -165,7 +165,7 @@ def init():
 
         def log(httpserver):
             app.logger.debug('WSReloaded after server restart')
-        wsreload.monkey_patch_http_server({'url': url}, callback=log)
+        wsreload.client.monkey_patch_http_server({'url': url}, callback=log)
         app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
 

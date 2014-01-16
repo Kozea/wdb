@@ -2,7 +2,7 @@
 from __future__ import with_statement
 # This file is part of wdb
 #
-# wdb Copyright (C) 2012  Florian Mounier, Kozea
+# wdb Copyright (C) 2012-2014  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -39,6 +39,7 @@ import threading
 import socket
 import webbrowser
 import atexit
+import pickle
 
 # Get wdb server host
 SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
@@ -51,10 +52,6 @@ WEB_SERVER = os.getenv('WDB_WEB_SERVER')
 WEB_PORT = int(os.getenv('WDB_WEB_PORT', 0))
 
 WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
-
-BASE_PATH = os.path.join(
-    os.path.abspath(os.path.dirname(__file__)))
-RES_PATH = os.path.join(BASE_PATH, 'resources')
 
 log = get_color_logger('wdb')
 trace_log = logging.getLogger('wdb.trace')
@@ -243,7 +240,8 @@ class Wdb(object):
         """Break at current state"""
         # We are already tracing, do nothing
         trace_log.info('Setting trace %s (stepping %s) (current_trace: %s)' % (
-            pretty_frame(frame or sys._getframe().f_back), self.stepping, sys.gettrace()))
+            pretty_frame(frame or sys._getframe().f_back), self.stepping,
+            sys.gettrace()))
         if self.stepping:
             return
         self.reset()
@@ -310,6 +308,10 @@ class Wdb(object):
         breakpoint = self.get_break(
             filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
+        if not temporary:
+            self._socket.send_bytes(
+                b'Server|AddBreak|' + pickle.dumps(breakpoint))
+
         log.info('Breakpoint %r added' % breakpoint)
 
     def clear_break(self, filename, lineno=None, temporary=False, cond=None,
@@ -326,6 +328,9 @@ class Wdb(object):
 
         try:
             self.breakpoints.remove(breakpoint)
+            if not temporary:
+                self._socket.send_bytes(
+                    b'Server|RmBreak|' + pickle.dumps(breakpoint))
             log.info('Breakpoint %r removed' % breakpoint)
         except:
             log.info('Breakpoint %r not removed: not found' % breakpoint)
@@ -514,10 +519,14 @@ class Wdb(object):
         log.debug('Sending %s' % data)
         self._socket.send_bytes(data.encode('utf-8'))
 
-    def receive(self):
+    def receive(self, pickled=False):
         """Receive data through websocket"""
         log.debug('Receiving')
         data = self._socket.recv_bytes()
+        if pickled:
+            data = pickle.loads(data)
+            log.debug('Got pickled %r' % data)
+            return data
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 

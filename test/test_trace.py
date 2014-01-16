@@ -5,6 +5,7 @@ from .conftest import use
 @use('trace_in_script.py')
 def test_with_trace(socket):
     socket.start()
+
     msg = socket.receive()
     assert msg.command == 'Init'
     assert 'cwd' in msg.data
