@@ -14,14 +14,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#### Initializations ####
+#*** Initializations ***#
 
 time = ->
     d = new Date()
     "#{d.getHours()}:#{d.getMinutes()}:#{d.getSeconds()}.#{d.getMilliseconds()}"
 
 cm = null
-cm_theme = 'tomorrow-night'
 
 started = false
 to_complete = null
@@ -55,7 +54,7 @@ send = (msg) ->
 
 make_ws = ->
     # Open a websocket in case of request break
-    sck = "ws://" + document.location.hostname + ':1984/websocket/' + _uuid
+    sck = "ws://" + document.location.host + '/websocket/' + _uuid
     console.log 'Opening new socket', sck
     new_ws = new WebSocket sck
     new_ws.onclose = (m) =>
@@ -110,7 +109,7 @@ make_ws = ->
             treat data
     new_ws
 
-#### Loading ####
+#*** Loading ***#
 $ =>
     setTimeout(->
         $('#deactivate').click () ->
@@ -195,12 +194,12 @@ get_mode = (fn) ->
 create_code_mirror = (file, name, rw=false)->
     window.cm = cm = CodeMirror ((elt) ->
         $('#source-editor').prepend(elt)
-        $(elt).addClass(if rw then 'rw' else 'ro')
+        $(elt).addClass(if rw then 'rw' else 'ro').addClass('cm')
         ) , (
         value: file,
         mode:  get_mode(name),
         readOnly: !rw,
-        theme: cm_theme,
+        theme: 'wdb',
         keyMap: 'wdb',
         gutters: ["breakpoints", "CodeMirror-linenumbers"],
         lineNumbers: true)
@@ -289,6 +288,7 @@ select = (data) ->
 
     for lno in data.breaks
         cm.addClass(lno, 'breakpoint')
+        cm.addMark(lno, 'breakpoint', '●')
 
     cm.addClass(current_frame.lno, 'highlighted')
     cm.addMark(current_frame.lno, 'highlighted', '➤')
@@ -330,7 +330,7 @@ code = (parent, src, classes=[], html=false) ->
         .parent()
         .each ->
             $code = $(@)
-            $code.addClass('waiting_for_hl').addClass('cm-s-' + cm_theme)
+            $code.addClass('waiting_for_hl').addClass('cm')
             for cls in classes
                 $code.addClass(cls)
             setTimeout (->
@@ -339,7 +339,7 @@ code = (parent, src, classes=[], html=false) ->
                 ellipsize $code
             ), 50
     else
-        $code = $('<code>', 'class': 'cm-s-' + cm_theme)
+        $code = $('<code>', 'class': 'cm')
         for cls in classes
             $code.addClass(cls)
         parent.append $code
@@ -682,7 +682,7 @@ die = ->
 
 register_handlers = ->
     $('body,html').on 'keydown', (e) ->
-        if cm._rw
+        if cm and cm._rw
             return true
         if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119 # ctrl + left  or F8
             send('Continue')

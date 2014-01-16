@@ -10,7 +10,7 @@ import sys
 log = get_color_logger('wdb.ext')
 
 
-def _handle_off(theme, silent=False):
+def _handle_off(silent=False):
     if not silent:
         log.exception('Exception with wdb off')
     type_, value, tb = sys.exc_info()
@@ -24,7 +24,6 @@ def _handle_off(theme, silent=False):
                 '500.html')) as f:
         return to_bytes(
             f.read() % dict(
-                theme=theme,
                 trace=traceback.format_exc(),
                 title=type_.__name__.replace("'", "\\'").replace('\n', ' '),
                 subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
@@ -37,9 +36,8 @@ def _handle_off(theme, silent=False):
 
 
 class WdbMiddleware(object):
-    def __init__(self, app, start_disabled=False, theme='dark'):
+    def __init__(self, app, start_disabled=False):
         self.app = app
-        self.theme = theme
         Wdb.enabled = not start_disabled
 
     def __call__(self, environ, start_response):
@@ -70,7 +68,7 @@ class WdbMiddleware(object):
                 except Exception:
                     start_response('500 INTERNAL SERVER ERROR', [
                         ('Content-Type', 'text/html')])
-                    yield _handle_off(self.theme)
+                    yield _handle_off()
                 finally:
                     hasattr(appiter, 'close') and appiter.close()
             return trace_wsgi(environ, start_response)
@@ -84,7 +82,7 @@ class WdbMiddleware(object):
             except Exception:
                 start_response('500 INTERNAL SERVER ERROR', [
                     ('Content-Type', 'text/html')])
-                yield _handle_off(self.theme)
+                yield _handle_off()
             finally:
                 # Close set_trace debuggers
                 stop_trace(close_on_exit=True)
@@ -93,7 +91,7 @@ class WdbMiddleware(object):
         return catch(environ, start_response)
 
 
-def wdb_tornado(application, start_disabled=False, theme='dark'):
+def wdb_tornado(application, start_disabled=False):
     from tornado.web import RequestHandler, HTTPError
     Wdb.enabled = not start_disabled
 
@@ -122,7 +120,7 @@ def wdb_tornado(application, start_disabled=False, theme='dark'):
         ex = kwargs.get('exc_info')
         if ex:
             silent = issubclass(ex[0], HTTPError)
-        self.finish(_handle_off(theme, silent=silent))
+        self.finish(_handle_off(silent=silent))
 
     RequestHandler.write_error = _wdb_error_writter
 

@@ -1,17 +1,10 @@
 {% extends _layout.html %}
 {% block head %}
-  <script src="{{ static_url('javascripts/codemirror-3.16/lib/codemirror.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/addon/runmode/runmode.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/addon/search/search.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/addon/search/searchcursor.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/addon/dialog/dialog.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/mode/javascript/javascript.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/mode/python/python.js') }}"></script>
-  <script src="{{ static_url('javascripts/codemirror-3.16/mode/jinja2/jinja2.js') }}"></script>
+  <script src="{{ static_url('javascripts/codemirror-compressed.js') }}"></script>
 
-  <link href="{{ static_url('javascripts/codemirror-3.16/lib/codemirror.css') }}" rel="stylesheet" type="text/css">
-  <link href="{{ static_url('javascripts/codemirror-3.16/theme/tomorrow.css') }}" rel="stylesheet" type="text/css">
-  <link href="{{ static_url('javascripts/codemirror-3.16/addon/dialog/dialog.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ static_url('stylesheets/codemirror.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ static_url('stylesheets/dialog.css') }}" rel="stylesheet" type="text/css">
+
   <script>
     _uuid = "{{ uuid }}";
   </script>
