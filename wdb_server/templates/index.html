@@ -1,14 +1,7 @@
 {% extends _layout.html %}
 
 {% block head %}
-  <script>
-    $(function () {
-      $('.open-self').click(function () {
-        $.get('/self');
-        return false;
-      });
-    });
-  </script>
+  <script src="{{ static_url('javascripts/status.js') }}"></script>
 {% end %}
 
 {% block main %}
@@ -23,8 +16,7 @@
     {% set uuids = set(Sockets.sockets.keys()) | set(Sockets.websockets.keys()) %}
     <section>
       <h2>Active sessions</h2>
-      {% if uuids %}
-        <table>
+        <table class="sessions">
           <thead>
             <tr>
               <th>Session id</th>
@@ -35,22 +27,19 @@
           </thead>
           <tbody>
             {% for uuid in uuids %}
-              <tr>
+              <tr data-uuid="{{ uuid }}">
                 {% if Sockets.sockets.get(uuid) %}
-                <td><a href="/debug/session/{{ uuid }}">{{ uuid }}</a></td>
+                <td class="uuid"><a href="/debug/session/{{ uuid }}">{{ uuid }}</a></td>
                 {% else %}
-                <td>{{ uuid }}</td>
+                <td class="uuid">{{ uuid }}</td>
                 {% end %}
-                <td>{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
-                <td>{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
-                <td><a href="/uuid/{{ uuid }}/close">Force close</a></td>
+                <td class="socket">{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
+                <td class="websocket">{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
+                <td class="close"><a href="/uuid/{{ uuid }}/close">Force close</a></td>
               </tr>
             {% end %}
           </tbody>
         </table>
-      {% else %}
-        <p>No active session</p>
-      {% end %}
     </section>
     <section>
       <h2>Change theme</h2>
@@ -78,7 +67,6 @@
     </section>
     <section>
       <h2>Current global breakpoints</h2>
-      {% if global_breakpoints %}
         <table>
           <thead>
             <tr>
@@ -98,9 +86,6 @@
             {% end %}
           </tbody>
         </table>
-      {% else %}
-        <p>No global breakpoint</p>
-      {% end %}
     </section>
   </article>
 {% end %}
