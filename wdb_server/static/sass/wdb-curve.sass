@@ -165,8 +165,15 @@ body
             color: #ED5F92
             font-weight: bold
 
-          &.active.complete .base
-            color: #E91861
+          &.active
+            .base 
+              color: #E91861
+
+            .completion
+              color: lighten(#e91861, 20%)
+
+            &.complete .base
+              color: #E91861
 
 
           &.action, &.close
@@ -221,14 +228,16 @@ body
         color: $trace-fun
 
 
-
+/* - Scrollback - */
 .cm.prompted
   border-top: 1px solid darken(#1d1f21, 7%)
   +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
 
-
   &:first-child
     border-top: none
+
+.out
+  margin-left: 2.4em
 
 .trace_500
   flex: 1
@@ -246,6 +255,7 @@ body
 .CodeMirror-linebackground.breakpoint
   color: #1BD2FF
   background: rgba(27, 210, 255, 0.1) !important
+  height: 1em
 
 .CodeMirror-linebackground.ctx
   margin-top: -4px
@@ -258,3 +268,9 @@ body
   position: relative
   left: 0px
   +text-shadow(0 0 1px darken($trace-fun, 50%))
+
+
+.traceline
+  +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
+  border-left: 1px solid $trace-alt-bg
+  border-top: 1px solid $trace-alt-bg
