@@ -1,6 +1,7 @@
 @import curve
 @import wdb
 
+
 +font-face("neuropol-x", font-files("neuropol-x.woff", "neuropol-x.ttf", "neuropol-x.svg"), "neuropol-x.eot", 400)
 
 
@@ -167,20 +168,23 @@ body
           &.active.complete .base
             color: #E91861
 
-          &.close 
+
+          &.action, &.close
             text-align: center
 
             a
-              background: url(../img/close.png) no-repeat center center
-              background-size: 16px
               color: transparent
-              display: block
               font-size: 0
-              height: 16px
-              margin: 0 auto
-              width: 16px
-            
-            
+              display: inline-block
+              +text-shadow(-1px -1px 0 #000)
+
+              &:before 
+                font-size: 18px
+                color: $trace-fun
+
+              &:hover, &:focus
+                &:before
+                  color: lighten($trace-fun, 25%)
 
 
     #source-editor .CodeMirror-scroll
@@ -223,7 +227,7 @@ body
   +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
 
 
-  &:first-child 
+  &:first-child
     border-top: none
 
 .trace_500
