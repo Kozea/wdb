@@ -35,7 +35,7 @@
                 {% end %}
                 <td class="socket">{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
                 <td class="websocket">{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
-                <td class="close"><a href="/uuid/{{ uuid }}/close">Force close</a></td>
+                <td class="close"><a href="/uuid/{{ uuid }}/close" class="icon-close">Force close</a></td>
               </tr>
             {% end %}
           </tbody>
@@ -78,9 +78,9 @@
             {% for breakpoint in global_breakpoints %}
               <tr>
                 <td>{{ breakpoint }}</td>
-                <td>
-                  <a href="/debug/file/{{ breakpoint.file }}">Open</a>
-                  <a href="/breakpoint/{{ id(breakpoint) }}/delete">Remove</a>
+                <td class="action">
+                  <a href="/debug/file/{{ breakpoint.file }}" class="icon-open">Open</a>
+                  <a href="/breakpoint/{{ id(breakpoint) }}/delete" class="icon-remove">Remove</a>
                 </td>
               </tr>
             {% end %}
