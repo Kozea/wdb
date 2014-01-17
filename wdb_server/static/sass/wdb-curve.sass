@@ -102,7 +102,7 @@ body
       margin-top: 25px
       min-height: 30px
       position: relative
-      +text-shadow(-1px -1px 0 $bg)
+      +text-shadow(-1px -1px 0 #000)
 
       &:before
         background-color: $bg
@@ -134,23 +134,55 @@ body
         top: 10px
         width: 8px
 
-    table tbody td
-      border: 1px solid darken(#1d1f21, 5%)
-      +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05))
+    table
+      border-collapse: collapse
+      +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05))
 
-      .base 
-        color: hsl(286,22%,65%)
+      a:hover, a:focus
+        color: lighten($trace-fun, 10%)
+        text-decoration: none
+
+      thead
+        color: darken($trace-fun, 10%)
+        font-size: 1.1em
+        text-shadow: -1px -1px 0 #000
+
+
+      tbody tr
+        &:nth-child(odd)
+          background-color: rgba(255, 255, 255, 0.05)
+
+        &:hover, &:focus
+          background-color: rgba(255, 255, 255, 0.1)
+          +transition(background-color 0.2s ease)
+
+        td
+          border: 1px solid darken(#1d1f21, 5%)
+          +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05))
+
+          .base
+            color: #ED5F92
+            font-weight: bold
+
+          &.active.complete .base
+            color: #E91861
+
 
     #source-editor .CodeMirror-scroll
       border: 1px solid lighten(#1d1f21, 5%)
       border-left: none
 
-    input.open-self
+    input[type="text"]
+      border: 1px solid darken(#1d1f21, 8%)
+      +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.1) inset, 1px 1px 0 rgba(255, 255, 255, 0.1))
+
+    input.open-self, input[type="submit"]
       +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
       border-color: darken($trace-fun, 10%)
       +border-radius(3px)
       color: darken($trace-fun, 25%)
       +text-shadow(1px 1px 0 $trace-fun)
+      font-weight: normal
 
       &:hover, &:focus
         +background(linear-gradient(lighten($trace-fun, 10%), $trace-fun))
@@ -168,8 +200,42 @@ body
 
       &:hover, &:focus
         color: $trace-fun
-      
 
+
+
+.cm.prompted
+  border-top: 1px solid darken(#1d1f21, 7%)
+  +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
+
+
+  &:first-child 
+    border-top: none
 
 .trace_500
   flex: 1
+
+
+/* - Code Mirror - */
+.CodeMirror-gutters
+  background: none
+  border-right: 1px solid transparent
+
+  .CodeMirror-gutter
+    border-right: 1px solid lighten(#1d1f21, 5%)
+    +box-shadow(-1px 0 0 darken(#1d1f21, 10%) inset)
+
+.CodeMirror-linebackground.breakpoint
+  color: #1BD2FF
+  background: rgba(27, 210, 255, 0.1) !important
+
+.CodeMirror-linebackground.ctx
+  margin-top: -4px
+
+  &.ctx-bottom
+    margin: 0 0 -4px
+
+.CodeMirror-gutter-elt .breakpoint
+  top: -2px
+  position: relative
+  left: 0px
+  +text-shadow(0 0 1px darken($trace-fun, 50%))
