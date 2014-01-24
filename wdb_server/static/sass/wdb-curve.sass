@@ -150,11 +150,8 @@ body
 
 
       tbody tr
-        &:nth-child(odd)
-          background-color: rgba(255, 255, 255, 0.05)
-
         &:hover, &:focus
-          background-color: rgba(255, 255, 255, 0.1)
+          background-color: rgba(255, 255, 255, 0.05)
           +transition(background-color 0.2s ease)
 
         td
@@ -220,12 +217,8 @@ body
 
 
 /* - Scrollback - */
-.cm.prompted
-  border-top: 1px solid darken(#1d1f21, 7%)
-  +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
-
-  &:first-child
-    border-top: none
+a .cm
+  margin-left: 2.4em
 
 .out
   margin-left: 2.4em
