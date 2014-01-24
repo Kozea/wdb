@@ -1407,38 +1407,60 @@ body {
   padding: 0;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003250}}
+/* - Table Object - */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003251}}
 table.object tbody td, table.object thead td {
   border-width: 1px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003253}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003254}}
 table.object thead {
   text-shadow: none !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003256}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003257}}
+table.object a.inspect {
+  -webkit-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+  -moz-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+  padding: 0.1em 5px;
+  margin: 1px 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003263}}
 table.object .attr a.inspect {
   background-color: #0b0b0b;
   border-color: black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003262}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003267}}
+table.object .attr a.inspect:hover, table.object .attr a.inspect:focus {
+  background-color: #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003272}}
 table.object .method a.inspect {
   background-color: #070707;
   border-color: black;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003267}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003276}}
+table.object .method a.inspect:hover, table.object .method a.inspect:focus {
+  background-color: #141414;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003280}}
 table.object .core a.inspect {
   background-color: #010101;
   border-color: black;
 }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003284}}
+table.object .core a.inspect:hover, table.object .core a.inspect:focus {
+  background-color: #0e0e0e;
+}
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003272}}
+/* - Traceline - */
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003290}}
 .traceline {
   -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   border-top: 1px solid #181818;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003276}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003294}}
 .traceline .tracefilelno, .traceline .tracecode {
   border-left: 1px solid #181818;
   -webkit-box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;
@@ -1446,7 +1468,7 @@ table.object .core a.inspect {
   box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003281}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003299}}
 a.inspect {
   padding: 0.1em 5px;
   -webkit-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;

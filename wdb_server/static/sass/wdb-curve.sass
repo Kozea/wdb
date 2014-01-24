@@ -159,7 +159,7 @@ body
             font-weight: bold
 
           &.active
-            .base 
+            .base
               color: #E91861
 
             .completion
@@ -245,17 +245,27 @@ body
   padding: 0
 
 
+/* - Table Object - */
 table.object
-  tbody, thead 
-    td 
+  tbody, thead
+    td
       border-width: 1px
 
   thead
     +text-shadow(none !important)
+
+  a.inspect
+    +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
+    padding: 0.1em 5px
+    margin: 1px 0
+
   .attr
     a.inspect
       background-color: darken($obj-attr-bg, 5%)
-      border-color: darken($obj-attr-bg, 10%)
+      border-color: darken($obj-attr-bg, 15%)
+
+      &:hover, &:focus
+        background-color: $obj-attr-bg
 
 
   .method
@@ -263,12 +273,20 @@ table.object
       background-color: darken($obj-method-bg, 5%)
       border-color: darken($obj-method-bg, 10%)
 
+      &:hover, &:focus
+        background-color: $obj-method-bg
+
   .core
     a.inspect
       background-color: darken($obj-core-bg, 5%)
       border-color: darken($obj-core-bg, 10%)
 
+      &:hover, &:focus
+        background-color: $obj-core-bg
 
+
+
+/* - Traceline - */
 .traceline
   +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
   border-top: 1px solid $trace-alt-bg
@@ -279,5 +297,5 @@ table.object
 
 
 a.inspect
-  padding: 0.1em 5px 
+  padding: 0.1em 5px
   +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
