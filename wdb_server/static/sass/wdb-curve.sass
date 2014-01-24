@@ -136,8 +136,8 @@ body
         width: 8px
 
     table
-      border-collapse: collapse
-      +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05))
+      tbody
+        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05))
 
       a:hover, a:focus
         color: lighten($trace-fun, 10%)
@@ -150,10 +150,6 @@ body
 
 
       tbody tr
-        &:hover, &:focus
-          background-color: rgba(255, 255, 255, 0.05)
-          +transition(background-color 0.2s ease)
-
         td
           border: 1px solid darken(#1d1f21, 5%)
           +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05))
@@ -183,7 +179,7 @@ body
 
 
     #source-editor .CodeMirror-scroll
-      border: 1px solid lighten(#1d1f21, 5%)
+      border-bottom: 1px solid lighten(#1d1f21, 5%)
       border-left: none
 
     input[type="text"]
@@ -229,7 +225,7 @@ body
   background: none
   border-right: 1px solid transparent
 
-  .CodeMirror-gutter
+  .CodeMirror-gutter.CodeMirror-gutter.CodeMirror-linenumbers
     border-right: 1px solid lighten(#1d1f21, 5%)
     +box-shadow(-1px 0 0 darken(#1d1f21, 10%) inset)
 
@@ -239,11 +235,38 @@ body
   height: 1em
 
 .CodeMirror-gutter-elt .breakpoint
-  top: -2px
   position: relative
   left: 0px
-  width: 0.3em
-  +text-shadow(0 0 1px darken($trace-fun, 50%))
+  font-size: 13px
+  width: 0.1em
+
+.CodeMirror-code pre
+  border-right: none
+  padding: 0
+
+
+table.object
+  tbody, thead 
+    td 
+      border-width: 1px
+
+  thead
+    +text-shadow(none !important)
+  .attr
+    a.inspect
+      background-color: darken($obj-attr-bg, 5%)
+      border-color: darken($obj-attr-bg, 10%)
+
+
+  .method
+    a.inspect
+      background-color: darken($obj-method-bg, 5%)
+      border-color: darken($obj-method-bg, 10%)
+
+  .core
+    a.inspect
+      background-color: darken($obj-core-bg, 5%)
+      border-color: darken($obj-core-bg, 10%)
 
 
 .traceline
@@ -253,3 +276,8 @@ body
   .tracefilelno, .tracecode
     border-left: 1px solid $trace-alt-bg
     +box-shadow(1px 0 0 rgba(255, 255, 255, 0.05) inset)
+
+
+a.inspect
+  padding: 0.1em 5px 
+  +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)

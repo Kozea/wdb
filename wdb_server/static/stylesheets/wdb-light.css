@@ -827,30 +827,30 @@ a.inspect:hover {
 .object .core {
   background-color: rgba(0, 125, 255, 0.05);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003428}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003429}}
 .object .method {
   background-color: rgba(0, 125, 255, 0.075);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003430}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003432}}
 .object .attr {
   background-color: rgba(0, 125, 255, 0.1);
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003433}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003435}}
 .nogood {
   color: red !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003436}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003438}}
 .nogood > .pln, .nogood > .typ {
   color: red !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003439}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003441}}
 .waiting_for_hl {
   opacity: 0.4;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003443}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003445}}
 code, code span {
   -webkit-transition: opacity 50ms;
   -moz-transition: opacity 50ms;
@@ -858,29 +858,29 @@ code, code span {
   transition: opacity 50ms;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003447}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003449}}
 .trace_500 {
   margin: 0 1em 1em;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003450}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003452}}
 .trace_500 .flno {
   color: #cccccc;
   font-size: 1.3em;
   float: left;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003455}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003457}}
 .trace_500 .fun {
   font-size: 1.2em;
   float: right;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003459}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003461}}
 .trace_500 code {
   font-size: 1.3em;
   padding: 0.5em;
   clear: left;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003465}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003467}}
 #activate, #deactivate {
   display: block;
   width: 80px;
@@ -888,7 +888,7 @@ code, code span {
   text-decoration: none;
   background-color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003472}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003474}}
 #activate:before, #deactivate:before {
   display: block;
   width: 40px;
@@ -898,33 +898,33 @@ code, code span {
   font-weight: bold;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003480}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003482}}
 #activate:before {
   content: "Off";
   background-color: red;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003484}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003486}}
 #deactivate:before {
   content: "On";
   margin-left: 40px;
   background-color: green;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003489}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003491}}
 .CodeMirror-dialog {
   background-color: #e6e6e6;
   border-bottom-color: white;
   color: black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003494}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003496}}
 .cm-searching {
   background: white;
 }
 
 /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003500}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003502}}
 .state {
   background-color: rgba(0, 0, 0, 0);
   border: 5px solid rgba(119, 0, 136, 0.7);
@@ -945,7 +945,7 @@ code, code span {
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003521}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003523}}
 .state.inner {
   width: 30px;
   height: 30px;
@@ -958,7 +958,7 @@ code, code span {
   -webkit-animation-play-state: paused;
   animation-play-state: paused;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003533}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/_wdb\.sass}line{font-family:\00003535}}
 .state.on {
   -moz-animation-play-state: running;
   -webkit-animation-play-state: running;
@@ -966,7 +966,7 @@ code, code span {
 }
 
 @-moz-keyframes spinPulse {
-  /* line 539, ../sass/_wdb.sass */
+  /* line 541, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(145deg);
     -moz-transform: rotate(145deg);
@@ -976,7 +976,7 @@ code, code span {
     opacity: 1;
   }
 
-  /* line 542, ../sass/_wdb.sass */
+  /* line 544, ../sass/_wdb.sass */
   50% {
     -webkit-transform: rotate(-120deg);
     -moz-transform: rotate(-120deg);
@@ -986,7 +986,7 @@ code, code span {
     opacity: 0;
   }
 
-  /* line 545, ../sass/_wdb.sass */
+  /* line 547, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(160deg);
     -moz-transform: rotate(160deg);
@@ -999,7 +999,7 @@ code, code span {
 }
 
 @-moz-keyframes spinoffPulse {
-  /* line 551, ../sass/_wdb.sass */
+  /* line 553, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -1008,7 +1008,7 @@ code, code span {
     transform: rotate(0deg);
   }
 
-  /* line 553, ../sass/_wdb.sass */
+  /* line 555, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
@@ -1019,7 +1019,7 @@ code, code span {
 }
 
 @-webkit-keyframes spinPulse {
-  /* line 539, ../sass/_wdb.sass */
+  /* line 541, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(145deg);
     -moz-transform: rotate(145deg);
@@ -1029,7 +1029,7 @@ code, code span {
     opacity: 1;
   }
 
-  /* line 542, ../sass/_wdb.sass */
+  /* line 544, ../sass/_wdb.sass */
   50% {
     -webkit-transform: rotate(-120deg);
     -moz-transform: rotate(-120deg);
@@ -1039,7 +1039,7 @@ code, code span {
     opacity: 0;
   }
 
-  /* line 545, ../sass/_wdb.sass */
+  /* line 547, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(160deg);
     -moz-transform: rotate(160deg);
@@ -1052,7 +1052,7 @@ code, code span {
 }
 
 @-webkit-keyframes spinoffPulse {
-  /* line 551, ../sass/_wdb.sass */
+  /* line 553, ../sass/_wdb.sass */
   0% {
     -webkit-transform: rotate(0deg);
     -moz-transform: rotate(0deg);
@@ -1061,7 +1061,7 @@ code, code span {
     transform: rotate(0deg);
   }
 
-  /* line 553, ../sass/_wdb.sass */
+  /* line 555, ../sass/_wdb.sass */
   100% {
     -webkit-transform: rotate(360deg);
     -moz-transform: rotate(360deg);
