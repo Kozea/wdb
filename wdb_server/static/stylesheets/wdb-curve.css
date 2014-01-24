@@ -1372,27 +1372,22 @@ body {
 
 /* - Scrollback - */
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003220}}
-a .cm {
-  margin-left: 2.4em;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003223}}
 .out {
   margin-left: 2.4em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003226}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003223}}
 .trace_500 {
   flex: 1;
 }
 
 /* - Code Mirror - */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003231}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003228}}
 .CodeMirror-gutters {
   background: none;
   border-right: 1px solid transparent;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003235}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003232}}
 .CodeMirror-gutters .CodeMirror-gutter {
   border-right: 1px solid #292c2f;
   -webkit-box-shadow: -1px 0 0 #050606 inset;
@@ -1400,35 +1395,33 @@ a .cm {
   box-shadow: -1px 0 0 #050606 inset;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003239}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003236}}
 .CodeMirror-linebackground.breakpoint {
   color: #1bd2ff;
   background: rgba(27, 210, 255, 0.1) !important;
   height: 1em;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003244}}
-.CodeMirror-linebackground.ctx {
-  margin-top: -4px;
-}
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003247}}
-.CodeMirror-linebackground.ctx.ctx-bottom {
-  margin: 0 0 -4px;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003250}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003241}}
 .CodeMirror-gutter-elt .breakpoint {
   top: -2px;
   position: relative;
   left: 0px;
+  width: 0.3em;
   text-shadow: 0 0 1px black;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003257}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003249}}
 .traceline {
-  -webkit-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
-  -moz-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
-  box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
-  border-left: 1px solid #181818;
+  -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   border-top: 1px solid #181818;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-curve\.sass}line{font-family:\00003253}}
+.traceline .tracefilelno, .traceline .tracecode {
+  border-left: 1px solid #181818;
+  -webkit-box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+  -moz-box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;
 }

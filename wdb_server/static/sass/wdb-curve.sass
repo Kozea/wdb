@@ -217,9 +217,6 @@ body
 
 
 /* - Scrollback - */
-a .cm
-  margin-left: 2.4em
-
 .out
   margin-left: 2.4em
 
@@ -241,20 +238,18 @@ a .cm
   background: rgba(27, 210, 255, 0.1) !important
   height: 1em
 
-.CodeMirror-linebackground.ctx
-  margin-top: -4px
-
-  &.ctx-bottom
-    margin: 0 0 -4px
-
 .CodeMirror-gutter-elt .breakpoint
   top: -2px
   position: relative
   left: 0px
+  width: 0.3em
   +text-shadow(0 0 1px darken($trace-fun, 50%))
 
 
 .traceline
-  +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
-  border-left: 1px solid $trace-alt-bg
+  +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
   border-top: 1px solid $trace-alt-bg
+
+  .tracefilelno, .tracecode
+    border-left: 1px solid $trace-alt-bg
+    +box-shadow(1px 0 0 rgba(255, 255, 255, 0.05) inset)
