@@ -1,2 +1,40 @@
 @import light
 @import wdb
+
+body
+  background-color: #f8f8f8
+
+  #wdb
+    /* - HEADER - */
+    > header
+      h1
+        color: $trace-fun
+
+
+    /* - SWITCH - */
+    #switch
+      a
+        border: 1px solid darken(#f8f8f8, 5%)
+        background-color: #f8f8f8
+        +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.9) inset, 1px 1px 0 rgba(255, 255, 255, 0.9))
+        +border-radius(4px)
+        overflow: hidden
+
+        &#deactivate:before
+          +border-radius(4px)
+          background-color: $trace-fun
+          +box-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+
+
+  > article 
+    table tr
+      &:hover, &:focus
+        background: rgba(255, 255, 255, 0.9)
+
+  #traceback .traceline .tracefunfun
+    background-color: #f8f8f8
+
+    .tracefun
+      &:before
+        border-bottom-color: #f8f8f8
+        border-left-color: #f8f8f8

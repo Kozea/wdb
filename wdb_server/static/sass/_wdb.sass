@@ -42,8 +42,28 @@ body, html
       width: 90%
 
     table
+      border-collapse: collapse
       width: 90%
       margin: 0 auto
+
+      tbody td
+        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.7) inset)
+
+        &.action, &.close
+          text-align: center
+
+          a
+            color: transparent
+            font-size: 0
+            display: inline-block
+
+            &:hover, &:focus
+              &:before 
+                color: lighten($trace-fun, 10%)
+
+            &:before
+              color: $trace-fun
+              font-size: 18px
 
       a
         color: $trace-fun
