@@ -17,8 +17,6 @@
 
 
 body
-  background-color: #1d1f21
-
 #wdb
   border-top: 4px solid rgb(1, 183, 229)
   padding-top: 4px
@@ -57,9 +55,9 @@ body
         color: rgb(1, 183, 229)
 
       small
-        color: darken(#1d1f21, 10%)
+        color: black
         text-transform: capitalize
-        +text-shadow(1px 1px 1px rgba(255, 255, 255, 0.3), -1px -1px 1px rgba(0, 0, 0, 0.5))
+        +text-shadow(1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5))
 
 
     #activity
@@ -288,8 +286,15 @@ table.object
 
 /* - Traceline - */
 .traceline
+  background-color: darken($bg, 8%)
   +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
   border-top: 1px solid $trace-alt-bg
+
+  .tracefunfun .tracefun
+    background-color: darken($bg, 8%)
+
+    &:before 
+      border-color: darken($bg, 8%) darken($bg, 8%) $bg $bg
 
   .tracefilelno, .tracecode
     border-left: 1px solid $trace-alt-bg
