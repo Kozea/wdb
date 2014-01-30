@@ -1,14 +1,66 @@
 @import light
 @import wdb
 
-body
-  background-color: #f8f8f8
++font-face("WeblySleek", font-files("Weblysleekuil.woff", "Weblysleekuil.ttf", "Weblysleekuil.svg"), "Weblysleekuil.eot", 100, normal)
++font-face("WeblySleek", font-files("Weblysleekuili.woff", "Weblysleekuili.ttf", "Weblysleekuili.svg"), "Weblysleekuili.eot", 100, italic)
 
-  #wdb
-    /* - HEADER - */
-    > header
-      h1
-        color: $trace-fun
++font-face("WeblySleek", font-files("Weblysleekuisb.woff", "Weblysleekuisb.ttf", "Weblysleekuisb.svg"), "Weblysleekuisb.eot", 700, normal)
++font-face("WeblySleek", font-files("Weblysleekuisbi.woff", "Weblysleekuisbi.ttf", "Weblysleekuisbi.svg"), "Weblysleekuisbi.eot", 700, italic)
+
++font-face("WeblySleek", font-files("Weblysleekuisl.woff", "Weblysleekuisl.ttf", "Weblysleekuisl.svg"), "Weblysleekuisl.eot", 400, normal)
++font-face("WeblySleek", font-files("Weblysleekuisli.woff", "Weblysleekuisli.ttf", "Weblysleekuisli.svg"), "Weblysleekuisli.eot", 400, italic)
+
+
+
+\::-webkit-scrollbar
+  background: $bg
+  border: 1px solid $code-ctx-border
+  width: .75em
+  height: .75em
+
+\::-webkit-scrollbar-thumb
+  background: $code-ctx-bg
+  border: 1px solid $code-ctx-border
+
+body
+  border-top: 2px solid $trace-fun
+
+#wdb
+  /* - HEADER - */
+  > header
+    border-bottom: 1px solid darken($bg, 3%)
+    +box-shadow(0 1px 0 rgba(255, 255, 255, 0.8), -5px 0 5px -5px rgba(0, 0, 0, 0.5), 5px 0 5px -5px rgba(0, 0, 0, 0.5))
+    margin: 0 5%
+    padding: 10px 20px 0
+    position: relative
+
+    &:before
+      background-color: $trace-fun
+      content: ''
+      display: block
+      height: 10px
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+
+    #activity
+      position: relative
+      display: block
+
+      .state
+        left: 20px
+        top: -30px
+
+      .state.inner
+        left: 30px
+        top: -20px
+
+    h1
+      color: $trace-fun
+
+      small
+        font-weight: normal
 
 
     /* - SWITCH - */
@@ -26,15 +78,57 @@ body
           +box-shadow(0 0 5px rgba(0, 0, 0, 0.5))
 
 
-  > article 
-    table tr
-      &:hover, &:focus
-        background: rgba(255, 255, 255, 0.9)
+  article
+    margin: 0 5%
 
-  #traceback .traceline .tracefunfun
-    background-color: #f8f8f8
+    section
+      border: 1px solid #fff
+      +box-shadow(0 1px 1px rgba(0, 0, 0, 0.1) inset)
+      margin: 25px 0
+      padding: 10px 15px
+      position: relative
+      background-color: darken($bg, 2%)
 
-    .tracefun
-      &:before
-        border-bottom-color: #f8f8f8
-        border-left-color: #f8f8f8
+      h2
+        border-bottom: 5px solid $trace-fun
+        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+        color: #5a5a5a
+        display: inline-block
+        font-family: "Weblysleek", sans-serif
+
+        &:after
+          background-color: $trace-fun
+          content: ''
+          display: block
+          height: 1px 
+          margin-top: 5px
+          position: absolute
+          width: 97%
+
+      input[type="submit"]
+        +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
+        border-color: darken($trace-fun, 10%)
+        +border-radius(3px)
+        color: #fff
+        font-weight: normal
+        
+
+
+
+.traceline
+  +traceline(lighten($bg, 5%))
+
+  &:nth-child(odd)
+    +traceline($trace-alt-bg)
+
+
+  &:hover
+    +traceline(lighten(#eadeeb, 5%))
+
+  &.selected
+    +traceline(darken(#eadeeb, 5%))
+
+  &.real-selected
+    +traceline(#eadeeb)
+
+
