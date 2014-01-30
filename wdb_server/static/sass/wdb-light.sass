@@ -29,7 +29,7 @@ body
   /* - HEADER - */
   > header
     border-bottom: 1px solid darken($bg, 3%)
-    +box-shadow(0 1px 0 rgba(255, 255, 255, 0.8), -5px 0 5px -5px rgba(0, 0, 0, 0.5), 5px 0 5px -5px rgba(0, 0, 0, 0.5))
+    +box-shadow(0 1px 0 rgba(255, 255, 255, 0.8), -10px 0 10px -10px rgba(0, 0, 0, 0.5), 10px 0 10px -10px rgba(0, 0, 0, 0.5))
     margin: 0 5%
     padding: 10px 20px 0
     position: relative
@@ -100,7 +100,7 @@ body
           background-color: $trace-fun
           content: ''
           display: block
-          height: 1px 
+          height: 1px
           margin-top: 5px
           position: absolute
           width: 97%
@@ -111,8 +111,6 @@ body
         +border-radius(3px)
         color: #fff
         font-weight: normal
-        
-
 
 
 .traceline
@@ -132,3 +130,27 @@ body
     +traceline(#eadeeb)
 
 
+.CodeMirror-linebackground
+  &.breakpoint
+    background-color: #ee5f80
+
+  &.highlighted
+    background-color: #a9dac4 !important
+
+
+.cm span.cm-def
+  color: #089970
+
+
+#completions .base 
+  font-weight: bold
+
+
+footer
+  background-color: darken($bg, 5%)
+  border-top: 5px solid $trace-fun
+
+  #watchers
+    border-top: 8px solid $trace-fun
+    margin: 0 5%
+    padding: 0.5em 0
