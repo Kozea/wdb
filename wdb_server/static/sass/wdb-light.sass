@@ -22,10 +22,9 @@
   background: $code-ctx-bg
   border: 1px solid $code-ctx-border
 
-body
+#wdb
   border-top: 2px solid $trace-fun
 
-#wdb
   /* - HEADER - */
   > header
     border-bottom: 1px solid darken($bg, 3%)
@@ -199,11 +198,13 @@ table.object
 
 footer
   background-color: darken($bg, 5%)
-  border-top: 5px solid $trace-fun
+  border-top: 1px solid  darken($bg, 5%)
+  +box-shadow(0 1px 0 #fff inset)
 
   #watchers
-    border-top: 8px solid $trace-fun
     margin: 0 5%
     padding: 0.5em 0
-
+      
+    > div code.name 
+      color: $trace-fun
 

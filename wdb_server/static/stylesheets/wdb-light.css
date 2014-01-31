@@ -1134,15 +1134,11 @@ code, code span {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000325}}
-body {
-  border-top: 2px solid #770088;
-}
-
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000328}}
 #wdb {
+  border-top: 2px solid #770088;
   /* - HEADER - */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000330}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000329}}
 #wdb > header {
   border-bottom: 1px solid #f0f0f0;
   -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8), -10px 0 10px -10px rgba(0, 0, 0, 0.5), 10px 0 10px -10px rgba(0, 0, 0, 0.5);
@@ -1153,7 +1149,7 @@ body {
   position: relative;
   /* - SWITCH - */
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000337}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000336}}
 #wdb > header:before {
   background-color: #770088;
   content: "";
@@ -1164,30 +1160,30 @@ body {
   left: 0;
   width: 100%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000347}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000346}}
 #wdb > header #activity {
   position: relative;
   display: block;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000351}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000350}}
 #wdb > header #activity .state {
   left: 20px;
   top: -30px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000355}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000354}}
 #wdb > header #activity .state.inner {
   left: 30px;
   top: -20px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000359}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000358}}
 #wdb > header h1 {
   color: #770088;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000362}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000361}}
 #wdb > header h1 small {
   font-weight: normal;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000368}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000367}}
 #wdb > header #switch a {
   border: 1px solid #ebebeb;
   background-color: #f8f8f8;
@@ -1201,7 +1197,7 @@ body {
   border-radius: 4px;
   overflow: hidden;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000375}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000374}}
 #wdb > header #switch a#deactivate:before {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
@@ -1213,11 +1209,11 @@ body {
   -moz-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000381}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000380}}
 #wdb article {
   margin: 0 5%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000384}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000383}}
 #wdb article section {
   border: 1px solid white;
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset;
@@ -1228,7 +1224,7 @@ body {
   position: relative;
   background-color: #f3f3f3;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000392}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000391}}
 #wdb article section h2 {
   border-bottom: 5px solid #770088;
   -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -1238,7 +1234,7 @@ body {
   display: inline-block;
   font-family: "Weblysleek", sans-serif;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000399}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\0000398}}
 #wdb article section h2:after {
   background-color: #770088;
   content: "";
@@ -1248,7 +1244,7 @@ body {
   position: absolute;
   width: 97%;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003108}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003107}}
 #wdb article section input[type="submit"] {
   background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #770088), color-stop(100%, #4a0055));
   background: -webkit-linear-gradient(#770088, #4a0055);
@@ -1265,7 +1261,7 @@ body {
   font-weight: normal;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003116}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003115}}
 .traceline {
   background-color: white;
 }
@@ -1286,7 +1282,7 @@ body {
 .traceline .tracefunfun .tracefun:before {
   border-color: white white #f8f8f8 #f8f8f8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003119}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003118}}
 .traceline:nth-child(odd) {
   background-color: #f0f0f0;
 }
@@ -1307,7 +1303,7 @@ body {
 .traceline:nth-child(odd) .tracefunfun .tracefun:before {
   border-color: #f0f0f0 #f0f0f0 #f8f8f8 #f8f8f8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003123}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003122}}
 .traceline:hover {
   background-color: #f4eef5;
 }
@@ -1328,7 +1324,7 @@ body {
 .traceline:hover .tracefunfun .tracefun:before {
   border-color: #f4eef5 #f4eef5 #f8f8f8 #f8f8f8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003126}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003125}}
 .traceline.selected {
   background-color: #e0cee1;
 }
@@ -1349,7 +1345,7 @@ body {
 .traceline.selected .tracefunfun .tracefun:before {
   border-color: #e0cee1 #e0cee1 #f8f8f8 #f8f8f8;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003129}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003128}}
 .traceline.real-selected {
   background-color: #eadeeb;
 }
@@ -1372,42 +1368,48 @@ body {
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003133}}
-.CodeMirror-code .CodeMirror-gutter-elt .breakpoint {
+.CodeMirror-code .CodeMirror-gutter-elt.breakpoint {
+  color: #770088;
+  font-size: 0.8em;
+  margin-top: 2px;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003138}}
+.CodeMirror-code .CodeMirror-gutter-elt.highlighted {
   color: #770088;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003137}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003142}}
 .CodeMirror-linebackground.breakpoint {
   background-color: #ee5f80;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003140}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003145}}
 .CodeMirror-linebackground.highlighted {
   background-color: #a9dac4 !important;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003144}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003149}}
 .cm span.cm-def {
   color: #089970;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003148}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003153}}
 #completions .base {
   font-weight: bold;
 }
 
 /* - Table Object - */
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003154}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003159}}
 table.object tbody td, table.object thead td {
   -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
   -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset;
   border-width: 1px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003158}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003163}}
 table.object thead {
   text-shadow: none !important;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003161}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003166}}
 table.object a.inspect {
   -webkit-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
   -moz-box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
@@ -1415,42 +1417,48 @@ table.object a.inspect {
   padding: 0.1em 5px;
   margin: 1px 0;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003167}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003172}}
 table.object .attr a.inspect {
   background-color: #f8f8f8;
   border-color: #c5c5c5;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003171}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003176}}
 table.object .attr a.inspect:hover, table.object .attr a.inspect:focus {
   background-color: #ebebeb;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003176}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003181}}
 table.object .method a.inspect {
   background-color: #f0f0f0;
   border-color: #cacaca;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003180}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003185}}
 table.object .method a.inspect:hover, table.object .method a.inspect:focus {
   background-color: #e4e4e4;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003184}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003189}}
 table.object .core a.inspect {
   background-color: #ebebeb;
   border-color: #d2d2d2;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003188}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003193}}
 table.object .core a.inspect:hover, table.object .core a.inspect:focus {
   background-color: #dfdfdf;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003194}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003199}}
 footer {
   background-color: #ebebeb;
-  border-top: 5px solid #770088;
+  border-top: 1px solid #ebebeb;
+  -webkit-box-shadow: 0 1px 0 white inset;
+  -moz-box-shadow: 0 1px 0 white inset;
+  box-shadow: 0 1px 0 white inset;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003198}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003204}}
 footer #watchers {
-  border-top: 8px solid #770088;
   margin: 0 5%;
   padding: 0.5em 0;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/opt\/abaumgartner\/projets\/wdb\/wdb_server\/static\/sass\/wdb-light\.sass}line{font-family:\00003208}}
+footer #watchers code.name {
+  color: #770088;
 }
