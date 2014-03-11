@@ -6,7 +6,7 @@ wdb
 """
 import os
 import re
-from setuptools import setup, find_packages
+from setuptools import setup
 
 ROOT = os.path.dirname(__file__)
 with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
@@ -23,7 +23,7 @@ options = dict(
     license="GPLv3",
     platforms="Any",
     scripts=['wdb.server.py'],
-    packages=find_packages(),
+    packages=['wdb', 'wdb_server'],
     install_requires=["tornado", "log_colorizer", "jedi", "filemagic"],
     package_data={
         'wdb_server': [
