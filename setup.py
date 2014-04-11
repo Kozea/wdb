@@ -29,7 +29,9 @@ options = dict(
         'wdb_server': [
             'static/fonts/*',
             'static/stylesheets/*',
-            'static/javascripts/*.min.js',
+            'static/img/*.png',
+            'static/*.min.js',
+            'static/*.min.css',
             'static/javascripts/wdb/*.min.js',
             'templates/*.html'
         ],
