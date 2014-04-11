@@ -2,9 +2,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- le jquery -->
-    <script src="{{ static_url('javascripts/jquery-1.9.1.min.js') }}"></script>
-    <script src="{{ static_url('javascripts/jquery.autosize.min.js') }}"></script>
+    <script src="{{ static_url('deps.min.js') }}"></script>
+    <link href="{{ static_url('deps.min.css') }}" rel="stylesheet" type="text/css">
+
     {% block head %}
     {% end %}
     {% from wdb_server import StyleHandler %}

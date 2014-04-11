@@ -1,0 +1,16 @@
+{
+  "name": "wdb",
+  "version": "1.2.0",
+  "homepage": "https://github.com/Kozea/wdb",
+  "authors": [
+    "Florian Mounier <florian.mounier@kozea.fr>"
+  ],
+  "description": "An improbable python web debugger through WebSockets",
+  "license": "GPLv3",
+  "private": true,
+  "dependencies": {
+    "jquery": "~2.1.0",
+    "codemirror": "~4.0.3",
+    "jquery-autosize": "~1.18.6"
+  }
+}
