@@ -70,7 +70,7 @@ class Message(object):
             pipe = message.index('|')
             self.command, self.data = message[:pipe], message[pipe + 1:]
             if pickled and self.data:
-                self.data = pickle.loads(self.data.encode('utf-8'))
+                self.data = pickle.loads(self.data.encode('utf-8'), protocol=2)
             else:
                 self.data = json.loads(self.data, object_hook=AttrDict)
         else:

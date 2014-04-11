@@ -10,7 +10,6 @@ from logging import getLogger
 from shutil import move
 from tempfile import gettempdir
 from base64 import b64encode
-import pickle
 
 try:
     from cutter import cut
@@ -222,8 +221,8 @@ class Interaction(object):
     def do_start(self, data):
         # Getting breakpoints
         log.debug('Getting breakpoints')
-        self.db.send('Server|GetBreaks')
-        self.db.breakpoints = self.db.receive(True)
+        # self.db.send('Server|GetBreaks')
+        # self.db.breakpoints = self.db.receive()
 
         self.db.send('Init|%s' % dump({
             'cwd': os.getcwd()

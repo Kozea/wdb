@@ -21,7 +21,6 @@ import tornado.web
 import tornado.websocket
 import os
 import logging
-import pickle
 from multiprocessing import Process
 
 log = logging.getLogger('wdb_server')
@@ -105,6 +104,13 @@ class MainHandler(tornado.web.RequestHandler):
         self.render('wdb.html', uuid=uuid)
 
 
+class LastHandler(tornado.web.RequestHandler):
+    def get(self):
+        if len(Sockets.sockets) == 0:
+            self.send_error(404)
+        self.render('wdb.html', uuid=list(Sockets.sockets.keys())[0])
+
+
 class SelfHandler(tornado.web.RequestHandler):
     def get(self):
         from multiprocessing import Process
@@ -130,21 +136,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def write(self, message):
         log.debug('socket -> websocket: %s' % message)
-        if message.startswith(b'Server|'):
-            message = message.replace(b'Server|', b'')
-            if message == b'GetBreaks':
-                socket = Sockets.sockets.get(self.uuid)
-                bps = pickle.dumps(global_breakpoints)
-                socket.write(pack("!i", len(bps)))
-                socket.write(bps)
-            if message.startswith(b'AddBreak|'):
-                global_breakpoints.add(pickle.loads(
-                    message.replace(b'AddBreak|', b'')))
-            if message.startswith(b'RmBreak|'):
-                global_breakpoints.remove(pickle.loads(
-                    message.replace(b'RmBreak|', b'')))
-        else:
-            self.write_message(message)
+        # if message == ''.startswith(b'Server|'):
+        #     message = message.replace(b'Server|', b'')
+        #     if message == b'GetBreaks':
+        #         socket = Sockets.sockets.get(self.uuid)
+        #         bps = pickle.dumps(global_breakpoints, protocol=2)
+        #         socket.write(pack("!i", len(bps)))
+        #         socket.write(bps)
+        #     if message.startswith(b'AddBreak|'):
+        #         global_breakpoints.add(pickle.loads(
+        #             message.replace(b'AddBreak|', b''), protocol=2))
+        #     if message.startswith(b'RmBreak|'):
+        #         global_breakpoints.remove(pickle.loads(
+        #             message.replace(b'RmBreak|', b''), protocol=2))
+        # else:
+        self.write_message(message)
 
     def open(self, uuid):
         self.uuid = uuid.decode('utf-8')
@@ -215,6 +221,7 @@ server = tornado.web.Application(
         (r"/websocket/(.+)", WebSocketHandler),
         (r"/status", SyncWebSocketHandler),
         (r"/self", SelfHandler),
+        (r"/last", LastHandler),
     ],
     debug=tornado.options.options.debug,
     static_path=static_path,

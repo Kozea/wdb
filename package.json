@@ -1,0 +1,25 @@
+{
+  "name": "wdb",
+  "version": "1.2.0",
+  "description": "An improbable python web debugger through WebSockets",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Kozea/wdb.git"
+  },
+  "private": true,
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/Kozea/wdb/issues"
+  },
+  "homepage": "https://github.com/Kozea/wdb",
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-coffee": "^0.10.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-contrib-uglify": "^0.4.0",
+    "grunt-contrib-cssmin": "^0.9.0",
+    "grunt-coffeelint": "0.0.8",
+    "grunt-sass": "^0.12.1",
+    "grunt-bower-task": "^0.3.4"
+  }
+}
