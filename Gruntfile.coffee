@@ -100,4 +100,5 @@ module.exports = (grunt) ->
   grunt.registerTask 'css', ['sass_to_scss', 'sass']
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
+    'sass_to_scss', 'sass',
     'bower', 'uglify', 'cssmin']
