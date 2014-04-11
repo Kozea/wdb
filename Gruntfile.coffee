@@ -10,8 +10,11 @@ module.exports = (grunt) ->
         sourceMap: true
 
       wdb:
-        files:
-          'wdb_server/static/wdb.min.js': 'wdb_server/static/javascripts/wdb.js'
+        expand: true
+        cwd: 'wdb_server/static/javascripts'
+        src: '*.js'
+        dest: 'wdb_server/static/javascripts/wdb/'
+        ext: '.min.js'
 
       deps:
         files:
@@ -24,6 +27,22 @@ module.exports = (grunt) ->
             'bower_components/codemirror/mode/python/python.js'
             'bower_components/codemirror/mode/jinja2/jinja2.js'
           ]
+
+    sass_to_scss:
+      wdb:
+        expand: true
+        cwd: 'sass/'
+        src: '*.sass'
+        dest: 'sass/scss/'
+        ext: '.scss'
+
+    sass:
+      wdb:
+        expand: true
+        cwd: 'sass/scss'
+        src: '*.scss'
+        dest: 'wdb_server/static/stylesheets/'
+        ext: '.css'
 
     cssmin:
       codemirror:
@@ -55,12 +74,18 @@ module.exports = (grunt) ->
       install: {}
 
     watch:
-      files: [
-        'coffees/*.coffee'
-        'Gruntfile.coffee'
-      ]
-      tasks: ['coffeelint', 'coffee']
+      coffee:
+        files: [
+          'coffees/*.coffee'
+          'Gruntfile.coffee'
+        ]
+        tasks: ['coffeelint', 'coffee']
 
+      sass:
+        files: [
+          'sass/*.sass'
+        ]
+        tasks: ['sass_to_scss', 'sass']
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-watch'
@@ -68,9 +93,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-sass'
+  grunt.loadNpmTasks 'grunt-sass-to-scss'
   grunt.loadNpmTasks 'grunt-bower-task'
 
   grunt.registerTask 'dev', ['coffeelint', 'coffee', 'watch']
+  grunt.registerTask 'css', ['sass_to_scss', 'sass']
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
     'bower', 'uglify', 'cssmin']

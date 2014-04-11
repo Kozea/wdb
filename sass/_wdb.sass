@@ -1,12 +1,22 @@
-@import compass/css3
-@import _wdb_font
+@import '_wdb_font'
 
 
-+font-face("Source Code Pro", font-files("SourceCodePro-Regular.woff", "SourceCodePro-Regular.ttf", "SourceCodePro-Regular.svg"), "SourceCodePro-Regular.eot", 400)
-+font-face("Source Code Pro", font-files("SourceCodePro-Semibold.woff", "SourceCodePro-Semibold.ttf", "SourceCodePro-Semibold.svg"), "SourceCodePro-Semibold.eot", 700)
-+font-face("Source Code Pro", font-files("SourceCodePro-Bold.woff", "SourceCodePro-Bold.ttf", "SourceCodePro-Bold.svg"), "SourceCodePro-Bold.eot", 900)
+@font-face
+  font-family: "Source Code Pro"
+  src: url("../fonts/SourceCodePro-Regular.ttf.woff") format("woff")
+  font-weight: 400
 
-@import hl
+@font-face
+  font-family: "Source Code Pro"
+  src: url("../fonts/SourceCodePro-Semibold.ttf.woff") format("woff")
+  font-weight: 700
+
+@font-face
+  font-family: "Source Code Pro"
+  src: url("../fonts/SourceCodePro-Bold.ttf.woff") format("woff")
+  font-weight: 900
+
+@import 'hl'
 
 body, html
   color: $fg
@@ -47,7 +57,6 @@ body, html
       margin: 0 auto
 
       tbody td
-        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.7) inset)
 
         &.action, &.close
           text-align: center
@@ -58,7 +67,7 @@ body, html
             display: inline-block
 
             &:hover, &:focus
-              &:before 
+              &:before
                 color: lighten($trace-fun, 10%)
 
             &:before
@@ -161,7 +170,7 @@ code
     font-family: "Source Code Pro" !important
     font-weight: bold
     font-size: 15px
-    +box-shadow(inset -8px 0 20px $source-shadow)
+    box-shadow: inset -8px 0 20px $source-shadow
 
     &.rw:after
       position: absolute
@@ -173,7 +182,7 @@ code
       border-top: 1px solid $trace-file
       border-bottom: 1px solid $trace-file
       padding: .2em 3em
-      +rotate(45deg)
+      transform: rotate(45deg)
 
     .breakpoints
       width: .6em
@@ -194,7 +203,7 @@ code
 
 #scrollback
   .display
-    +box-shadow(inset -8px 0 20px $source-shadow)
+    box-shadow: inset -8px 0 20px $source-shadow
     background-color: white
     border: 1px solid $code-ctx-border
     resize: both
@@ -243,7 +252,7 @@ code
 .trace
   font: $code-font
 
-@mixin traceline($col)
+=traceline($col)
   background-color: $col
 
   &:before
@@ -258,7 +267,7 @@ code
         border-color: $col $col $bg $bg
 
 .traceline
-  +transition(border 750ms)
+  transition: border 750ms
   margin: 0 0 1em 1em
   font: $code-font
   clear: both
@@ -326,10 +335,10 @@ code
   font-size: 14px
 
 .CodeMirror-linebackground
-  +transition(1s)
+  transition: 1s
 
   &:hover
-    +transition(1s)
+    transition: 1s
     color: $lno-hover-fg
   &.ctx
     &.ctx-top
@@ -443,7 +452,7 @@ a.inspect
 
 
 code, code span
-  +transition(opacity 50ms)
+  transition: opacity 50ms
 
 
 .trace_500
@@ -497,7 +506,7 @@ code, code span
   background: lighten($bg, 10%)
 
 
-/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/
+/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
 
 .state
   background-color: rgba(0, 0, 0, 0)
@@ -512,11 +521,9 @@ code, code span
   left: 10px
   width: 50px
   height: 50px
-  -moz-animation: spinPulse 1s infinite ease-in-out
   -webkit-animation: spinPulse 1s infinite linear
   animation: spinPulse 1s infinite linear
 
-  -moz-animation-play-state: paused
   -webkit-animation-play-state: paused
   animation-play-state: paused
 
@@ -525,40 +532,48 @@ code, code span
     height: 30px
     top: 30px
     left: 20px
-    -moz-animation: spinoffPulse 1s infinite linear
     -webkit-animation: spinoffPulse 1s infinite linear
     animation: spinoffPulse 1s infinite linear
-    -moz-animation-play-state: paused
     -webkit-animation-play-state: paused
     animation-play-state: paused
 
   &.on
-    -moz-animation-play-state: running
     -webkit-animation-play-state: running
     animation-play-state: running
 
 @mixin pulse()
-  0%
-    +rotate(145deg)
+  /* This is wrong, this is for sass_to_scss */
+  0% {
+    -webkit-transform: rotate(145deg)
+    transform: rotate(145deg)
     opacity: 1
-  50%
-    +rotate(-120deg)
+  }
+  50% {
+    -webkit-transform: rotate(-120deg)
+    transform: rotate(-120deg)
     opacity: 0
-  100%
-    +rotate(160deg)
+  }
+  100% {
+    -webkit-transform: rotate(160deg)
+    transform: rotate(160deg)
     opacity: 0
     box-shadow: 0 0 1px $state-outer
+  }
 
 @mixin pulseoff()
-  0%
-    +rotate(0deg)
-  100%
-    +rotate(360deg)
+  0% {
+    -webkit-transform: rotate(0deg)
+    transform: rotate(0deg)
+  }
+  100% {
+    -webkit-transform: rotate(360deg)
+    transform: rotate(360deg)
+  }
 
-@-moz-keyframes spinPulse
+@keyframes spinPulse
   +pulse
 
-@-moz-keyframes spinoffPulse
+@keyframes spinoffPulse
   +pulseoff
 
 @-webkit-keyframes spinPulse

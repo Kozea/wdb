@@ -1,15 +1,41 @@
-@import light
-@import wdb
+@import 'light'
+@import 'wdb'
 
-+font-face("WeblySleek", font-files("Weblysleekuil.woff", "Weblysleekuil.ttf", "Weblysleekuil.svg"), "Weblysleekuil.eot", 100, normal)
-+font-face("WeblySleek", font-files("Weblysleekuili.woff", "Weblysleekuili.ttf", "Weblysleekuili.svg"), "Weblysleekuili.eot", 100, italic)
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuil.ttf") format("truetype")
+  font-weight: 100
+  font-style: normal
 
-+font-face("WeblySleek", font-files("Weblysleekuisb.woff", "Weblysleekuisb.ttf", "Weblysleekuisb.svg"), "Weblysleekuisb.eot", 700, normal)
-+font-face("WeblySleek", font-files("Weblysleekuisbi.woff", "Weblysleekuisbi.ttf", "Weblysleekuisbi.svg"), "Weblysleekuisbi.eot", 700, italic)
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuili.ttf") format("truetype")
+  font-weight: 100
+  font-style: italic
 
-+font-face("WeblySleek", font-files("Weblysleekuisl.woff", "Weblysleekuisl.ttf", "Weblysleekuisl.svg"), "Weblysleekuisl.eot", 400, normal)
-+font-face("WeblySleek", font-files("Weblysleekuisli.woff", "Weblysleekuisli.ttf", "Weblysleekuisli.svg"), "Weblysleekuisli.eot", 400, italic)
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuisl.ttf") format("truetype")
+  font-weight: 400
+  font-style: normal
 
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuisli.ttf") format("truetype")
+  font-weight: 400
+  font-style: italic
+
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuisb.ttf") format("truetype")
+  font-weight: 700
+  font-style: normal
+
+@font-face
+  font-family: "WeblySleek"
+  src: url("../fonts/weblysleekuisbi.ttf") format("truetype")
+  font-weight: 700
+  font-style: italic
 
 
 \::-webkit-scrollbar
@@ -28,7 +54,7 @@
   /* - HEADER - */
   > header
     border-bottom: 1px solid darken($bg, 3%)
-    +box-shadow(0 1px 0 rgba(255, 255, 255, 0.8), -10px 0 10px -10px rgba(0, 0, 0, 0.5), 10px 0 10px -10px rgba(0, 0, 0, 0.5))
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8), -10px 0 10px -10px rgba(0, 0, 0, 0.5), 10px 0 10px -10px rgba(0, 0, 0, 0.5)
     margin: 0 5%
     padding: 10px 20px 0
     position: relative
@@ -67,14 +93,14 @@
       a
         border: 1px solid darken(#f8f8f8, 5%)
         background-color: #f8f8f8
-        +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.9) inset, 1px 1px 0 rgba(255, 255, 255, 0.9))
-        +border-radius(4px)
+        box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.9) inset, 1px 1px 0 rgba(255, 255, 255, 0.9)
+        border-radius: 4px
         overflow: hidden
 
         &#deactivate:before
-          +border-radius(4px)
+          border-radius: 4px
           background-color: $trace-fun
-          +box-shadow(0 0 5px rgba(0, 0, 0, 0.5))
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.5)
 
 
   article
@@ -82,7 +108,7 @@
 
     section
       border: 1px solid #fff
-      +box-shadow(0 1px 1px rgba(0, 0, 0, 0.1) inset)
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1) inset
       margin: 25px 0
       padding: 10px 15px
       position: relative
@@ -90,7 +116,7 @@
 
       h2
         border-bottom: 5px solid $trace-fun
-        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.5))
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5)
         color: #5a5a5a
         display: inline-block
         font-family: "Weblysleek", sans-serif
@@ -105,9 +131,9 @@
           width: 97%
 
       input[type="submit"]
-        +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
+        background: linear-gradient($trace-fun, darken($trace-fun, 10%))
         border-color: darken($trace-fun, 10%)
-        +border-radius(3px)
+        border-radius: 3px
         color: #fff
         font-weight: normal
 
@@ -129,7 +155,7 @@
     +traceline(#eadeeb)
 
 
-.CodeMirror-code .CodeMirror-gutter-elt 
+.CodeMirror-code .CodeMirror-gutter-elt
   &.breakpoint
     color: $trace-fun
     font-size: 0.8em
@@ -150,21 +176,21 @@
   color: #089970
 
 
-#completions .base 
+#completions .base
   font-weight: bold
 
 /* - Table Object - */
 table.object
   tbody, thead
     td
-      +box-shadow(0 1px 0 rgba(255, 255, 255, 0.3) inset)
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) inset
       border-width: 1px
 
   thead
-    +text-shadow(none !important)
+    text-shadow: none !important
 
   a.inspect
-    +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
+    box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset
     padding: 0.1em 5px
     margin: 1px 0
 
@@ -175,7 +201,6 @@ table.object
 
       &:hover, &:focus
         background-color: $obj-attr-bg
-
 
   .method
     a.inspect
@@ -193,18 +218,14 @@ table.object
       &:hover, &:focus
         background-color: $obj-core-bg
 
-
-
-
 footer
   background-color: darken($bg, 5%)
   border-top: 1px solid  darken($bg, 5%)
-  +box-shadow(0 1px 0 #fff inset)
+  box-shadow: 0 1px 0 #fff inset
 
   #watchers
     margin: 0 5%
     padding: 0.5em 0
-      
-    > div code.name 
-      color: $trace-fun
 
+    > div code.name
+      color: $trace-fun

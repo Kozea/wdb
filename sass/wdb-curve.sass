@@ -1,9 +1,12 @@
-@import curve
-@import wdb
+@import 'curve'
+@import 'wdb'
 
 
-+font-face("neuropol-x", font-files("neuropol-x.woff", "neuropol-x.ttf", "neuropol-x.svg"), "neuropol-x.eot", 400)
-
+@font-face
+  font-family: "neuropol-x"
+  src: url("../fonts/neuropol-x.ttf") format("truetype")
+  font-weight: 400
+  font-style: normal
 
 \::-webkit-scrollbar
   background: $bg
@@ -14,7 +17,6 @@
 \::-webkit-scrollbar-thumb
   background: $code-ctx-bg
   border: 1px solid $code-ctx-border
-
 
 
 #wdb
@@ -39,15 +41,15 @@
       left: 0
       top: 130px
       z-index: 1
-      +box-shadow(0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset)
+      box-shadow: 0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset
 
     h1#title
-      +box-shadow(-5px 0 5px -5px #000)
+      box-shadow: -5px 0 5px -5px #000
       font-variant: normal
       font-weight: normal
       margin-top: -20px
       padding-left: 10px
-      +text-shadow(1px 1px 1px rgba(0, 0, 0, 0.5))
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5)
       text-transform: uppercase
 
       &:first-letter
@@ -57,7 +59,7 @@
       small
         color: black
         text-transform: capitalize
-        +text-shadow(1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5))
+        text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5)
 
 
     #activity
@@ -73,11 +75,11 @@
 
     #deactivate, #activate
       border: 1px solid lighten(#1d1f21, 5%)
-      +border-radius(5px)
-      +box-shadow(1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset)
+      border-radius: 5px
+      box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset
 
       &:before
-        +border-radius(3px)
+        border-radius: 3px
         font-family: "neuropol-x"
         font-size: 0.8em
         font-variant: normal
@@ -92,7 +94,7 @@
 
     h2
       border-bottom: 1px solid darken($bg, 7%)
-      +box-shadow(0 1px 0 lighten($bg, 7%))
+      box-shadow: 0 1px 0 lighten($bg, 7%)
       color: lighten($bg, 20%)
       font-family: $font
       font-weight: normal
@@ -101,7 +103,7 @@
       margin-top: 25px
       min-height: 30px
       position: relative
-      +text-shadow(-1px -1px 0 #000)
+      text-shadow: -1px -1px 0 #000
 
       &:before
         background-color: $bg
@@ -109,8 +111,8 @@
         border-left: 3px solid $trace-fun
         border-right: 3px solid $trace-fun
         border-top: 3px solid $bg
-        +border-radius(100%)
-        +box-shadow(0 0 3px rgba(255, 255, 255, 0.3) inset)
+        border-radius: 100%
+        box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset
         content: ''
         display: block
         float: left
@@ -123,8 +125,8 @@
       &:after
         background: linear-gradient($trace-fun darken($trace-fun, 8%))
         border: 1px solid darken($trace-fun, 10%)
-        +border-radius(100%)
-        +box-shadow(1px 1px 0 rgba(0, 0, 0, 0.5) inset)
+        border-radius: 100%
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) inset
         content: ''
         display: block
         height: 8px
@@ -135,7 +137,7 @@
 
     table
       tbody
-        +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05))
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05)
 
       a:hover, a:focus
         color: lighten($trace-fun, 10%)
@@ -150,7 +152,7 @@
       tbody tr
         td
           border: 1px solid darken(#1d1f21, 5%)
-          +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05))
+          box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05)
 
           .base
             color: #ED5F92
@@ -169,7 +171,7 @@
 
           &.action, &.close
             a
-              +text-shadow(-1px -1px 0 #000)
+              text-shadow: -1px -1px 0 #000
 
               &:hover, &:focus
                 &:before
@@ -182,24 +184,24 @@
 
     input[type="text"]
       border: 1px solid darken(#1d1f21, 8%)
-      +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.1) inset, 1px 1px 0 rgba(255, 255, 255, 0.1))
+      box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.1) inset, 1px 1px 0 rgba(255, 255, 255, 0.1)
 
     input.open-self, input[type="submit"]
-      +background(linear-gradient($trace-fun, darken($trace-fun, 10%)))
+      background: linear-gradient($trace-fun, darken($trace-fun, 10%))
       border-color: darken($trace-fun, 10%)
-      +border-radius(3px)
+      border-radius: 3px
       color: darken($trace-fun, 25%)
-      +text-shadow(1px 1px 0 $trace-fun)
+      text-shadow: 1px 1px 0 $trace-fun
       font-weight: normal
 
       &:hover, &:focus
-        +background(linear-gradient(lighten($trace-fun, 10%), $trace-fun))
-        +text-shadow(1px 1px 0 lighten($trace-fun, 10%))
+        background: linear-gradient(lighten($trace-fun, 10%), $trace-fun)
+        text-shadow: 1px 1px 0 lighten($trace-fun, 10%)
 
   footer #watchers
     background: darken(#1d1f21, 5%)
     border-top: 1px solid darken(#1d1f21, 15%)
-    +box-shadow(0 1px 0 rgba(255, 255, 255, 0.1) inset)
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset
     padding: 0.1em 0
 
     > div .name
@@ -225,7 +227,7 @@
 
   .CodeMirror-gutter.CodeMirror-gutter.CodeMirror-linenumbers
     border-right: 1px solid lighten(#1d1f21, 5%)
-    +box-shadow(-1px 0 0 darken(#1d1f21, 10%) inset)
+    box-shadow: -1px 0 0 darken(#1d1f21, 10%) inset
 
 .CodeMirror-linebackground.breakpoint
   color: #1BD2FF
@@ -250,10 +252,10 @@ table.object
       border-width: 1px
 
   thead
-    +text-shadow(none !important)
+    text-shadow: none !important
 
   a.inspect
-    +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
+    box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset
     padding: 0.1em 5px
     margin: 1px 0
 
@@ -287,20 +289,20 @@ table.object
 /* - Traceline - */
 .traceline
   background-color: darken($bg, 8%)
-  +box-shadow(0 1px 0 rgba(255, 255, 255, 0.05) inset)
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset
   border-top: 1px solid $trace-alt-bg
 
   .tracefunfun .tracefun
     background-color: darken($bg, 8%)
 
-    &:before 
+    &:before
       border-color: darken($bg, 8%) darken($bg, 8%) $bg $bg
 
   .tracefilelno, .tracecode
     border-left: 1px solid $trace-alt-bg
-    +box-shadow(1px 0 0 rgba(255, 255, 255, 0.05) inset)
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset
 
 
 a.inspect
   padding: 0.1em 5px
-  +box-shadow(1px 1px 0 rgba(255, 255, 255, 0.05) inset)
+  box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset

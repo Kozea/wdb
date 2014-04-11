@@ -1,0 +1,234 @@
+@import 'curve';
+@import 'wdb';
+@font-face{
+  font-family: "neuropol-x";
+  src: url("../fonts/neuropol-x.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;}
+\::-webkit-scrollbar{
+  background: $bg;
+  border: 1px solid $code-ctx-border;
+  width: .75em;
+  height: .75em;}
+\::-webkit-scrollbar-thumb{
+  background: $code-ctx-bg;
+  border: 1px solid $code-ctx-border;}
+#wdb{
+  border-top: 4px solid rgb(1, 183, 229);
+  padding-top: 4px;
+  > header{
+    background: url(../img/bg-left.png) no-repeat top left, url(../img/bg-right.png) no-repeat top right;
+    border-top: 1px solid rgb(1, 183, 229);
+    height: 150px;
+    padding-left: 60px;
+    position: relative;
+    z-index: 5;
+    &:after{
+      background: rgb(1, 183, 229);
+      height: 25px;
+      width: 100%;
+      display: block;
+      position: absolute;
+      content: '';
+      left: 0;
+      top: 130px;
+      z-index: 1;
+      box-shadow: 0 8px 8px -8px rgba(0, 0, 0, 0.5) inset, 0 -8px 8px -8px rgba(0, 0, 0, 0.5) inset;}
+    h1#title{
+      box-shadow: -5px 0 5px -5px #000;
+      font-variant: normal;
+      font-weight: normal;
+      margin-top: -20px;
+      padding-left: 10px;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+      &:first-letter{
+        font-size: 1.5em;
+        color: rgb(1, 183, 229);}
+      small{
+        color: black;
+        text-transform: capitalize;
+        text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5);}}
+    #activity{
+      height: 100px;
+      margin-top: -20px;
+      width: 90px;
+      .state{
+        margin: 15px 10px 0 50px;}
+      .inner-state{
+        margin: 5px 0 0 50px;}}
+    #deactivate, #activate{
+      border: 1px solid lighten(#1d1f21, 5%);
+      border-radius: 5px;
+      box-shadow: 1px 1px 1px rgba(255, 255, 255, 0.2), 1px 2px 2px rgba(0, 0, 0, 0.3) inset;
+      &:before{
+        border-radius: 3px;
+        font-family: "neuropol-x";
+        font-size: 0.8em;
+        font-variant: normal;
+        padding: 0.2em 0;}}
+    #deactivate{
+      &:before{
+        background-color: rgb(1, 183, 229);}}}
+  article{
+    margin-top: 2em;
+    h2{
+      border-bottom: 1px solid darken($bg, 7%);
+      box-shadow: 0 1px 0 lighten($bg, 7%);
+      color: lighten($bg, 20%);
+      font-family: $font;
+      font-weight: normal;
+      margin-left: 3%;
+      margin-right: 3%;
+      margin-top: 25px;
+      min-height: 30px;
+      position: relative;
+      text-shadow: -1px -1px 0 #000;
+      &:before{
+        background-color: $bg;
+        border-bottom: 3px solid $bg;
+        border-left: 3px solid $trace-fun;
+        border-right: 3px solid $trace-fun;
+        border-top: 3px solid $bg;
+        border-radius: 100%;
+        box-shadow: 0 0 3px rgba(255, 255, 255, 0.3) inset;
+        content: '';
+        display: block;
+        float: left;
+        float: left;
+        height: 25px;
+        margin-right: 10px;
+        position: relative;
+        width: 25px;}
+      &:after{
+        background: linear-gradient($trace-fun darken($trace-fun, 8%));
+        border: 1px solid darken($trace-fun, 10%);
+        border-radius: 100%;
+        box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5) inset;
+        content: '';
+        display: block;
+        height: 8px;
+        left: 10px;
+        position: absolute;
+        top: 10px;
+        width: 8px;}}
+    table{
+      tbody{
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);}
+      a:hover, a:focus{
+        color: lighten($trace-fun, 10%);
+        text-decoration: none;}
+      thead{
+        color: darken($trace-fun, 10%);
+        font-size: 1.1em;
+        text-shadow: -1px -1px 0 #000;}
+      tbody tr{
+        td{
+          border: 1px solid darken(#1d1f21, 5%);
+          box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset, 1px 1px 0 rgba(255, 255, 255, 0.05);
+          .base{
+            color: #ED5F92;
+            font-weight: bold;}
+          &.active{
+            .base{
+              color: #E91861;}
+            .completion{
+              color: lighten(#e91861, 20%);}
+            &.complete .base{
+              color: #E91861;}}
+          &.action, &.close{
+            a{
+              text-shadow: -1px -1px 0 #000;
+              &:hover, &:focus{
+                &:before{
+                  color: lighten($trace-fun, 25%);}}}}}}}
+    #source-editor .CodeMirror-scroll{
+      border-bottom: 1px solid lighten(#1d1f21, 5%);
+      border-left: none;}
+    input[type="text"]{
+      border: 1px solid darken(#1d1f21, 8%);
+      box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.1) inset, 1px 1px 0 rgba(255, 255, 255, 0.1);}
+    input.open-self, input[type="submit"]{
+      background: linear-gradient($trace-fun, darken($trace-fun, 10%));
+      border-color: darken($trace-fun, 10%);
+      border-radius: 3px;
+      color: darken($trace-fun, 25%);
+      text-shadow: 1px 1px 0 $trace-fun;
+      font-weight: normal;
+      &:hover, &:focus{
+        background: linear-gradient(lighten($trace-fun, 10%), $trace-fun);
+        text-shadow: 1px 1px 0 lighten($trace-fun, 10%);}}}
+  footer #watchers{
+    background: darken(#1d1f21, 5%);
+    border-top: 1px solid darken(#1d1f21, 15%);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+    padding: 0.1em 0;
+    > div .name{
+      color: darken($trace-fun, 8%);
+      font-weight: bold;
+      &:hover, &:focus{
+        color: $trace-fun;}}}}
+.out{
+  margin-left: 2.4em;}
+.trace_500{
+  flex: 1;}
+.CodeMirror-gutters{
+  background: none;
+  border-right: 1px solid transparent;
+  .CodeMirror-gutter.CodeMirror-gutter.CodeMirror-linenumbers{
+    border-right: 1px solid lighten(#1d1f21, 5%);
+    box-shadow: -1px 0 0 darken(#1d1f21, 10%) inset;}}
+.CodeMirror-linebackground.breakpoint{
+  color: #1BD2FF;
+  background: rgba(27, 210, 255, 0.1) !important;
+  height: 1em;}
+.CodeMirror-gutter-elt .breakpoint{
+  position: relative;
+  left: 0px;
+  font-size: 13px;
+  width: 0.1em;}
+.CodeMirror-code pre{
+  border-right: none;
+  padding: 0;}
+table.object{
+  tbody, thead{
+    td{
+      border-width: 1px;}}
+  thead{
+    text-shadow: none !important;}
+  a.inspect{
+    box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
+    padding: 0.1em 5px;
+    margin: 1px 0;}
+  .attr{
+    a.inspect{
+      background-color: darken($obj-attr-bg, 5%);
+      border-color: darken($obj-attr-bg, 15%);
+      &:hover, &:focus{
+        background-color: $obj-attr-bg;}}}
+  .method{
+    a.inspect{
+      background-color: darken($obj-method-bg, 5%);
+      border-color: darken($obj-method-bg, 10%);
+      &:hover, &:focus{
+        background-color: $obj-method-bg;}}}
+  .core{
+    a.inspect{
+      background-color: darken($obj-core-bg, 5%);
+      border-color: darken($obj-core-bg, 10%);
+      &:hover, &:focus{
+        background-color: $obj-core-bg;}}}}
+.traceline{
+  background-color: darken($bg, 8%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  border-top: 1px solid $trace-alt-bg;
+  .tracefunfun .tracefun{
+    background-color: darken($bg, 8%);
+    &:before{
+      border-color: darken($bg, 8%) darken($bg, 8%) $bg $bg;}}
+  .tracefilelno, .tracecode{
+    border-left: 1px solid $trace-alt-bg;
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.05) inset;}}
+a.inspect{
+  padding: 0.1em 5px;
+  box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;}
