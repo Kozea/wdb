@@ -1,0 +1,10 @@
+@import 'dark';
+@import 'wdb';
+\::-webkit-scrollbar{
+  background: $bg;
+  border: 1px solid $code-ctx-border;
+  width: .75em;
+  height: .75em;}
+\::-webkit-scrollbar-thumb{
+  background: $code-ctx-bg;
+  border: 1px solid $code-ctx-border;}
