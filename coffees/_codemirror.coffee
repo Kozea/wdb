@@ -63,10 +63,17 @@ class Codemirror extends Log
 
   clear_breakpoint: (lno) ->
     @remove_mark(lno)
+    @remove_class(lno, 'ask-breakpoint')
     @remove_class(lno, 'breakpoint')
 
   ask_breakpoint: (lno) ->
     @add_class(lno, 'ask-breakpoint')
+
+  set_breakpoint: (lno, temp=false, cond='') ->
+    @remove_class(lno, 'ask-breakpoint')
+    @add_class(lno, 'breakpoint')
+    @add_mark(lno, 'breakpoint',
+      (if temp then '○' else '●'), cond)
 
   get_selection: ->
     @code_mirror.getSelection().trim()
@@ -87,10 +94,10 @@ class Codemirror extends Log
     @code_mirror.removeLineClass(lno - 1, 'background', cls)
     delete @bg_marks.cls[lno]
 
-  add_mark: (lno, cls, char) ->
+  add_mark: (lno, cls, char, title) ->
     @bg_marks.marks[lno] = [cls, char]
     @code_mirror.setGutterMarker(lno - 1, "breakpoints",
-      $('<div>', class: cls).html(char).get(0))
+      $('<div>', class: cls, title: title).html(char).get(0))
 
   remove_mark: (lno) ->
     delete @bg_marks.marks[lno]
