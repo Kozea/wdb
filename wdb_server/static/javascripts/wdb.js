@@ -162,11 +162,24 @@
 
     Codemirror.prototype.clear_breakpoint = function(lno) {
       this.remove_mark(lno);
+      this.remove_class(lno, 'ask-breakpoint');
       return this.remove_class(lno, 'breakpoint');
     };
 
     Codemirror.prototype.ask_breakpoint = function(lno) {
       return this.add_class(lno, 'ask-breakpoint');
+    };
+
+    Codemirror.prototype.set_breakpoint = function(lno, temp, cond) {
+      if (temp == null) {
+        temp = false;
+      }
+      if (cond == null) {
+        cond = '';
+      }
+      this.remove_class(lno, 'ask-breakpoint');
+      this.add_class(lno, 'breakpoint');
+      return this.add_mark(lno, 'breakpoint', (temp ? '○' : '●'), cond);
     };
 
     Codemirror.prototype.get_selection = function() {
@@ -196,10 +209,11 @@
       return delete this.bg_marks.cls[lno];
     };
 
-    Codemirror.prototype.add_mark = function(lno, cls, char) {
+    Codemirror.prototype.add_mark = function(lno, cls, char, title) {
       this.bg_marks.marks[lno] = [cls, char];
       return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", $('<div>', {
-        "class": cls
+        "class": cls,
+        title: title
       }).html(char).get(0));
     };
 
@@ -328,8 +342,12 @@
       this.$waiter = $('#waiter');
       this.$wdb = $('#wdb');
       this.$source = $('#source');
+      this.$interpreter = $('#interpreter');
       this.$scrollback = $('#scrollback');
+      this.$prompt = $('#prompt');
       this.$eval = $('#eval');
+      this.$completions = $('#completions');
+      this.$backsearch = $('#backsearch');
       this.$traceback = $('#traceback');
       this.$watchers = $('#watchers');
       try {
@@ -431,9 +449,8 @@
 
     Wdb.prototype.select = function(data) {
       var current_frame;
-      this.$source = $('#source');
       current_frame = data.frame;
-      $('#interpreter').show();
+      this.$interpreter.show();
       $('.traceline').removeClass('selected');
       $('#trace-' + current_frame.level).addClass('selected');
       this.$eval.val('').attr('data-index', -1).trigger('autosize.resize');
@@ -505,16 +522,15 @@
     };
 
     Wdb.prototype.historize = function(snippet) {
-      var filename, index;
-      filename = $('.selected .tracefile').text();
-      if (!(filename in this.session_cmd_hist)) {
-        this.session_cmd_hist[filename] = [];
+      var index;
+      if (!(this.cm.fn in this.session_cmd_hist)) {
+        this.session_cmd_hist[this.cm.fn] = [];
       }
       while ((index = this.cmd_hist.indexOf(snippet)) !== -1) {
         this.cmd_hist.splice(index, 1);
       }
       this.cmd_hist.unshift(snippet);
-      this.session_cmd_hist[filename].unshift(snippet);
+      this.session_cmd_hist[this.cm.fn].unshift(snippet);
       return localStorage && (localStorage['cmd_hist'] = JSON.stringify(this.cmd_hist));
     };
 
@@ -591,7 +607,7 @@
             cmd('Unbreak', data);
             break;
           case 'f':
-            this.print_hist(this.session_cmd_hist[$('.selected .tracefile').text()]);
+            this.print_hist(this.session_cmd_hist[this.cm.fn]);
         }
         return;
       } else if (snippet.indexOf('?') === 0) {
@@ -611,7 +627,7 @@
     };
 
     Wdb.prototype.cls = function() {
-      $('#completions').height($('#interpreter').height() - $('#prompt').innerHeight());
+      this.$completions.height(this.$interpreter.height() - this.$prompt.innerHeight());
       this.termscroll();
       return this.$eval.val('').trigger('autosize.resize');
     };
@@ -633,8 +649,8 @@
     };
 
     Wdb.prototype.termscroll = function() {
-      return $('#interpreter').stop(true).animate({
-        scrollTop: $('#scrollback').height()
+      return this.$interpreter.stop(true).animate({
+        scrollTop: this.$scrollback.height()
       }, 1000);
     };
 
@@ -642,24 +658,24 @@
       var snippet;
       this.suggest_stop();
       snippet = this.$eval.val();
-      this.code($('#scrollback'), data["for"], ['prompted']);
-      this.code($('#scrollback'), data.result, [], true);
+      this.code(this.$scrollback, data["for"], ['prompted']);
+      this.code(this.$scrollback, data.result, [], true);
       this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      $('#completions').attr('style', '');
+      this.$completions.attr('style', '');
       this.termscroll();
       return this.chilling();
     };
 
     Wdb.prototype.echo = function(data) {
-      this.code($('#scrollback'), data["for"], ['prompted']);
-      this.code($('#scrollback'), data.val || '', [], true);
+      this.code(this.$scrollback, data["for"], ['prompted']);
+      this.code(this.$scrollback, data.val || '', [], true);
       this.termscroll();
       return this.chilling();
     };
 
     Wdb.prototype.dump = function(data) {
       var $attr_tbody, $container, $core_tbody, $method_tbody, $table, $tbody, key, val, _ref;
-      this.code($('#scrollback'), data["for"], ['prompted']);
+      this.code(this.$scrollback, data["for"], ['prompted']);
       $container = $('<div>');
       $table = $('<table>', {
         "class": 'object'
@@ -702,7 +718,7 @@
         }
         $tbody.append($('<tr>').append($('<td>').text(key)).append($('<td>').html(val.val)));
       }
-      this.code($('#scrollback'), $container.html(), [], true);
+      this.code(this.$scrollback, $container.html(), [], true);
       this.termscroll();
       this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
       return this.chilling();
@@ -710,12 +726,7 @@
 
     Wdb.prototype.breakset = function(data) {
       if (data.lno) {
-        this.cm.remove_class(data.lno, 'ask-breakpoint');
-        this.cm.add_class(data.lno, 'breakpoint');
-        this.cm.add_mark(data.lno, 'breakpoint', data.temporary ? '○' : '●');
-        if (data.cond) {
-          $line.attr('title', "On [" + data.cond + "]");
-        }
+        this.cm.set_breakpoint(data.lno, data.temporary, data.cond);
       }
       if (this.$eval.val().indexOf('.b ') === 0 || this.$eval.val().indexOf('.t ') === 0) {
         this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
@@ -724,7 +735,7 @@
     };
 
     Wdb.prototype.breakunset = function(data) {
-      this.cm.remove_class(data.lno, 'ask-breakpoint');
+      this.cm.clear_breakpoint(data.lno);
       if (this.$eval.val().indexOf('.b ') === 0) {
         this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
       }
@@ -750,12 +761,13 @@
         return;
       }
       if (this.cm.has_breakpoint(lno)) {
-        this.cm.clear_breakpoint(lno);
         this.ws.send('Unbreak', ":" + lno);
+        this.cm.clear_breakpoint(lno);
       } else {
         this.ws.send(cmd, arg);
       }
-      return this.cm.ask_breakpoint(lno);
+      this.cm.ask_breakpoint(lno);
+      return this.working();
     };
 
     Wdb.prototype.format_fun = function(p) {
@@ -791,12 +803,11 @@
     };
 
     Wdb.prototype.suggest = function(data) {
-      var $appender, $comp, $comp_wrapper, $tbody, $td, added, base_len, completion, height, index, param, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, param, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       if (data) {
-        $comp_wrapper = $('#completions');
-        $comp = $('#completions table').empty();
+        $comp = this.$completions.find('table').empty();
         $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
-        height = $comp_wrapper.height();
+        height = this.$completions.height();
         added = [];
         _ref = data.params;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -827,7 +838,7 @@
           }
         }
         $comp.append($tbody);
-        $comp_wrapper.height(Math.max(height, $comp.height()));
+        this.$completions.height(Math.max(height, $comp.height()));
         this.termscroll();
       }
       if (this.to_complete) {
@@ -839,16 +850,15 @@
     };
 
     Wdb.prototype.suggest_stop = function() {
-      return $('#completions table').empty();
+      return this.$completions.find('table').empty();
     };
 
     Wdb.prototype.watched = function(data) {
-      var $name, $value, $watcher, $watchers, value, watcher;
-      $watchers = $('#watchers');
+      var $name, $value, $watcher, value, watcher;
       for (watcher in data) {
         if (!__hasProp.call(data, watcher)) continue;
         value = data[watcher];
-        $watcher = $watchers.find(".watching").filter(function(e) {
+        $watcher = this.$watchers.find(".watching").filter(function(e) {
           return $(e).attr('data-expr') === watcher;
         });
         if (!$watcher.size()) {
@@ -858,7 +868,7 @@
           $value = $('<div>', {
             "class": "value"
           });
-          $watchers.append($watcher = $('<div>', {
+          this.$watchers.append($watcher = $('<div>', {
             "class": "watching"
           }).attr('data-expr', watcher).append($name.text(watcher), $('<code>').text(': '), $value));
           this.code($value, value.toString(), [], true);
@@ -868,8 +878,8 @@
         }
         $watcher.addClass('updated');
       }
-      $watchers.find('.watching:not(.updated)').remove();
-      return $watchers.find('.watching').removeClass('updated');
+      this.$watchers.find('.watching:not(.updated)').remove();
+      return this.$watchers.find('.watching').removeClass('updated');
     };
 
     Wdb.prototype.ack = function() {
@@ -880,7 +890,7 @@
       var $tag, snippet;
       this.suggest_stop();
       snippet = this.$eval.val();
-      this.code($('#scrollback'), data["for"], ['prompted']);
+      this.code(this.$scrollback, data["for"], ['prompted']);
       if (data.type.indexOf('image') >= 0) {
         $tag = $("<img>");
       } else if (data.type.indexOf('audio') >= 0) {
@@ -898,9 +908,9 @@
       }
       $tag.addClass('display');
       $tag.attr('src', "data:" + data.type + ";charset=UTF-8;base64," + data.val);
-      $('#scrollback').append($tag);
+      this.$scrollback.append($tag);
       this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      $('#completions').attr('style', '');
+      this.$completions.attr('style', '');
       this.termscroll();
       return this.chilling();
     };
@@ -917,7 +927,7 @@
         if (re.test(h)) {
           index--;
           if (index === 0) {
-            $('#backsearch').html(h.replace(re, '<span class="backsearched">$1</span>'));
+            this.$backsearch.html(h.replace(re, '<span class="backsearched">$1</span>'));
             return;
           }
         }
@@ -931,14 +941,15 @@
 
     Wdb.prototype.searchback_stop = function(validate) {
       if (validate) {
-        this.$eval.val($('#backsearch').text()).trigger('autosize.resize');
+        this.$eval.val(this.$backsearch.text()).trigger('autosize.resize');
       }
-      $('#backsearch').html('');
+      this.$backsearch.html('');
       return this.backsearch = null;
     };
 
     Wdb.prototype.die = function() {
-      $('#source,#traceback').remove();
+      this.$source.remove();
+      this.$traceback.remove();
       $('h1').html('Dead<small>Program has exited</small>');
       this.ws.ws.close();
       return setTimeout((function() {
@@ -977,7 +988,7 @@
     };
 
     Wdb.prototype.eval_key = function(e) {
-      var $active, $tds, base, completion, endPos, filename, index, startPos, to_set, txtarea;
+      var $active, $table, $tds, base, completion, endPos, index, startPos, to_set, txtarea;
       if (e.altKey && e.keyCode === 82 && this.backsearch) {
         this.backsearch = Math.max(this.backsearch - 1, 1);
         this.searchback();
@@ -1011,7 +1022,8 @@
             this.searchback_stop(true);
             return false;
           }
-          if ($('#completions table td.active').length && !$('#completions table td.complete').length) {
+          $table = this.$completions.find('table');
+          if ($table.find('td.active').size() && !$table.find('td.complete').size()) {
             this.suggest_stop();
             return false;
           }
@@ -1039,7 +1051,7 @@
           if (this.backsearch) {
             return false;
           }
-          $tds = $('#completions table td');
+          $tds = this.$completions.find('table td');
           $active = $tds.filter('.active');
           if ($tds.length) {
             if (!$active.length) {
@@ -1056,13 +1068,12 @@
             }
             base = $active.find('.base').text();
             completion = $active.find('.completion').text();
-            this.$eval.val($eval.data().root + base + completion).trigger('autosize.resize');
+            this.$eval.val(this.$eval.data().root + base + completion).trigger('autosize.resize');
             $('#comp-desc').text($active.attr('title'));
             this.termscroll();
           }
           return false;
         case 38:
-          filename = $('.selected .tracefile').text();
           if (!e.shiftKey) {
             index = parseInt(this.$eval.attr('data-index')) + 1;
             if (index >= 0 && index < this.cmd_hist.length) {
@@ -1078,9 +1089,8 @@
           }
           break;
         case 40:
-          filename = $('.selected .tracefile').text();
           if (!e.shiftKey) {
-            index = parseInt($eval.attr('data-index')) - 1;
+            index = parseInt(this.$eval.attr('data-index')) - 1;
             if (index >= -1 && index < this.cmd_hist.length) {
               if (index === -1) {
                 to_set = this.$eval.attr('data-current');
@@ -1108,7 +1118,7 @@
         }
         return;
       }
-      hist = this.session_cmd_hist[$('.selected .tracefile').text()] || [];
+      hist = this.session_cmd_hist[this.cm.fn] || [];
       if (txt && txt[0] !== '.') {
         comp = hist.slice(0).reverse().filter(function(e) {
           return e.indexOf('.') !== 0;

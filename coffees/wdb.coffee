@@ -34,8 +34,12 @@ class Wdb extends Log
     @$waiter = $('#waiter')
     @$wdb = $('#wdb')
     @$source = $('#source')
+    @$interpreter = $('#interpreter')
     @$scrollback = $('#scrollback')
+    @$prompt = $('#prompt')
     @$eval = $('#eval')
+    @$completions = $('#completions')
+    @$backsearch = $('#backsearch')
     @$traceback = $('#traceback')
     @$watchers = $('#watchers')
 
@@ -153,9 +157,8 @@ class Wdb extends Log
       @select data
 
   select: (data) ->
-    @$source = $ '#source'
     current_frame = data.frame
-    $('#interpreter').show()
+    @$interpreter.show()
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     @$eval.val('').attr('data-index', -1).trigger('autosize.resize')
@@ -205,15 +208,14 @@ class Wdb extends Log
     $code
 
   historize: (snippet) ->
-    filename = $('.selected .tracefile').text()
-    if not (filename of @session_cmd_hist)
-      @session_cmd_hist[filename] = []
+    if not (@cm.fn of @session_cmd_hist)
+      @session_cmd_hist[@cm.fn] = []
 
     while (index = @cmd_hist.indexOf(snippet)) != -1
       @cmd_hist.splice(index, 1)
 
     @cmd_hist.unshift snippet
-    @session_cmd_hist[filename].unshift snippet
+    @session_cmd_hist[@cm.fn].unshift snippet
 
     localStorage and localStorage['cmd_hist'] = JSON.stringify @cmd_hist
 
@@ -251,8 +253,7 @@ class Wdb extends Log
         when 'u' then cmd 'Until'
         when 'w' then cmd 'Watch', data
         when 'z' then cmd 'Unbreak', data
-        when 'f' then @print_hist @session_cmd_hist[$('.selected .tracefile')
-          .text()]
+        when 'f' then @print_hist @session_cmd_hist[@cm.fn]
       return
 
     else if snippet.indexOf('?') == 0
@@ -271,8 +272,8 @@ class Wdb extends Log
       @working()
 
   cls: ->
-    $('#completions').height(
-      $('#interpreter').height() - $('#prompt').innerHeight())
+    @$completions.height(
+      @$interpreter.height() - @$prompt.innerHeight())
     @termscroll()
     @$eval.val('').trigger('autosize.resize')
 
@@ -348,33 +349,33 @@ specify a module like `logging.config`.
 '''
 
   termscroll: ->
-    $('#interpreter')
+    @$interpreter
       .stop(true)
-      .animate((scrollTop: $('#scrollback').height()), 1000)
+      .animate((scrollTop: @$scrollback.height()), 1000)
 
   print: (data) ->
     @suggest_stop()
     snippet = @$eval.val()
-    @code($('#scrollback'), data.for, ['prompted'])
-    @code($('#scrollback'), data.result, [], true)
+    @code(@$scrollback, data.for, ['prompted'])
+    @code(@$scrollback, data.result, [], true)
     @$eval
       .val('')
       .prop('disabled', false)
       .attr('data-index', -1)
       .trigger('autosize.resize')
       .focus()
-    $('#completions').attr('style', '')
+    @$completions.attr('style', '')
     @termscroll()
     @chilling()
 
   echo: (data) ->
-    @code($('#scrollback'), data.for, ['prompted'])
-    @code($('#scrollback'), data.val or '', [], true)
+    @code(@$scrollback, data.for, ['prompted'])
+    @code(@$scrollback, data.val or '', [], true)
     @termscroll()
     @chilling()
 
   dump: (data) ->
-    @code($('#scrollback'), data.for, ['prompted'])
+    @code(@$scrollback, data.for, ['prompted'])
     $container = $('<div>')
     $table = $('<table>', class: 'object').appendTo($container)
     $table.append(
@@ -408,7 +409,7 @@ specify a module like `logging.config`.
       $tbody.append($('<tr>')
         .append($('<td>').text(key))
         .append($('<td>').html(val.val)))
-    @code($('#scrollback'), $container.html(), [], true)
+    @code(@$scrollback, $container.html(), [], true)
     @termscroll()
     @$eval.val('')
       .prop('disabled', false)
@@ -418,19 +419,14 @@ specify a module like `logging.config`.
 
   breakset: (data) ->
     if data.lno
-      @cm.remove_class(data.lno, 'ask-breakpoint')
-      @cm.add_class(data.lno, 'breakpoint')
-      @cm.add_mark(data.lno, 'breakpoint',
-        if data.temporary then '○' else '●')
+      @cm.set_breakpoint(data.lno, data.temporary, data.cond)
 
-      if data.cond
-        $line.attr('title', "On [#{data.cond}]")
     if @$eval.val().indexOf('.b ') == 0 or @$eval.val().indexOf('.t ') == 0
       @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
     @chilling()
 
   breakunset: (data) ->
-    @cm.remove_class(data.lno, 'ask-breakpoint')
+    @cm.clear_breakpoint(data.lno)
     if @$eval.val().indexOf('.b ') == 0
       @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
     @chilling()
@@ -453,11 +449,12 @@ specify a module like `logging.config`.
       return
 
     if @cm.has_breakpoint(lno)
-      @cm.clear_breakpoint(lno)
       @ws.send 'Unbreak', ":#{lno}"
+      @cm.clear_breakpoint(lno)
     else
       @ws.send cmd, arg
     @cm.ask_breakpoint(lno)
+    @working()
 
   format_fun: (p) ->
     tags = [
@@ -476,10 +473,9 @@ specify a module like `logging.config`.
 
   suggest: (data) ->
     if data
-      $comp_wrapper = $('#completions')
-      $comp = $('#completions table').empty()
+      $comp = @$completions.find('table').empty()
       $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
-      height = $comp_wrapper.height()
+      height = @$completions.height()
       added = []
       for param in data.params
         $('#comp-desc').append(format_fun(param))
@@ -503,7 +499,7 @@ specify a module like `logging.config`.
           $td.addClass('active complete')
           $('#comp-desc').html($td.attr('title'))
       $comp.append($tbody)
-      $comp_wrapper.height(Math.max(height, $comp.height()))
+      @$completions.height(Math.max(height, $comp.height()))
       @termscroll()
     if @to_complete
       @ws.send 'Complete', @to_complete
@@ -512,18 +508,17 @@ specify a module like `logging.config`.
       @to_complete = null
 
   suggest_stop: ->
-    $('#completions table').empty()
+    @$completions.find('table').empty()
 
   watched: (data) ->
-    $watchers = $('#watchers')
     for own watcher, value of data
-      $watcher = $watchers
+      $watcher = @$watchers
         .find(".watching")
         .filter((e) -> $(e).attr('data-expr') == watcher)
       if not $watcher.size()
         $name = $('<code>', class: "name")
         $value = $('<div>', class: "value")
-        $watchers.append(
+        @$watchers.append(
           $watcher = $('<div>', class: "watching")
             .attr('data-expr', watcher)
             .append($name.text(watcher), $('<code>').text(': '), $value))
@@ -532,8 +527,8 @@ specify a module like `logging.config`.
         $watcher.find('.value code').remove()
         @code($watcher.find('.value'), value.toString(), [], true)
       $watcher.addClass('updated')
-    $watchers.find('.watching:not(.updated)').remove()
-    $watchers.find('.watching').removeClass('updated')
+    @$watchers.find('.watching:not(.updated)').remove()
+    @$watchers.find('.watching').removeClass('updated')
 
 
   ack: ->
@@ -542,7 +537,7 @@ specify a module like `logging.config`.
   display: (data) ->
     @suggest_stop()
     snippet = @$eval.val()
-    @code($('#scrollback'), data.for, ['prompted'])
+    @code(@$scrollback, data.for, ['prompted'])
     if data.type.indexOf('image') >= 0
       $tag = $("<img>")
     else if data.type.indexOf('audio') >= 0
@@ -554,14 +549,14 @@ specify a module like `logging.config`.
 
     $tag.addClass('display')
     $tag.attr('src', "data:#{data.type};charset=UTF-8;base64,#{data.val}")
-    $('#scrollback').append($tag)
+    @$scrollback.append($tag)
     @$eval
       .val('')
       .prop('disabled', false)
       .attr('data-index', -1)
       .trigger('autosize.resize')
       .focus()
-    $('#completions').attr('style', '')
+    @$completions.attr('style', '')
     @termscroll()
     @chilling()
 
@@ -574,7 +569,7 @@ specify a module like `logging.config`.
       if re.test(h)
         index--
         if index == 0
-          $('#backsearch')
+          @$backsearch
             .html(h.replace(re, '<span class="backsearched">$1</span>'))
           return
     if @backsearch == 1
@@ -584,12 +579,13 @@ specify a module like `logging.config`.
 
   searchback_stop: (validate) ->
     if validate
-      @$eval.val($('#backsearch').text()).trigger('autosize.resize')
-    $('#backsearch').html('')
+      @$eval.val(@$backsearch.text()).trigger('autosize.resize')
+    @$backsearch.html('')
     @backsearch = null
 
   die: ->
-    $('#source,#traceback').remove()
+    @$source.remove()
+    @$traceback.remove()
     $('h1').html('Dead<small>Program has exited</small>')
     @ws.ws.close()
     setTimeout (-> window.close()), 10
@@ -652,8 +648,9 @@ specify a module like `logging.config`.
         if @backsearch
           @searchback_stop true
           return false
-        if $('#completions table td.active').length and
-           not $('#completions table td.complete').length
+        $table = @$completions.find('table')
+        if $table.find('td.active').size() and
+           not $table.find('td.complete').size()
           @suggest_stop()
           return false
         if not e.shiftKey
@@ -681,7 +678,7 @@ specify a module like `logging.config`.
           return false
         if @backsearch
           return false
-        $tds = $('#completions table td')
+        $tds = @$completions.find('table td')
         $active = $tds.filter('.active')
         if $tds.length
           if not $active.length
@@ -697,14 +694,13 @@ specify a module like `logging.config`.
           base = $active.find('.base').text()
           completion = $active.find('.completion').text()
           @$eval
-            .val($eval.data().root + base + completion)
+            .val(@$eval.data().root + base + completion)
             .trigger('autosize.resize')
           $('#comp-desc').text($active.attr('title'))
           @termscroll()
         return false
 
       when 38  # Up
-        filename = $('.selected .tracefile').text()
         if not e.shiftKey
           index = parseInt(@$eval.attr('data-index')) + 1
           if index >= 0 and index < @cmd_hist.length
@@ -718,9 +714,8 @@ specify a module like `logging.config`.
             return false
 
       when 40  # Down
-        filename = $('.selected .tracefile').text()
         if not e.shiftKey
-          index = parseInt($eval.attr('data-index')) - 1
+          index = parseInt(@$eval.attr('data-index')) - 1
           if index >= -1 and index < @cmd_hist.length
             if index == -1
               to_set = @$eval.attr('data-current')
@@ -741,7 +736,7 @@ specify a module like `logging.config`.
         @backsearch = 1
         @searchback()
       return
-    hist = @session_cmd_hist[$('.selected .tracefile').text()] or []
+    hist = @session_cmd_hist[@cm.fn] or []
     if txt and txt[0] != '.'
       comp = hist
         .slice(0)
