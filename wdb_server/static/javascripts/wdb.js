@@ -119,10 +119,8 @@
       })(this);
       this.code_mirror = null;
       this.$container = $('#source-editor');
-      this.bg_marks = {
-        cls: {},
-        marks: {}
-      };
+      this.cls_marks = {};
+      this.chr_marks = {};
       this.rw = false;
       this.fn = null;
       this.file = null;
@@ -197,20 +195,20 @@
 
     Codemirror.prototype.add_class = function(lno, cls) {
       this.code_mirror.addLineClass(lno - 1, 'background', cls);
-      if (this.bg_marks.cls[lno]) {
-        return this.bg_marks.cls[lno] = this.bg_marks.cls[lno] + ' ' + cls;
+      if (this.cls_marks[lno]) {
+        return this.cls_marks[lno] = this.cls_marks[lno] + ' ' + cls;
       } else {
-        return this.bg_marks.cls[lno] = cls;
+        return this.cls_marks[lno] = cls;
       }
     };
 
     Codemirror.prototype.remove_class = function(lno, cls) {
       this.code_mirror.removeLineClass(lno - 1, 'background', cls);
-      return delete this.bg_marks.cls[lno];
+      return delete this.cls_marks[lno];
     };
 
     Codemirror.prototype.add_mark = function(lno, cls, char, title) {
-      this.bg_marks.marks[lno] = [cls, char];
+      this.chr_marks[lno] = [cls, char];
       return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", $('<div>', {
         "class": cls,
         title: title
@@ -218,7 +216,7 @@
     };
 
     Codemirror.prototype.remove_mark = function(lno) {
-      delete this.bg_marks.marks[lno];
+      delete this.chr_marks[lno];
       return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", null);
     };
 
@@ -231,8 +229,8 @@
     Codemirror.prototype.toggle_edition = function() {
       var char, cls, lno, marks, scroll, _ref;
       this.rw = !this.rw;
-      cls = $.extend({}, this.bg_marks.cls);
-      marks = $.extend({}, this.bg_marks.marks);
+      cls = $.extend({}, this.cls_marks);
+      marks = $.extend({}, this.chr_marks);
       scroll = $('#source .CodeMirror-scroll').scrollTop();
       $('#source .CodeMirror').remove();
       this.code_mirror = this["new"](this.file, this.fn, rw);
@@ -258,11 +256,11 @@
       } else {
         if (this.fn === data.name) {
           if (this.fun !== frame["function"]) {
-            for (lno in this.bg_marks.cls) {
+            for (lno in this.cls_marks) {
               this.code_mirror.removeLineClass(lno - 1, 'background');
             }
           }
-          for (lno in this.bg_marks.marks) {
+          for (lno in this.chr_marks) {
             this.code_mirror.setGutterMarker(lno - 1, 'breakpoints', null);
           }
           if (this.last_hl) {
@@ -276,8 +274,8 @@
           this.file = data.file;
           this.last_hl = null;
         }
-        this.bg_marks.cls = {};
-        this.bg_marks.marks = {};
+        this.cls_marks = {};
+        this.chr_marks = {};
       }
       _ref = data.breaks;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
