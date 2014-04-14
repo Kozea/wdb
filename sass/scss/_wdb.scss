@@ -254,6 +254,7 @@ code{
   .tracefilelno{
     padding: .5em;
     padding-bottom: .25em;
+    word-wrap: break-word;
     .tracefile{
       color: $trace-file;}
     .tracelno{

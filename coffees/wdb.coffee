@@ -14,205 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#*** Initializations ***#
-debug = true
-
-class Log
-  log: ->
-    if debug
-      name = "[#{@constructor.name}]"
-      log_args = [name].concat Array.prototype.slice.call(arguments, 0)
-      console.log.apply console, log_args
-
-  fail: ->
-    name = @constructor.name
-    log_args = [name].concat Array.prototype.slice.call(arguments, 0)
-    console.error.apply console, log_args
-
-class WS extends Log
-  constructor: (@wdb) ->
-    # Open a websocket in case of request break
-    @url = "ws://#{document.location.host}/websocket/#{_uuid}"
-    @log 'Opening new socket', @url
-    @ws = new WebSocket @url
-    @ws.onclose = @close.bind(@)
-    @ws.onopen = @open.bind(@)
-    @ws.onerror = @error.bind(@)
-    @ws.onmessage = @message.bind(@)
-
-  time: ->
-    date = new Date()
-    "#{date.getHours()}:#{date.getMinutes()}:" +
-    "#{date.getSeconds()}.#{date.getMilliseconds()}"
-
-  close: (m) ->
-    @log "Closed", m
-
-  error: (m) ->
-    @fail "Error", m
-
-  open: (m) ->
-    # We are connected, ie: in request break
-    @log "Open", m
-    @wdb.opening()
-
-  message: (m) ->
-    # Open a websocket in case of request break
-    message = m.data
-    pipe = message.indexOf('|')
-    if pipe > -1
-      cmd = message.substr(0, pipe)
-      data = JSON.parse message.substr(pipe + 1)
-    else
-      cmd = message
-    @log @time(), '<-', cmd
-    cmd = cmd.toLowerCase()
-    if cmd of @wdb
-      @wdb[cmd.toLowerCase()] data
-    else
-      @fail 'Unknown command', cmd
-
-  send: (cmd, data=null) ->
-    if data
-      msg = "#{cmd}|#{data}"
-    else
-      msg = cmd
-    @log @time(), '->', msg
-    @ws.send msg
-
-class Codemirror extends Log
-  constructor: (@wdb) ->
-    CodeMirror.keyMap.wdb =
-      Esc: (cm) => @toggle_edition false
-      fallthrough: ["default"]
-
-    CodeMirror.commands.save = =>
-      @wdb.ws.send 'Save', "#{@cm._fn}|#{@cm.getValue()}"
-
-    @cm = null
-
-  new: (file, name, rw=false) ->
-    @cm = CodeMirror ((elt) ->
-      $('#source-editor').prepend(elt)
-      $(elt).addClass(if rw then 'rw' else 'ro').addClass('cm')
-      ) , (
-      value: file,
-      mode:  @get_mode(name),
-      readOnly: !rw,
-      theme: 'wdb',
-      keyMap: 'wdb',
-      gutters: ["breakpoints", "CodeMirror-linenumbers"],
-      lineNumbers: true)
-    @cm._bg_marks = cls: {}, marks: {}
-    @cm._rw = rw
-    @cm._fn = name
-    @cm._file = file
-    @cm._fun = null
-    @cm._last_hl = null
-
-    @cm.on("gutterClick", (@cm, n) =>
-      @wdb.toggle_break ':' + (n + 1)
-    )
-
-    @cm.addClass = (lno, cls) =>
-      @cm.addLineClass(lno - 1, 'background', cls)
-      if @cm._bg_marks.cls[lno]
-        @cm._bg_marks.cls[lno] = @cm._bg_marks.cls[lno] + ' ' + cls
-      else
-        @cm._bg_marks.cls[lno] = cls
-
-    @cm.removeClass = (lno, cls) =>
-      @cm.removeLineClass(lno - 1, 'background', cls)
-      delete @cm._bg_marks.cls[lno]
-
-    @cm.addMark = (lno, cls, char) =>
-      @cm._bg_marks.marks[lno] = [cls, char]
-      @cm.setGutterMarker(lno - 1, "breakpoints",
-        $('<div>', class: cls).html(char).get(0))
-
-    @cm.removeMark = (lno) =>
-      delete @cm._bg_marks.marks[lno]
-      @cm.setGutterMarker(lno - 1, "breakpoints", null)
-
-  toggle_edition: (rw) ->
-    cls = $.extend({}, @cm._bg_marks.cls)
-    marks = $.extend({}, @cm._bg_marks.marks)
-    scroll = $('#source .CodeMirror-scroll').scrollTop()
-    $('#source .CodeMirror').remove()
-    @cm = @new @cm._file, @cm._fn, rw
-    for lno of cls
-      @cm.addClass(lno, cls[lno])
-    for lno of marks
-      [cls, char] = marks[lno]
-      @cm.addMark(lno, cls, char)
-    $('#source .CodeMirror-scroll').scrollTop(scroll)
-    @print
-      for: "Toggling edition"
-      result: "Edit mode #{if rw then 'on' else 'off'}"
-
-  select: (data, frame) ->
-    if not @cm
-      @new data.file, data.name
-      @wdb.$eval.focus()
-    else
-      if @cm._fn == data.name
-        if @cm._fun != frame.function
-          for lno of @cm._bg_marks.cls
-            @cm.removeLineClass(lno - 1, 'background')
-
-        for lno of @cm._bg_marks.marks
-          @cm.setGutterMarker(lno - 1, 'breakpoints', null)
-        if @cm._last_hl
-          @cm.removeLineClass(lno - 1, 'background')
-          @cm.addLineClass(lno - 1, 'background', 'footstep')
-      else
-        @cm.setValue data.file
-        @cm._fn = data.name
-        @cm._fun = frame.function
-        @cm._file = data.file
-        @cm._last_hl = null
-      @cm._bg_marks.cls = {}
-      @cm._bg_marks.marks = {}
-
-    for lno in data.breaks
-      @cm.addClass(lno, 'breakpoint')
-      @cm.addMark(lno, 'breakpoint', '●')
-
-    @cm.addClass(frame.lno, 'highlighted')
-    @cm.addMark(frame.lno, 'highlighted', '➤')
-    if @cm._fun != frame.function and
-       frame.function != '<module>'
-      for lno in [frame.flno...frame.llno + 1]
-        @cm.addClass(lno, 'ctx')
-        if lno == frame.flno
-          @cm.addClass(lno, 'ctx-top')
-        else if lno == frame.llno
-          @cm.addClass(lno, 'ctx-bottom')
-      @cm._fun = frame.function
-    @cm._last_hl = frame.lno
-
-    @cm.scrollIntoView(line: frame.lno, ch: 1, 1)
-    $scroll = $ '#source .CodeMirror-scroll'
-    $hline = $ '#source .highlighted'
-    $scroll.scrollTop(
-      $hline.offset().top - $scroll.offset().top +
-      $scroll.scrollTop() - $scroll.height() / 2)
-
-  get_mode: (fn) ->
-    ext = fn.split('.').splice(-1)[0]
-    if ext == 'py'
-      'python'
-    else if ext == 'jinja2'
-      'jinja2'
-    'python'
-
 
 class Wdb extends Log
   constructor: ->
     @started = false
     @to_complete = null
-    @ws = new WS(@)
-    @cm = new Codemirror(@)
     @cwd = null
     @backsearch = null
     @cmd_hist = []
@@ -221,26 +27,51 @@ class Wdb extends Log
     @last_cmd = null
 
     @waited_for_ws = 0
+
+    # Page elements
     @$state = $('.state')
+    @$title = $('#title')
     @$waiter = $('#waiter')
     @$wdb = $('#wdb')
-    @$eval = $('#eval')
     @$source = $('#source')
+    @$scrollback = $('#scrollback')
+    @$eval = $('#eval')
     @$traceback = $('#traceback')
-    @$traceback.on 'click', '.traceline', @select_click.bind(@)
-    @$title = $('#title')
+    @$watchers = $('#watchers')
+
     try
       @cmd_hist = JSON.parse(localStorage['cmd_hist'])
     catch e
       @fail e
 
+    @ws = new Websocket(@, @$wdb.find('> header').attr('data-uuid'))
+    @cm = new Codemirror(@)
+
   opening: ->
     # Start by getting current trace
     if not @started
-      @register_handlers()
-      @started = true
-    @start()
+      @$eval
+        .on 'keydown', @eval_key.bind @
+        .on 'input', @eval_input.bind @
+        .on 'blur', @searchback_stop.bind @
 
+      $(window).on 'keydown', @global_key.bind @
+
+      @$traceback.on 'click', '.traceline', @select_click.bind @
+      @$scrollback.add(@$watchers)
+        .on 'click', 'a.inspect', @inspect.bind(@)
+        .on 'click', '.short.close', @short_open.bind @
+        .on 'click', '.short.open', @short_close.bind @
+        .on 'click', '.toggle', @toggle_visibility.bind @
+
+      @$watchers.on 'click', '.watching .name', @unwatch.bind @
+      @$source.on 'mouseup', @paste_target.bind @
+      $('#deactivate').click @disable.bind @
+      false
+
+      @started = true
+
+    @ws.send 'Start'
     @$waiter.remove()
     @$wdb.show()
     @$eval.autosize()
@@ -250,9 +81,6 @@ class Wdb extends Log
 
   chilling: ->
     @$state.removeClass('on')
-
-  start: ->
-    @ws.send 'Start'
 
   init: (data) ->
     @cwd = data.cwd
@@ -332,7 +160,7 @@ class Wdb extends Log
     $('#trace-' + current_frame.level).addClass('selected')
     @$eval.val('').attr('data-index', -1).trigger('autosize.resize')
     @file_cache[data.name] = data.file
-    @cm.select(data, current_frame)
+    @cm.open(data, current_frame)
     @chilling()
 
   ellipsize: ($code) ->
@@ -409,7 +237,7 @@ class Wdb extends Log
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
         when 'd' then cmd 'Dump', data
-        when 'e' then @cm.toggle_edition(not @cm.cm._rw)
+        when 'e' then @cm.toggle_edition()
         when 'g' then @cls()
         when 'h' then @print_help()
         when 'j' then cmd 'Jump', data
@@ -590,9 +418,9 @@ specify a module like `logging.config`.
 
   breakset: (data) ->
     if data.lno
-      @cm.cm.removeClass(data.lno, 'ask-breakpoint')
-      @cm.cm.addClass(data.lno, 'breakpoint')
-      @cm.cm.addMark(data.lno, 'breakpoint',
+      @cm.remove_class(data.lno, 'ask-breakpoint')
+      @cm.add_class(data.lno, 'breakpoint')
+      @cm.add_mark(data.lno, 'breakpoint',
         if data.temporary then '○' else '●')
 
       if data.cond
@@ -602,7 +430,7 @@ specify a module like `logging.config`.
     @chilling()
 
   breakunset: (data) ->
-    @cm.cm.removeClass(data.lno, 'ask-breakpoint')
+    @cm.remove_class(data.lno, 'ask-breakpoint')
     if @$eval.val().indexOf('.b ') == 0
       @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
     @chilling()
@@ -624,15 +452,12 @@ specify a module like `logging.config`.
       @ws.send cmd, arg
       return
 
-    cls = @cm.cm.lineInfo(lno - 1).bgClass or ''
-    if cls.split(' ').indexOf('breakpoint') > -1
-      @cm.cm.removeMark(lno)
-      @cm.cm.removeClass(lno, 'breakpoint')
-      @cm.cm.addClass(lno, 'ask-breakpoint')
+    if @cm.has_breakpoint(lno)
+      @cm.clear_breakpoint(lno)
       @ws.send 'Unbreak', ":#{lno}"
     else
-      @cm.cm.addClass(lno, 'ask-breakpoint')
       @ws.send cmd, arg
+    @cm.ask_breakpoint(lno)
 
   format_fun: (p) ->
     tags = [
@@ -769,55 +594,61 @@ specify a module like `logging.config`.
     @ws.ws.close()
     setTimeout (-> window.close()), 10
 
-  register_handlers: ->
-    $('body,html').on 'keydown', (e) =>
-      if @cm.cm?._rw
-        return true
-      if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119
-        # ctrl + left  or F8
-        @ws.send 'Continue'
-      else if (e.ctrlKey and e.keyCode == 38) or e.keyCode == 120
-        # ctrl + up  or F9
-        @ws.send 'Return'
-      else if (e.ctrlKey and e.keyCode == 39) or e.keyCode == 121
-        # ctrl + right or F10
-        @ws.send 'Next'
-      else if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122
-        # ctrl + down  or F11
-        @ws.send 'Step'
-      else if e.keyCode == 118 # F7
-        @ws.send 'Until'
-      else
-        return true
-      @working()
-      false
+  global_key: (e) ->
+    return true if @cm.rw
 
-    @$eval.on 'keydown', (e) =>
-      if e.altKey and e.keyCode == 82 and @backsearch # R
-        @backsearch = Math.max(@backsearch - 1, 1)
-        @searchback()
-        return false
+    if e.keyCode == 13
+      sel = @cm.get_selection()
+      return unless sel
+      @historize sel
+      @ws.send 'Eval', sel
 
-      if e.ctrlKey
-        if e.keyCode == 82 # R
-          if @backsearch is null
-            @backsearch = 1
+    if (e.ctrlKey and e.keyCode == 37) or e.keyCode == 119
+      # ctrl + left  or F8
+      @ws.send 'Continue'
+    else if (e.ctrlKey and e.keyCode == 38) or e.keyCode == 120
+      # ctrl + up  or F9
+      @ws.send 'Return'
+    else if (e.ctrlKey and e.keyCode == 39) or e.keyCode == 121
+      # ctrl + right or F10
+      @ws.send 'Next'
+    else if (e.ctrlKey and e.keyCode == 40) or e.keyCode == 122
+      # ctrl + down  or F11
+      @ws.send 'Step'
+    else if e.keyCode == 118 # F7
+      @ws.send 'Until'
+    else
+      return true
+
+    @working()
+    false
+
+  eval_key: (e) ->
+    if e.altKey and e.keyCode == 82 and @backsearch # R
+      @backsearch = Math.max(@backsearch - 1, 1)
+      @searchback()
+      return false
+
+    if e.ctrlKey
+      switch e.keyCode
+        when 82 # R
+          @backsearch ?= 0
+          if e.shiftKey
+            @backsearch = Math.max(@backsearch - 1, 1)
           else
-            if e.shiftKey
-              @backsearch = Math.max(@backsearch - 1, 1)
-            else
-              @backsearch++
+            @backsearch++
           @searchback()
           return false
-        else if e.keyCode == 67 # C
+        when 67 # C
           @searchback_stop()
-        else if e.keyCode == 68 # D
+        when 68 # D
           @ws.send 'Quit'
-        else
-          e.stopPropagation()
-          return
 
-      if e.keyCode == 13 # Enter
+      e.stopPropagation()
+      return
+
+    switch e.keyCode
+      when 13 # Enter
         if @backsearch
           @searchback_stop true
           return false
@@ -829,12 +660,12 @@ specify a module like `logging.config`.
           @execute @$eval.val()
           return false
 
-      else if e.keyCode == 27 # Escape
+      when 27 # Escape
         @suggest_stop()
         @searchback_stop()
         return false
 
-      else if e.keyCode == 9 # Tab
+      when 9 # Tab
         if e.shiftKey
           txtarea = @$eval.get(0)
           startPos = txtarea.selectionStart
@@ -872,7 +703,7 @@ specify a module like `logging.config`.
           @termscroll()
         return false
 
-      else if e.keyCode == 38  # Up
+      when 38  # Up
         filename = $('.selected .tracefile').text()
         if not e.shiftKey
           index = parseInt(@$eval.attr('data-index')) + 1
@@ -886,7 +717,7 @@ specify a module like `logging.config`.
             @termscroll()
             return false
 
-      else if e.keyCode == 40  # Down
+      when 40  # Down
         filename = $('.selected .tracefile').text()
         if not e.shiftKey
           index = parseInt($eval.attr('data-index')) - 1
@@ -901,75 +732,70 @@ specify a module like `logging.config`.
             @termscroll()
             return false
 
-    $("#scrollback, #watchers").on('click', 'a.inspect', (e) =>
-      @ws.send 'Inspect', $(e.currentTarget).attr('href')
-      @working()
-      false
-    ).on('click', '.short.close', ->
-      $(@).addClass('open').removeClass('close').next('.long').show('fast')
-    ).on('click', '.long,.short.open', ->
-      elt = if $(@).hasClass('long') then $(@) else $(@).next('.long')
-      elt.hide('fast').prev('.short').removeClass('open').addClass('close')
-    ).on('click', '.toggle', ->
-      $(@).add($(@).next()).toggleClass('hidden', 'shown')
-    )
-
-    $("#watchers").on('click', '.watching .name', (e) =>
-      @ws.send 'Unwatch', $(e.currentTarget)
-        .closest('.watching')
-        .attr('data-expr')
-      @working()
-    )
-
-    $("#source").on('mouseup', 'span', (e) =>
-      if e.which == 2 # Middle
-        target = $(e.currentTarget).text().trim()
-        @historize target
-        @ws.send 'Dump', target
-        @working()
-    )
-
-    $(document).on('keydown', (e) =>
-      if e.keyCode == 13
-        sel = @cm.cm.getSelection().trim()
-        if sel
-          @historize sel
-          @ws.send 'Eval', sel
-          false
-    )
-
-    @$eval.on('input', (e) =>
-      txt = $(e.currentTarget).val()
-      if @backsearch
-        if not txt
-          @searchback_stop()
-        else
-          @backsearch = 1
-          @searchback()
-        return
-      hist = @session_cmd_hist[$('.selected .tracefile').text()] or []
-      if txt and txt[0] != '.'
-        comp = hist
-          .slice(0)
-          .reverse()
-          .filter((e) -> e.indexOf('.') != 0)
-          .join('\n') + '\n' + txt
-
-        if @to_complete == null
-          @ws.send 'Complete', comp
-          @to_complete = false
-        else
-          @to_complete = comp
+  eval_input: (e) ->
+    txt = $(e.currentTarget).val()
+    if @backsearch
+      if not txt
+        @searchback_stop()
       else
-        @suggest_stop()
-    ).on('blur', =>
-      @searchback_stop()
-    )
+        @backsearch = 1
+        @searchback()
+      return
+    hist = @session_cmd_hist[$('.selected .tracefile').text()] or []
+    if txt and txt[0] != '.'
+      comp = hist
+        .slice(0)
+        .reverse()
+        .filter((e) -> e.indexOf('.') != 0)
+        .join('\n') + '\n' + txt
 
-$ =>
-  setTimeout(->
-    $('#deactivate').click () ->
-      window.wdb.ws.send('Disable')
-      false
-  , 250)
-  @wdb = new Wdb()
+      if @to_complete == null
+        @ws.send 'Complete', comp
+        @to_complete = false
+      else
+        @to_complete = comp
+    else
+      @suggest_stop()
+
+  inspect: (e) ->
+    @ws.send 'Inspect', $(e.currentTarget).attr('href')
+    @working()
+    false
+
+  short_open: (e) ->
+    $(e.currentTarget)
+      .addClass('open')
+      .removeClass('close')
+      .next('.long')
+      .show('fast')
+
+  short_close: (e) ->
+    $(e.currentTarget)
+      .addClass('close')
+      .removeClass('open')
+      .next('.long')
+      .hide('fast')
+
+  toggle_visibility: (e) ->
+    $(e.currentTarget)
+      .add($(e.currentTarget).next())
+      .toggleClass('hidden', 'shown')
+
+  unwatch: ->
+    @ws.send 'Unwatch', $(e.currentTarget)
+      .closest('.watching')
+      .attr('data-expr')
+    @working()
+
+  paste_target: (e) ->
+    return unless e.which == 2 # Middle
+    target = $(e.target).text().trim()
+    @historize target
+    @ws.send 'Dump', target
+    @working()
+    false
+
+  disable: ->
+    @ws.send('Disable')
+
+$ => @wdb = new Wdb()

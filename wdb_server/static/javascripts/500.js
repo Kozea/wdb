@@ -1,4 +1,31 @@
 (function() {
+  var Log;
+
+  Log = (function() {
+    function Log() {
+      this.debug = $('body').attr('data-debug') || false;
+    }
+
+    Log.prototype.log = function() {
+      var log_args, name;
+      if (this.debug) {
+        name = "[" + this.constructor.name + "]";
+        log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+        return console.log.apply(console, log_args);
+      }
+    };
+
+    Log.prototype.fail = function() {
+      var log_args, name;
+      name = this.constructor.name;
+      log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+      return console.error.apply(console, log_args);
+    };
+
+    return Log;
+
+  })();
+
   $(function() {
     var $code, $trace, code, file, fun, lno, _i, _len, _ref, _ref1, _results;
     $('#activate').click(function() {

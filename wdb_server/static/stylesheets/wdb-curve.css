@@ -386,7 +386,8 @@ code {
         vertical-align: top; }
   .traceline .tracefilelno {
     padding: 0.5em;
-    padding-bottom: 0.25em; }
+    padding-bottom: 0.25em;
+    word-wrap: break-word; }
     .traceline .tracefilelno .tracefile {
       color: #555; }
     .traceline .tracefilelno .tracelno {
@@ -680,7 +681,8 @@ code, code span {
       #wdb > header h1#title small {
         color: black;
         text-transform: capitalize;
-        text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5); }
+        text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5);
+        padding-top: 0.3em; }
     #wdb > header #activity {
       height: 100px;
       margin-top: -20px;

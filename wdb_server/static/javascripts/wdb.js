@@ -1,17 +1,17 @@
 (function() {
-  var Codemirror, Log, WS, Wdb, debug,
+  var Codemirror, Log, Wdb, Websocket,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  debug = true;
-
   Log = (function() {
-    function Log() {}
+    function Log() {
+      this.debug = $('body').attr('data-debug') || false;
+    }
 
     Log.prototype.log = function() {
       var log_args, name;
-      if (debug) {
+      if (this.debug) {
         name = "[" + this.constructor.name + "]";
         log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
         return console.log.apply(console, log_args);
@@ -29,12 +29,12 @@
 
   })();
 
-  WS = (function(_super) {
-    __extends(WS, _super);
+  Websocket = (function(_super) {
+    __extends(Websocket, _super);
 
-    function WS(wdb) {
+    function Websocket(wdb, uuid) {
       this.wdb = wdb;
-      this.url = "ws://" + document.location.host + "/websocket/" + _uuid;
+      this.url = "ws://" + document.location.host + "/websocket/" + uuid;
       this.log('Opening new socket', this.url);
       this.ws = new WebSocket(this.url);
       this.ws.onclose = this.close.bind(this);
@@ -43,26 +43,26 @@
       this.ws.onmessage = this.message.bind(this);
     }
 
-    WS.prototype.time = function() {
+    Websocket.prototype.time = function() {
       var date;
       date = new Date();
       return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
     };
 
-    WS.prototype.close = function(m) {
+    Websocket.prototype.close = function(m) {
       return this.log("Closed", m);
     };
 
-    WS.prototype.error = function(m) {
+    Websocket.prototype.error = function(m) {
       return this.fail("Error", m);
     };
 
-    WS.prototype.open = function(m) {
+    Websocket.prototype.open = function(m) {
       this.log("Open", m);
       return this.wdb.opening();
     };
 
-    WS.prototype.message = function(m) {
+    Websocket.prototype.message = function(m) {
       var cmd, data, message, pipe;
       message = m.data;
       pipe = message.indexOf('|');
@@ -81,7 +81,7 @@
       }
     };
 
-    WS.prototype.send = function(cmd, data) {
+    Websocket.prototype.send = function(cmd, data) {
       var msg;
       if (data == null) {
         data = null;
@@ -95,7 +95,7 @@
       return this.ws.send(msg);
     };
 
-    return WS;
+    return Websocket;
 
   })(Log);
 
@@ -107,27 +107,39 @@
       CodeMirror.keyMap.wdb = {
         Esc: (function(_this) {
           return function(cm) {
-            return _this.toggle_edition(false);
+            return _this.stop_edition();
           };
         })(this),
         fallthrough: ["default"]
       };
       CodeMirror.commands.save = (function(_this) {
         return function() {
-          return _this.wdb.ws.send('Save', "" + _this.cm._fn + "|" + (_this.cm.getValue()));
+          return _this.wdb.ws.send('Save', "" + _this.fn + "|" + (_this.code_mirror.getValue()));
         };
       })(this);
-      this.cm = null;
+      this.code_mirror = null;
+      this.$container = $('#source-editor');
+      this.bg_marks = {
+        cls: {},
+        marks: {}
+      };
+      this.rw = false;
+      this.fn = null;
+      this.file = null;
+      this.fun = null;
+      this.last_hl = null;
     }
 
     Codemirror.prototype["new"] = function(file, name, rw) {
       if (rw == null) {
         rw = false;
       }
-      this.cm = CodeMirror((function(elt) {
-        $('#source-editor').prepend(elt);
-        return $(elt).addClass(rw ? 'rw' : 'ro').addClass('cm');
-      }), {
+      this.code_mirror = CodeMirror((function(_this) {
+        return function(elt) {
+          _this.$container.prepend(elt);
+          return $(elt).addClass(rw ? 'rw' : 'ro').addClass('cm');
+        };
+      })(this), {
         value: file,
         mode: this.get_mode(name),
         readOnly: !rw,
@@ -136,66 +148,86 @@
         gutters: ["breakpoints", "CodeMirror-linenumbers"],
         lineNumbers: true
       });
-      this.cm._bg_marks = {
-        cls: {},
-        marks: {}
-      };
-      this.cm._rw = rw;
-      this.cm._fn = name;
-      this.cm._file = file;
-      this.cm._fun = null;
-      this.cm._last_hl = null;
-      this.cm.on("gutterClick", (function(_this) {
-        return function(cm, n) {
-          _this.cm = cm;
-          return _this.wdb.toggle_break(':' + (n + 1));
-        };
-      })(this));
-      this.cm.addClass = (function(_this) {
-        return function(lno, cls) {
-          _this.cm.addLineClass(lno - 1, 'background', cls);
-          if (_this.cm._bg_marks.cls[lno]) {
-            return _this.cm._bg_marks.cls[lno] = _this.cm._bg_marks.cls[lno] + ' ' + cls;
-          } else {
-            return _this.cm._bg_marks.cls[lno] = cls;
-          }
-        };
-      })(this);
-      this.cm.removeClass = (function(_this) {
-        return function(lno, cls) {
-          _this.cm.removeLineClass(lno - 1, 'background', cls);
-          return delete _this.cm._bg_marks.cls[lno];
-        };
-      })(this);
-      this.cm.addMark = (function(_this) {
-        return function(lno, cls, char) {
-          _this.cm._bg_marks.marks[lno] = [cls, char];
-          return _this.cm.setGutterMarker(lno - 1, "breakpoints", $('<div>', {
-            "class": cls
-          }).html(char).get(0));
-        };
-      })(this);
-      return this.cm.removeMark = (function(_this) {
-        return function(lno) {
-          delete _this.cm._bg_marks.marks[lno];
-          return _this.cm.setGutterMarker(lno - 1, "breakpoints", null);
-        };
-      })(this);
+      this.code_mirror.on('gutterClick', this.gutter_click.bind(this));
+      this.rw = rw;
+      this.fn = name;
+      this.file = file;
+      this.fun = null;
+      return this.last_hl = null;
     };
 
-    Codemirror.prototype.toggle_edition = function(rw) {
+    Codemirror.prototype.gutter_click = function(_, n) {
+      return this.wdb.toggle_break(':' + (n + 1));
+    };
+
+    Codemirror.prototype.clear_breakpoint = function(lno) {
+      this.remove_mark(lno);
+      return this.remove_class(lno, 'breakpoint');
+    };
+
+    Codemirror.prototype.ask_breakpoint = function(lno) {
+      return this.add_class(lno, 'ask-breakpoint');
+    };
+
+    Codemirror.prototype.get_selection = function() {
+      return this.code_mirror.getSelection().trim();
+    };
+
+    Codemirror.prototype.has_breakpoint = function(n) {
+      var line_cls;
+      line_cls = this.code_mirror.lineInfo(n - 1).bgClass;
+      if (!line_cls) {
+        return false;
+      }
+      return __indexOf.call(line_cls.split(' '), 'breakpoint') >= 0;
+    };
+
+    Codemirror.prototype.add_class = function(lno, cls) {
+      this.code_mirror.addLineClass(lno - 1, 'background', cls);
+      if (this.bg_marks.cls[lno]) {
+        return this.bg_marks.cls[lno] = this.bg_marks.cls[lno] + ' ' + cls;
+      } else {
+        return this.bg_marks.cls[lno] = cls;
+      }
+    };
+
+    Codemirror.prototype.remove_class = function(lno, cls) {
+      this.code_mirror.removeLineClass(lno - 1, 'background', cls);
+      return delete this.bg_marks.cls[lno];
+    };
+
+    Codemirror.prototype.add_mark = function(lno, cls, char) {
+      this.bg_marks.marks[lno] = [cls, char];
+      return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", $('<div>', {
+        "class": cls
+      }).html(char).get(0));
+    };
+
+    Codemirror.prototype.remove_mark = function(lno) {
+      delete this.bg_marks.marks[lno];
+      return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", null);
+    };
+
+    Codemirror.prototype.stop_edition = function() {
+      if (this.rw) {
+        return this.toggle_edition();
+      }
+    };
+
+    Codemirror.prototype.toggle_edition = function() {
       var char, cls, lno, marks, scroll, _ref;
-      cls = $.extend({}, this.cm._bg_marks.cls);
-      marks = $.extend({}, this.cm._bg_marks.marks);
+      this.rw = !this.rw;
+      cls = $.extend({}, this.bg_marks.cls);
+      marks = $.extend({}, this.bg_marks.marks);
       scroll = $('#source .CodeMirror-scroll').scrollTop();
       $('#source .CodeMirror').remove();
-      this.cm = this["new"](this.cm._file, this.cm._fn, rw);
+      this.code_mirror = this["new"](this.file, this.fn, rw);
       for (lno in cls) {
-        this.cm.addClass(lno, cls[lno]);
+        this.add_class(lno, cls[lno]);
       }
       for (lno in marks) {
         _ref = marks[lno], cls = _ref[0], char = _ref[1];
-        this.cm.addMark(lno, cls, char);
+        this.add_mark(lno, cls, char);
       }
       $('#source .CodeMirror-scroll').scrollTop(scroll);
       return this.print({
@@ -204,56 +236,56 @@
       });
     };
 
-    Codemirror.prototype.select = function(data, frame) {
+    Codemirror.prototype.open = function(data, frame) {
       var $hline, $scroll, lno, _i, _j, _len, _ref, _ref1, _ref2;
-      if (!this.cm) {
+      if (!this.code_mirror) {
         this["new"](data.file, data.name);
         this.wdb.$eval.focus();
       } else {
-        if (this.cm._fn === data.name) {
-          if (this.cm._fun !== frame["function"]) {
-            for (lno in this.cm._bg_marks.cls) {
-              this.cm.removeLineClass(lno - 1, 'background');
+        if (this.fn === data.name) {
+          if (this.fun !== frame["function"]) {
+            for (lno in this.bg_marks.cls) {
+              this.code_mirror.removeLineClass(lno - 1, 'background');
             }
           }
-          for (lno in this.cm._bg_marks.marks) {
-            this.cm.setGutterMarker(lno - 1, 'breakpoints', null);
+          for (lno in this.bg_marks.marks) {
+            this.code_mirror.setGutterMarker(lno - 1, 'breakpoints', null);
           }
-          if (this.cm._last_hl) {
-            this.cm.removeLineClass(lno - 1, 'background');
-            this.cm.addLineClass(lno - 1, 'background', 'footstep');
+          if (this.last_hl) {
+            this.code_mirror.removeLineClass(lno - 1, 'background');
+            this.code_mirror.addLineClass(lno - 1, 'background', 'footstep');
           }
         } else {
-          this.cm.setValue(data.file);
-          this.cm._fn = data.name;
-          this.cm._fun = frame["function"];
-          this.cm._file = data.file;
-          this.cm._last_hl = null;
+          this.code_mirror.setValue(data.file);
+          this.fn = data.name;
+          this.fun = frame["function"];
+          this.file = data.file;
+          this.last_hl = null;
         }
-        this.cm._bg_marks.cls = {};
-        this.cm._bg_marks.marks = {};
+        this.bg_marks.cls = {};
+        this.bg_marks.marks = {};
       }
       _ref = data.breaks;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         lno = _ref[_i];
-        this.cm.addClass(lno, 'breakpoint');
-        this.cm.addMark(lno, 'breakpoint', '●');
+        this.add_class(lno, 'breakpoint');
+        this.add_mark(lno, 'breakpoint', '●');
       }
-      this.cm.addClass(frame.lno, 'highlighted');
-      this.cm.addMark(frame.lno, 'highlighted', '➤');
-      if (this.cm._fun !== frame["function"] && frame["function"] !== '<module>') {
+      this.add_class(frame.lno, 'highlighted');
+      this.add_mark(frame.lno, 'highlighted', '➤');
+      if (this.fun !== frame["function"] && frame["function"] !== '<module>') {
         for (lno = _j = _ref1 = frame.flno, _ref2 = frame.llno + 1; _ref1 <= _ref2 ? _j < _ref2 : _j > _ref2; lno = _ref1 <= _ref2 ? ++_j : --_j) {
-          this.cm.addClass(lno, 'ctx');
+          this.add_class(lno, 'ctx');
           if (lno === frame.flno) {
-            this.cm.addClass(lno, 'ctx-top');
+            this.add_class(lno, 'ctx-top');
           } else if (lno === frame.llno) {
-            this.cm.addClass(lno, 'ctx-bottom');
+            this.add_class(lno, 'ctx-bottom');
           }
         }
-        this.cm._fun = frame["function"];
+        this.fun = frame["function"];
       }
-      this.cm._last_hl = frame.lno;
-      this.cm.scrollIntoView({
+      this.last_hl = frame.lno;
+      this.code_mirror.scrollIntoView({
         line: frame.lno,
         ch: 1
       }, 1);
@@ -263,14 +295,14 @@
     };
 
     Codemirror.prototype.get_mode = function(fn) {
-      var ext;
-      ext = fn.split('.').splice(-1)[0];
-      if (ext === 'py') {
-        'python';
-      } else if (ext === 'jinja2') {
-        'jinja2';
+      switch (fn.split('.').splice(-1)[0]) {
+        case 'py':
+          return 'python';
+        case 'jinja2':
+          return 'jinja2';
+        default:
+          return 'python';
       }
-      return 'python';
     };
 
     return Codemirror;
@@ -284,8 +316,6 @@
       var e;
       this.started = false;
       this.to_complete = null;
-      this.ws = new WS(this);
-      this.cm = new Codemirror(this);
       this.cwd = null;
       this.backsearch = null;
       this.cmd_hist = [];
@@ -294,27 +324,37 @@
       this.last_cmd = null;
       this.waited_for_ws = 0;
       this.$state = $('.state');
+      this.$title = $('#title');
       this.$waiter = $('#waiter');
       this.$wdb = $('#wdb');
-      this.$eval = $('#eval');
       this.$source = $('#source');
+      this.$scrollback = $('#scrollback');
+      this.$eval = $('#eval');
       this.$traceback = $('#traceback');
-      this.$traceback.on('click', '.traceline', this.select_click.bind(this));
-      this.$title = $('#title');
+      this.$watchers = $('#watchers');
       try {
         this.cmd_hist = JSON.parse(localStorage['cmd_hist']);
       } catch (_error) {
         e = _error;
         this.fail(e);
       }
+      this.ws = new Websocket(this, this.$wdb.find('> header').attr('data-uuid'));
+      this.cm = new Codemirror(this);
     }
 
     Wdb.prototype.opening = function() {
       if (!this.started) {
-        this.register_handlers();
+        this.$eval.on('keydown', this.eval_key.bind(this)).on('input', this.eval_input.bind(this)).on('blur', this.searchback_stop.bind(this));
+        $(window).on('keydown', this.global_key.bind(this));
+        this.$traceback.on('click', '.traceline', this.select_click.bind(this));
+        this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
+        this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
+        this.$source.on('mouseup', this.paste_target.bind(this));
+        $('#deactivate').click(this.disable.bind(this));
+        false;
         this.started = true;
       }
-      this.start();
+      this.ws.send('Start');
       this.$waiter.remove();
       this.$wdb.show();
       return this.$eval.autosize();
@@ -326,10 +366,6 @@
 
     Wdb.prototype.chilling = function() {
       return this.$state.removeClass('on');
-    };
-
-    Wdb.prototype.start = function() {
-      return this.ws.send('Start');
     };
 
     Wdb.prototype.init = function(data) {
@@ -402,7 +438,7 @@
       $('#trace-' + current_frame.level).addClass('selected');
       this.$eval.val('').attr('data-index', -1).trigger('autosize.resize');
       this.file_cache[data.name] = data.file;
-      this.cm.select(data, current_frame);
+      this.cm.open(data, current_frame);
       return this.chilling();
     };
 
@@ -513,7 +549,7 @@
             cmd('Dump', data);
             break;
           case 'e':
-            this.cm.toggle_edition(!this.cm.cm._rw);
+            this.cm.toggle_edition();
             break;
           case 'g':
             this.cls();
@@ -674,9 +710,9 @@
 
     Wdb.prototype.breakset = function(data) {
       if (data.lno) {
-        this.cm.cm.removeClass(data.lno, 'ask-breakpoint');
-        this.cm.cm.addClass(data.lno, 'breakpoint');
-        this.cm.cm.addMark(data.lno, 'breakpoint', data.temporary ? '○' : '●');
+        this.cm.remove_class(data.lno, 'ask-breakpoint');
+        this.cm.add_class(data.lno, 'breakpoint');
+        this.cm.add_mark(data.lno, 'breakpoint', data.temporary ? '○' : '●');
         if (data.cond) {
           $line.attr('title', "On [" + data.cond + "]");
         }
@@ -688,7 +724,7 @@
     };
 
     Wdb.prototype.breakunset = function(data) {
-      this.cm.cm.removeClass(data.lno, 'ask-breakpoint');
+      this.cm.remove_class(data.lno, 'ask-breakpoint');
       if (this.$eval.val().indexOf('.b ') === 0) {
         this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
       }
@@ -696,7 +732,7 @@
     };
 
     Wdb.prototype.toggle_break = function(arg, temporary) {
-      var cls, cmd, lno;
+      var cmd, lno;
       cmd = temporary ? 'TBreak' : 'Break';
       lno = NaN;
       if (arg.indexOf(':') > -1) {
@@ -713,16 +749,13 @@
         this.ws.send(cmd, arg);
         return;
       }
-      cls = this.cm.cm.lineInfo(lno - 1).bgClass || '';
-      if (cls.split(' ').indexOf('breakpoint') > -1) {
-        this.cm.cm.removeMark(lno);
-        this.cm.cm.removeClass(lno, 'breakpoint');
-        this.cm.cm.addClass(lno, 'ask-breakpoint');
-        return this.ws.send('Unbreak', ":" + lno);
+      if (this.cm.has_breakpoint(lno)) {
+        this.cm.clear_breakpoint(lno);
+        this.ws.send('Unbreak', ":" + lno);
       } else {
-        this.cm.cm.addClass(lno, 'ask-breakpoint');
-        return this.ws.send(cmd, arg);
+        this.ws.send(cmd, arg);
       }
+      return this.cm.ask_breakpoint(lno);
     };
 
     Wdb.prototype.format_fun = function(p) {
@@ -913,226 +946,221 @@
       }), 10);
     };
 
-    Wdb.prototype.register_handlers = function() {
-      $('body,html').on('keydown', (function(_this) {
-        return function(e) {
-          var _ref;
-          if ((_ref = _this.cm.cm) != null ? _ref._rw : void 0) {
-            return true;
-          }
-          if ((e.ctrlKey && e.keyCode === 37) || e.keyCode === 119) {
-            _this.ws.send('Continue');
-          } else if ((e.ctrlKey && e.keyCode === 38) || e.keyCode === 120) {
-            _this.ws.send('Return');
-          } else if ((e.ctrlKey && e.keyCode === 39) || e.keyCode === 121) {
-            _this.ws.send('Next');
-          } else if ((e.ctrlKey && e.keyCode === 40) || e.keyCode === 122) {
-            _this.ws.send('Step');
-          } else if (e.keyCode === 118) {
-            _this.ws.send('Until');
-          } else {
-            return true;
-          }
-          _this.working();
-          return false;
-        };
-      })(this));
-      this.$eval.on('keydown', (function(_this) {
-        return function(e) {
-          var $active, $tds, base, completion, endPos, filename, index, startPos, to_set, txtarea;
-          if (e.altKey && e.keyCode === 82 && _this.backsearch) {
-            _this.backsearch = Math.max(_this.backsearch - 1, 1);
-            _this.searchback();
-            return false;
-          }
-          if (e.ctrlKey) {
-            if (e.keyCode === 82) {
-              if (_this.backsearch === null) {
-                _this.backsearch = 1;
-              } else {
-                if (e.shiftKey) {
-                  _this.backsearch = Math.max(_this.backsearch - 1, 1);
-                } else {
-                  _this.backsearch++;
-                }
-              }
-              _this.searchback();
-              return false;
-            } else if (e.keyCode === 67) {
-              _this.searchback_stop();
-            } else if (e.keyCode === 68) {
-              _this.ws.send('Quit');
-            } else {
-              e.stopPropagation();
-              return;
+    Wdb.prototype.global_key = function(e) {
+      var sel;
+      if (this.cm.rw) {
+        return true;
+      }
+      if (e.keyCode === 13) {
+        sel = this.cm.get_selection();
+        if (!sel) {
+          return;
+        }
+        this.historize(sel);
+        this.ws.send('Eval', sel);
+      }
+      if ((e.ctrlKey && e.keyCode === 37) || e.keyCode === 119) {
+        this.ws.send('Continue');
+      } else if ((e.ctrlKey && e.keyCode === 38) || e.keyCode === 120) {
+        this.ws.send('Return');
+      } else if ((e.ctrlKey && e.keyCode === 39) || e.keyCode === 121) {
+        this.ws.send('Next');
+      } else if ((e.ctrlKey && e.keyCode === 40) || e.keyCode === 122) {
+        this.ws.send('Step');
+      } else if (e.keyCode === 118) {
+        this.ws.send('Until');
+      } else {
+        return true;
+      }
+      this.working();
+      return false;
+    };
+
+    Wdb.prototype.eval_key = function(e) {
+      var $active, $tds, base, completion, endPos, filename, index, startPos, to_set, txtarea;
+      if (e.altKey && e.keyCode === 82 && this.backsearch) {
+        this.backsearch = Math.max(this.backsearch - 1, 1);
+        this.searchback();
+        return false;
+      }
+      if (e.ctrlKey) {
+        switch (e.keyCode) {
+          case 82:
+            if (this.backsearch == null) {
+              this.backsearch = 0;
             }
-          }
-          if (e.keyCode === 13) {
-            if (_this.backsearch) {
-              _this.searchback_stop(true);
-              return false;
-            }
-            if ($('#completions table td.active').length && !$('#completions table td.complete').length) {
-              _this.suggest_stop();
-              return false;
-            }
-            if (!e.shiftKey) {
-              _this.execute(_this.$eval.val());
-              return false;
-            }
-          } else if (e.keyCode === 27) {
-            _this.suggest_stop();
-            _this.searchback_stop();
-            return false;
-          } else if (e.keyCode === 9) {
             if (e.shiftKey) {
-              txtarea = _this.$eval.get(0);
-              startPos = txtarea.selectionStart;
-              endPos = txtarea.selectionEnd;
-              if (startPos || startPos === '0') {
-                _this.$eval.val(_this.$eval.val().substring(0, startPos) + '  ' + _this.$eval.val().substring(endPos, _this.$eval.val().length)).trigger('autosize.resize');
-              } else {
-                _this.$eval.val(_this.$eval.val() + '  ').trigger('autosize.resize');
-              }
-              return false;
+              this.backsearch = Math.max(this.backsearch - 1, 1);
+            } else {
+              this.backsearch++;
             }
-            if (_this.backsearch) {
-              return false;
-            }
-            $tds = $('#completions table td');
-            $active = $tds.filter('.active');
-            if ($tds.length) {
-              if (!$active.length) {
-                $active = $tds.first().addClass('active');
-              } else {
-                index = $tds.index($active);
-                if (index === $tds.length - 1) {
-                  index = 0;
-                } else {
-                  index++;
-                }
-                $active.removeClass('active complete');
-                $active = $tds.eq(index).addClass('active');
-              }
-              base = $active.find('.base').text();
-              completion = $active.find('.completion').text();
-              _this.$eval.val($eval.data().root + base + completion).trigger('autosize.resize');
-              $('#comp-desc').text($active.attr('title'));
-              _this.termscroll();
+            this.searchback();
+            return false;
+          case 67:
+            this.searchback_stop();
+            break;
+          case 68:
+            this.ws.send('Quit');
+        }
+        e.stopPropagation();
+        return;
+      }
+      switch (e.keyCode) {
+        case 13:
+          if (this.backsearch) {
+            this.searchback_stop(true);
+            return false;
+          }
+          if ($('#completions table td.active').length && !$('#completions table td.complete').length) {
+            this.suggest_stop();
+            return false;
+          }
+          if (!e.shiftKey) {
+            this.execute(this.$eval.val());
+            return false;
+          }
+          break;
+        case 27:
+          this.suggest_stop();
+          this.searchback_stop();
+          return false;
+        case 9:
+          if (e.shiftKey) {
+            txtarea = this.$eval.get(0);
+            startPos = txtarea.selectionStart;
+            endPos = txtarea.selectionEnd;
+            if (startPos || startPos === '0') {
+              this.$eval.val(this.$eval.val().substring(0, startPos) + '  ' + this.$eval.val().substring(endPos, this.$eval.val().length)).trigger('autosize.resize');
+            } else {
+              this.$eval.val(this.$eval.val() + '  ').trigger('autosize.resize');
             }
             return false;
-          } else if (e.keyCode === 38) {
-            filename = $('.selected .tracefile').text();
-            if (!e.shiftKey) {
-              index = parseInt(_this.$eval.attr('data-index')) + 1;
-              if (index >= 0 && index < _this.cmd_hist.length) {
-                to_set = _this.cmd_hist[index];
-                if (index === 0) {
-                  _this.$eval.attr('data-current', _this.$eval.val());
-                }
-                _this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
-                _this.suggest_stop();
-                _this.termscroll();
-                return false;
-              }
-            }
-          } else if (e.keyCode === 40) {
-            filename = $('.selected .tracefile').text();
-            if (!e.shiftKey) {
-              index = parseInt($eval.attr('data-index')) - 1;
-              if (index >= -1 && index < _this.cmd_hist.length) {
-                if (index === -1) {
-                  to_set = _this.$eval.attr('data-current');
-                } else {
-                  to_set = _this.cmd_hist[index];
-                }
-                _this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
-                _this.suggest_stop();
-                _this.termscroll();
-                return false;
-              }
-            }
           }
-        };
-      })(this));
-      $("#scrollback, #watchers").on('click', 'a.inspect', (function(_this) {
-        return function(e) {
-          _this.ws.send('Inspect', $(e.currentTarget).attr('href'));
-          _this.working();
+          if (this.backsearch) {
+            return false;
+          }
+          $tds = $('#completions table td');
+          $active = $tds.filter('.active');
+          if ($tds.length) {
+            if (!$active.length) {
+              $active = $tds.first().addClass('active');
+            } else {
+              index = $tds.index($active);
+              if (index === $tds.length - 1) {
+                index = 0;
+              } else {
+                index++;
+              }
+              $active.removeClass('active complete');
+              $active = $tds.eq(index).addClass('active');
+            }
+            base = $active.find('.base').text();
+            completion = $active.find('.completion').text();
+            this.$eval.val($eval.data().root + base + completion).trigger('autosize.resize');
+            $('#comp-desc').text($active.attr('title'));
+            this.termscroll();
+          }
           return false;
-        };
-      })(this)).on('click', '.short.close', function() {
-        return $(this).addClass('open').removeClass('close').next('.long').show('fast');
-      }).on('click', '.long,.short.open', function() {
-        var elt;
-        elt = $(this).hasClass('long') ? $(this) : $(this).next('.long');
-        return elt.hide('fast').prev('.short').removeClass('open').addClass('close');
-      }).on('click', '.toggle', function() {
-        return $(this).add($(this).next()).toggleClass('hidden', 'shown');
-      });
-      $("#watchers").on('click', '.watching .name', (function(_this) {
-        return function(e) {
-          _this.ws.send('Unwatch', $(e.currentTarget)).closest('.watching').attr('data-expr');
-          return _this.working();
-        };
-      })(this));
-      $("#source").on('mouseup', 'span', (function(_this) {
-        return function(e) {
-          var target;
-          if (e.which === 2) {
-            target = $(e.currentTarget).text().trim();
-            _this.historize(target);
-            _this.ws.send('Dump', target);
-            return _this.working();
-          }
-        };
-      })(this));
-      $(document).on('keydown', (function(_this) {
-        return function(e) {
-          var sel;
-          if (e.keyCode === 13) {
-            sel = _this.cm.cm.getSelection().trim();
-            if (sel) {
-              _this.historize(sel);
-              _this.ws.send('Eval', sel);
+        case 38:
+          filename = $('.selected .tracefile').text();
+          if (!e.shiftKey) {
+            index = parseInt(this.$eval.attr('data-index')) + 1;
+            if (index >= 0 && index < this.cmd_hist.length) {
+              to_set = this.cmd_hist[index];
+              if (index === 0) {
+                this.$eval.attr('data-current', this.$eval.val());
+              }
+              this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
+              this.suggest_stop();
+              this.termscroll();
               return false;
             }
           }
-        };
-      })(this));
-      return this.$eval.on('input', (function(_this) {
-        return function(e) {
-          var comp, hist, txt;
-          txt = $(e.currentTarget).val();
-          if (_this.backsearch) {
-            if (!txt) {
-              _this.searchback_stop();
-            } else {
-              _this.backsearch = 1;
-              _this.searchback();
+          break;
+        case 40:
+          filename = $('.selected .tracefile').text();
+          if (!e.shiftKey) {
+            index = parseInt($eval.attr('data-index')) - 1;
+            if (index >= -1 && index < this.cmd_hist.length) {
+              if (index === -1) {
+                to_set = this.$eval.attr('data-current');
+              } else {
+                to_set = this.cmd_hist[index];
+              }
+              this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
+              this.suggest_stop();
+              this.termscroll();
+              return false;
             }
-            return;
           }
-          hist = _this.session_cmd_hist[$('.selected .tracefile').text()] || [];
-          if (txt && txt[0] !== '.') {
-            comp = hist.slice(0).reverse().filter(function(e) {
-              return e.indexOf('.') !== 0;
-            }).join('\n') + '\n' + txt;
-            if (_this.to_complete === null) {
-              _this.ws.send('Complete', comp);
-              return _this.to_complete = false;
-            } else {
-              return _this.to_complete = comp;
-            }
-          } else {
-            return _this.suggest_stop();
-          }
-        };
-      })(this)).on('blur', (function(_this) {
-        return function() {
-          return _this.searchback_stop();
-        };
-      })(this));
+      }
+    };
+
+    Wdb.prototype.eval_input = function(e) {
+      var comp, hist, txt;
+      txt = $(e.currentTarget).val();
+      if (this.backsearch) {
+        if (!txt) {
+          this.searchback_stop();
+        } else {
+          this.backsearch = 1;
+          this.searchback();
+        }
+        return;
+      }
+      hist = this.session_cmd_hist[$('.selected .tracefile').text()] || [];
+      if (txt && txt[0] !== '.') {
+        comp = hist.slice(0).reverse().filter(function(e) {
+          return e.indexOf('.') !== 0;
+        }).join('\n') + '\n' + txt;
+        if (this.to_complete === null) {
+          this.ws.send('Complete', comp);
+          return this.to_complete = false;
+        } else {
+          return this.to_complete = comp;
+        }
+      } else {
+        return this.suggest_stop();
+      }
+    };
+
+    Wdb.prototype.inspect = function(e) {
+      this.ws.send('Inspect', $(e.currentTarget).attr('href'));
+      this.working();
+      return false;
+    };
+
+    Wdb.prototype.short_open = function(e) {
+      return $(e.currentTarget).addClass('open').removeClass('close').next('.long').show('fast');
+    };
+
+    Wdb.prototype.short_close = function(e) {
+      return $(e.currentTarget).addClass('close').removeClass('open').next('.long').hide('fast');
+    };
+
+    Wdb.prototype.toggle_visibility = function(e) {
+      return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('hidden', 'shown');
+    };
+
+    Wdb.prototype.unwatch = function() {
+      this.ws.send('Unwatch', $(e.currentTarget)).closest('.watching').attr('data-expr');
+      return this.working();
+    };
+
+    Wdb.prototype.paste_target = function(e) {
+      var target;
+      if (e.which !== 2) {
+        return;
+      }
+      target = $(e.target).text().trim();
+      this.historize(target);
+      this.ws.send('Dump', target);
+      this.working();
+      return false;
+    };
+
+    Wdb.prototype.disable = function() {
+      return this.ws.send('Disable');
     };
 
     return Wdb;
@@ -1141,12 +1169,6 @@
 
   $((function(_this) {
     return function() {
-      setTimeout(function() {
-        return $('#deactivate').click(function() {
-          window.wdb.ws.send('Disable');
-          return false;
-        });
-      }, 250);
       return _this.wdb = new Wdb();
     };
   })(this));

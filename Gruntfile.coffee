@@ -57,11 +57,28 @@ module.exports = (grunt) ->
         sourceMap: true
 
       wdb:
-        expand: true
-        cwd: 'coffees/'
-        src: '*.coffee'
-        dest: 'wdb_server/static/javascripts/'
-        ext: '.js'
+        files:
+          'wdb_server/static/javascripts/wdb.js': [
+            'coffees/_base.coffee'
+            'coffees/_websocket.coffee'
+            'coffees/_codemirror.coffee'
+            'coffees/wdb.coffee'
+          ]
+
+      500:
+        files:
+          'wdb_server/static/javascripts/500.js': [
+            'coffees/_base.coffee'
+            'coffees/500.coffee'
+          ]
+
+      status:
+        files:
+          'wdb_server/static/javascripts/status.js': [
+            'coffees/_base.coffee'
+            'coffees/status.coffee'
+          ]
+
 
     coffeelint:
       wdb:

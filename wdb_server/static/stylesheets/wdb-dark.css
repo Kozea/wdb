@@ -386,7 +386,8 @@ code {
         vertical-align: top; }
   .traceline .tracefilelno {
     padding: 0.5em;
-    padding-bottom: 0.25em; }
+    padding-bottom: 0.25em;
+    word-wrap: break-word; }
     .traceline .tracefilelno .tracefile {
       color: #555; }
     .traceline .tracefilelno .tracelno {

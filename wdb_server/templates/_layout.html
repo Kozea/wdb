@@ -5,15 +5,14 @@
     <script src="{{ static_url('deps.min.js') }}"></script>
     <link href="{{ static_url('deps.min.css') }}" rel="stylesheet" type="text/css">
 
-    {% block head %}
-    {% end %}
     {% from wdb_server import StyleHandler %}
     <link href="{{ static_url('stylesheets/wdb-%s.css' % StyleHandler.theme) }}" rel="stylesheet" type="text/css">
   </head>
-  <body>
+  <body {% if options.debug %}data-debug="true"{% end %}>
     <section id="wdb">
       {% block main %}
       {% end %}
     </section>
+    {% block script %}{% end %}
   </body>
 </html>

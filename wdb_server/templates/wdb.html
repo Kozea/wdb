@@ -1,14 +1,12 @@
 {% extends _layout.html %}
-{% block head %}
-  <script>
-    _uuid = "{{ uuid }}";
-  </script>
-  <script src="{{ static_url('javascripts/wdb/wdb.min.js') }}"></script>
+
+{% block script %}
+  <script src="{{ static_url('javascripts/wdb' + '.js' if options.debug else '/wdb.min.js') }}"></script>
 {% end %}
 
 
 {% block main %}
-  <header>
+  <header data-uuid="{{ uuid }}">
     <div id="activity">
       <div class="state on"></div>
       <div class="inner state on"></div>

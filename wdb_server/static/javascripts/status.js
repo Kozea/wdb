@@ -1,5 +1,30 @@
 (function() {
-  var make_uuid_line, rm_uuid_line, ws_message;
+  var Log, make_uuid_line, rm_uuid_line, ws_message;
+
+  Log = (function() {
+    function Log() {
+      this.debug = $('body').attr('data-debug') || false;
+    }
+
+    Log.prototype.log = function() {
+      var log_args, name;
+      if (this.debug) {
+        name = "[" + this.constructor.name + "]";
+        log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+        return console.log.apply(console, log_args);
+      }
+    };
+
+    Log.prototype.fail = function() {
+      var log_args, name;
+      name = this.constructor.name;
+      log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+      return console.error.apply(console, log_args);
+    };
+
+    return Log;
+
+  })();
 
   make_uuid_line = function(uuid, socket) {
     var $line;
