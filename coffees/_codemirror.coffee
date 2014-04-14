@@ -25,10 +25,8 @@ class Codemirror extends Log
 
     @code_mirror = null
     @$container = $('#source-editor')
-    @bg_marks =
-      cls: {}
-      marks: {}
-
+    @cls_marks = {}
+    @chr_marks = {}
     @rw = false
     @fn = null
     @file = null
@@ -85,22 +83,22 @@ class Codemirror extends Log
 
   add_class: (lno, cls) ->
     @code_mirror.addLineClass(lno - 1, 'background', cls)
-    if @bg_marks.cls[lno]
-      @bg_marks.cls[lno] = @bg_marks.cls[lno] + ' ' + cls
+    if @cls_marks[lno]
+      @cls_marks[lno] = @cls_marks[lno] + ' ' + cls
     else
-      @bg_marks.cls[lno] = cls
+      @cls_marks[lno] = cls
 
   remove_class: (lno, cls) ->
     @code_mirror.removeLineClass(lno - 1, 'background', cls)
-    delete @bg_marks.cls[lno]
+    delete @cls_marks[lno]
 
   add_mark: (lno, cls, char, title) ->
-    @bg_marks.marks[lno] = [cls, char]
+    @chr_marks[lno] = [cls, char]
     @code_mirror.setGutterMarker(lno - 1, "breakpoints",
       $('<div>', class: cls, title: title).html(char).get(0))
 
   remove_mark: (lno) ->
-    delete @bg_marks.marks[lno]
+    delete @chr_marks[lno]
     @code_mirror.setGutterMarker(lno - 1, "breakpoints", null)
 
   stop_edition: ->
@@ -108,8 +106,8 @@ class Codemirror extends Log
 
   toggle_edition: ->
     @rw = not @rw
-    cls = $.extend({}, @bg_marks.cls)
-    marks = $.extend({}, @bg_marks.marks)
+    cls = $.extend({}, @cls_marks)
+    marks = $.extend({}, @chr_marks)
     scroll = $('#source .CodeMirror-scroll').scrollTop()
     $('#source .CodeMirror').remove()
     @code_mirror = @new @file, @fn, rw
@@ -130,10 +128,10 @@ class Codemirror extends Log
     else
       if @fn == data.name
         if @fun != frame.function
-          for lno of @bg_marks.cls
+          for lno of @cls_marks
             @code_mirror.removeLineClass(lno - 1, 'background')
 
-        for lno of @bg_marks.marks
+        for lno of @chr_marks
           @code_mirror.setGutterMarker(lno - 1, 'breakpoints', null)
         if @last_hl
           @code_mirror.removeLineClass(lno - 1, 'background')
@@ -144,8 +142,8 @@ class Codemirror extends Log
         @fun = frame.function
         @file = data.file
         @last_hl = null
-      @bg_marks.cls = {}
-      @bg_marks.marks = {}
+      @cls_marks = {}
+      @chr_marks = {}
 
     for lno in data.breaks
       @add_class(lno, 'breakpoint')
