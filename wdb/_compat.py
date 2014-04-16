@@ -3,11 +3,10 @@ import sys
 python_version = sys.version_info[0]
 
 
-
 try:
-    from json import dumps, JSONEncoder
+    from json import loads, dumps, JSONEncoder
 except ImportError:
-    from simplejson import dumps, JSONEncoder
+    from simplejson import loads, dumps, JSONEncoder
 
 try:
     from urllib.parse import quote

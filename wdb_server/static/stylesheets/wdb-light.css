@@ -39,66 +39,67 @@
   src: url("../fonts/SourceCodePro-Bold.ttf.woff") format("woff");
   font-weight: 900; }
 
-.cm.CodeMirror-focused .CodeMirror-selected {
+.CodeMirror-focused .CodeMirror-selected {
   background: #d7d4f0; }
 
-.cm {
+.CodeMirror, .CodeMirror-standalone {
   background: none;
   color: grey; }
-  .cm .CodeMirror-selected {
+  .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
     background: #d9d9d9; }
-  .cm .CodeMirror-gutter {
-    background: none;
+  .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
     border-right: 1px solid #808080; }
-  .cm .CodeMirror-linenumber {
+    .CodeMirror .CodeMirror-gutters .CodeMirror-gutter, .CodeMirror-standalone .CodeMirror-gutters .CodeMirror-gutter {
+      background: none; }
+  .CodeMirror .CodeMirror-linenumber, .CodeMirror-standalone .CodeMirror-linenumber {
     color: none; }
-  .cm .CodeMirror-cursor {
+  .CodeMirror .CodeMirror-cursor, .CodeMirror-standalone .CodeMirror-cursor {
     border-left: 1px solid black !important; }
-  .cm span.cm-keyword {
+  .CodeMirror span.cm-keyword, .CodeMirror-standalone span.cm-keyword {
     color: #360795; }
-  .cm span.cm-atom {
+  .CodeMirror span.cm-atom, .CodeMirror-standalone span.cm-atom {
     color: #219; }
-  .cm span.cm-number {
+  .CodeMirror span.cm-number, .CodeMirror-standalone span.cm-number {
     color: #770088; }
-  .cm span.cm-def {
+  .CodeMirror span.cm-def, .CodeMirror-standalone span.cm-def {
     color: #00f; }
-  .cm span.cm-variable {
+  .CodeMirror span.cm-variable, .CodeMirror-standalone span.cm-variable {
     color: #525252; }
-  .cm span.cm-variable-2 {
+  .CodeMirror span.cm-variable-2, .CodeMirror-standalone span.cm-variable-2 {
     color: #05a; }
-  .cm span.cm-variable-3 {
+  .CodeMirror span.cm-variable-3, .CodeMirror-standalone span.cm-variable-3 {
     color: #085; }
-  .cm span.cm-property {
+  .CodeMirror span.cm-property, .CodeMirror-standalone span.cm-property {
     color: black; }
-  .cm span.cm-operator {
+  .CodeMirror span.cm-operator, .CodeMirror-standalone span.cm-operator {
     color: black; }
-  .cm span.cm-comment {
+  .CodeMirror span.cm-comment, .CodeMirror-standalone span.cm-comment {
     color: #95720F; }
-  .cm span.cm-string {
+  .CodeMirror span.cm-string, .CodeMirror-standalone span.cm-string {
     color: #950728; }
-  .cm span.cm-string-2 {
+  .CodeMirror span.cm-string-2, .CodeMirror-standalone span.cm-string-2 {
     color: #f50; }
-  .cm span.cm-meta {
+  .CodeMirror span.cm-meta, .CodeMirror-standalone span.cm-meta {
     color: #555; }
-  .cm span.cm-qualifier {
+  .CodeMirror span.cm-qualifier, .CodeMirror-standalone span.cm-qualifier {
     color: #555; }
-  .cm span.cm-builtin {
+  .CodeMirror span.cm-builtin, .CodeMirror-standalone span.cm-builtin {
     color: #BA00D4; }
-  .cm span.cm-bracket {
+  .CodeMirror span.cm-bracket, .CodeMirror-standalone span.cm-bracket {
     color: #997; }
-  .cm span.cm-tag {
+  .CodeMirror span.cm-tag, .CodeMirror-standalone span.cm-tag {
     color: #170; }
-  .cm span.cm-attribute {
+  .CodeMirror span.cm-attribute, .CodeMirror-standalone span.cm-attribute {
     color: #00c; }
-  .cm span.cm-header {
+  .CodeMirror span.cm-header, .CodeMirror-standalone span.cm-header {
     color: blue; }
-  .cm span.cm-quote {
+  .CodeMirror span.cm-quote, .CodeMirror-standalone span.cm-quote {
     color: #090; }
-  .cm span.cm-hr {
+  .CodeMirror span.cm-hr, .CodeMirror-standalone span.cm-hr {
     color: #999; }
-  .cm span.cm-link {
+  .CodeMirror span.cm-link, .CodeMirror-standalone span.cm-link {
     color: #00c; }
-  .cm span.cm-error {
+  .CodeMirror span.cm-error, .CodeMirror-standalone span.cm-error {
     color: #f00; }
 
 body, html {
@@ -154,7 +155,7 @@ body, html {
       #wdb > article #source #source-editor {
         flex: 1;
         position: relative; }
-        #wdb > article #source #source-editor .cm {
+        #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
           width: 100%; }
@@ -222,12 +223,12 @@ code {
   white-space: pre-wrap;
   word-break: break-all; }
 
-#source-editor > .cm {
+#source-editor > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-weight: bold;
   font-size: 15px;
   box-shadow: inset -8px 0 20px #ddd; }
-  #source-editor > .cm.rw:after {
+  #source-editor > .CodeMirror.rw:after {
     position: absolute;
     top: 2em;
     right: -2em;
@@ -236,9 +237,10 @@ code {
     color: #ccc;
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
-    padding: 0.2em 3em;
+    padding: 0.2em 2em;
+    -webkit-transform: rotate(45deg);
     transform: rotate(45deg); }
-  #source-editor > .cm .breakpoints {
+  #source-editor > .CodeMirror .breakpoints {
     width: 0.6em;
     border: none; }
 
@@ -401,12 +403,23 @@ code {
 .CodeMirror-linenumber {
   font-size: 14px; }
 
+.CodeMirror-gutter-elt {
+  text-align: center; }
+  .CodeMirror-gutter-elt .breakpoint {
+    position: relative;
+    top: -2px; }
+
+.CodeMirror-gutter.breaks {
+  width: 0.6em; }
+
 .CodeMirror-linebackground {
   transition: 1s; }
   .CodeMirror-linebackground:hover {
     transition: 1s;
     color: blue; }
   .CodeMirror-linebackground.ctx {
+    border-left: 1px solid #e4e4e4;
+    border-right: 1px solid #e4e4e4;
     color: rgba(0, 125, 50, 0.6);
     background-color: rgba(119, 0, 136, 0.05); }
     .CodeMirror-linebackground.ctx.ctx-top {
@@ -425,6 +438,8 @@ code {
   .CodeMirror-linebackground.highlighted {
     color: green;
     background-color: rgba(0, 255, 0, 0.25) !important; }
+  .CodeMirror-linebackground.breakpoint.highlighted {
+    background-color: rgba(153, 0, 0, 0.15) !important; }
   .CodeMirror-linebackground.ask-breakpoint {
     color: yellow; }
 
@@ -814,7 +829,7 @@ code, code span {
 .CodeMirror-linebackground.highlighted {
   background-color: #a9dac4 !important; }
 
-.cm span.cm-def {
+.CodeMirror span.cm-def {
   color: #089970; }
 
 #completions .base {

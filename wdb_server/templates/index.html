@@ -1,7 +1,7 @@
 {% extends _layout.html %}
 
 {% block script %}
-  <script src="{{ static_url('javascripts/wdb/status.min.js') }}"></script>
+  <script src="{{ static_url('javascripts/' + 'status.js' if options.debug else 'wdb/status.min.js') }}"></script>
 {% end %}
 
 {% block main %}
@@ -12,8 +12,6 @@
   </header>
 
   <article>
-    {% from wdb_server import Sockets, StyleHandler, global_breakpoints %}
-    {% set uuids = set(Sockets.sockets.keys()) | set(Sockets.websockets.keys()) %}
     <section>
       <h2>Active sessions</h2>
         <table class="sessions">
@@ -26,22 +24,12 @@
             </tr>
           </thead>
           <tbody>
-            {% for uuid in uuids %}
-              <tr data-uuid="{{ uuid }}">
-                {% if Sockets.sockets.get(uuid) %}
-                <td class="uuid"><a href="/debug/session/{{ uuid }}">{{ uuid }}</a></td>
-                {% else %}
-                <td class="uuid">{{ uuid }}</td>
-                {% end %}
-                <td class="socket">{{ Sockets.sockets.get(uuid) and 'Yes' or 'No' }}</td>
-                <td class="websocket">{{ Sockets.websockets.get(uuid) and 'Yes' or 'No' }}</td>
-                <td class="close"><a href="/uuid/{{ uuid }}/close" class="icon-close">Force close</a></td>
-              </tr>
-            {% end %}
           </tbody>
         </table>
     </section>
     <section>
+      {% from wdb_server import StyleHandler%}
+
       <h2>Change theme</h2>
       <form method="post">
         <select name="theme">
@@ -67,23 +55,17 @@
     </section>
     <section>
       <h2>Current global breakpoints</h2>
-        <table>
+        <table class="breakpoints">
           <thead>
             <tr>
-              <th>Breakpoint</th>
+              <th>File</th>
+              <th>Line number</th>
+              <th>Condition</th>
+              <th>Function</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {% for breakpoint in global_breakpoints %}
-              <tr>
-                <td>{{ breakpoint }}</td>
-                <td class="action">
-                  <a href="/debug/file/{{ breakpoint.file }}" class="icon-open">Open</a>
-                  <a href="/breakpoint/{{ id(breakpoint) }}/delete" class="icon-remove">Remove</a>
-                </td>
-              </tr>
-            {% end %}
           </tbody>
         </table>
     </section>

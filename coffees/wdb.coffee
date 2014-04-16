@@ -17,6 +17,7 @@
 
 class Wdb extends Log
   constructor: ->
+    super
     @started = false
     @to_complete = null
     @cwd = null
@@ -81,13 +82,17 @@ class Wdb extends Log
     @$eval.autosize()
 
   working: ->
-    @$state.addClass('on')
+    @$state.addClass 'on'
 
   chilling: ->
-    @$state.removeClass('on')
+    @$state.removeClass 'on'
 
   init: (data) ->
     @cwd = data.cwd
+    brks = data.breaks
+    for brk in brks
+      @cm.breakpoints[brk.fn] ?= []
+      @cm.breakpoints[brk.fn].push brk
 
   title: (data) ->
     @$title
@@ -189,7 +194,7 @@ class Wdb extends Log
       .parent()
       .each (i, elt) =>
         $code = $(elt)
-        $code.addClass('waiting_for_hl').addClass('cm')
+        $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone')
         for cls in classes
           $code.addClass(cls)
         setTimeout (=>
@@ -198,7 +203,7 @@ class Wdb extends Log
           @ellipsize $code
         ), 50
     else
-      $code = $('<code>', 'class': 'cm')
+      $code = $('<code>', 'class': 'CodeMirror-standalone')
       for cls in classes
         $code.addClass(cls)
       parent.append $code
@@ -208,14 +213,14 @@ class Wdb extends Log
     $code
 
   historize: (snippet) ->
-    if not (@cm.fn of @session_cmd_hist)
-      @session_cmd_hist[@cm.fn] = []
+    if not (@cm.state.fn of @session_cmd_hist)
+      @session_cmd_hist[@cm.state.fn] = []
 
     while (index = @cmd_hist.indexOf(snippet)) != -1
       @cmd_hist.splice(index, 1)
 
     @cmd_hist.unshift snippet
-    @session_cmd_hist[@cm.fn].unshift snippet
+    @session_cmd_hist[@cm.state.fn].unshift snippet
 
     localStorage and localStorage['cmd_hist'] = JSON.stringify @cmd_hist
 
@@ -252,8 +257,8 @@ class Wdb extends Log
         when 't' then @toggle_break data, true
         when 'u' then cmd 'Until'
         when 'w' then cmd 'Watch', data
-        when 'z' then cmd 'Unbreak', data
-        when 'f' then @print_hist @session_cmd_hist[@cm.fn]
+        when 'z' then @toggle_break data, false, true
+        when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
       return
 
     else if snippet.indexOf('?') == 0
@@ -418,42 +423,72 @@ specify a module like `logging.config`.
     @chilling()
 
   breakset: (data) ->
-    if data.lno
-      @cm.set_breakpoint(data.lno, data.temporary, data.cond)
+    @cm.set_breakpoint data
 
-    if @$eval.val().indexOf('.b ') == 0 or @$eval.val().indexOf('.t ') == 0
+    if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't']
       @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
+        .attr('data-index', -1)
     @chilling()
 
   breakunset: (data) ->
-    @cm.clear_breakpoint(data.lno)
-    if @$eval.val().indexOf('.b ') == 0
+    @cm.clear_breakpoint data
+
+    if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't', 'z']
       @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
+        .attr('data-index', -1)
     @chilling()
 
-  toggle_break: (arg, temporary) ->
-    cmd = if temporary then 'TBreak' else 'Break'
-    lno = NaN
-    if arg.indexOf(':') > -1
-      lno = arg.split(':')[1]
-      if lno.indexOf(',') > -1
-        lno = arg.split(',')[0]
-      if lno.indexOf('#') > -1
-        lno = arg.split('#')[0]
-      lno = parseInt(lno)
+  split: (str, char) ->
+    # Returns the split on last occurence of char
+    if char in str
+      split = str.split(char)
+      [split[0], split.slice(1).join(char).trim()]
+    else
+      [str, null]
 
-    if isNaN lno
-      # If lno is not a number
-      # Can't set line info here, returning
-      @ws.send cmd, arg
+  toggle_break: (arg, temporary=false, remove_only=false) ->
+    brk =
+      lno: null
+      cond: null
+      fun: null
+      fn: null
+      temporary: temporary
+
+    remaining = arg
+
+    [remaining, brk.cond] = @split remaining, ','
+    [remaining, brk.fun] = @split remaining, '#'
+    [remaining, brk.lno] = @split remaining, ':'
+    brk.fn = remaining or @cm.state.fn
+    brk.lno = parseInt brk.lno
+
+    exist = false
+    for ebrk in @cm.breakpoints[brk.fn] or []
+      if (ebrk.fn is brk.fn and
+         ebrk.lno is brk.lno and
+         ebrk.cond is brk.cond and
+         ebrk.fun is brk.fun and
+         ebrk.temporary is brk.temporary
+      )
+        exist = true
+        brk = ebrk
+        break
+
+    if exist or remove_only
+      @cm.clear_breakpoint(brk)
+      cmd = 'Unbreak'
+      unless brk.temporary
+        cmd = 'Broadcast|' + cmd
+      @ws.send cmd, brk
+      @working()
       return
 
-    if @cm.has_breakpoint(lno)
-      @ws.send 'Unbreak', ":#{lno}"
-      @cm.clear_breakpoint(lno)
-    else
-      @ws.send cmd, arg
-    @cm.ask_breakpoint(lno)
+    if brk.lno
+      @cm.ask_breakpoint(brk.lno)
+    cmd = 'Break'
+    unless temporary
+      cmd = 'Broadcast|' + cmd
+    @ws.send cmd, brk
     @working()
 
   format_fun: (p) ->
@@ -478,7 +513,7 @@ specify a module like `logging.config`.
       height = @$completions.height()
       added = []
       for param in data.params
-        $('#comp-desc').append(format_fun(param))
+        $('#comp-desc').append(@format_fun(param))
 
       if data.completions.length
         $tbody = $('<tbody>')
@@ -530,7 +565,6 @@ specify a module like `logging.config`.
     @$watchers.find('.watching:not(.updated)').remove()
     @$watchers.find('.watching').removeClass('updated')
 
-
   ack: ->
     @$eval.val('').trigger('autosize.resize')
 
@@ -579,13 +613,13 @@ specify a module like `logging.config`.
 
   searchback_stop: (validate) ->
     if validate
-      @$eval.val(@$backsearch.text()).trigger('autosize.resize')
+      @$eval
+        .val(@$backsearch.text())
+        .trigger('autosize.resize')
     @$backsearch.html('')
     @backsearch = null
 
   die: ->
-    @$source.remove()
-    @$traceback.remove()
     $('h1').html('Dead<small>Program has exited</small>')
     @ws.ws.close()
     setTimeout (-> window.close()), 10
@@ -736,7 +770,7 @@ specify a module like `logging.config`.
         @backsearch = 1
         @searchback()
       return
-    hist = @session_cmd_hist[@cm.fn] or []
+    hist = @session_cmd_hist[@cm.state.fn] or []
     if txt and txt[0] != '.'
       comp = hist
         .slice(0)
@@ -791,6 +825,6 @@ specify a module like `logging.config`.
     false
 
   disable: ->
-    @ws.send('Disable')
+    @ws.send 'Disable'
 
 $ => @wdb = new Wdb()

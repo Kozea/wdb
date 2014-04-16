@@ -16,6 +16,7 @@
 
 class Websocket extends Log
   constructor: (@wdb, uuid) ->
+    super
     # Open a websocket in case of request break
     @url = "ws://#{document.location.host}/websocket/#{uuid}"
     @log 'Opening new socket', @url
@@ -32,6 +33,7 @@ class Websocket extends Log
 
   close: (m) ->
     @log "Closed", m
+    @wdb.die()
 
   error: (m) ->
     @fail "Error", m
@@ -50,7 +52,7 @@ class Websocket extends Log
       data = JSON.parse message.substr(pipe + 1)
     else
       cmd = message
-    @log @time(), '<-', cmd
+    @log @time(), '<-', message
     cmd = cmd.toLowerCase()
     if cmd of @wdb
       @wdb[cmd.toLowerCase()] data
@@ -59,6 +61,8 @@ class Websocket extends Log
 
   send: (cmd, data=null) ->
     if data
+      if typeof(data) isnt 'string'
+        data = JSON.stringify data
       msg = "#{cmd}|#{data}"
     else
       msg = cmd

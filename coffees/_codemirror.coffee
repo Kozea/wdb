@@ -16,158 +16,177 @@
 
 class Codemirror extends Log
   constructor: (@wdb) ->
+    super
+    @$container = $('#source-editor')
+
+    CodeMirror.commands.save = @save.bind @
     CodeMirror.keyMap.wdb =
-      Esc: (cm) => @stop_edition()
+      Esc: @stop_edition.bind @
       fallthrough: ["default"]
 
-    CodeMirror.commands.save = =>
-      @wdb.ws.send 'Save', "#{@fn}|#{@code_mirror.getValue()}"
-
-    @code_mirror = null
-    @$container = $('#source-editor')
-    @cls_marks = {}
-    @chr_marks = {}
-    @rw = false
-    @fn = null
-    @file = null
-    @fun = null
-    @last_hl = null
-
-  new: (file, name, rw=false) ->
     @code_mirror = CodeMirror (elt) =>
+      @$code_mirror = $ elt
       @$container.prepend(elt)
-      $(elt)
-        .addClass(if rw then 'rw' else 'ro')
-        .addClass('cm')
     ,
-      value: file,
-      mode:  @get_mode(name),
-      readOnly: !rw,
+      value: 'Waiting for file',
       theme: 'wdb',
       keyMap: 'wdb',
-      gutters: ["breakpoints", "CodeMirror-linenumbers"],
+      readOnly: true,
+      gutters: ['breaks', 'CodeMirror-linenumbers'],
       lineNumbers: true
 
     @code_mirror.on 'gutterClick', @gutter_click.bind(@)
+    @state =
+      fn: null
+      file: null
+      fun: null
+      lno: 0
 
-    @rw = rw
-    @fn = name
-    @file = file
-    @fun = null
-    @last_hl = null
+    @fun_scope = null
+    # File -> footsteps
+    @footsteps = {}
+    @breakpoints = {}
+
+  save: ->
+    new_file = @code_mirror.getValue()
+    @wdb.ws.send 'Save', "#{@state.fn}|#{new_file}"
+    @state.file = new_file
 
   gutter_click: (_, n) ->
-    @wdb.toggle_break ':' + (n + 1)
+    @wdb.toggle_break ":#{n + 1}"
 
-  clear_breakpoint: (lno) ->
-    @remove_mark(lno)
-    @remove_class(lno, 'ask-breakpoint')
-    @remove_class(lno, 'breakpoint')
+  clear_breakpoint: (brk) ->
+    @breakpoints[brk.fn] ?= []
+    if brk in @breakpoints[brk.fn]
+      @breakpoints[brk.fn].splice @breakpoints[brk.fn].indexOf(brk)
+
+    if brk.lno
+      @remove_mark brk.lno
+      @remove_class brk.lno, 'ask-breakpoint'
+      @remove_class brk.lno, 'breakpoint'
 
   ask_breakpoint: (lno) ->
-    @add_class(lno, 'ask-breakpoint')
+    @add_class lno, 'ask-breakpoint'
 
-  set_breakpoint: (lno, temp=false, cond='') ->
-    @remove_class(lno, 'ask-breakpoint')
-    @add_class(lno, 'breakpoint')
-    @add_mark(lno, 'breakpoint',
-      (if temp then '○' else '●'), cond)
+  set_breakpoint: (brk) ->
+    @breakpoints[brk.fn] ?= []
+    @breakpoints[brk.fn].push brk
+    @mark_breakpoint brk
+
+  mark_breakpoint: (brk) ->
+    if brk.lno
+      @remove_class brk.lno, 'ask-breakpoint'
+      @add_class brk.lno, 'breakpoint'
+      @add_mark brk.lno, 'breakpoint', 'breaks',
+        (if brk.temporary then '○' else '●'),
+         @brk_to_str brk
+
+  brk_to_str: (brk) ->
+    if brk.temporary
+      str = 'Temporary '
+    else
+      str = ''
+
+    str += 'Breakpoint'
+
+    if brk.fun
+      str += " On #{brk.fun}"
+
+    if brk.lno
+      str += " At #{brk.lno}"
+
+    if brk.cond
+      str += " If #{brk.cond}"
+
+    str
 
   get_selection: ->
     @code_mirror.getSelection().trim()
 
-  has_breakpoint: (n) ->
-    line_cls = @code_mirror.lineInfo(n - 1).bgClass
-    return false unless line_cls
-    return 'breakpoint' in line_cls.split(' ')
+  get_breakpoint: (n) ->
+    @breakpoints[@state.fn] ?= []
+    for brk in @breakpoints[@state.fn]
+      if brk.lno is n
+        return brk
 
   add_class: (lno, cls) ->
     @code_mirror.addLineClass(lno - 1, 'background', cls)
-    if @cls_marks[lno]
-      @cls_marks[lno] = @cls_marks[lno] + ' ' + cls
-    else
-      @cls_marks[lno] = cls
 
   remove_class: (lno, cls) ->
     @code_mirror.removeLineClass(lno - 1, 'background', cls)
-    delete @cls_marks[lno]
 
-  add_mark: (lno, cls, char, title) ->
-    @chr_marks[lno] = [cls, char]
-    @code_mirror.setGutterMarker(lno - 1, "breakpoints",
+  add_mark: (lno, cls, id, char, title) ->
+    @code_mirror.setGutterMarker(lno - 1, id,
       $('<div>', class: cls, title: title).html(char).get(0))
 
   remove_mark: (lno) ->
-    delete @chr_marks[lno]
-    @code_mirror.setGutterMarker(lno - 1, "breakpoints", null)
+    @code_mirror.setGutterMarker(lno - 1, 'breaks', null)
 
   stop_edition: ->
-    @toggle_edition() if @rw
+    unless @code_mirror.getOption 'readOnly'
+      @toggle_edition()
 
   toggle_edition: ->
-    @rw = not @rw
-    cls = $.extend({}, @cls_marks)
-    marks = $.extend({}, @chr_marks)
-    scroll = $('#source .CodeMirror-scroll').scrollTop()
-    $('#source .CodeMirror').remove()
-    @code_mirror = @new @file, @fn, rw
-    for lno of cls
-      @add_class(lno, cls[lno])
-    for lno of marks
-      [cls, char] = marks[lno]
-      @add_mark(lno, cls, char)
-    $('#source .CodeMirror-scroll').scrollTop(scroll)
-    @print
+    was_ro = @code_mirror.getOption 'readOnly'
+    @code_mirror.setOption 'readOnly', not was_ro
+    @$code_mirror.toggleClass 'rw', 'ro'
+
+    @wdb.print
       for: "Toggling edition"
-      result: "Edit mode #{if rw then 'on' else 'off'}"
+      result: "Edit mode #{if was_ro then 'on' else 'off'}"
+
+    unless was_ro
+      @code_mirror.setValue @file
 
   open: (data, frame) ->
-    if not @code_mirror
-      @new data.file, data.name
-      @wdb.$eval.focus()
+    new_state =
+      fn: data.name
+      file: data.file
+      fun: frame.function
+      lno: frame.lno
+      flno: frame.flno
+      llno: frame.llno
+    @set_state new_state
+
+  set_state: (new_state) ->
+    rescope = true
+
+    if @state.fn isnt new_state.fn or @state.file isnt new_state.file
+      @code_mirror.setValue new_state.file
+      for brk in @breakpoints[new_state.fn] or []
+        @mark_breakpoint brk
+
     else
-      if @fn == data.name
-        if @fun != frame.function
-          for lno of @cls_marks
-            @code_mirror.removeLineClass(lno - 1, 'background')
-
-        for lno of @chr_marks
-          @code_mirror.setGutterMarker(lno - 1, 'breakpoints', null)
-        if @last_hl
-          @code_mirror.removeLineClass(lno - 1, 'background')
-          @code_mirror.addLineClass(lno - 1, 'background', 'footstep')
+      if @state.fun isnt new_state.fun and @state.fun isnt '<module>'
+        @remove_class @state.flno, 'ctx-top'
+        for lno in [@state.flno..@state.llno]
+          @remove_class lno, 'ctx'
+        @remove_class @state.llno, 'ctx-bottom'
       else
-        @code_mirror.setValue data.file
-        @fn = data.name
-        @fun = frame.function
-        @file = data.file
-        @last_hl = null
-      @cls_marks = {}
-      @chr_marks = {}
+        rescope = false
 
-    for lno in data.breaks
-      @add_class(lno, 'breakpoint')
-      @add_mark(lno, 'breakpoint', '●')
+    @state = new_state
 
-    @add_class(frame.lno, 'highlighted')
-    @add_mark(frame.lno, 'highlighted', '➤')
-    if @fun != frame.function and
-       frame.function != '<module>'
-      for lno in [frame.flno...frame.llno + 1]
-        @add_class(lno, 'ctx')
-        if lno == frame.flno
-          @add_class(lno, 'ctx-top')
-        else if lno == frame.llno
-          @add_class(lno, 'ctx-bottom')
-      @fun = frame.function
-    @last_hl = frame.lno
+    @code_mirror.clearGutter 'CodeMirror-linenumbers'
+    for step in @footsteps[@state.fn] or []
+      @remove_class(step, 'highlighted')
+      @add_class(step, 'footstep')
 
-    @code_mirror.scrollIntoView(line: frame.lno, ch: 1, 1)
-    $scroll = $ '#source .CodeMirror-scroll'
-    $hline = $ '#source .highlighted'
-    $scroll.scrollTop(
-      $hline.offset().top - $scroll.offset().top +
-      $scroll.scrollTop() - $scroll.height() / 2)
+    if rescope and @state.fun isnt '<module>'
+      @add_class @state.flno, 'ctx-top'
+      for lno in [@state.flno..@state.llno]
+        @add_class lno, 'ctx'
+      @add_class @state.llno, 'ctx-bottom'
+
+    @add_class(@state.lno, 'highlighted')
+    @add_mark(@state.lno, 'highlighted', 'CodeMirror-linenumbers', '➤')
+    @footsteps[@state.fn] ?= []
+    @footsteps[@state.fn].push @state.lno
+
+    @code_mirror.scrollIntoView
+      line: @state.lno
+      ch: 1,
+      @$code_mirror.height() / 2
 
   get_mode: (fn) ->
     switch fn.split('.').splice(-1)[0]

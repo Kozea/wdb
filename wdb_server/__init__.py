@@ -15,22 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from struct import pack
 import tornado.options
 import tornado.web
 import tornado.websocket
 import os
 import logging
+import json
+from wdb_server.state import (
+    sockets, websockets, syncwebsockets, breakpoints)
 from multiprocessing import Process
+from uuid import uuid4
 
 log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")
-global_breakpoints = set()
-
-
-class Sockets(object):
-    websockets = {}
-    sockets = {}
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -59,26 +56,10 @@ class StyleHandler(tornado.web.RequestHandler):
 class ActionHandler(tornado.web.RequestHandler):
     def get(self, uuid, action):
         if action == 'close':
-            socket = Sockets.sockets.get(uuid)
-            if socket:
-                socket.close()
-            else:
-                ws = Sockets.websockets.get(uuid)
-                if ws:
-                    try:
-                        ws.close()
-                    except:
-                        del Sockets.websockets[uuid]
-                        SyncWebSocketHandler.broadcast('RM_WS|' + uuid)
-        self.redirect('/')
-
-
-class BreakpointHandler(tornado.web.RequestHandler):
-    def get(self, bpid, action):
-        if action == 'delete':
-            for breakpoint in list(global_breakpoints):
-                if id(breakpoint) == int(bpid):
-                    global_breakpoints.remove(breakpoint)
+            sockets.close(uuid)
+            sockets.remove(uuid)
+            websockets.close(uuid)
+            websockets.remove(uuid)
         self.redirect('/')
 
 
@@ -104,13 +85,6 @@ class MainHandler(tornado.web.RequestHandler):
         self.render('wdb.html', uuid=uuid)
 
 
-class LastHandler(tornado.web.RequestHandler):
-    def get(self):
-        if len(Sockets.sockets) == 0:
-            self.send_error(404)
-        self.render('wdb.html', uuid=list(Sockets.sockets.keys())[0])
-
-
 class SelfHandler(tornado.web.RequestHandler):
     def get(self):
         from multiprocessing import Process
@@ -118,76 +92,97 @@ class SelfHandler(tornado.web.RequestHandler):
         def self_shell(variables):
             import wdb
             wdb.set_trace()
+            # Some random code
+            i = 12
+            for j in range(i):
+                i += 1
+            print(j)
+            print('Done')
 
         Process(target=self_shell, args=(globals(),)).start()
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def send(self, message):
-        socket = Sockets.sockets.get(self.uuid)
-        if not socket:
-            if self.ws_connection:
-                self.close()
-            return
-        log.debug('websocket -> socket: %s' % message)
-        data = message.encode('utf-8')
-        socket.write(pack("!i", len(data)))
-        socket.write(data)
-
     def write(self, message):
         log.debug('socket -> websocket: %s' % message)
-        # if message == ''.startswith(b'Server|'):
-        #     message = message.replace(b'Server|', b'')
-        #     if message == b'GetBreaks':
-        #         socket = Sockets.sockets.get(self.uuid)
-        #         bps = pickle.dumps(global_breakpoints, protocol=2)
-        #         socket.write(pack("!i", len(bps)))
-        #         socket.write(bps)
-        #     if message.startswith(b'AddBreak|'):
-        #         global_breakpoints.add(pickle.loads(
-        #             message.replace(b'AddBreak|', b''), protocol=2))
-        #     if message.startswith(b'RmBreak|'):
-        #         global_breakpoints.remove(pickle.loads(
-        #             message.replace(b'RmBreak|', b''), protocol=2))
-        # else:
+        message = message.decode('utf-8')
+        if (
+                message.startswith('BreakSet|') or
+                message.startswith('BreakUnset|')):
+            log.debug('Intercepted break')
+            cmd, brk = message.split('|', 1)
+            brk = json.loads(brk)
+            if not brk['temporary']:
+                del brk['temporary']
+                if cmd == 'BreakSet':
+                    breakpoints.add(brk)
+                elif cmd == 'BreakUnset':
+                    breakpoints.remove(brk)
+
         self.write_message(message)
 
     def open(self, uuid):
         self.uuid = uuid.decode('utf-8')
+
+        if self.uuid not in sockets.uuids:
+            log.warn(
+                'Websocket opened for %s with no correponding socket' %
+                self.uuid)
+            self.write('Die')
+            self.close()
+            return
+
         log.info('Websocket opened for %s' % self.uuid)
-        Sockets.websockets[self.uuid] = self
-        SyncWebSocketHandler.broadcast('NEW_WS|' + self.uuid)
+        websockets.add(self.uuid, self)
 
     def on_message(self, message):
-        self.send(message)
+        log.debug('websocket -> socket: %s' % message)
+        if message.startswith('Broadcast|'):
+            message = message.split('|', 1)[1]
+            sockets.broadcast(message)
+        else:
+            sockets.send(self.uuid, message)
 
     def on_close(self):
         log.info('Websocket closed for %s' % self.uuid)
-        socket = Sockets.sockets.get(self.uuid)
-        if socket and not tornado.options.options.detached_session:
-            self.send('Continue')
-            socket.close()
+        if not tornado.options.options.detached_session:
+            sockets.send(self.uuid, 'Continue')
+            sockets.close(self.uuid)
 
 
 class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
-    websockets = set()
-
-    @staticmethod
-    def broadcast(message):
-        for ws in set(SyncWebSocketHandler.websockets):
-            try:
-                ws.write_message(message)
-            except:
-                SyncWebSocketHandler.websockets.remove(ws)
+    def write(self, message):
+        log.debug('server -> syncsocket: %s' % message)
+        self.write_message(message)
 
     def open(self):
-        SyncWebSocketHandler.websockets.add(self)
+        self.uuid = str(uuid4())
+        syncwebsockets.add(self.uuid, self)
 
     def on_message(self, message):
-        pass
+        if '|' in message:
+            cmd, data = message.split('|', 1)
+        else:
+            cmd, data = message, ''
+
+        if cmd == 'ListSockets':
+            for uuid in sockets.uuids:
+                self.write('AddSocket|' + uuid)
+        elif cmd == 'ListWebsockets':
+            for uuid in websockets.uuids:
+                self.write('AddWebSocket|' + uuid)
+        elif cmd == 'ListBreaks':
+            for brk in breakpoints.get():
+                self.write('AddBreak|' + json.dumps(brk))
+        elif cmd == 'RemoveBreak':
+            brk = json.loads(data)
+            breakpoints.remove(brk)
+            # If it was here, it wasn't temporary
+            brk['temporary'] = False
+            sockets.broadcast('Unbreak|' + json.dumps(brk))
 
     def on_close(self):
-        SyncWebSocketHandler.websockets.remove(self)
+        syncwebsockets.remove(self.uuid)
 
 
 tornado.options.define('theme', default="curve",
@@ -196,7 +191,6 @@ tornado.options.define('theme', default="curve",
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
-
 tornado.options.define("socket_port", default=19840,
                        help="Port used to communicate with wdb instances")
 tornado.options.define("server_port", default=1984,
@@ -217,11 +211,9 @@ server = tornado.web.Application(
         (r"/uuid/([^/]+)/([^/]+)", ActionHandler),
         (r"/debug/session/(.+)", MainHandler),
         (r"/debug/file/(.*)", DebugHandler),
-        (r"/breakpoint/(\d+)/([^/]+)", BreakpointHandler),
         (r"/websocket/(.+)", WebSocketHandler),
         (r"/status", SyncWebSocketHandler),
         (r"/self", SelfHandler),
-        (r"/last", LastHandler),
     ],
     debug=tornado.options.options.debug,
     static_path=static_path,

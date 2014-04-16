@@ -34,6 +34,7 @@
 
     function Websocket(wdb, uuid) {
       this.wdb = wdb;
+      Websocket.__super__.constructor.apply(this, arguments);
       this.url = "ws://" + document.location.host + "/websocket/" + uuid;
       this.log('Opening new socket', this.url);
       this.ws = new WebSocket(this.url);
@@ -50,7 +51,8 @@
     };
 
     Websocket.prototype.close = function(m) {
-      return this.log("Closed", m);
+      this.log("Closed", m);
+      return this.wdb.die();
     };
 
     Websocket.prototype.error = function(m) {
@@ -72,7 +74,7 @@
       } else {
         cmd = message;
       }
-      this.log(this.time(), '<-', cmd);
+      this.log(this.time(), '<-', message);
       cmd = cmd.toLowerCase();
       if (cmd in this.wdb) {
         return this.wdb[cmd.toLowerCase()](data);
@@ -87,6 +89,9 @@
         data = null;
       }
       if (data) {
+        if (typeof data !== 'string') {
+          data = JSON.stringify(data);
+        }
         msg = "" + cmd + "|" + data;
       } else {
         msg = cmd;
@@ -104,206 +109,221 @@
 
     function Codemirror(wdb) {
       this.wdb = wdb;
+      Codemirror.__super__.constructor.apply(this, arguments);
+      this.$container = $('#source-editor');
+      CodeMirror.commands.save = this.save.bind(this);
       CodeMirror.keyMap.wdb = {
-        Esc: (function(_this) {
-          return function(cm) {
-            return _this.stop_edition();
-          };
-        })(this),
+        Esc: this.stop_edition.bind(this),
         fallthrough: ["default"]
       };
-      CodeMirror.commands.save = (function(_this) {
-        return function() {
-          return _this.wdb.ws.send('Save', "" + _this.fn + "|" + (_this.code_mirror.getValue()));
-        };
-      })(this);
-      this.code_mirror = null;
-      this.$container = $('#source-editor');
-      this.cls_marks = {};
-      this.chr_marks = {};
-      this.rw = false;
-      this.fn = null;
-      this.file = null;
-      this.fun = null;
-      this.last_hl = null;
-    }
-
-    Codemirror.prototype["new"] = function(file, name, rw) {
-      if (rw == null) {
-        rw = false;
-      }
       this.code_mirror = CodeMirror((function(_this) {
         return function(elt) {
-          _this.$container.prepend(elt);
-          return $(elt).addClass(rw ? 'rw' : 'ro').addClass('cm');
+          _this.$code_mirror = $(elt);
+          return _this.$container.prepend(elt);
         };
       })(this), {
-        value: file,
-        mode: this.get_mode(name),
-        readOnly: !rw,
+        value: 'Waiting for file',
         theme: 'wdb',
         keyMap: 'wdb',
-        gutters: ["breakpoints", "CodeMirror-linenumbers"],
+        readOnly: true,
+        gutters: ['breaks', 'CodeMirror-linenumbers'],
         lineNumbers: true
       });
       this.code_mirror.on('gutterClick', this.gutter_click.bind(this));
-      this.rw = rw;
-      this.fn = name;
-      this.file = file;
-      this.fun = null;
-      return this.last_hl = null;
+      this.state = {
+        fn: null,
+        file: null,
+        fun: null,
+        lno: 0
+      };
+      this.fun_scope = null;
+      this.footsteps = {};
+      this.breakpoints = {};
+    }
+
+    Codemirror.prototype.save = function() {
+      var new_file;
+      new_file = this.code_mirror.getValue();
+      this.wdb.ws.send('Save', "" + this.state.fn + "|" + new_file);
+      return this.state.file = new_file;
     };
 
     Codemirror.prototype.gutter_click = function(_, n) {
-      return this.wdb.toggle_break(':' + (n + 1));
+      return this.wdb.toggle_break(":" + (n + 1));
     };
 
-    Codemirror.prototype.clear_breakpoint = function(lno) {
-      this.remove_mark(lno);
-      this.remove_class(lno, 'ask-breakpoint');
-      return this.remove_class(lno, 'breakpoint');
+    Codemirror.prototype.clear_breakpoint = function(brk) {
+      var _base, _name;
+      if ((_base = this.breakpoints)[_name = brk.fn] == null) {
+        _base[_name] = [];
+      }
+      if (__indexOf.call(this.breakpoints[brk.fn], brk) >= 0) {
+        this.breakpoints[brk.fn].splice(this.breakpoints[brk.fn].indexOf(brk));
+      }
+      if (brk.lno) {
+        this.remove_mark(brk.lno);
+        this.remove_class(brk.lno, 'ask-breakpoint');
+        return this.remove_class(brk.lno, 'breakpoint');
+      }
     };
 
     Codemirror.prototype.ask_breakpoint = function(lno) {
       return this.add_class(lno, 'ask-breakpoint');
     };
 
-    Codemirror.prototype.set_breakpoint = function(lno, temp, cond) {
-      if (temp == null) {
-        temp = false;
+    Codemirror.prototype.set_breakpoint = function(brk) {
+      var _base, _name;
+      if ((_base = this.breakpoints)[_name = brk.fn] == null) {
+        _base[_name] = [];
       }
-      if (cond == null) {
-        cond = '';
+      this.breakpoints[brk.fn].push(brk);
+      return this.mark_breakpoint(brk);
+    };
+
+    Codemirror.prototype.mark_breakpoint = function(brk) {
+      if (brk.lno) {
+        this.remove_class(brk.lno, 'ask-breakpoint');
+        this.add_class(brk.lno, 'breakpoint');
+        return this.add_mark(brk.lno, 'breakpoint', 'breaks', (brk.temporary ? '○' : '●'), this.brk_to_str(brk));
       }
-      this.remove_class(lno, 'ask-breakpoint');
-      this.add_class(lno, 'breakpoint');
-      return this.add_mark(lno, 'breakpoint', (temp ? '○' : '●'), cond);
+    };
+
+    Codemirror.prototype.brk_to_str = function(brk) {
+      var str;
+      if (brk.temporary) {
+        str = 'Temporary ';
+      } else {
+        str = '';
+      }
+      str += 'Breakpoint';
+      if (brk.fun) {
+        str += " On " + brk.fun;
+      }
+      if (brk.lno) {
+        str += " At " + brk.lno;
+      }
+      if (brk.cond) {
+        str += " If " + brk.cond;
+      }
+      return str;
     };
 
     Codemirror.prototype.get_selection = function() {
       return this.code_mirror.getSelection().trim();
     };
 
-    Codemirror.prototype.has_breakpoint = function(n) {
-      var line_cls;
-      line_cls = this.code_mirror.lineInfo(n - 1).bgClass;
-      if (!line_cls) {
-        return false;
+    Codemirror.prototype.get_breakpoint = function(n) {
+      var brk, _base, _i, _len, _name, _ref;
+      if ((_base = this.breakpoints)[_name = this.state.fn] == null) {
+        _base[_name] = [];
       }
-      return __indexOf.call(line_cls.split(' '), 'breakpoint') >= 0;
+      _ref = this.breakpoints[this.state.fn];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        brk = _ref[_i];
+        if (brk.lno === n) {
+          return brk;
+        }
+      }
     };
 
     Codemirror.prototype.add_class = function(lno, cls) {
-      this.code_mirror.addLineClass(lno - 1, 'background', cls);
-      if (this.cls_marks[lno]) {
-        return this.cls_marks[lno] = this.cls_marks[lno] + ' ' + cls;
-      } else {
-        return this.cls_marks[lno] = cls;
-      }
+      return this.code_mirror.addLineClass(lno - 1, 'background', cls);
     };
 
     Codemirror.prototype.remove_class = function(lno, cls) {
-      this.code_mirror.removeLineClass(lno - 1, 'background', cls);
-      return delete this.cls_marks[lno];
+      return this.code_mirror.removeLineClass(lno - 1, 'background', cls);
     };
 
-    Codemirror.prototype.add_mark = function(lno, cls, char, title) {
-      this.chr_marks[lno] = [cls, char];
-      return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", $('<div>', {
+    Codemirror.prototype.add_mark = function(lno, cls, id, char, title) {
+      return this.code_mirror.setGutterMarker(lno - 1, id, $('<div>', {
         "class": cls,
         title: title
       }).html(char).get(0));
     };
 
     Codemirror.prototype.remove_mark = function(lno) {
-      delete this.chr_marks[lno];
-      return this.code_mirror.setGutterMarker(lno - 1, "breakpoints", null);
+      return this.code_mirror.setGutterMarker(lno - 1, 'breaks', null);
     };
 
     Codemirror.prototype.stop_edition = function() {
-      if (this.rw) {
+      if (!this.code_mirror.getOption('readOnly')) {
         return this.toggle_edition();
       }
     };
 
     Codemirror.prototype.toggle_edition = function() {
-      var char, cls, lno, marks, scroll, _ref;
-      this.rw = !this.rw;
-      cls = $.extend({}, this.cls_marks);
-      marks = $.extend({}, this.chr_marks);
-      scroll = $('#source .CodeMirror-scroll').scrollTop();
-      $('#source .CodeMirror').remove();
-      this.code_mirror = this["new"](this.file, this.fn, rw);
-      for (lno in cls) {
-        this.add_class(lno, cls[lno]);
-      }
-      for (lno in marks) {
-        _ref = marks[lno], cls = _ref[0], char = _ref[1];
-        this.add_mark(lno, cls, char);
-      }
-      $('#source .CodeMirror-scroll').scrollTop(scroll);
-      return this.print({
+      var was_ro;
+      was_ro = this.code_mirror.getOption('readOnly');
+      this.code_mirror.setOption('readOnly', !was_ro);
+      this.$code_mirror.toggleClass('rw', 'ro');
+      this.wdb.print({
         "for": "Toggling edition",
-        result: "Edit mode " + (rw ? 'on' : 'off')
+        result: "Edit mode " + (was_ro ? 'on' : 'off')
       });
+      if (!was_ro) {
+        return this.code_mirror.setValue(this.file);
+      }
     };
 
     Codemirror.prototype.open = function(data, frame) {
-      var $hline, $scroll, lno, _i, _j, _len, _ref, _ref1, _ref2;
-      if (!this.code_mirror) {
-        this["new"](data.file, data.name);
-        this.wdb.$eval.focus();
+      var new_state;
+      new_state = {
+        fn: data.name,
+        file: data.file,
+        fun: frame["function"],
+        lno: frame.lno,
+        flno: frame.flno,
+        llno: frame.llno
+      };
+      return this.set_state(new_state);
+    };
+
+    Codemirror.prototype.set_state = function(new_state) {
+      var brk, lno, rescope, step, _base, _i, _j, _k, _l, _len, _len1, _name, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      rescope = true;
+      if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
+        this.code_mirror.setValue(new_state.file);
+        _ref = this.breakpoints[new_state.fn] || [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          brk = _ref[_i];
+          this.mark_breakpoint(brk);
+        }
       } else {
-        if (this.fn === data.name) {
-          if (this.fun !== frame["function"]) {
-            for (lno in this.cls_marks) {
-              this.code_mirror.removeLineClass(lno - 1, 'background');
-            }
+        if (this.state.fun !== new_state.fun && this.state.fun !== '<module>') {
+          this.remove_class(this.state.flno, 'ctx-top');
+          for (lno = _j = _ref1 = this.state.flno, _ref2 = this.state.llno; _ref1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; lno = _ref1 <= _ref2 ? ++_j : --_j) {
+            this.remove_class(lno, 'ctx');
           }
-          for (lno in this.chr_marks) {
-            this.code_mirror.setGutterMarker(lno - 1, 'breakpoints', null);
-          }
-          if (this.last_hl) {
-            this.code_mirror.removeLineClass(lno - 1, 'background');
-            this.code_mirror.addLineClass(lno - 1, 'background', 'footstep');
-          }
+          this.remove_class(this.state.llno, 'ctx-bottom');
         } else {
-          this.code_mirror.setValue(data.file);
-          this.fn = data.name;
-          this.fun = frame["function"];
-          this.file = data.file;
-          this.last_hl = null;
+          rescope = false;
         }
-        this.cls_marks = {};
-        this.chr_marks = {};
       }
-      _ref = data.breaks;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        lno = _ref[_i];
-        this.add_class(lno, 'breakpoint');
-        this.add_mark(lno, 'breakpoint', '●');
+      this.state = new_state;
+      this.code_mirror.clearGutter('CodeMirror-linenumbers');
+      _ref3 = this.footsteps[this.state.fn] || [];
+      for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
+        step = _ref3[_k];
+        this.remove_class(step, 'highlighted');
+        this.add_class(step, 'footstep');
       }
-      this.add_class(frame.lno, 'highlighted');
-      this.add_mark(frame.lno, 'highlighted', '➤');
-      if (this.fun !== frame["function"] && frame["function"] !== '<module>') {
-        for (lno = _j = _ref1 = frame.flno, _ref2 = frame.llno + 1; _ref1 <= _ref2 ? _j < _ref2 : _j > _ref2; lno = _ref1 <= _ref2 ? ++_j : --_j) {
+      if (rescope && this.state.fun !== '<module>') {
+        this.add_class(this.state.flno, 'ctx-top');
+        for (lno = _l = _ref4 = this.state.flno, _ref5 = this.state.llno; _ref4 <= _ref5 ? _l <= _ref5 : _l >= _ref5; lno = _ref4 <= _ref5 ? ++_l : --_l) {
           this.add_class(lno, 'ctx');
-          if (lno === frame.flno) {
-            this.add_class(lno, 'ctx-top');
-          } else if (lno === frame.llno) {
-            this.add_class(lno, 'ctx-bottom');
-          }
         }
-        this.fun = frame["function"];
+        this.add_class(this.state.llno, 'ctx-bottom');
       }
-      this.last_hl = frame.lno;
-      this.code_mirror.scrollIntoView({
-        line: frame.lno,
+      this.add_class(this.state.lno, 'highlighted');
+      this.add_mark(this.state.lno, 'highlighted', 'CodeMirror-linenumbers', '➤');
+      if ((_base = this.footsteps)[_name = this.state.fn] == null) {
+        _base[_name] = [];
+      }
+      this.footsteps[this.state.fn].push(this.state.lno);
+      return this.code_mirror.scrollIntoView({
+        line: this.state.lno,
         ch: 1
-      }, 1);
-      $scroll = $('#source .CodeMirror-scroll');
-      $hline = $('#source .highlighted');
-      return $scroll.scrollTop($hline.offset().top - $scroll.offset().top + $scroll.scrollTop() - $scroll.height() / 2);
+      }, this.$code_mirror.height() / 2);
     };
 
     Codemirror.prototype.get_mode = function(fn) {
@@ -326,6 +346,7 @@
 
     function Wdb() {
       var e;
+      Wdb.__super__.constructor.apply(this, arguments);
       this.started = false;
       this.to_complete = null;
       this.cwd = null;
@@ -385,7 +406,18 @@
     };
 
     Wdb.prototype.init = function(data) {
-      return this.cwd = data.cwd;
+      var brk, brks, _base, _i, _len, _name, _results;
+      this.cwd = data.cwd;
+      brks = data.breaks;
+      _results = [];
+      for (_i = 0, _len = brks.length; _i < _len; _i++) {
+        brk = brks[_i];
+        if ((_base = this.cm.breakpoints)[_name = brk.fn] == null) {
+          _base[_name] = [];
+        }
+        _results.push(this.cm.breakpoints[brk.fn].push(brk));
+      }
+      return _results;
     };
 
     Wdb.prototype.title = function(data) {
@@ -492,7 +524,7 @@
           return function(i, elt) {
             var $code, cls, _i, _len;
             $code = $(elt);
-            $code.addClass('waiting_for_hl').addClass('cm');
+            $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone');
             for (_i = 0, _len = classes.length; _i < _len; _i++) {
               cls = classes[_i];
               $code.addClass(cls);
@@ -506,7 +538,7 @@
         })(this));
       } else {
         $code = $('<code>', {
-          'class': 'cm'
+          'class': 'CodeMirror-standalone'
         });
         for (_i = 0, _len = classes.length; _i < _len; _i++) {
           cls = classes[_i];
@@ -521,14 +553,14 @@
 
     Wdb.prototype.historize = function(snippet) {
       var index;
-      if (!(this.cm.fn in this.session_cmd_hist)) {
-        this.session_cmd_hist[this.cm.fn] = [];
+      if (!(this.cm.state.fn in this.session_cmd_hist)) {
+        this.session_cmd_hist[this.cm.state.fn] = [];
       }
       while ((index = this.cmd_hist.indexOf(snippet)) !== -1) {
         this.cmd_hist.splice(index, 1);
       }
       this.cmd_hist.unshift(snippet);
-      this.session_cmd_hist[this.cm.fn].unshift(snippet);
+      this.session_cmd_hist[this.cm.state.fn].unshift(snippet);
       return localStorage && (localStorage['cmd_hist'] = JSON.stringify(this.cmd_hist));
     };
 
@@ -602,10 +634,10 @@
             cmd('Watch', data);
             break;
           case 'z':
-            cmd('Unbreak', data);
+            this.toggle_break(data, false, true);
             break;
           case 'f':
-            this.print_hist(this.session_cmd_hist[this.cm.fn]);
+            this.print_hist(this.session_cmd_hist[this.cm.state.fn]);
         }
         return;
       } else if (snippet.indexOf('?') === 0) {
@@ -723,48 +755,82 @@
     };
 
     Wdb.prototype.breakset = function(data) {
-      if (data.lno) {
-        this.cm.set_breakpoint(data.lno, data.temporary, data.cond);
-      }
-      if (this.$eval.val().indexOf('.b ') === 0 || this.$eval.val().indexOf('.t ') === 0) {
-        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
+      var _ref;
+      this.cm.set_breakpoint(data);
+      if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't')) {
+        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus().attr('data-index', -1);
       }
       return this.chilling();
     };
 
     Wdb.prototype.breakunset = function(data) {
-      this.cm.clear_breakpoint(data.lno);
-      if (this.$eval.val().indexOf('.b ') === 0) {
-        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
+      var _ref;
+      this.cm.clear_breakpoint(data);
+      if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't' || _ref === 'z')) {
+        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus().attr('data-index', -1);
       }
       return this.chilling();
     };
 
-    Wdb.prototype.toggle_break = function(arg, temporary) {
-      var cmd, lno;
-      cmd = temporary ? 'TBreak' : 'Break';
-      lno = NaN;
-      if (arg.indexOf(':') > -1) {
-        lno = arg.split(':')[1];
-        if (lno.indexOf(',') > -1) {
-          lno = arg.split(',')[0];
-        }
-        if (lno.indexOf('#') > -1) {
-          lno = arg.split('#')[0];
-        }
-        lno = parseInt(lno);
+    Wdb.prototype.split = function(str, char) {
+      var split;
+      if (__indexOf.call(str, char) >= 0) {
+        split = str.split(char);
+        return [split[0], split.slice(1).join(char).trim()];
+      } else {
+        return [str, null];
       }
-      if (isNaN(lno)) {
-        this.ws.send(cmd, arg);
+    };
+
+    Wdb.prototype.toggle_break = function(arg, temporary, remove_only) {
+      var brk, cmd, ebrk, exist, remaining, _i, _len, _ref, _ref1, _ref2, _ref3;
+      if (temporary == null) {
+        temporary = false;
+      }
+      if (remove_only == null) {
+        remove_only = false;
+      }
+      brk = {
+        lno: null,
+        cond: null,
+        fun: null,
+        fn: null,
+        temporary: temporary
+      };
+      remaining = arg;
+      _ref = this.split(remaining, ','), remaining = _ref[0], brk.cond = _ref[1];
+      _ref1 = this.split(remaining, '#'), remaining = _ref1[0], brk.fun = _ref1[1];
+      _ref2 = this.split(remaining, ':'), remaining = _ref2[0], brk.lno = _ref2[1];
+      brk.fn = remaining || this.cm.state.fn;
+      brk.lno = parseInt(brk.lno);
+      exist = false;
+      _ref3 = this.cm.breakpoints[brk.fn] || [];
+      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+        ebrk = _ref3[_i];
+        if (ebrk.fn === brk.fn && ebrk.lno === brk.lno && ebrk.cond === brk.cond && ebrk.fun === brk.fun && ebrk.temporary === brk.temporary) {
+          exist = true;
+          brk = ebrk;
+          break;
+        }
+      }
+      if (exist || remove_only) {
+        this.cm.clear_breakpoint(brk);
+        cmd = 'Unbreak';
+        if (!brk.temporary) {
+          cmd = 'Broadcast|' + cmd;
+        }
+        this.ws.send(cmd, brk);
+        this.working();
         return;
       }
-      if (this.cm.has_breakpoint(lno)) {
-        this.ws.send('Unbreak', ":" + lno);
-        this.cm.clear_breakpoint(lno);
-      } else {
-        this.ws.send(cmd, arg);
+      if (brk.lno) {
+        this.cm.ask_breakpoint(brk.lno);
       }
-      this.cm.ask_breakpoint(lno);
+      cmd = 'Break';
+      if (!temporary) {
+        cmd = 'Broadcast|' + cmd;
+      }
+      this.ws.send(cmd, brk);
       return this.working();
     };
 
@@ -810,7 +876,7 @@
         _ref = data.params;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           param = _ref[_i];
-          $('#comp-desc').append(format_fun(param));
+          $('#comp-desc').append(this.format_fun(param));
         }
         if (data.completions.length) {
           $tbody = $('<tbody>');
@@ -946,8 +1012,6 @@
     };
 
     Wdb.prototype.die = function() {
-      this.$source.remove();
-      this.$traceback.remove();
       $('h1').html('Dead<small>Program has exited</small>');
       this.ws.ws.close();
       return setTimeout((function() {
@@ -1116,7 +1180,7 @@
         }
         return;
       }
-      hist = this.session_cmd_hist[this.cm.fn] || [];
+      hist = this.session_cmd_hist[this.cm.state.fn] || [];
       if (txt && txt[0] !== '.') {
         comp = hist.slice(0).reverse().filter(function(e) {
           return e.indexOf('.') !== 0;

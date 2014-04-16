@@ -1,6 +1,6 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
-    dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
+    loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
 from tokenize import generate_tokens, TokenError
 import token as tokens
@@ -142,7 +142,6 @@ class Interaction(object):
         }))
         self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(self.current_file),
             'name': self.current_file
         }))
         self.hook('init')
@@ -150,8 +149,7 @@ class Interaction(object):
     def parse_command(self, message):
         # Parse received message
         if '|' in message:
-            pipe = message.index('|')
-            return message[:pipe], message[pipe + 1:]
+            return message.split('|', 1)
         return message, ''
 
     def loop(self):
@@ -225,7 +223,8 @@ class Interaction(object):
         # self.db.breakpoints = self.db.receive()
 
         self.db.send('Init|%s' % dump({
-            'cwd': os.getcwd()
+            'cwd': os.getcwd(),
+            'breaks': self.db.breakpoints_to_json()
         }))
         self.db.send('Title|%s' % dump({
             'title': self.exception,
@@ -239,7 +238,6 @@ class Interaction(object):
         self.index = len(self.stack) - 1
         self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(self.current_file),
             'name': self.current_file
         }))
         if self.init_message:
@@ -250,7 +248,6 @@ class Interaction(object):
         self.index = int(data)
         self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(self.current_file),
             'name': self.current_file
         }))
 
@@ -259,7 +256,6 @@ class Interaction(object):
         file = self.db.get_file(fn)
         self.db.send('Select|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(fn),
             'name': fn,
             'file': file
         }))
@@ -324,7 +320,6 @@ class Interaction(object):
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
             try:
-                print
                 compiled_code = compile(data, '<stdin>', 'single')
                 l = self.locals[self.index]
                 execute(compiled_code, self.get_globals(), l)
@@ -386,28 +381,15 @@ class Interaction(object):
         self.db.set_until(self.current_frame)
         return True
 
-    def do_break(self, data, temporary=False):
+    def do_break(self, data):
+        brk = loads(data)
         break_fail = lambda x: fail(
-            self.db, 'Break', 'Break on %s failed' % data, message=x)
+            self.db, 'Break', 'Break on %s failed' % (
+                '%s:%s' % (brk['fn'], brk['lno'])), message=x)
 
-        lno = cond = funcname = None
-        remaining = data
-
-        if ',' in data:
-            remaining, cond = remaining.split(',')
-            cond = cond.strip()
-
-        if '#' in data:
-            remaining, funcname = remaining.split('#')
-
-        if ':' in data:
-            remaining, lno = remaining.split(':')
-
-        fn = remaining or self.current_file
-
-        if lno is not None:
+        if brk['lno'] is not None:
             try:
-                lno = int(lno)
+                lno = int(brk['lno'])
             except:
                 break_fail(
                     'Wrong breakpoint format must be '
@@ -415,12 +397,12 @@ class Interaction(object):
                 return
 
             line = getline(
-                fn, lno, self.current_frame.f_globals)
+                brk['fn'], lno, self.current_frame.f_globals)
             if not line:
                 for path in sys.path:
                     line = getline(
-                        os.path.join(path, fn),
-                        lno, self.current_frame.f_globals)
+                        os.path.join(path, brk['fn']),
+                        brk['lno'], self.current_frame.f_globals)
                     if line:
                         break
             if not line:
@@ -435,40 +417,17 @@ class Interaction(object):
                 return
 
         self.db.set_break(
-            fn, lno, temporary, cond, funcname)
+            brk['fn'], brk['lno'], brk['temporary'], brk['cond'], brk['fun'])
 
-        if fn == self.current_file:
-            self.db.send('BreakSet|%s' % dump({
-                'lno': lno, 'cond': cond, 'temporary': temporary
-            }))
-        else:
-            self.db.send('BreakSet|%s' % dump({
-                'temporary': temporary
-            }))
-
-    def do_tbreak(self, data):
-        return self.do_break(data, True)
+        self.db.send('BreakSet|%s' % data)
 
     def do_unbreak(self, data):
-        lno = cond = funcname = None
-        remaining = data
-
-        if ',' in data:
-            remaining, cond = remaining.split(',')
-            cond = cond.strip()
-
-        if '#' in data:
-            remaining, funcname = remaining.split('#')
-
-        if ':' in data:
-            remaining, lno = remaining.split(':')
-
-        fn = remaining or self.current_file
+        brk = loads(data)
+        lno = brk['lno'] and int(brk['lno'])
         self.db.clear_break(
-            fn, lno and int(lno), None, cond, funcname)
+            brk['fn'], lno, brk['temporary'], brk['cond'], brk['fun'])
 
-        if fn == self.current_file:
-            self.db.send('BreakUnset|%s' % dump({'lno': lno}))
+        self.db.send('BreakUnset|%s' % data)
 
     def do_breakpoints(self, data):
         self.db.send('Print|%s' % dump({
@@ -501,7 +460,6 @@ class Interaction(object):
         }))
         self.db.send('SelectCheck|%s' % dump({
             'frame': self.current,
-            'breaks': self.db.get_breaks_lno(self.current_file),
             'name': self.current_file
         }))
 
@@ -560,9 +518,7 @@ class Interaction(object):
                 '\n'.join(reversed(segments))))
 
     def do_save(self, data):
-        pipe = data.index('|')
-        fn = data[:pipe]
-        src = data[pipe + 1:]
+        fn, src = data.split('|', 1)
         if os.path.exists(fn):
             dn = os.path.dirname(fn)
             bn = os.path.basename(fn)
@@ -587,9 +543,7 @@ class Interaction(object):
 
     def do_display(self, data):
         if ';' in data:
-            pipe = data.index(';')
-            mime = data[:pipe]
-            data = data[pipe + 1:]
+            mime, data = data.split(';', 1)
         else:
             mime = 'text/html'
 

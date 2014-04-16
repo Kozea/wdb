@@ -32,6 +32,7 @@ class Breakpoint(object):
     """Simple breakpoint that breaks if in file"""
 
     def __init__(self, file, temporary=False):
+        self.fn = file
         if not file.endswith(('.py', '.pyc', '.pyo')):
             file = file_from_import(file)
         self.file = canonic(file)

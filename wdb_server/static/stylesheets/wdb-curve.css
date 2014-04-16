@@ -39,66 +39,67 @@
   src: url("../fonts/SourceCodePro-Bold.ttf.woff") format("woff");
   font-weight: 900; }
 
-.cm.CodeMirror-focused .CodeMirror-selected {
+.CodeMirror-focused .CodeMirror-selected {
   background: #1b1d1e; }
 
-.cm {
+.CodeMirror, .CodeMirror-standalone {
   background: none;
   color: #01b7e5; }
-  .cm .CodeMirror-selected {
+  .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
     background: #1f2224; }
-  .cm .CodeMirror-gutter {
-    background: #1d1f20;
+  .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
     border-right: 1px solid #303030; }
-  .cm .CodeMirror-linenumber {
+    .CodeMirror .CodeMirror-gutters .CodeMirror-gutter, .CodeMirror-standalone .CodeMirror-gutters .CodeMirror-gutter {
+      background: #1d1f20; }
+  .CodeMirror .CodeMirror-linenumber, .CodeMirror-standalone .CodeMirror-linenumber {
     color: #4a4a4a; }
-  .cm .CodeMirror-cursor {
+  .CodeMirror .CodeMirror-cursor, .CodeMirror-standalone .CodeMirror-cursor {
     border-left: 1px solid white !important; }
-  .cm span.cm-keyword {
+  .CodeMirror span.cm-keyword, .CodeMirror-standalone span.cm-keyword {
     color: #e91861; }
-  .cm span.cm-atom {
+  .CodeMirror span.cm-atom, .CodeMirror-standalone span.cm-atom {
     color: #845dc4; }
-  .cm span.cm-number {
+  .CodeMirror span.cm-number, .CodeMirror-standalone span.cm-number {
     color: #E56F01; }
-  .cm span.cm-def {
+  .CodeMirror span.cm-def, .CodeMirror-standalone span.cm-def {
     color: #efc371; }
-  .cm span.cm-variable {
+  .CodeMirror span.cm-variable, .CodeMirror-standalone span.cm-variable {
     color: #c3c6c4; }
-  .cm span.cm-variable-2 {
+  .CodeMirror span.cm-variable-2, .CodeMirror-standalone span.cm-variable-2 {
     color: #b1b4b2; }
-  .cm span.cm-variable-3 {
+  .CodeMirror span.cm-variable-3, .CodeMirror-standalone span.cm-variable-3 {
     color: #9fa3a0; }
-  .cm span.cm-property {
+  .CodeMirror span.cm-property, .CodeMirror-standalone span.cm-property {
     color: #c5c8c6; }
-  .cm span.cm-operator {
+  .CodeMirror span.cm-operator, .CodeMirror-standalone span.cm-operator {
     color: #80a1bc; }
-  .cm span.cm-comment {
+  .CodeMirror span.cm-comment, .CodeMirror-standalone span.cm-comment {
     color: #c5c8c6; }
-  .cm span.cm-string {
+  .CodeMirror span.cm-string, .CodeMirror-standalone span.cm-string {
     color: #e56f01; }
-  .cm span.cm-string-2 {
+  .CodeMirror span.cm-string-2, .CodeMirror-standalone span.cm-string-2 {
     color: #e56f01; }
-  .cm span.cm-meta {
+  .CodeMirror span.cm-meta, .CodeMirror-standalone span.cm-meta {
     color: #89bdb5; }
-  .cm span.cm-qualifier {
+  .CodeMirror span.cm-qualifier, .CodeMirror-standalone span.cm-qualifier {
     color: #89bdb5; }
-  .cm span.cm-builtin {
+  .CodeMirror span.cm-builtin, .CodeMirror-standalone span.cm-builtin {
     color: #80a1bc; }
-  .cm span.cm-bracket {
+  .CodeMirror span.cm-bracket, .CodeMirror-standalone span.cm-bracket {
     color: #80a1bc; }
-  .cm span.cm-tag {
+  .CodeMirror span.cm-tag, .CodeMirror-standalone span.cm-tag {
     color: #c5c8c6; }
-  .cm span.cm-attribute {
+  .CodeMirror span.cm-attribute, .CodeMirror-standalone span.cm-attribute {
     color: #cc6666; }
-  .cm span.cm-header {
+  .CodeMirror span.cm-header, .CodeMirror-standalone span.cm-header {
     color: #cc6666; }
-  .cm span.cm-quote {
+  .CodeMirror span.cm-quote, .CodeMirror-standalone span.cm-quote {
     color: #cc6666; }
-  .cm span.cm-hr {
+  .CodeMirror span.cm-hr, .CodeMirror-standalone span.cm-hr {
     color: #cc6666; }
-  .cm span.cm-link {
+  .CodeMirror span.cm-link, .CodeMirror-standalone span.cm-link {
     color: #80a1bc; }
-  .cm span.cm-error {
+  .CodeMirror span.cm-error, .CodeMirror-standalone span.cm-error {
     color: #808080; }
 
 body, html {
@@ -154,7 +155,7 @@ body, html {
       #wdb > article #source #source-editor {
         flex: 1;
         position: relative; }
-        #wdb > article #source #source-editor .cm {
+        #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
           width: 100%; }
@@ -222,12 +223,12 @@ code {
   white-space: pre-wrap;
   word-break: break-all; }
 
-#source-editor > .cm {
+#source-editor > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-weight: bold;
   font-size: 15px;
   box-shadow: inset -8px 0 20px black; }
-  #source-editor > .cm.rw:after {
+  #source-editor > .CodeMirror.rw:after {
     position: absolute;
     top: 2em;
     right: -2em;
@@ -236,9 +237,10 @@ code {
     color: #777;
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
-    padding: 0.2em 3em;
+    padding: 0.2em 2em;
+    -webkit-transform: rotate(45deg);
     transform: rotate(45deg); }
-  #source-editor > .cm .breakpoints {
+  #source-editor > .CodeMirror .breakpoints {
     width: 0.6em;
     border: none; }
 
@@ -401,30 +403,43 @@ code {
 .CodeMirror-linenumber {
   font-size: 14px; }
 
+.CodeMirror-gutter-elt {
+  text-align: center; }
+  .CodeMirror-gutter-elt .breakpoint {
+    position: relative;
+    top: -2px; }
+
+.CodeMirror-gutter.breaks {
+  width: 0.6em; }
+
 .CodeMirror-linebackground {
   transition: 1s; }
   .CodeMirror-linebackground:hover {
     transition: 1s;
     color: #8cedff; }
   .CodeMirror-linebackground.ctx {
+    border-left: 1px solid black;
+    border-right: 1px solid black;
     color: #fff;
-    background-color: #181818; }
+    background-color: rgba(0, 0, 0, 0.4); }
     .CodeMirror-linebackground.ctx.ctx-top {
       border-top: 1px solid black; }
     .CodeMirror-linebackground.ctx.ctx-bottom {
       border-bottom: 1px solid black; }
     .CodeMirror-linebackground.ctx:before {
       color: #fff;
-      background-color: #181818; }
+      background-color: rgba(0, 0, 0, 0.4); }
   .CodeMirror-linebackground.footstep {
-    color: blackw;
-    background-color: #111 !important; }
+    color: black;
+    background-color: rgba(0, 0, 0, 0.6) !important; }
   .CodeMirror-linebackground.breakpoint {
     color: #ff5995;
-    background-color: rgba(255, 89, 149, 0.15) !important; }
+    background-color: rgba(1, 183, 229, 0.1) !important; }
   .CodeMirror-linebackground.highlighted {
     color: #b6e354;
-    background-color: black !important; }
+    background-color: rgba(0, 0, 0, 0.8) !important; }
+  .CodeMirror-linebackground.breakpoint.highlighted {
+    background-color: rgba(0, 102, 127, 0.1) !important; }
   .CodeMirror-linebackground.ask-breakpoint {
     color: yellow; }
 
@@ -643,7 +658,7 @@ code, code span {
   height: 0.75em; }
 
 \::-webkit-scrollbar-thumb {
-  background: #181818;
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid black; }
 
 #wdb {
@@ -673,16 +688,15 @@ code, code span {
       font-weight: normal;
       margin-top: -20px;
       padding-left: 10px;
-      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-      text-transform: uppercase; }
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5); }
       #wdb > header h1#title:first-letter {
         font-size: 1.5em;
         color: #01b7e5; }
       #wdb > header h1#title small {
         color: black;
-        text-transform: capitalize;
         text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5);
-        padding-top: 0.3em; }
+        padding-top: 0.3em;
+        padding-bottom: 0.3em; }
     #wdb > header #activity {
       height: 100px;
       margin-top: -20px;
@@ -802,24 +816,6 @@ code, code span {
 
 .trace_500 {
   flex: 1; }
-
-.CodeMirror-gutters {
-  background: none;
-  border-right: 1px solid transparent; }
-  .CodeMirror-gutters .CodeMirror-gutter.CodeMirror-gutter.CodeMirror-linenumbers {
-    border-right: 1px solid #292c2f;
-    box-shadow: -1px 0 0 #050606 inset; }
-
-.CodeMirror-linebackground.breakpoint {
-  color: #1BD2FF;
-  background: rgba(27, 210, 255, 0.1) !important;
-  height: 1em; }
-
-.CodeMirror-gutter-elt .breakpoint {
-  position: relative;
-  left: 0px;
-  font-size: 13px;
-  width: 0.1em; }
 
 .CodeMirror-code pre {
   border-right: none;

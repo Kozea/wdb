@@ -2,7 +2,7 @@
 from wdb_server import server
 from tornado.ioloop import IOLoop
 from tornado.options import options
-from wdb_server.sockets import handle_connection
+from wdb_server.streams import handle_connection
 from tornado.netutil import bind_sockets, add_accept_handler
 from logging import getLogger
 

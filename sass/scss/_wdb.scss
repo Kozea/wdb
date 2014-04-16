@@ -66,7 +66,7 @@ body, html{
       #source-editor{
         flex: 1;
         position: relative;
-        .cm{
+        .CodeMirror{
           position: absolute;
           height: 100%;
           width: 100%;}}
@@ -129,7 +129,7 @@ code{
   white-space: pre-wrap;
   word-break: break-all;}
 #source-editor{
-  > .cm{
+  > .CodeMirror{
     font-family: "Source Code Pro" !important;
     font-weight: bold;
     font-size: 15px;
@@ -143,7 +143,8 @@ code{
       color: $alt-fg;
       border-top: 1px solid $trace-file;
       border-bottom: 1px solid $trace-file;
-      padding: .2em 3em;
+      padding: .2em 2em;
+      -webkit-transform: rotate(45deg);
       transform: rotate(45deg);}
     .breakpoints{
       width: .6em;
@@ -265,12 +266,21 @@ code{
   border: none !important;}
 .CodeMirror-linenumber{
   font-size: 14px;}
+.CodeMirror-gutter-elt{
+  text-align: center;
+  .breakpoint{
+    position: relative;
+    top: -2px;}}
+.CodeMirror-gutter.breaks{
+  width: .6em;}
 .CodeMirror-linebackground{
   transition: 1s;
   &:hover{
     transition: 1s;
     color: $lno-hover-fg;}
   &.ctx{
+    border-left: 1px solid $code-ctx-border;
+    border-right: 1px solid $code-ctx-border;
     &.ctx-top{
       border-top: 1px solid $code-ctx-border;}
     &.ctx-bottom{
@@ -289,6 +299,8 @@ code{
   &.highlighted{
     color: $code-hl-fg;
     background-color: $code-hl-bg !important;}
+  &.breakpoint.highlighted{
+    background-color: darken($code-hl-break-bg, 20%) !important;}
   &.ask-breakpoint{
     color: $code-hl-break-ask-fg;}}
 a.inspect{
