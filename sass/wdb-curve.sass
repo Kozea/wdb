@@ -50,7 +50,6 @@
       margin-top: -20px
       padding-left: 10px
       text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5)
-      text-transform: uppercase
 
       &:first-letter
         font-size: 1.5em
@@ -58,10 +57,10 @@
 
       small
         color: black
-        text-transform: capitalize
         text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.2), -1px -1px 1px rgba(0, 0, 0, 0.5)
         /* Compensate broken font */
         padding-top: .3em
+        padding-bottom: .3em
 
 
     #activity
@@ -223,25 +222,6 @@
 
 
 /* - Code Mirror - */
-.CodeMirror-gutters
-  background: none
-  border-right: 1px solid transparent
-
-  .CodeMirror-gutter.CodeMirror-gutter.CodeMirror-linenumbers
-    border-right: 1px solid lighten(#1d1f21, 5%)
-    box-shadow: -1px 0 0 darken(#1d1f21, 10%) inset
-
-.CodeMirror-linebackground.breakpoint
-  color: #1BD2FF
-  background: rgba(27, 210, 255, 0.1) !important
-  height: 1em
-
-.CodeMirror-gutter-elt .breakpoint
-  position: relative
-  left: 0px
-  font-size: 13px
-  width: 0.1em
-
 .CodeMirror-code pre
   border-right: none
   padding: 0

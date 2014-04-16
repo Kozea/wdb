@@ -1,14 +1,15 @@
-.cm.CodeMirror-focused{
+.CodeMirror-focused{
   .CodeMirror-selected{
     background: $cm-focused-selected;}}
-.cm{
+.CodeMirror, .CodeMirror-standalone{
   background: none;
   color: $hl-default;
   .CodeMirror-selected{
     background: $cm-selected;}
-  .CodeMirror-gutter{
-    background: $cm-gutter;
-    border-right: 1px solid $cm-gutter-border;}
+  .CodeMirror-gutters{
+    border-right: 1px solid $cm-gutter-border;
+    .CodeMirror-gutter{
+      background: $cm-gutter;}}
   .CodeMirror-linenumber{
     color: $cm-gutter-text;}
   .CodeMirror-cursor{

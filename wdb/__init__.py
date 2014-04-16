@@ -17,7 +17,7 @@ from __future__ import with_statement
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 __version__ = '1.1.0'
 
-from ._compat import execute, StringIO, to_unicode_string, escape
+from ._compat import execute, StringIO, to_unicode_string, escape, loads
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -39,6 +39,7 @@ import threading
 import socket
 import webbrowser
 import atexit
+import time
 
 # Get wdb server host
 SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
@@ -110,6 +111,8 @@ class Wdb(object):
         self.full = False
         self.below = False
         self._socket = None
+        self.connect()
+        self.get_breakpoints()
 
     def run_file(self, filename):
         """Run the file `filename` with trace"""
@@ -153,6 +156,7 @@ class Wdb(object):
         tries = 0
         while not self._socket and tries < 10:
             try:
+                time.sleep(.25)
                 self._socket = Client((SOCKET_SERVER, SOCKET_PORT))
             except socket.error:
                 tries += 1
@@ -167,6 +171,29 @@ class Wdb(object):
 
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
+
+    def get_breakpoints(self):
+        log.info('Getting server breakpoints')
+        self.send('ServerBreaks')
+        breaks = self.receive()
+        breaks = loads(breaks)
+        self._init_breakpoints = breaks
+
+        for brk in breaks:
+            self.set_break(
+                brk['fn'], brk['lno'], False,
+                brk['cond'], brk['fun'])
+
+        log.info('Server breakpoints added')
+
+    def breakpoints_to_json(self):
+        return [
+            {
+                'fn': getattr(brk, 'fn', None),
+                'lno': getattr(brk, 'line', None),
+                'cond': getattr(brk, 'condition', None),
+                'fun': getattr(brk, 'function', None)
+            } for brk in self.breakpoints]
 
     def trace_dispatch(self, frame, event, arg):
         """This function is called every line,
@@ -307,10 +334,6 @@ class Wdb(object):
         breakpoint = self.get_break(
             filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
-        # if not temporary:
-            # self._socket.send_bytes(
-                # b'Server|AddBreak|' + pickle.dumps(breakpoint, protocol=2))
-
         log.info('Breakpoint %r added' % breakpoint)
 
     def clear_break(self, filename, lineno=None, temporary=False, cond=None,
@@ -426,7 +449,7 @@ class Wdb(object):
         try:
             yield out, err
         finally:
-            out.extend(sys.stdout.getvalue().splitlines()[1:])
+            out.extend(sys.stdout.getvalue().splitlines())
             err.extend(sys.stderr.getvalue().splitlines())
             if with_hook:
                 sys.displayhook = d_hook
@@ -521,7 +544,11 @@ class Wdb(object):
     def receive(self):
         """Receive data through websocket"""
         log.debug('Receiving')
-        data = self._socket.recv_bytes()
+        try:
+            data = self._socket.recv_bytes()
+        except EOFError:
+            log.error('Connection lost')
+            sys.exit(1)
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 
@@ -571,6 +598,7 @@ class Wdb(object):
             interaction.init()
         else:
             self.begun = True
+
         interaction.loop()
 
     def handle_call(self, frame, argument_list):
@@ -624,8 +652,8 @@ class Wdb(object):
             'for': '__exception__',
             'val': escape('%s: %s') % (
                 exception, exception_description)})
-        # User exception is 4 frames away from exception
         log.warning(pretty_frame(frame))
+        # User exception is 4 frames away from exception
         frame = frame or sys._getframe().f_back.f_back.f_back.f_back
         self.interaction(
             frame, tb, exception, exception_description, init=init)
