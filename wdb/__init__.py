@@ -562,7 +562,6 @@ class Wdb(object):
         self.stepping = True
 
         if not self.connected:
-            self.connect()
             log.debug('Launching browser and wait for connection')
             web_url = 'http://%s:%d/debug/session/%s' % (
                 WEB_SERVER or 'localhost',
@@ -737,8 +736,8 @@ def trace(full=False, frame=None, below=False, close_on_exit=False):
 @atexit.register
 def cleanup():
     """Close all sockets at exit"""
-    for socket in Wdb._sockets:
-        socket.close()
+    for sck in Wdb._sockets:
+        sck.close()
 
 
 # Pdb compatibility

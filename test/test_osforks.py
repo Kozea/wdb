@@ -61,7 +61,6 @@ def test_with_fork_from_os(socket):
     for uuid in (uuid1, uuid2):
         msg = socket.receive(uuid)
         assert msg.command == 'SelectCheck'
-        assert msg.data.breaks == []
         assert msg.data.frame.function == '<module>'
 
         msg = socket.receive(uuid)

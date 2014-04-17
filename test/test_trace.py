@@ -28,7 +28,6 @@ def test_with_trace(socket):
 
     msg = socket.receive()
     assert msg.command == 'SelectCheck'
-    assert msg.data.breaks == []
     assert msg.data.frame.function == 'fun2'
     file = msg.data.name
 
@@ -70,7 +69,6 @@ def test_with_trace(socket):
 
     msg = socket.receive()
     assert msg.command == 'SelectCheck'
-    assert msg.data.breaks == []
     assert msg.data.frame.function == '<module>'
     file = msg.data.name
 

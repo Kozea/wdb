@@ -219,8 +219,6 @@ class Interaction(object):
     def do_start(self, data):
         # Getting breakpoints
         log.debug('Getting breakpoints')
-        # self.db.send('Server|GetBreaks')
-        # self.db.breakpoints = self.db.receive()
 
         self.db.send('Init|%s' % dump({
             'cwd': os.getcwd(),

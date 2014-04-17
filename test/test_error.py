@@ -27,7 +27,6 @@ def test_with_error(socket):
 
     msg = socket.receive()
     assert msg.command == 'SelectCheck'
-    assert msg.data.breaks == []
     assert msg.data.frame.function == 'divide_by_zero'
     file = msg.data.name
 
