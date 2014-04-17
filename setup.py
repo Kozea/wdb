@@ -30,8 +30,6 @@ options = dict(
             'static/fonts/*',
             'static/stylesheets/*',
             'static/img/*.png',
-            'static/*.min.js',
-            'static/*.min.css',
             'static/javascripts/wdb/*.min.js',
             'templates/*.html'
         ],

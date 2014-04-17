@@ -70,7 +70,7 @@ class Wdb extends Log
         .on 'click', '.toggle', @toggle_visibility.bind @
 
       @$watchers.on 'click', '.watching .name', @unwatch.bind @
-      @$source.on 'mouseup', @paste_target.bind @
+      @$source.find('#source-editor').on 'mouseup', @paste_target.bind @
       $('#deactivate').click @disable.bind @
       false
 

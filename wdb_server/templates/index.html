@@ -28,7 +28,47 @@
         </table>
     </section>
     <section>
-      {% from wdb_server import StyleHandler%}
+      <h2>Current global breakpoints</h2>
+      <table class="breakpoints">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Line number</th>
+            <th>Condition</th>
+            <th>Function</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h2>Running processes</h2>
+      <table class="processes">
+        <thead>
+          <tr>
+            <th>Pid</th>
+            <th>User</th>
+            <th>Command Line</th>
+            <th>Time</th>
+            <th># Threads</th>
+            <th>Memory</th>
+            <th>Cpu</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <h3>Run python file with trace</h3>
+      <form>
+        <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
+        <input type="button" value="Debug" />
+      </form>
+    </section>
+    <section>
+      {% from wdb_server import StyleHandler %}
 
       <h2>Change theme</h2>
       <form method="post">
@@ -39,35 +79,6 @@
         </select>
         <input type="submit" value="Change" />
       </form>
-    </section>
-    <section>
-      <h2>Debug a file</h2>
-      <form method="post" action="/debug/file/">
-        <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
-        <input type="submit" value="Start debugging" />
-      </form>
-    </section>
-    <section>
-      <h2>Open debugger here</h2>
-      <form>
-        <input type="button" value="Debug me" class="open-self" />
-      </form>
-    </section>
-    <section>
-      <h2>Current global breakpoints</h2>
-        <table class="breakpoints">
-          <thead>
-            <tr>
-              <th>File</th>
-              <th>Line number</th>
-              <th>Condition</th>
-              <th>Function</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
     </section>
   </article>
 {% end %}

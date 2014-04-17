@@ -386,7 +386,7 @@
         this.$traceback.on('click', '.traceline', this.select_click.bind(this));
         this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
         this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
-        this.$source.on('mouseup', this.paste_target.bind(this));
+        this.$source.find('#source-editor').on('mouseup', this.paste_target.bind(this));
         $('#deactivate').click(this.disable.bind(this));
         false;
         this.started = true;

@@ -1,30 +1,4 @@
 @font-face {
-  font-family: "wdb_font";
-  src: url("../fonts/wdb_font.woff") format("woff");
-  font-weight: 700;
-  font-style: normal; }
-
-[class^="icon-"], [class*="icon-"] {
-  font-family: 'wdb_font';
-  speak: none;
-  font-style: normal;
-  font-weight: normal;
-  font-variant: normal;
-  text-transform: none;
-  line-height: 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale; }
-
-.icon-close:before {
-  content: "\e600"; }
-
-.icon-remove:before {
-  content: "\e601"; }
-
-.icon-open:before {
-  content: "\e602"; }
-
-@font-face {
   font-family: "Source Code Pro";
   src: url("../fonts/SourceCodePro-Regular.ttf.woff") format("woff");
   font-weight: 400; }
@@ -759,6 +733,10 @@ code, code span {
         position: absolute;
         top: 10px;
         width: 8px; }
+    #wdb article h3 {
+      color: #01b7e5;
+      margin-left: 4%;
+      text-shadow: -1px -1px 0 #000; }
     #wdb article table tbody {
       box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05); }
     #wdb article table a:hover, #wdb article table a:focus {

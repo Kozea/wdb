@@ -27,7 +27,9 @@ class BaseSockets(object):
     def __init__(self):
         self._sockets = {}
 
-    def send(self, uuid, data):
+    def send(self, uuid, data, message=None):
+        if message:
+            data = data + '|' + json.dumps(message)
         if isinstance(data, unicode_type):
             data = data.encode('utf-8')
         sck = self.get(uuid)
@@ -39,11 +41,11 @@ class BaseSockets(object):
     def get(self, uuid):
         return self._sockets.get(uuid)
 
-    def broadcast(self, data):
+    def broadcast(self, cmd, message=None):
         for uuid in list(self._sockets.keys()):
             try:
                 log.debug('Broadcast to socket %s' % uuid)
-                self.send(uuid, data)
+                self.send(uuid, cmd, message)
             except:
                 log.warn('Failed broadcast to socket %s' % uuid)
                 self.close(uuid)
@@ -53,15 +55,13 @@ class BaseSockets(object):
         if uuid not in self._sockets:
             self._sockets[uuid] = sck
             syncwebsockets.broadcast(
-                'Add' + self.__class__.__name__.rstrip('s')
-                + '|' + uuid)
+                'Add' + self.__class__.__name__.rstrip('s') , uuid)
 
     def remove(self, uuid):
         sck = self._sockets.pop(uuid, None)
         if sck:
             syncwebsockets.broadcast(
-                'Remove' + self.__class__.__name__.rstrip('s')
-                + '|' + uuid)
+                'Remove' + self.__class__.__name__.rstrip('s'), uuid)
 
     def close(self, uuid):
         sck = self.get(uuid)

@@ -414,10 +414,11 @@ class Interaction(object):
                 break_fail('Blank line or comment')
                 return
 
-        self.db.set_break(
+        breakpoint = self.db.set_break(
             brk['fn'], brk['lno'], brk['temporary'], brk['cond'], brk['fun'])
-
-        self.db.send('BreakSet|%s' % data)
+        break_set = breakpoint.to_dict()
+        break_set['temporary'] = brk['temporary']
+        self.db.send('BreakSet|%s' % dump(break_set))
 
     def do_unbreak(self, data):
         brk = loads(data)
