@@ -57,11 +57,11 @@ make_process_line = (proc) ->
     val
 
   if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).size()
-    for elt in ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu']
+    for elt in ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu']
       $tr.find(".#{elt}").text(get_val elt)
   else
     line = "<tr data-pid=\"#{proc.pid}\">"
-    for elt in ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu']
+    for elt in ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu']
       line += "<td class=\"#{elt}\">#{get_val elt}</td>"
     line += "<td class=\"action\">
           <a href=\"\"
