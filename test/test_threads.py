@@ -65,7 +65,6 @@ def test_with_threads(socket):
     for uuid in (uuid1, uuid2):
         msg = socket.receive(uuid)
         assert msg.command == 'SelectCheck'
-        assert msg.data.breaks == []
         assert msg.data.frame.function == 'run'
 
         msg = socket.receive(uuid)

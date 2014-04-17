@@ -108,6 +108,9 @@ class Socket(object):
         log.info('Connection get')
         uuid = connection.recv_bytes().decode('utf-8')
         self.connections[uuid] = connection
+        msg = self.receive(uuid)
+        assert msg.command == 'ServerBreaks'
+        self.send('[]', uuid=uuid)
         self.send('Start', uuid=uuid)
         return uuid
 
@@ -145,19 +148,11 @@ class Socket(object):
 
         selectmsg = self.receive()
         assert selectmsg.command == 'SelectCheck'
-        if breaks is not None:
-            assert selectmsg.data.breaks == breaks
 
         assert self.receive().command == 'Watched'
 
     def receive(self, uuid=None):
-        received = None
-        # Plug server only commands
-        while not received or received.startswith(b'Server|'):
-            received = self.connection(uuid).recv_bytes()
-            if received == b'Server|GetBreaks':
-                self.connection(uuid).send_bytes(pickle.dumps(set()))
-        return Message(received.decode('utf-8'))
+        return Message(self.connection(uuid).recv_bytes().decode('utf-8'))
 
     def send(self, command, data=None, uuid=None):
         message = '%s|%s' % (command, data) if data else command
