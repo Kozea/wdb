@@ -104,7 +104,7 @@
       return val;
     };
     if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
-      _ref = ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu'];
+      _ref = ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu'];
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         elt = _ref[_i];
@@ -113,7 +113,7 @@
       return _results;
     } else {
       line = "<tr data-pid=\"" + proc.pid + "\">";
-      _ref1 = ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu'];
+      _ref1 = ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu'];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         elt = _ref1[_j];
         line += "<td class=\"" + elt + "\">" + (get_val(elt)) + "</td>";

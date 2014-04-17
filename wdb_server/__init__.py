@@ -185,18 +185,23 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             remaining_pids = []
             for proc in psutil.process_iter():
                 # Might end with .exe, .bat or whatever
-                if 'python' in proc.name():
+                if (
+                        'python' in proc.name() and
+                        proc.is_running() and
+                        proc.status() != psutil.STATUS_ZOMBIE):
                     try:
-                        syncwebsockets.send(self.uuid, 'AddProcess', {
-                            'pid': proc.pid,
-                            'user': proc.username(),
-                            'cmd': ' '.join(proc.cmdline()),
-                            'time': proc.create_time(),
-                            'threads': proc.num_threads(),
-                            'mem': proc.memory_percent(),
-                            'cpu': proc.cpu_percent(interval=.01)
-                        })
-                        remaining_pids.append(proc.pid)
+                        for thread in proc.threads():
+                            syncwebsockets.send(self.uuid, 'AddProcess', {
+                                'pid': thread.id,
+                                'user': proc.username(),
+                                'cmd': ' '.join(proc.cmdline()),
+                                'threadof': None if thread.id == proc.pid
+                                else proc.pid,
+                                'time': proc.create_time(),
+                                'mem': proc.memory_percent(),
+                                'cpu': proc.cpu_percent(interval=.01)
+                            })
+                            remaining_pids.append(thread.id)
                     except:
                         log.warn('', exc_info=True)
                         continue
