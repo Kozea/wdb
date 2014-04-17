@@ -204,7 +204,10 @@ def socket(request):
         signal.alarm(5)
 
     def end_socket():
-        socket.close(request.node.rep_call.failed)
+        failed = False
+        if hasattr(request.node, 'rep_call'):
+            failed = request.node.rep_call.failed
+        socket.close(failed)
         signal.alarm(0)
 
     request.addfinalizer(end_socket)
