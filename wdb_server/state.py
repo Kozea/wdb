@@ -50,16 +50,18 @@ class BaseSockets(object):
                 self.remove(uuid)
 
     def add(self, uuid, sck):
-        self._sockets[uuid] = sck
-        syncwebsockets.broadcast(
-            'Add' + self.__class__.__name__.rstrip('s')
-            + '|' + uuid)
+        if uuid not in self._sockets:
+            self._sockets[uuid] = sck
+            syncwebsockets.broadcast(
+                'Add' + self.__class__.__name__.rstrip('s')
+                + '|' + uuid)
 
     def remove(self, uuid):
-        self._sockets.pop(uuid)
-        syncwebsockets.broadcast(
-            'Remove' + self.__class__.__name__.rstrip('s')
-            + '|' + uuid)
+        sck = self._sockets.pop(uuid, None)
+        if sck:
+            syncwebsockets.broadcast(
+                'Remove' + self.__class__.__name__.rstrip('s')
+                + '|' + uuid)
 
     def close(self, uuid):
         sck = self.get(uuid)
