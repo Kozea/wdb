@@ -2,8 +2,8 @@
 {% from tornado.options import options %}
 <html>
   <head>
-    <script src="{{ static_url('deps.min.js') }}"></script>
-    <link href="{{ static_url('deps.min.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ static_url('javascripts/wdb/deps.min.js') }}"></script>
+    <link href="{{ static_url('stylesheets/deps.min.css') }}" rel="stylesheet" type="text/css">
 
     {% from wdb_server import StyleHandler %}
     <link href="{{ static_url('stylesheets/wdb-%s.css' % StyleHandler.theme) }}" rel="stylesheet" type="text/css">

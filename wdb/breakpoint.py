@@ -58,6 +58,14 @@ class Breakpoint(object):
         s.update(repr(self).encode('utf-8'))
         return int(s.hexdigest(), 16)
 
+    def to_dict(self):
+        return {
+            'fn': getattr(self, 'file', None),
+            'lno': getattr(self, 'line', None),
+            'cond': getattr(self, 'condition', None),
+            'fun': getattr(self, 'function', None)
+        }
+
 
 class LineBreakpoint(Breakpoint):
     """Simple breakpoint that breaks if in file at line"""

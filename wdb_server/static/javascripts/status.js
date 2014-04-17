@@ -1,5 +1,6 @@
 (function() {
-  var Log, create_socket, make_brk_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message;
+  var Log, create_socket, make_brk_line, make_process_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Log = (function() {
     function Log() {
@@ -33,7 +34,7 @@
   make_uuid_line = function(uuid, socket) {
     var $line;
     if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
-      $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"><a href=\"/uuid/" + uuid + "/close\">Force close</a></td>");
+      $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"><a class=\"fa fa-times-circle remove\" href=\"\"> Force close</a></td>");
       $('.sessions tbody').append($line);
     }
     return $line.find("." + socket).text('Yes');
@@ -51,23 +52,21 @@
     }
   };
 
-  make_brk_line = function(data) {
-    var brk, elt, line, _i, _len, _ref;
-    brk = JSON.parse(data);
+  make_brk_line = function(brk) {
+    var elt, line, _i, _len, _ref;
     line = '<tr>';
     _ref = ['fn', 'lno', 'cond', 'fun'];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       elt = _ref[_i];
       line += "<td class=\"" + elt + "\">" + (brk[elt] || '∅') + "</td>";
     }
-    line += "<td class=\"action\"> <a href=\"/debug/file/" + brk.fn + "\" class=\"icon-open\">Open</a> <a href=\"\" class=\"icon-remove\">Remove</a> </td>";
+    line += "<td class=\"action\"> <a href=\"\" class=\"fa fa-folder-open open\">Open</a> <a href=\"\" class=\"fa fa-minus-circle remove\">Remove</a> </td>";
     line += '</tr>';
     return $('.breakpoints tbody').append($(line));
   };
 
-  rm_brk_line = function(data) {
-    var $tr, brk, elt, same, tr, _i, _j, _len, _len1, _ref, _ref1, _results;
-    brk = JSON.parse(data);
+  rm_brk_line = function(brk) {
+    var $tr, elt, same, tr, _i, _j, _len, _len1, _ref, _ref1, _results;
     _ref = $('.breakpoints tr');
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -88,14 +87,51 @@
     return _results;
   };
 
+  make_process_line = function(proc) {
+    var $tr, elt, get_val, line, _i, _j, _len, _len1, _ref, _ref1, _results;
+    get_val = function(elt) {
+      var val;
+      val = proc[elt];
+      if (val == null) {
+        val = '∅';
+      }
+      if (elt === 'time') {
+        val = (new Date().getTime() / 1000) - val;
+        val = Math.round(val) + ' s';
+      } else if (elt === 'mem' || elt === 'cpu') {
+        val = val.toFixed(2) + '%';
+      }
+      return val;
+    };
+    if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
+      _ref = ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu'];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        elt = _ref[_i];
+        _results.push($tr.find("." + elt).text(get_val(elt)));
+      }
+      return _results;
+    } else {
+      line = "<tr data-pid=\"" + proc.pid + "\">";
+      _ref1 = ['pid', 'user', 'cmd', 'time', 'threads', 'mem', 'cpu'];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        elt = _ref1[_j];
+        line += "<td class=\"" + elt + "\">" + (get_val(elt)) + "</td>";
+      }
+      line += "<td class=\"action\"> <a href=\"\" class=\"fa fa-pause pause\">Pause</a> </td>";
+      line += '</tr>';
+      return $('.processes tbody').append($(line));
+    }
+  };
+
   ws_message = function(event) {
-    var cmd, data, message, pipe;
+    var $tr, cmd, data, message, pipe, tr, _i, _len, _ref, _ref1;
     wait = 25;
     message = event.data;
     pipe = message.indexOf('|');
     if (pipe > -1) {
       cmd = message.substr(0, pipe);
-      data = message.substr(pipe + 1);
+      data = JSON.parse(message.substr(pipe + 1));
     } else {
       cmd = message;
       data = '';
@@ -113,6 +149,20 @@
         return make_brk_line(data);
       case 'RemoveBreak':
         return rm_brk_line(data);
+      case 'AddProcess':
+        return make_process_line(data);
+      case 'KeepProcess':
+        _ref = $('.processes tbody tr');
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          tr = _ref[_i];
+          $tr = $(tr);
+          if (_ref1 = parseInt($tr.attr('data-pid')), __indexOf.call(data, _ref1) < 0) {
+            $tr.remove();
+          }
+        }
+        return setTimeout((function() {
+          return ws.send('ListProcesses');
+        }), 1000);
     }
   };
 
@@ -123,7 +173,8 @@
       $("tbody tr").remove();
       ws.send('ListSockets');
       ws.send('ListWebSockets');
-      return ws.send('ListBreaks');
+      ws.send('ListBreaks');
+      return ws.send('ListProcesses');
     };
     ws.onerror = function() {
       return console.log("WebSocket error", arguments);
@@ -146,11 +197,17 @@
 
   $(function() {
     create_socket();
-    $('.open-self').click(function() {
-      $.get('/self');
+    $('.sessions tbody').on('click', '.remove', function(e) {
+      ws.send('RemoveUUID|' + $(this).closest('tr').attr('data-uuid'));
       return false;
     });
-    return $('.breakpoints tbody').on('click', '.icon-remove', function(e) {
+    $('.breakpoints tbody').on('click', '.open', function(e) {
+      var $tr;
+      $tr = $(this).closest('tr');
+      ws.send('RunFile|' + $tr.find('.fn').text());
+      return false;
+    });
+    $('.breakpoints tbody').on('click', '.remove', function(e) {
       var $tr, brk;
       $tr = $(this).closest('tr');
       brk = {
@@ -161,6 +218,13 @@
       };
       ws.send('RemoveBreak|' + JSON.stringify(brk));
       return false;
+    });
+    $('.processes tbody').on('click', '.pause', function(e) {
+      ws.send('Pause|' + $(this).closest('tr').find('.pid').text());
+      return false;
+    });
+    return $('.processes [type=button]').on('click', function(e) {
+      return ws.send('RunFile|' + $(this).siblings('[type=text]').val());
     });
   });
 

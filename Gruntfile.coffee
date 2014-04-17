@@ -18,7 +18,7 @@ module.exports = (grunt) ->
 
       deps:
         files:
-          'wdb_server/static/deps.min.js': [
+          'wdb_server/static/javascripts/wdb/deps.min.js': [
             'bower_components/jquery/dist/jquery.min.js'
             'bower_components/jquery-autosize/jquery.autosize.min.js'
             'bower_components/codemirror/lib/codemirror.js'
@@ -47,7 +47,8 @@ module.exports = (grunt) ->
     cssmin:
       codemirror:
         files:
-          'wdb_server/static/deps.min.css': [
+          'wdb_server/static/stylesheets/deps.min.css': [
+            'bower_components/font-awesome/css/font-awesome.min.css'
             'bower_components/codemirror/lib/codemirror.css'
             'bower_components/codemirror/addon/dialog/dialog.css'
           ]

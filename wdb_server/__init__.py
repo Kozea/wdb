@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import tornado.options
+import tornado.process
 import tornado.web
 import tornado.websocket
 import os
@@ -25,6 +26,8 @@ from wdb_server.state import (
     sockets, websockets, syncwebsockets, breakpoints)
 from multiprocessing import Process
 from uuid import uuid4
+import psutil
+
 
 log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")
@@ -85,23 +88,6 @@ class MainHandler(tornado.web.RequestHandler):
         self.render('wdb.html', uuid=uuid)
 
 
-class SelfHandler(tornado.web.RequestHandler):
-    def get(self):
-        from multiprocessing import Process
-
-        def self_shell(variables):
-            import wdb
-            wdb.set_trace()
-            # Some random code
-            i = 12
-            for j in range(i):
-                i += 1
-            print(j)
-            print('Done')
-
-        Process(target=self_shell, args=(globals(),)).start()
-
-
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def write(self, message):
         log.debug('socket -> websocket: %s' % message)
@@ -122,6 +108,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.write_message(message)
 
     def open(self, uuid):
+        if self.request.headers['Origin'] != 'http://%s' % (
+                self.request.headers['Host']):
+            self.close()
+            return
+
         self.uuid = uuid.decode('utf-8')
 
         if self.uuid not in sockets.uuids:
@@ -156,6 +147,11 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
         self.write_message(message)
 
     def open(self):
+        if self.request.headers['Origin'] != 'http://%s' % (
+                self.request.headers['Host']):
+            self.close()
+            return
+
         self.uuid = str(uuid4())
         syncwebsockets.add(self.uuid, self)
 
@@ -167,19 +163,74 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         if cmd == 'ListSockets':
             for uuid in sockets.uuids:
-                self.write('AddSocket|' + uuid)
+                syncwebsockets.send(self.uuid, 'AddSocket', uuid)
         elif cmd == 'ListWebsockets':
             for uuid in websockets.uuids:
-                self.write('AddWebSocket|' + uuid)
+                syncwebsockets.send(self.uuid, 'AddWebSocket', uuid)
         elif cmd == 'ListBreaks':
             for brk in breakpoints.get():
-                self.write('AddBreak|' + json.dumps(brk))
+                syncwebsockets.send(self.uuid, 'AddBreak', brk)
         elif cmd == 'RemoveBreak':
             brk = json.loads(data)
             breakpoints.remove(brk)
             # If it was here, it wasn't temporary
             brk['temporary'] = False
-            sockets.broadcast('Unbreak|' + json.dumps(brk))
+            sockets.broadcast('Unbreak', brk)
+        elif cmd == 'RemoveUUID':
+            sockets.close(data)
+            sockets.remove(data)
+            websockets.close(data)
+            websockets.remove(data)
+        elif cmd == 'ListProcesses':
+            remaining_pids = []
+            for proc in psutil.process_iter():
+                # Might end with .exe, .bat or whatever
+                if 'python' in proc.name():
+                    try:
+                        syncwebsockets.send(self.uuid, 'AddProcess', {
+                            'pid': proc.pid,
+                            'user': proc.username(),
+                            'cmd': ' '.join(proc.cmdline()),
+                            'time': proc.create_time(),
+                            'threads': proc.num_threads(),
+                            'mem': proc.memory_percent(),
+                            'cpu': proc.cpu_percent(interval=.01)
+                        })
+                        remaining_pids.append(proc.pid)
+                    except:
+                        log.warn('', exc_info=True)
+                        continue
+            syncwebsockets.send(self.uuid, 'KeepProcess', remaining_pids)
+        elif cmd == 'Pause':
+            if int(data) == os.getpid():
+
+                def self_shell(variables):
+                    # Debugging self
+                    import wdb
+                    wdb.set_trace()
+
+                Process(target=self_shell, args=(globals(),)).start()
+
+            else:
+                tornado.process.Subprocess([
+                    'gdb', '-p', data,
+                    '-batch'] + [
+                        "-eval-command=call %s" % hook
+                        for hook in [
+                            'PyGILState_Ensure()',
+                            'PyRun_SimpleString('
+                            '"import wdb; wdb.set_trace(skip=1)"'
+                            ')',
+                            'PyGILState_Release($1)',
+                        ]])
+        elif cmd == 'RunFile':
+            file_name = data
+
+            def run():
+                from wdb import Wdb
+                Wdb.get().run_file(file_name)
+
+            Process(target=run).start()
 
     def on_close(self):
         syncwebsockets.remove(self.uuid)
@@ -208,12 +259,10 @@ server = tornado.web.Application(
     [
         (r"/", IndexHandler),
         (r"/style.css", StyleHandler),
-        (r"/uuid/([^/]+)/([^/]+)", ActionHandler),
         (r"/debug/session/(.+)", MainHandler),
         (r"/debug/file/(.*)", DebugHandler),
         (r"/websocket/(.+)", WebSocketHandler),
-        (r"/status", SyncWebSocketHandler),
-        (r"/self", SelfHandler),
+        (r"/status", SyncWebSocketHandler)
     ],
     debug=tornado.options.options.debug,
     static_path=static_path,

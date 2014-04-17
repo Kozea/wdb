@@ -187,13 +187,7 @@ class Wdb(object):
         log.info('Server breakpoints added')
 
     def breakpoints_to_json(self):
-        return [
-            {
-                'fn': getattr(brk, 'fn', None),
-                'lno': getattr(brk, 'line', None),
-                'cond': getattr(brk, 'condition', None),
-                'fun': getattr(brk, 'function', None)
-            } for brk in self.breakpoints]
+        return [brk.to_dict() for brk in self.breakpoints]
 
     def trace_dispatch(self, frame, event, arg):
         """This function is called every line,
@@ -335,6 +329,7 @@ class Wdb(object):
             filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
         log.info('Breakpoint %r added' % breakpoint)
+        return breakpoint
 
     def clear_break(self, filename, lineno=None, temporary=False, cond=None,
                     funcname=None):
@@ -350,9 +345,6 @@ class Wdb(object):
 
         try:
             self.breakpoints.remove(breakpoint)
-            # if not temporary:
-                # self._socket.send_bytes(
-                    # b'Server|RmBreak|' + pickle.dumps(breakpoint, protocol=2))
             log.info('Breakpoint %r removed' % breakpoint)
         except:
             log.info('Breakpoint %r not removed: not found' % breakpoint)
@@ -691,9 +683,13 @@ class Wdb(object):
         self.pop()
 
 
-def set_trace(frame=None):
+def set_trace(frame=None, skip=0):
     """Set trace on current line, or on given frame"""
     frame = frame or sys._getframe().f_back
+    for i in range(skip):
+        if not frame.f_back:
+            break
+        frame = frame.f_back
     wdb = Wdb.get()
     wdb.set_trace(frame)
     return wdb
