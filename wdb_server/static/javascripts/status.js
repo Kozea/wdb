@@ -34,7 +34,7 @@
   make_uuid_line = function(uuid, socket) {
     var $line;
     if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
-      $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"><a class=\"fa fa-times-circle remove\" href=\"\"> Force close</a></td>");
+      $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"> <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a> </td>");
       $('.sessions tbody').append($line);
     }
     return $line.find("." + socket).text('Yes');
@@ -60,7 +60,7 @@
       elt = _ref[_i];
       line += "<td class=\"" + elt + "\">" + (brk[elt] || '∅') + "</td>";
     }
-    line += "<td class=\"action\"> <a href=\"\" class=\"fa fa-folder-open open\">Open</a> <a href=\"\" class=\"fa fa-minus-circle remove\">Remove</a> </td>";
+    line += "<td class=\"action\"> <a class=\"fa fa-folder-open open\" title=\"Open\"></a> <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a> </td>";
     line += '</tr>';
     return $('.breakpoints tbody').append($(line));
   };
@@ -104,7 +104,7 @@
       return val;
     };
     if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
-      _ref = ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu'];
+      _ref = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         elt = _ref[_i];
@@ -112,13 +112,18 @@
       }
       return _results;
     } else {
-      line = "<tr data-pid=\"" + proc.pid + "\">";
-      _ref1 = ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu'];
+      line = "<tr data-pid=\"" + proc.pid + "\" " + (proc.threadof ? 'data-threadof="' + proc.threadof + '"' : '') + ">";
+      _ref1 = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         elt = _ref1[_j];
         line += "<td class=\"" + elt + "\">" + (get_val(elt)) + "</td>";
       }
-      line += "<td class=\"action\"> <a href=\"\" class=\"fa fa-pause pause\">Pause</a> </td>";
+      line += "<td class=\"action\">";
+      line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
+      if (proc.threads > 1) {
+        line += "<a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a> ";
+      }
+      line += "</td>";
       line += '</tr>';
       return $('.processes tbody').append($(line));
     }
@@ -221,6 +226,20 @@
     });
     $('.processes tbody').on('click', '.pause', function(e) {
       ws.send('Pause|' + $(this).closest('tr').find('.pid').text());
+      return false;
+    }).on('click', '.minus', function(e) {
+      var $a, $tr;
+      $a = $(this);
+      $tr = $a.closest('tr');
+      $("[data-threadof=" + ($tr.attr('data-pid')) + "]").hide('fast');
+      $a.attr('class', $a.attr('class').replace(/minus/g, 'plus'));
+      return false;
+    }).on('click', '.plus', function(e) {
+      var $a, $tr;
+      $a = $(this);
+      $tr = $a.closest('tr');
+      $("[data-threadof=" + ($tr.attr('data-pid')) + "]").show('fast');
+      $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
       return false;
     });
     return $('.processes [type=button]').on('click', function(e) {

@@ -119,7 +119,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             log.warn(
                 'Websocket opened for %s with no correponding socket' %
                 self.uuid)
-            self.write('Die')
+            sockets.send(self.uuid, 'Die')
             self.close()
             return
 
@@ -184,9 +184,12 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
         elif cmd == 'ListProcesses':
             remaining_pids = []
             for proc in psutil.process_iter():
-                # Might end with .exe, .bat or whatever
+                cl = proc.cmdline()
+                if len(cl) == 0:
+                    continue
+                binary = cl[0].split('/')[-1]
                 if (
-                        'python' in proc.name() and
+                        'python' in binary and
                         proc.is_running() and
                         proc.status() != psutil.STATUS_ZOMBIE):
                     try:
@@ -195,6 +198,8 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
                                 'pid': thread.id,
                                 'user': proc.username(),
                                 'cmd': ' '.join(proc.cmdline()),
+                                'threads': proc.num_threads()
+                                if thread.id == proc.pid else 0,
                                 'threadof': None if thread.id == proc.pid
                                 else proc.pid,
                                 'time': proc.create_time(),
