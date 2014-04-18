@@ -109,9 +109,7 @@ body, html {
       #wdb > article table tbody td.action, #wdb > article table tbody td.close {
         text-align: center; }
         #wdb > article table tbody td.action a, #wdb > article table tbody td.close a {
-          color: transparent;
-          font-size: 0;
-          display: inline-block; }
+          text-decoration: none; }
           #wdb > article table tbody td.action a:hover:before, #wdb > article table tbody td.action a:focus:before, #wdb > article table tbody td.close a:hover:before, #wdb > article table tbody td.close a:focus:before {
             color: #a200bb; }
           #wdb > article table tbody td.action a:before, #wdb > article table tbody td.close a:before {
@@ -156,10 +154,15 @@ a {
   color: #000; }
 
 table {
+  font-family: "Source Code Pro" !important;
   width: 100%; }
-  table tr td {
-    padding: 0.25em;
-    border: 1px solid #dfdfdf; }
+  table tr {
+    color: #000; }
+    table tr[data-threadof] {
+      color: #ccc; }
+    table tr td {
+      padding: 0.25em;
+      border: 1px solid #dfdfdf; }
 
 input {
   border: 1px solid #dfdfdf;

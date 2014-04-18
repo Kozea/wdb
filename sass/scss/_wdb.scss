@@ -44,9 +44,7 @@ body, html{
         &.action, &.close{
           text-align: center;
           a{
-            color: transparent;
-            font-size: 0;
-            display: inline-block;
+            text-decoration: none;
             &:hover, &:focus{
               &:before{
                 color: lighten($trace-fun, 10%);}}
@@ -90,10 +88,15 @@ body, html{
 a{
   color: $fg;}
 table{
+  font-family: "Source Code Pro" !important;
   width: 100%;
-  tr td{
-    padding: .25em;
-    border: 1px solid darken($bg, 10%);}}
+  tr{
+    color: $fg;
+    &[data-threadof]{
+      color: $alt-fg;}
+    td{
+      padding: .25em;
+      border: 1px solid darken($bg, 10%);}}}
 input{
   border: 1px solid darken($bg, 10%);
   background-color: $bg;

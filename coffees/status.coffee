@@ -7,8 +7,9 @@ make_uuid_line = (uuid, socket) ->
       <td class=\"uuid\"><a href=\"/debug/session/#{uuid}\">#{uuid}</a></td>
       <td class=\"socket\">No</td>
       <td class=\"websocket\">No</td>
-      <td class=\"close\"><a class=\"fa fa-times-circle remove\" href=\"\">
-        Force close</a></td>
+      <td class=\"close\">
+        <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a>
+      </td>
     ")
     $('.sessions tbody').append $line
   $line.find(".#{socket}").text('Yes')
@@ -27,10 +28,8 @@ make_brk_line = (brk) ->
   for elt in ['fn', 'lno', 'cond', 'fun']
     line += "<td class=\"#{elt}\">#{brk[elt] or '∅'}</td>"
   line += "<td class=\"action\">
-        <a href=\"\"
-          class=\"fa fa-folder-open open\">Open</a>
-        <a href=\"\"
-          class=\"fa fa-minus-circle remove\">Remove</a>
+        <a class=\"fa fa-folder-open open\" title=\"Open\"></a>
+        <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a>
       </td>"
 
   line += '</tr>'
@@ -57,16 +56,19 @@ make_process_line = (proc) ->
     val
 
   if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).size()
-    for elt in ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu']
+    for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
       $tr.find(".#{elt}").text(get_val elt)
   else
-    line = "<tr data-pid=\"#{proc.pid}\">"
-    for elt in ['pid', 'user', 'cmd', 'time', 'threadof', 'mem', 'cpu']
+    line = "<tr data-pid=\"#{proc.pid}\"
+    #{ if proc.threadof then 'data-threadof="' + proc.threadof + '"' else ''}>"
+    for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
       line += "<td class=\"#{elt}\">#{get_val elt}</td>"
-    line += "<td class=\"action\">
-          <a href=\"\"
-            class=\"fa fa-pause pause\">Pause</a>
-        </td>"
+    line += "<td class=\"action\">"
+    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> "
+    if proc.threads > 1
+      line += "<a href=\"\" class=\"fa fa-minus minus\"
+        title=\"Toggle threads\"></a> "
+    line += "</td>"
 
     line += '</tr>'
     $('.processes tbody').append $ line
@@ -154,9 +156,22 @@ $ ->
     ws.send('RemoveBreak|' + JSON.stringify(brk))
     false
 
-  $('.processes tbody').on 'click', '.pause', (e) ->
-    ws.send('Pause|' +  $(this).closest('tr').find('.pid').text())
-    false
+  $('.processes tbody')
+    .on('click', '.pause', (e) ->
+      ws.send('Pause|' +  $(this).closest('tr').find('.pid').text())
+      false)
+    .on('click', '.minus', (e) ->
+      $a = $(this)
+      $tr = $a.closest('tr')
+      $("[data-threadof=#{$tr.attr('data-pid')}]").hide 'fast'
+      $a.attr 'class', $a.attr('class').replace(/minus/g, 'plus')
+      false)
+    .on('click', '.plus', (e) ->
+      $a = $(this)
+      $tr = $a.closest('tr')
+      $("[data-threadof=#{$tr.attr('data-pid')}]").show 'fast'
+      $a.attr 'class', $a.attr('class').replace(/plus/g, 'minus')
+      false)
 
   $('.processes [type=button]').on 'click', (e) ->
     ws.send('RunFile|' + $(this).siblings('[type=text]').val())
