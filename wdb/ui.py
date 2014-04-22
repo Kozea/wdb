@@ -2,6 +2,7 @@
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
+from .utils import get_source, get_doc
 from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
@@ -267,7 +268,10 @@ class Interaction(object):
 
         self.db.send('Dump|%s' % dump({
             'for': repr(thing),
-            'val': self.db.dmp(thing)}))
+            'val': self.db.dmp(thing),
+            'doc': get_doc(thing),
+            'source': get_source(thing)
+        }))
 
     def do_dump(self, data):
         try:
@@ -276,10 +280,12 @@ class Interaction(object):
         except Exception:
             fail(self.db, 'Dump')
             return
-        else:
-            self.db.send('Dump|%s' % dump({
-                'for': u('%s ⟶ %s ') % (data, repr(thing)),
-                'val': self.db.dmp(thing)}))
+
+        self.db.send('Dump|%s' % dump({
+            'for': u('%s ⟶ %s ') % (data, repr(thing)),
+            'val': self.db.dmp(thing),
+            'doc': get_doc(thing),
+            'source': get_source(thing)}))
 
     def do_trace(self, data):
         self.db.send('Trace|%s' % dump({

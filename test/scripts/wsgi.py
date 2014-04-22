@@ -174,7 +174,7 @@ def run():
     app.wsgi_app = WdbMiddleware(app.wsgi_app)
     app.run(
         debug=True, host='0.0.0.0', port=1985, use_debugger=False,
-        use_reloader=True, threaded=True)
+        use_reloader=True)
 
 if __name__ == '__main__':
     run()

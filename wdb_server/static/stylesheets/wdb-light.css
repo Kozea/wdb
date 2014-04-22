@@ -156,6 +156,8 @@ a {
 table {
   font-family: "Source Code Pro" !important;
   width: 100%; }
+  table thead.toggle {
+    cursor: pointer; }
   table tr {
     color: #000; }
     table tr[data-threadof] {
@@ -483,6 +485,10 @@ a.inspect {
     background-color: #e4e4e4; }
   .object .attr {
     background-color: #ebebeb; }
+  .object .doc {
+    background-color: #f0f0f0; }
+  .object .source {
+    background-color: #f5f5f5; }
 
 .nogood {
   color: red !important; }

@@ -90,6 +90,8 @@ a{
 table{
   font-family: "Source Code Pro" !important;
   width: 100%;
+  thead.toggle{
+    cursor: pointer;}
   tr{
     color: $fg;
     &[data-threadof]{
@@ -366,7 +368,11 @@ a.inspect{
   .method{
     background-color: $obj-method-bg;}
   .attr{
-    background-color: $obj-attr-bg;}}
+    background-color: $obj-attr-bg;}
+  .doc{
+    background-color: $obj-doc-bg;}
+  .source{
+    background-color: $obj-source-bg;}}
 .nogood{
   color: red !important;
   >{
