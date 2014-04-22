@@ -704,38 +704,38 @@
     };
 
     Wdb.prototype.dump = function(data) {
-      var $attr_tbody, $container, $core_tbody, $method_tbody, $table, $tbody, key, val, _ref;
+      var $attr_head, $attr_tbody, $container, $core_head, $core_tbody, $method_head, $method_tbody, $table, $tbody, key, val, _ref;
       this.code(this.$scrollback, data["for"], ['prompted']);
       $container = $('<div>');
       $table = $('<table>', {
         "class": 'object'
       }).appendTo($container);
-      $table.append($('<thead>', {
+      $core_head = $('<thead>', {
         "class": 'toggle hidden'
       }).append($('<tr>').append($('<td>', {
         "class": 'core',
         colspan: 2
-      }).text('Core Members'))));
+      }).text('Core Members'))).appendTo($table);
       $core_tbody = $('<tbody>', {
         "class": 'core hidden'
       }).appendTo($table);
-      $table.append($('<thead>', {
+      $method_head = $('<thead>', {
         "class": 'toggle hidden'
       }).append($('<tr>').append($('<td>', {
         "class": 'method',
         colspan: 2
-      }).text('Methods'))));
+      }).text('Methods'))).appendTo($table);
       $method_tbody = $('<tbody>', {
         "class": 'method hidden'
       }).appendTo($table);
-      $table.append($('<thead>', {
-        "class": 'toggle shown'
+      $attr_head = $('<thead>', {
+        "class": 'toggle hidden'
       }).append($('<tr>').append($('<td>', {
         "class": 'attr',
         colspan: 2
-      }).text('Attributes'))));
+      }).text('Attributes'))).appendTo($table);
       $attr_tbody = $('<tbody>', {
-        "class": 'attr shown'
+        "class": 'attr hidden'
       }).appendTo($table);
       _ref = data.val;
       for (key in _ref) {
@@ -747,6 +747,46 @@
           $tbody = $method_tbody;
         }
         $tbody.append($('<tr>').append($('<td>').text(key)).append($('<td>').html(val.val)));
+      }
+      if ($core_tbody.find('tr').size() === 0) {
+        $core_head.remove();
+        $core_tbody.remove();
+      }
+      if ($attr_tbody.find('tr').size() === 0) {
+        $attr_head.remove();
+        $attr_tbody.remove();
+      }
+      if ($method_tbody.find('tr').size() === 0) {
+        $method_head.remove();
+        $method_tbody.remove();
+      }
+      if (data.doc) {
+        $table.append($('<thead>', {
+          "class": 'toggle hidden'
+        }).append($('<tr>').append($('<td>', {
+          "class": 'doc',
+          colspan: 2
+        }).text('Documentation'))));
+        $('<tbody>', {
+          "class": 'doc hidden'
+        }).append($('<tr>').append($('<td>', {
+          "class": 'doc',
+          colspan: 2
+        }).text(data.doc))).appendTo($table);
+      }
+      if (data.source) {
+        $table.append($('<thead>', {
+          "class": 'toggle hidden'
+        }).append($('<tr>').append($('<td>', {
+          "class": 'source',
+          colspan: 2
+        }).text('Source'))));
+        $('<tbody>', {
+          "class": 'source hidden'
+        }).append($('<tr>').append($('<td>', {
+          "class": 'source',
+          colspan: 2
+        }).text(data.source))).appendTo($table);
       }
       this.code(this.$scrollback, $container.html(), [], true);
       this.termscroll();

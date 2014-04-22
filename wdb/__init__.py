@@ -1,5 +1,4 @@
 # *-* coding: utf-8 *-*
-from __future__ import with_statement
 # This file is part of wdb
 #
 # wdb Copyright (C) 2012-2014  Florian Mounier, Kozea
@@ -15,6 +14,7 @@ from __future__ import with_statement
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import with_statement
 __version__ = '2.0.0'
 
 from ._compat import execute, StringIO, to_unicode_string, escape, loads
@@ -248,7 +248,7 @@ class Wdb(object):
         if self.tracing:
             return
         self.reset()
-        log.info('Starting trace on %r' % self.thread)
+        log.info('Starting trace')
         frame = frame or sys._getframe().f_back
         # Setting trace without pausing
         self.set_trace(frame, break_=False)
@@ -283,7 +283,7 @@ class Wdb(object):
             del frame.f_trace
             frame = frame.f_back
         sys.settrace(None)
-        log.info('Stopping trace on %r' % self.thread)
+        log.info('Stopping trace')
 
     def set_until(self, frame, lineno=None):
         """Stop on the next line number."""
@@ -356,21 +356,30 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self, obj):
+    def safe_better_repr(self, obj, context=None):
         """Repr with inspect links on objects"""
-        try:
-            rv = self.better_repr(obj)
-        except Exception:
-            rv = None
-        if rv:
-            return rv
+        context = context or {}
+        if id(obj) not in context:
+            recursive = False
+            context[id(obj)] = obj
+            try:
+                rv = self.better_repr(obj)
+            except Exception:
+                rv = None
+            if rv:
+                return rv
+        else:
+            recursive = True
 
         self.obj_cache[id(obj)] = obj
-        return '<a href="%d" class="inspect">%s</a>' % (
-            id(obj), escape(repr(obj)))
+        return '<a href="%d" class="inspect">%s%s</a>' % (
+            id(obj),
+            'Recursion of ' if recursive else '',
+            escape(repr(obj)))
 
-    def better_repr(self, obj):
+    def better_repr(self, obj, context=None):
         """Repr with html decorations"""
+        context = context or None
         if isinstance(obj, dict):
             if type(obj) != dict:
                 dict_repr = type(obj).__name__ + '({'
@@ -382,12 +391,14 @@ class Wdb(object):
                 dict_repr += '<table>'
                 dict_repr += ''.join([
                     '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
-                    '<td>' + self.safe_better_repr(val) + '</td></tr>'
+                    '<td>' + self.safe_better_repr(val, context) +
+                    '</td></tr>'
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
                 dict_repr += '</table>'
             else:
                 dict_repr += ', '.join([
-                    self.safe_repr(key) + ': ' + self.safe_better_repr(val)
+                    self.safe_repr(key) + ': ' + self.safe_better_repr(
+                        val, context)
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
@@ -416,7 +427,7 @@ class Wdb(object):
                 closer = '\n' + closer
 
             iter_repr += splitter.join(
-                [self.safe_better_repr(val) for val in obj])
+                [self.safe_better_repr(val, context) for val in obj])
 
             iter_repr += closer
             return iter_repr
@@ -549,8 +560,8 @@ class Wdb(object):
             exception='Wdb', exception_description='Stepping',
             init=None):
         """User interaction handling blocking on socket receive"""
-        log.info('Interaction for %r -> %r %r %r %r' % (
-            self.thread, frame, tb, exception, exception_description))
+        log.info('Interaction %r %r %r %r' % (
+            frame, tb, exception, exception_description))
         self.stepping = True
 
         if not self.connected:

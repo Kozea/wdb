@@ -1,3 +1,5 @@
+import inspect
+import dis
 
 
 def pretty_frame(frame):
@@ -9,3 +11,25 @@ def pretty_frame(frame):
         )
     else:
         return 'None'
+
+
+def get_source(obj):
+    try:
+        return inspect.getsource(obj)
+    except:
+        try:
+            return dis.dis(obj)
+        except:
+            return ''
+
+
+def get_doc(obj):
+    doc = inspect.getdoc(obj)
+    com = inspect.getcomments(obj)
+    if doc and com:
+        return '%s\n\n(%s)' % (doc, com)
+    elif doc:
+        return doc
+    elif com:
+        return com
+    return ''

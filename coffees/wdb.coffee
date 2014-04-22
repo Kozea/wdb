@@ -383,26 +383,26 @@ specify a module like `logging.config`.
     @code(@$scrollback, data.for, ['prompted'])
     $container = $('<div>')
     $table = $('<table>', class: 'object').appendTo($container)
-    $table.append(
+    $core_head =
       $('<thead>', class: 'toggle hidden').append(
         $('<tr>')
           .append($('<td>', class: 'core', colspan: 2)
-          .text('Core Members'))))
+          .text('Core Members'))).appendTo($table)
     $core_tbody = $('<tbody>', class: 'core hidden').appendTo($table)
 
-    $table.append(
+    $method_head =
       $('<thead>', class: 'toggle hidden').append(
         $('<tr>')
           .append($('<td>', class: 'method', colspan: 2)
-          .text('Methods'))))
+          .text('Methods'))).appendTo($table)
     $method_tbody = $('<tbody>', class: 'method hidden').appendTo($table)
 
-    $table.append(
-      $('<thead>', class: 'toggle shown').append(
+    $attr_head =
+      $('<thead>', class: 'toggle hidden').append(
         $('<tr>').append(
           $('<td>', class: 'attr', colspan: 2)
-            .text('Attributes'))))
-    $attr_tbody = $('<tbody>', class: 'attr shown').appendTo($table)
+            .text('Attributes'))).appendTo($table)
+    $attr_tbody = $('<tbody>', class: 'attr hidden').appendTo($table)
 
     for key, val of data.val
       $tbody = $attr_tbody
@@ -414,6 +414,43 @@ specify a module like `logging.config`.
       $tbody.append($('<tr>')
         .append($('<td>').text(key))
         .append($('<td>').html(val.val)))
+
+    if $core_tbody.find('tr').size() is 0
+      $core_head.remove()
+      $core_tbody.remove()
+
+    if $attr_tbody.find('tr').size() is 0
+      $attr_head.remove()
+      $attr_tbody.remove()
+
+    if $method_tbody.find('tr').size() is 0
+      $method_head.remove()
+      $method_tbody.remove()
+
+    if data.doc
+      $table.append(
+        $('<thead>', class: 'toggle hidden').append(
+          $('<tr>').append(
+            $('<td>', class: 'doc', colspan: 2)
+              .text('Documentation'))))
+
+      $('<tbody>', class: 'doc hidden').append(
+        $('<tr>').append(
+          $('<td>', class: 'doc', colspan: 2)
+            .text(data.doc))).appendTo($table)
+
+    if data.source
+      $table.append(
+        $('<thead>', class: 'toggle hidden').append(
+          $('<tr>').append(
+            $('<td>', class: 'source', colspan: 2)
+              .text('Source'))))
+
+      $('<tbody>', class: 'source hidden').append(
+        $('<tr>').append(
+          $('<td>', class: 'source', colspan: 2)
+            .text(data.source))).appendTo($table)
+
     @code(@$scrollback, $container.html(), [], true)
     @termscroll()
     @$eval.val('')
