@@ -1,6 +1,6 @@
 [Unit]
 Description=Wdb server
-After=syslog.target
+After=network.target
 
 [Service]
 ExecStart=/usr/bin/wdb.server.py

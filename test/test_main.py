@@ -40,4 +40,3 @@ def test_main_on_running_script(socket):
 def test_main_on_unexisting_script(socket):
     # If it doesn't timeout this is good
     socket.join()
-
