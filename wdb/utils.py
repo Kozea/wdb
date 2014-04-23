@@ -33,3 +33,11 @@ def get_doc(obj):
     elif com:
         return com
     return ''
+
+
+def executable_line(line):
+    line = line.strip()
+    return not (
+        (not line or (line[0] == '#') or
+         (line[:3] == '"""') or
+         line[:3] == "'''"))

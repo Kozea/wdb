@@ -25,13 +25,14 @@ from .breakpoint import (
 
 from collections import defaultdict
 from .ui import Interaction, dump
-from .utils import pretty_frame
+from .utils import pretty_frame, executable_line
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
 from multiprocessing.connection import Client
 from uuid import uuid4
 import dis
+import re
 import os
 import logging
 import sys
@@ -138,8 +139,21 @@ class Wdb(object):
         self.reset()
         if isinstance(cmd, str):
             cmd = compile(cmd, fn or "<wdb>", "exec")
+        if fn:
+            from linecache import getline
+            lno = 1
+            while True:
+                line = getline(fn, lno, globals)
+                if line is None:
+                    lno = None
+                    break
+                if executable_line(line):
+                    break
+                lno += 1
+
         self.start_trace()
-        self.breakpoints.add(Breakpoint(fn, temporary=True))
+        if lno is not None:
+            self.breakpoints.add(LineBreakpoint(fn, lno, temporary=True))
         try:
             execute(cmd, globals, locals)
         finally:

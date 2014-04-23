@@ -272,12 +272,17 @@ code
       &:before
         border-color: $col $col $bg $bg
 
+$shift: 4%
+$margin: 2%
+
 .traceline
   transition: border 750ms
   margin: 0 0 1em 1em
   font: $code-font
   clear: both
   overflow: hidden
+  width: 100% - $shift - $margin
+  margin-left: $shift + $margin
 
   +traceline($trace-bg)
   &:nth-child(odd)
@@ -287,6 +292,9 @@ code
     +traceline(darken($trace-bg, 5%))
 
   &.selected
+    width: 100% - $margin
+    margin-left: $margin
+
     +traceline(darken($trace-bg, 10%))
     background-color: darken($trace-bg, 10%)
 
@@ -312,6 +320,7 @@ code
       float: right
       line-height: 1.2
       color: $trace-fun
+      padding-right: 2%
 
       &:before
         content: ''
