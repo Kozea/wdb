@@ -24,9 +24,9 @@ import logging
 import json
 from wdb_server.state import (
     sockets, websockets, syncwebsockets, breakpoints)
+
 from multiprocessing import Process
 from uuid import uuid4
-import psutil
 
 
 log = logging.getLogger('wdb_server')
@@ -154,6 +154,8 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.uuid = str(uuid4())
         syncwebsockets.add(self.uuid, self)
+        if not LibPythonWatcher:
+            syncwebsockets.send(self.uuid, 'StartLoop')
 
     def on_message(self, message):
         if '|' in message:
@@ -182,35 +184,7 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             websockets.close(data)
             websockets.remove(data)
         elif cmd == 'ListProcesses':
-            remaining_pids = []
-            for proc in psutil.process_iter():
-                cl = proc.cmdline()
-                if len(cl) == 0:
-                    continue
-                binary = cl[0].split('/')[-1]
-                if (
-                        'python' in binary and
-                        proc.is_running() and
-                        proc.status() != psutil.STATUS_ZOMBIE):
-                    try:
-                        for thread in proc.threads():
-                            syncwebsockets.send(self.uuid, 'AddProcess', {
-                                'pid': thread.id,
-                                'user': proc.username(),
-                                'cmd': ' '.join(proc.cmdline()),
-                                'threads': proc.num_threads()
-                                if thread.id == proc.pid else 0,
-                                'threadof': None if thread.id == proc.pid
-                                else proc.pid,
-                                'time': proc.create_time(),
-                                'mem': proc.memory_percent(),
-                                'cpu': proc.cpu_percent(interval=.01)
-                            })
-                            remaining_pids.append(thread.id)
-                    except:
-                        log.warn('', exc_info=True)
-                        continue
-            syncwebsockets.send(self.uuid, 'KeepProcess', remaining_pids)
+            refresh_process(self.uuid)
         elif cmd == 'Pause':
             if int(data) == os.getpid():
 
@@ -258,12 +232,17 @@ tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
 
 tornado.options.parse_command_line()
+from wdb_server.utils import refresh_process, LibPythonWatcher
+
 StyleHandler.theme = tornado.options.options.theme
 
 for l in (log, logging.getLogger('tornado.access'),
           logging.getLogger('tornado.application'),
           logging.getLogger('tornado.general')):
     l.setLevel(10 if tornado.options.options.debug else 30)
+
+if LibPythonWatcher:
+    LibPythonWatcher()
 
 server = tornado.web.Application(
     [

@@ -130,7 +130,7 @@
   };
 
   ws_message = function(event) {
-    var $tr, cmd, data, message, pipe, tr, _i, _len, _ref, _ref1;
+    var $tr, cmd, data, message, pipe, tr, _i, _len, _ref, _ref1, _results;
     wait = 25;
     message = event.data;
     pipe = message.indexOf('|');
@@ -158,16 +158,22 @@
         return make_process_line(data);
       case 'KeepProcess':
         _ref = $('.processes tbody tr');
+        _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           tr = _ref[_i];
           $tr = $(tr);
           if (_ref1 = parseInt($tr.attr('data-pid')), __indexOf.call(data, _ref1) < 0) {
-            $tr.remove();
+            _results.push($tr.remove());
+          } else {
+            _results.push(void 0);
           }
         }
-        return setTimeout((function() {
+        return _results;
+        break;
+      case 'StartLoop':
+        return setInterval((function() {
           return ws.send('ListProcesses');
-        }), 1000);
+        }), 2000);
     }
   };
 
