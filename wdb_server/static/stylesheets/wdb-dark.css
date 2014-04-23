@@ -286,6 +286,8 @@ code {
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
   overflow: hidden;
+  width: 94%;
+  margin-left: 6%;
   background-color: #1b1b1b; }
   .traceline:before {
     background-color: #1b1b1b;
@@ -319,6 +321,8 @@ code {
         .traceline:hover .tracefunfun .tracefun:before {
           border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21; }
   .traceline.selected {
+    width: 98%;
+    margin-left: 2%;
     background-color: #010101;
     background-color: #010101; }
     .traceline.selected:before {
@@ -356,7 +360,8 @@ code {
       text-align: right;
       float: right;
       line-height: 1.2;
-      color: #88f; }
+      color: #88f;
+      padding-right: 2%; }
       .traceline .tracefunfun .tracefun:before {
         content: '';
         width: 0;

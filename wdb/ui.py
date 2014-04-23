@@ -2,11 +2,10 @@
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
-from .utils import get_source, get_doc
+from .utils import get_source, get_doc, executable_line
 from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
-from linecache import getline
 from logging import getLogger
 from shutil import move
 from tempfile import gettempdir
@@ -386,6 +385,8 @@ class Interaction(object):
         return True
 
     def do_break(self, data):
+        from linecache import getline
+
         brk = loads(data)
         break_fail = lambda x: fail(
             self.db, 'Break', 'Break on %s failed' % (
@@ -413,10 +414,7 @@ class Interaction(object):
                 break_fail('Line does not exist')
                 return
 
-            line = line.strip()
-            if ((not line or (line[0] == '#') or
-                 (line[:3] == '"""') or
-                 line[:3] == "'''")):
+            if not executable_line(line):
                 break_fail('Blank line or comment')
                 return
 

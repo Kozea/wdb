@@ -173,5 +173,6 @@ $ ->
       $a.attr 'class', $a.attr('class').replace(/plus/g, 'minus')
       false)
 
-  $('.processes [type=button]').on 'click', (e) ->
-    ws.send('RunFile|' + $(this).siblings('[type=text]').val())
+  $('.runfile').on 'submit', ->
+    ws.send('RunFile|' + $(this).find('[type=text]').val())
+    false

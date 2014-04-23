@@ -242,8 +242,9 @@
       $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
       return false;
     });
-    return $('.processes [type=button]').on('click', function(e) {
-      return ws.send('RunFile|' + $(this).siblings('[type=text]').val());
+    return $('.runfile').on('submit', function() {
+      ws.send('RunFile|' + $(this).find('[type=text]').val());
+      return false;
     });
   });
 
