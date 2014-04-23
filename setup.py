@@ -6,11 +6,17 @@ wdb
 """
 import os
 import re
+import sys
 from setuptools import setup
 
 ROOT = os.path.dirname(__file__)
 with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
     __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
+
+requires = [
+    "tornado", "log_colorizer", "jedi", "filemagic", "psutil"]
+if sys.platform == 'linux':
+    requires.append('pyinotify')
 
 options = dict(
     name="wdb",
@@ -24,8 +30,7 @@ options = dict(
     platforms="Any",
     scripts=['wdb.server.py'],
     packages=['wdb', 'wdb_server'],
-    install_requires=[
-        "tornado", "log_colorizer", "jedi", "filemagic", "psutil"],
+    install_requires=requires,
     package_data={
         'wdb_server': [
             'static/fonts/*',

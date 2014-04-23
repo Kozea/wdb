@@ -32,7 +32,6 @@ from log_colorizer import get_color_logger
 from multiprocessing.connection import Client
 from uuid import uuid4
 import dis
-import re
 import os
 import logging
 import sys

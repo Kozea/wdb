@@ -105,9 +105,12 @@ ws_message = (event) ->
         $tr = $ tr
         if parseInt($tr.attr('data-pid')) not in data
           $tr.remove()
-      setTimeout (->
+
+    when 'StartLoop'
+    # In case inotify is not available
+      setInterval (->
         ws.send('ListProcesses')
-      ), 1000
+      ), 2000
 
 create_socket = ->
   ws = new WebSocket "ws://#{location.host}/status"
