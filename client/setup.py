@@ -6,39 +6,25 @@ wdb
 """
 import os
 import re
-import sys
 from setuptools import setup
 
 ROOT = os.path.dirname(__file__)
 with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
     __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
 
-requires = [
-    "tornado", "log_colorizer", "jedi", "filemagic", "psutil"]
-if sys.platform == 'linux':
-    requires.append('pyinotify')
-
 options = dict(
     name="wdb",
     version=__version__,
-    description="An improbable web debugger through WebSockets",
+    description="An improbable web debugger through WebSockets (client only)",
     long_description="See http://github.com/Kozea/wdb",
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
     url="http://github.com/Kozea/wdb",
     license="GPLv3",
     platforms="Any",
-    scripts=['wdb.server.py'],
-    packages=['wdb', 'wdb_server'],
-    install_requires=requires,
+    packages=['wdb'],
+    install_requires=["log_colorizer", "jedi"],
     package_data={
-        'wdb_server': [
-            'static/fonts/*',
-            'static/stylesheets/*',
-            'static/img/*.png',
-            'static/javascripts/wdb/*.min.js',
-            'templates/*.html'
-        ],
         'wdb': [
             'res/*'
         ]

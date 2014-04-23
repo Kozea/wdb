@@ -169,13 +169,13 @@ class Wdb(object):
         tries = 0
         while not self._socket and tries < 10:
             try:
-                time.sleep(.25)
+                time.sleep(.2 * tries)
                 self._socket = Client((SOCKET_SERVER, SOCKET_PORT))
             except socket.error:
                 tries += 1
                 log.warning(
-                    'You must start wdb.server. '
-                    '(Retrying on %s:%d) [Try #%d]' % (
+                    'You must start/install wdb.server '
+                    '(Retrying on %s:%d) [Try #%d/10]' % (
                         SOCKET_SERVER, SOCKET_PORT, tries))
 
         if not self._socket:

@@ -16,18 +16,29 @@ The wdb clients allow step by step debugging, in-program python code execution, 
 
 Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
-**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4α) and pypy.
+**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4) and pypy.
 Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
+
+Even betterer, it is now possible to pause a currently running python process/thread using code injection from the web interface. (This requires gdb)
 
 In other words it's a very enhanced version of pdb directly in your browser with nice features.
 
 
 ## Installation:
 
+Global installation:
+
+```
+    $ pip install wdb.server
+```
+
+In virtualenv or with a different python installation:
+
 ```
     $ pip install wdb
 ```
 
+(You must have the server installed and running)
 
 ## Quick test
 
@@ -44,6 +55,8 @@ Next run:
 ```
 
 Wdb will open a debugging window right in your browser, paused at the beginning of your program.
+
+You can access to <http://localhost:1984/> to have an overview of the server.
 
 NB: You have to start the server only once. Multiple Debugging sessions can be run simultaneously without problem.
 
@@ -283,6 +296,8 @@ NB: Hotkeys with arrows are purposely not triggered in the eval prompt to avoid 
 To see which debugging session are currently open, open your browser at <http://localhost:1984/>.
 You can also close crashed session.
 
+From there you should also see all python process and their threads running and you can try to pause them during their execution to do step by step debugging and current variable inspection. **This is highly experimental and requires gdb to inject python code into a running python process.**
+
 
 ## Importing wdb each time is exhausting
 
@@ -330,11 +345,11 @@ Wdb has dynamic code completion in eval prompt thanks to [jedi](https://github.c
 
 ## Browser Support
 
-wdb is based on websockets and since 3812417 its layout relies on flexbox, browser requirement is now :
+wdb is based on websockets and since 3812417 its layout relies on flexbox, browser requirements are now :
 
-- Chrome 29
-- Firefox 22
-- IE 11
+- Chrome >= 29
+- Firefox >= 22
+- IE >= 11
 
 Better update you browser in any case.
 If it doesn't work with one of these version please report it.
@@ -364,6 +379,8 @@ Wdb is now partially tested, so if you want to contribute be sure to run the tes
 
 ```
     $ pip install pytest
+    $ pip install -e client -e server
+    $ cd test
     $ py.test
 ```
 
@@ -381,7 +398,7 @@ This library is licensed under GPLv3
 wdb - An improbable web debugger through WebSockets
 
 
-    wdb Copyright (C) 2013  Florian Mounier, Kozea
+    wdb Copyright (C) 2014  Florian Mounier, Kozea
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
