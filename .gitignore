@@ -2,3 +2,5 @@ bower_components/
 node_modules/
 *.map
 *.src.coffee
+client/build/
+server/build/
