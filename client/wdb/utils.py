@@ -1,6 +1,7 @@
 import inspect
 import dis
-
+import sys
+from ._compat import StringIO
 
 def pretty_frame(frame):
     if frame:
@@ -17,9 +18,16 @@ def get_source(obj):
     try:
         return inspect.getsource(obj)
     except:
+        old_stdout = sys.stdout
+        sys.stdout = StringIO()
         try:
-            return dis.dis(obj)
+            dis.dis(obj)
+            sys.stdout.seek(0)
+            rv = sys.stdout.read()
+            sys.stdout = old_stdout
+            return rv
         except:
+            sys.stdout = old_stdout
             return ''
 
 

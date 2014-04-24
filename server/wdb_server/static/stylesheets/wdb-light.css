@@ -134,6 +134,8 @@ body, html {
       #wdb > article #source #interpreter {
         flex: 1;
         overflow-y: auto; }
+        #wdb > article #source #interpreter:focus {
+          outline: none; }
     #wdb > article #traceback {
       flex: 3;
       overflow-y: auto; }
@@ -164,7 +166,7 @@ table {
   table tr {
     color: #000; }
     table tr[data-tid] {
-      color: #ccc; }
+      color: #777; }
     table tr td {
       padding: 0.25em;
       border: 1px solid #dfdfdf; }
@@ -190,7 +192,7 @@ h1 {
   text-overflow: ellipsis;
   overflow: hidden; }
   h1 small {
-    color: #ccc;
+    color: #777;
     display: block;
     font-size: 0.5em;
     font-variant: normal;
@@ -205,6 +207,8 @@ code {
   white-space: pre-wrap;
   word-break: break-all; }
 
+#source-editor:focus {
+  outline: none; }
 #source-editor > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-weight: bold;
@@ -216,7 +220,7 @@ code {
     right: -2em;
     content: 'Edit Mode';
     background: #e4e4e4;
-    color: #ccc;
+    color: #777;
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
     padding: 0.2em 2em;
@@ -512,7 +516,7 @@ code, code span {
 .trace_500 {
   margin: 0 1em 1em; }
   .trace_500 .flno {
-    color: #ccc;
+    color: #777;
     font-size: 1.3em;
     float: left; }
   .trace_500 .fun {

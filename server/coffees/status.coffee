@@ -73,7 +73,7 @@ get_proc_thread_val = (obj, elt) ->
         parts.push "<abbr title=\"#{part}\">#{part.split('/').slice(-1)}</abbr>"
       else if part.indexOf(':') is 1 and part.indexOf('\\') is 2
         parts.push "<abbr title=\"#{part}\">
-          #{part.slice(3, -1).split('\\').slice(-1)}</abbr>"
+          #{part.slice(3).split('\\').slice(-1)}</abbr>"
       else
         parts.push part
     val = parts.join(' ')
@@ -82,7 +82,7 @@ get_proc_thread_val = (obj, elt) ->
 make_process_line = (proc) ->
   if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).size()
     for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
-      $tr.find(".#{elt}").text(get_proc_thread_val proc, elt)
+      $tr.find(".#{elt}").html(get_proc_thread_val proc, elt)
   else
     line = "<tr data-pid=\"#{proc.pid}\"
     #{ if proc.threadof then 'data-threadof="' + proc.threadof + '"' else ''}>"
@@ -220,7 +220,8 @@ $ ->
 
   $('.processes tbody')
     .on('click', '.pause', (e) ->
-      ws.send('Pause|' +  $(this).closest('tr').find('.pid').text())
+      $tr = $(this).closest('tr')
+      ws.send('Pause|' + ($tr.attr('data-pid') or $tr.attr('data-tid')))
       false)
     .on('click', '.minus', (e) ->
       $a = $(this)

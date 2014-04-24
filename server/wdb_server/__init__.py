@@ -188,6 +188,7 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             refresh_process(self.uuid)
         elif cmd == 'Pause':
             if int(data) == os.getpid():
+                log.debug('Pausing self')
 
                 def self_shell(variables):
                     # Debugging self
@@ -197,6 +198,7 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
                 Process(target=self_shell, args=(globals(),)).start()
 
             else:
+                log.debug('Pausing %s' % data)
                 tornado.process.Subprocess([
                     'gdb', '-p', data,
                     '-batch'] + [

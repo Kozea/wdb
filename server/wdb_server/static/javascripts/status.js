@@ -130,7 +130,7 @@
         if (part.indexOf('/') === 0) {
           parts.push("<abbr title=\"" + part + "\">" + (part.split('/').slice(-1)) + "</abbr>");
         } else if (part.indexOf(':') === 1 && part.indexOf('\\') === 2) {
-          parts.push("<abbr title=\"" + part + "\"> " + (part.slice(3, -1).split('\\').slice(-1)) + "</abbr>");
+          parts.push("<abbr title=\"" + part + "\"> " + (part.slice(3).split('\\').slice(-1)) + "</abbr>");
         } else {
           parts.push(part);
         }
@@ -147,7 +147,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         elt = _ref[_i];
-        _results.push($tr.find("." + elt).text(get_proc_thread_val(proc, elt)));
+        _results.push($tr.find("." + elt).html(get_proc_thread_val(proc, elt)));
       }
       return _results;
     } else {
@@ -318,7 +318,9 @@
       return false;
     });
     $('.processes tbody').on('click', '.pause', function(e) {
-      ws.send('Pause|' + $(this).closest('tr').find('.pid').text());
+      var $tr;
+      $tr = $(this).closest('tr');
+      ws.send('Pause|' + ($tr.attr('data-pid') || $tr.attr('data-tid')));
       return false;
     }).on('click', '.minus', function(e) {
       var $a, $tr;
