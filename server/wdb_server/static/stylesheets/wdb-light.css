@@ -153,6 +153,9 @@ body, html {
 a {
   color: #000; }
 
+abbr {
+  font-weight: bold; }
+
 table {
   font-family: "Source Code Pro" !important;
   width: 100%; }
@@ -160,7 +163,7 @@ table {
     cursor: pointer; }
   table tr {
     color: #000; }
-    table tr[data-threadof] {
+    table tr[data-tid] {
       color: #ccc; }
     table tr td {
       padding: 0.25em;
