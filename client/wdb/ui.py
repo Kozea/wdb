@@ -23,8 +23,10 @@ except ImportError:
     magic = None
 
 import os
+import re
 import sys
 import time
+import pkgutil
 import traceback
 log = getLogger('wdb.ui')
 
@@ -293,6 +295,7 @@ class Interaction(object):
 
     def do_eval(self, data):
         redir = None
+        suggest = None
         raw_data = data.strip()
         if raw_data.startswith('!<'):
             filename = raw_data[2:].strip()
@@ -326,6 +329,15 @@ class Interaction(object):
                 compiled_code = compile(data, '<stdin>', 'single')
                 l = self.locals[self.index]
                 execute(compiled_code, self.get_globals(), l)
+            except NameError as e:
+                m = re.match("name '(.+)' is not defined", str(e))
+                if m:
+                    name = m.groups()[0]
+                    for loader, module, ispkg in pkgutil.iter_modules():
+                        if module == name:
+                            suggest = 'import %s' % module
+                            break
+                self.db.hooked = handle_exc()
             except Exception:
                 self.db.hooked = handle_exc()
 
@@ -339,7 +351,7 @@ class Interaction(object):
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
                 'result': escape('%s to file %s' % (
-                    'Appended' if append else 'Written', redir))
+                    'Appended' if append else 'Written', redir),)
             }))
         else:
             rv = escape('\n'.join(out) + '\n'.join(err))
@@ -357,7 +369,8 @@ class Interaction(object):
 
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
-                'result': result
+                'result': result,
+                'suggest': suggest
             }))
 
     def do_ping(self, data):

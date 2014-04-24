@@ -69,7 +69,9 @@ body, html{
           width: 100%;}}
       #interpreter{
         flex: 1;
-        overflow-y: auto;}}
+        overflow-y: auto;
+        &:focus{
+          outline: none;}}}
     #traceback{
       flex: 3;
       overflow-y: auto;}}
@@ -135,6 +137,8 @@ code{
   white-space: pre-wrap;
   word-break: break-all;}
 #source-editor{
+  &:focus{
+    outline: none;}
   > .CodeMirror{
     font-family: "Source Code Pro" !important;
     font-weight: bold;

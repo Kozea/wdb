@@ -388,6 +388,15 @@
         this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
         this.$source.find('#source-editor').on('mouseup', this.paste_target.bind(this));
         $('#deactivate').click(this.disable.bind(this));
+        this.$interpreter.on('keydown', (function(_this) {
+          return function(e) {
+            var _ref, _ref1;
+            if (e.ctrlKey && (37 <= (_ref = e.keyCode) && _ref <= 40) || (118 <= (_ref1 = e.keyCode) && _ref1 <= 122)) {
+              return true;
+            }
+            return _this.$eval.focus();
+          };
+        })(this));
         false;
         this.started = true;
       }
@@ -651,7 +660,7 @@
       }
       if (snippet) {
         this.ws.send('Eval', snippet);
-        this.$eval.val(this.$eval.val() + '…').trigger('autosize.resize').prop('disabled', true);
+        this.$eval.val(this.$eval.val() + '...').trigger('autosize.resize').prop('disabled', true);
         return this.working();
       }
     };
@@ -690,7 +699,7 @@
       snippet = this.$eval.val();
       this.code(this.$scrollback, data["for"], ['prompted']);
       this.code(this.$scrollback, data.result, [], true);
-      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
+      this.$eval.val(data.suggest || '').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
       this.$completions.attr('style', '');
       this.termscroll();
       return this.chilling();
@@ -1044,7 +1053,7 @@
     };
 
     Wdb.prototype.searchback_stop = function(validate) {
-      if (validate) {
+      if (validate === true) {
         this.$eval.val(this.$backsearch.text()).trigger('autosize.resize');
       }
       this.$backsearch.html('');

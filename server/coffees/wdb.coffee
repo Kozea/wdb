@@ -72,6 +72,11 @@ class Wdb extends Log
       @$watchers.on 'click', '.watching .name', @unwatch.bind @
       @$source.find('#source-editor').on 'mouseup', @paste_target.bind @
       $('#deactivate').click @disable.bind @
+      @$interpreter.on 'keydown', (e) =>
+        if e.ctrlKey and 37 <= e.keyCode <= 40 or 118 <= e.keyCode <= 122
+          return true
+        @$eval.focus()
+
       false
 
       @started = true
@@ -271,7 +276,7 @@ class Wdb extends Log
       return
     if snippet
       @ws.send 'Eval', snippet
-      @$eval.val(@$eval.val() + '…')
+      @$eval.val(@$eval.val() + '...')
         .trigger('autosize.resize')
         .prop('disabled', true)
       @working()
@@ -364,7 +369,7 @@ specify a module like `logging.config`.
     @code(@$scrollback, data.for, ['prompted'])
     @code(@$scrollback, data.result, [], true)
     @$eval
-      .val('')
+      .val(data.suggest or '')
       .prop('disabled', false)
       .attr('data-index', -1)
       .trigger('autosize.resize')
@@ -649,7 +654,7 @@ specify a module like `logging.config`.
     @backsearch = Math.max(@backsearch - 1, 1)
 
   searchback_stop: (validate) ->
-    if validate
+    if validate is true
       @$eval
         .val(@$backsearch.text())
         .trigger('autosize.resize')

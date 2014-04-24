@@ -51,6 +51,7 @@ else:
         def notified(self, notifier):
             log.debug('Got notified for %s' % self.files)
             refresh_process()
+            log.debug('Process refreshed')
 
         def close(self):
             log.debug('Closing for %s' % self.files)

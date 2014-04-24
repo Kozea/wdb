@@ -93,6 +93,9 @@ body, html
         flex: 1
         overflow-y: auto
 
+        &:focus
+          outline: none
+
     #traceback
       flex: 3
       overflow-y: auto
@@ -174,6 +177,9 @@ code
   word-break: break-all
 
 #source-editor
+  &:focus
+    outline: none
+
   > .CodeMirror
     font-family: "Source Code Pro" !important
     font-weight: bold

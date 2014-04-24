@@ -134,6 +134,8 @@ body, html {
       #wdb > article #source #interpreter {
         flex: 1;
         overflow-y: auto; }
+        #wdb > article #source #interpreter:focus {
+          outline: none; }
     #wdb > article #traceback {
       flex: 3;
       overflow-y: auto; }
@@ -205,6 +207,8 @@ code {
   white-space: pre-wrap;
   word-break: break-all; }
 
+#source-editor:focus {
+  outline: none; }
 #source-editor > .CodeMirror {
   font-family: "Source Code Pro" !important;
   font-weight: bold;
