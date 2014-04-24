@@ -1,5 +1,5 @@
 (function() {
-  var Log, create_socket, make_brk_line, make_process_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
+  var Log, create_socket, get_proc_thread_val, make_brk_line, make_process_line, make_thread_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Log = (function() {
@@ -87,28 +87,67 @@
     return _results;
   };
 
+  get_proc_thread_val = function(obj, elt) {
+    var part, parts, timeSince, val, _i, _len, _ref;
+    val = obj[elt];
+    if (val == null) {
+      return '∅';
+    }
+    if (elt === 'time') {
+      timeSince = function(date) {
+        var interval, seconds;
+        seconds = Math.floor((new Date() - date) / 1000);
+        interval = Math.floor(seconds / 31536000);
+        if (interval > 1) {
+          return interval + "y";
+        }
+        interval = Math.floor(seconds / 2592000);
+        if (interval > 1) {
+          return interval + "mo";
+        }
+        interval = Math.floor(seconds / 86400);
+        if (interval > 1) {
+          return interval + "d";
+        }
+        interval = Math.floor(seconds / 3600);
+        if (interval > 1) {
+          return interval + "h";
+        }
+        interval = Math.floor(seconds / 60);
+        if (interval > 1) {
+          return interval + "m";
+        }
+        return Math.floor(seconds) + "s";
+      };
+      val = timeSince(1000 * val);
+    } else if (elt === 'mem' || elt === 'cpu') {
+      val = val.toFixed(2) + '%';
+    } else if (elt === 'cmd') {
+      parts = [];
+      _ref = val.split(' ');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        part = _ref[_i];
+        if (part.indexOf('/') === 0) {
+          parts.push("<abbr title=\"" + part + "\">" + (part.split('/').slice(-1)) + "</abbr>");
+        } else if (part.indexOf(':') === 1 && part.indexOf('\\') === 2) {
+          parts.push("<abbr title=\"" + part + "\"> " + (part.slice(3, -1).split('\\').slice(-1)) + "</abbr>");
+        } else {
+          parts.push(part);
+        }
+      }
+      val = parts.join(' ');
+    }
+    return val;
+  };
+
   make_process_line = function(proc) {
-    var $tr, elt, get_val, line, _i, _j, _len, _len1, _ref, _ref1, _results;
-    get_val = function(elt) {
-      var val;
-      val = proc[elt];
-      if (val == null) {
-        val = '∅';
-      }
-      if (elt === 'time') {
-        val = (new Date().getTime() / 1000) - val;
-        val = Math.round(val) + ' s';
-      } else if (elt === 'mem' || elt === 'cpu') {
-        val = val.toFixed(2) + '%';
-      }
-      return val;
-    };
+    var $tr, elt, line, _i, _j, _len, _len1, _ref, _ref1, _results;
     if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
       _ref = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         elt = _ref[_i];
-        _results.push($tr.find("." + elt).text(get_val(elt)));
+        _results.push($tr.find("." + elt).text(get_proc_thread_val(proc, elt)));
       }
       return _results;
     } else {
@@ -116,21 +155,50 @@
       _ref1 = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
         elt = _ref1[_j];
-        line += "<td class=\"" + elt + "\">" + (get_val(elt)) + "</td>";
+        line += "<td class=\"rowspan " + elt + "\"> " + (get_proc_thread_val(proc, elt)) + "</td>";
       }
+      line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a></td>";
       line += "<td class=\"action\">";
       line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
-      if (proc.threads > 1) {
-        line += "<a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a> ";
-      }
       line += "</td>";
       line += '</tr>';
       return $('.processes tbody').append($(line));
     }
   };
 
+  make_thread_line = function(thread) {
+    var $next, $proc, $tr, elt, line, _i, _len, _ref, _results;
+    $proc = $(".processes tbody tr[data-pid=" + thread.of + "]");
+    if (!$proc.size()) {
+      return;
+    }
+    if (($tr = $(".processes tbody tr[data-tid=" + thread.id + "]")).size()) {
+      _ref = ['id', 'of'];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        elt = _ref[_i];
+        _results.push($tr.find("." + elt).text(get_proc_thread_val(thread, elt)));
+      }
+      return _results;
+    } else {
+      line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\">";
+      line += "<td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>";
+      line += "<td class=\"action\">";
+      line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
+      line += "</td>";
+      line += '</tr>';
+      $next = $proc.nextAll('[data-pid]');
+      if ($next.size()) {
+        $next.before(line);
+      } else {
+        $(".processes tbody").append(line);
+      }
+      return $proc.find('.rowspan').attr('rowspan', (+$proc.find('.rowspan').attr('rowspan') || 1) + 1);
+    }
+  };
+
   ws_message = function(event) {
-    var $tr, cmd, data, message, pipe, tr, _i, _len, _ref, _ref1, _results;
+    var $proc, $tr, cmd, data, message, pipe, tr, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _results, _results1;
     wait = 25;
     message = event.data;
     pipe = message.indexOf('|');
@@ -156,19 +224,38 @@
         return rm_brk_line(data);
       case 'AddProcess':
         return make_process_line(data);
+      case 'AddThread':
+        return make_thread_line(data);
       case 'KeepProcess':
-        _ref = $('.processes tbody tr');
+        _ref = $('.processes tbody tr[data-pid]');
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           tr = _ref[_i];
           $tr = $(tr);
           if (_ref1 = parseInt($tr.attr('data-pid')), __indexOf.call(data, _ref1) < 0) {
+            $(".processes [data-of=" + ($tr.attr('data-pid')) + "]").remove();
             _results.push($tr.remove());
           } else {
             _results.push(void 0);
           }
         }
         return _results;
+        break;
+      case 'KeepProcess':
+        _ref2 = $('.processes tbody tr[data-tid]');
+        _results1 = [];
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          tr = _ref2[_j];
+          $tr = $(tr);
+          if (_ref3 = parseInt($tr.attr('data-tid')), __indexOf.call(data, _ref3) < 0) {
+            $tr.remove();
+            $proc = $(".processes [data-pid=" + ($tr.attr('data-of')) + "]");
+            _results1.push($proc.attr('rowspan', +$proc.attr('rowspan') - 1));
+          } else {
+            _results1.push(void 0);
+          }
+        }
+        return _results1;
         break;
       case 'StartLoop':
         return setInterval((function() {
@@ -237,14 +324,16 @@
       var $a, $tr;
       $a = $(this);
       $tr = $a.closest('tr');
-      $("[data-threadof=" + ($tr.attr('data-pid')) + "]").hide('fast');
+      $("[data-of=" + ($tr.attr('data-pid')) + "]").hide();
+      $tr.find('.rowspan').attr('rowspan', 1);
       $a.attr('class', $a.attr('class').replace(/minus/g, 'plus'));
       return false;
     }).on('click', '.plus', function(e) {
-      var $a, $tr;
+      var $a, $tr, rowspan;
       $a = $(this);
       $tr = $a.closest('tr');
-      $("[data-threadof=" + ($tr.attr('data-pid')) + "]").show('fast');
+      rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().size();
+      $tr.find('.rowspan').attr('rowspan', rowspan + 1);
       $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
       return false;
     });

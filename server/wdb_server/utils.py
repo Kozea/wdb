@@ -64,6 +64,7 @@ def refresh_process(uuid=None):
         send = syncwebsockets.broadcast
 
     remaining_pids = []
+    remaining_tids = []
     for proc in psutil.process_iter():
         cl = proc.cmdline()
         if len(cl) == 0:
@@ -74,21 +75,24 @@ def refresh_process(uuid=None):
                 proc.is_running() and
                 proc.status() != psutil.STATUS_ZOMBIE):
             try:
+                send('AddProcess', {
+                    'pid': proc.pid,
+                    'user': proc.username(),
+                    'cmd': ' '.join(proc.cmdline()),
+                    'threads': proc.num_threads(),
+                    'time': proc.create_time(),
+                    'mem': proc.memory_percent(),
+                    'cpu': proc.cpu_percent(interval=.01)
+                })
+                remaining_pids.append(proc.pid)
                 for thread in proc.threads():
-                    send('AddProcess', {
-                        'pid': thread.id,
-                        'user': proc.username(),
-                        'cmd': ' '.join(proc.cmdline()),
-                        'threads': proc.num_threads()
-                        if thread.id == proc.pid else 0,
-                        'threadof': None if thread.id == proc.pid
-                        else proc.pid,
-                        'time': proc.create_time(),
-                        'mem': proc.memory_percent(),
-                        'cpu': proc.cpu_percent(interval=.01)
+                    send('AddThread', {
+                        'id': thread.id,
+                        'of': proc.pid
                     })
-                    remaining_pids.append(thread.id)
+                    remaining_tids.append(thread.id)
             except:
                 log.warn('', exc_info=True)
                 continue
     send('KeepProcess', remaining_pids)
+    send('KeepThreads', remaining_tids)

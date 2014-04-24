@@ -44,34 +44,82 @@ rm_brk_line = (brk) ->
     if same
       $tr.remove()
 
-make_process_line = (proc) ->
-  get_val = (elt) ->
-    val = proc[elt]
-    val = '∅' if not val?
-    if elt is 'time'
-      val = (new Date().getTime() / 1000) - val
-      val = Math.round(val) + ' s'
-    else if elt in ['mem', 'cpu']
-      val = val.toFixed(2) + '%'
-    val
+get_proc_thread_val = (obj, elt) ->
+  val = obj[elt]
+  if not val?
+    return '∅'
+  if elt is 'time'
+    timeSince = (date) ->
+      seconds = Math.floor((new Date() - date) / 1000)
+      interval = Math.floor(seconds / 31536000)
+      return interval + "y"  if interval > 1
+      interval = Math.floor(seconds / 2592000)
+      return interval + "mo"  if interval > 1
+      interval = Math.floor(seconds / 86400)
+      return interval + "d"  if interval > 1
+      interval = Math.floor(seconds / 3600)
+      return interval + "h"  if interval > 1
+      interval = Math.floor(seconds / 60)
+      return interval + "m"  if interval > 1
+      Math.floor(seconds) + "s"
 
+    val = timeSince 1000 * val
+  else if elt in ['mem', 'cpu']
+    val = val.toFixed(2) + '%'
+  else if elt is 'cmd'
+    parts = []
+    for part in val.split(' ')
+      if part.indexOf('/') is 0
+        parts.push "<abbr title=\"#{part}\">#{part.split('/').slice(-1)}</abbr>"
+      else if part.indexOf(':') is 1 and part.indexOf('\\') is 2
+        parts.push "<abbr title=\"#{part}\">
+          #{part.slice(3, -1).split('\\').slice(-1)}</abbr>"
+      else
+        parts.push part
+    val = parts.join(' ')
+  val
+
+make_process_line = (proc) ->
   if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).size()
     for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
-      $tr.find(".#{elt}").text(get_val elt)
+      $tr.find(".#{elt}").text(get_proc_thread_val proc, elt)
   else
     line = "<tr data-pid=\"#{proc.pid}\"
     #{ if proc.threadof then 'data-threadof="' + proc.threadof + '"' else ''}>"
     for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
-      line += "<td class=\"#{elt}\">#{get_val elt}</td>"
+      line += "<td class=\"rowspan #{elt}\">
+        #{get_proc_thread_val proc, elt}</td>"
+    line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\"
+        title=\"Toggle threads\"></a></td>"
     line += "<td class=\"action\">"
     line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> "
-    if proc.threads > 1
-      line += "<a href=\"\" class=\"fa fa-minus minus\"
-        title=\"Toggle threads\"></a> "
+    line += "</td>"
+    line += '</tr>'
+    $('.processes tbody').append $ line
+
+make_thread_line = (thread) ->
+  $proc = $(".processes tbody tr[data-pid=#{thread.of}]")
+  return unless $proc.size()
+
+  if ($tr = $(".processes tbody tr[data-tid=#{thread.id}]")).size()
+    for elt in ['id', 'of']
+      $tr.find(".#{elt}").text(get_proc_thread_val thread, elt)
+  else
+    line = "<tr data-tid=\"#{thread.id}\" data-of=\"#{thread.of}\">"
+
+    line += "<td class=\"id\">#{get_proc_thread_val thread, 'id'}</td>"
+    line += "<td class=\"action\">"
+    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> "
     line += "</td>"
 
     line += '</tr>'
-    $('.processes tbody').append $ line
+    $next = $proc.nextAll('[data-pid]')
+    if $next.size()
+      $next.before line
+    else
+      $(".processes tbody").append line
+    $proc.find('.rowspan').attr('rowspan',
+      (+$proc.find('.rowspan').attr('rowspan') or 1) + 1)
 
 
 ws_message = (event) ->
@@ -100,11 +148,22 @@ ws_message = (event) ->
       rm_brk_line data
     when 'AddProcess'
       make_process_line data
+    when 'AddThread'
+      make_thread_line data
     when 'KeepProcess'
-      for tr in $('.processes tbody tr')
+      for tr in $('.processes tbody tr[data-pid]')
         $tr = $ tr
         if parseInt($tr.attr('data-pid')) not in data
+          $(".processes [data-of=#{$tr.attr('data-pid')}]").remove()
           $tr.remove()
+
+    when 'KeepProcess'
+      for tr in $('.processes tbody tr[data-tid]')
+        $tr = $ tr
+        if parseInt($tr.attr('data-tid')) not in data
+          $tr.remove()
+          $proc = $(".processes [data-pid=#{$tr.attr('data-of')}]")
+          $proc.attr('rowspan', +$proc.attr('rowspan') - 1)
 
     when 'StartLoop'
     # In case inotify is not available
@@ -166,13 +225,15 @@ $ ->
     .on('click', '.minus', (e) ->
       $a = $(this)
       $tr = $a.closest('tr')
-      $("[data-threadof=#{$tr.attr('data-pid')}]").hide 'fast'
+      $("[data-of=#{$tr.attr('data-pid')}]").hide()
+      $tr.find('.rowspan').attr 'rowspan', 1
       $a.attr 'class', $a.attr('class').replace(/minus/g, 'plus')
       false)
     .on('click', '.plus', (e) ->
       $a = $(this)
       $tr = $a.closest('tr')
-      $("[data-threadof=#{$tr.attr('data-pid')}]").show 'fast'
+      rowspan = $("[data-of=#{$tr.attr('data-pid')}]").show().size()
+      $tr.find('.rowspan').attr 'rowspan', rowspan + 1
       $a.attr 'class', $a.attr('class').replace(/plus/g, 'minus')
       false)
 
