@@ -1,11 +1,7 @@
 # *-* coding: utf-8 *-*
 from .conftest import use
-from pytest import mark
-import sys
 
 
-@mark.skipif('PyPy' in sys.version,
-             reason="PyPy make some troubles with threads")
 @use('threads.py')
 def test_with_threads(socket):
     uuid1 = socket.start()
