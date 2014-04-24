@@ -72,7 +72,7 @@ def refresh_process(uuid=None):
             continue
         binary = cl[0].split('/')[-1]
         if (
-                'python' in binary and
+                ('python' in binary or 'pypy' in binary) and
                 proc.is_running() and
                 proc.status() != psutil.STATUS_ZOMBIE):
             try:

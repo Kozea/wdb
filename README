@@ -19,7 +19,7 @@ Due to this architecture, all of this is fully compatible with **multithread** a
 **wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4) and pypy.
 Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
 
-Even betterer, it is now possible to pause a currently running python process/thread using code injection from the web interface. (This requires gdb)
+Even betterer, it is now possible to pause a currently running python process/thread using code injection from the web interface. (This requires gdb and ptrace enabled)
 
 In other words it's a very enhanced version of pdb directly in your browser with nice features.
 
@@ -296,7 +296,15 @@ NB: Hotkeys with arrows are purposely not triggered in the eval prompt to avoid 
 To see which debugging session are currently open, open your browser at <http://localhost:1984/>.
 You can also close crashed session.
 
-From there you should also see all python process and their threads running and you can try to pause them during their execution to do step by step debugging and current variable inspection. **This is highly experimental and requires gdb to inject python code into a running python process.**
+From there you should also see all python process and their threads running and you can try to pause them during their execution to do step by step debugging and current variable inspection. **This is highly experimental and requires gdb and a kernel with ptrace enabled to inject python code into a running python process.**
+If you get `ptrace: Operation not permitted.` you will have to enable it.
+
+Depending on your system it might work with:
+```bash
+echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+```
+
+Make sure that wdb is installed for the python running the program too.
 
 
 ## Importing wdb each time is exhausting
