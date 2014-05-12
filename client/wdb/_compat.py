@@ -89,7 +89,59 @@ else:
             return bytes_.encode('utf-8')
         return bytes_
 
+
 def u(s):
     if python_version == 2:
         return s.decode('utf-8')
     return s
+
+
+if python_version == 2:
+    import struct
+    import socket
+
+    class Socket(object):
+        """A Socket compatible with multiprocessing.connection.Client, that
+        uses socket objects."""
+        # https://github.com/akheron/cpython/blob/3.3/Lib/multiprocessing/connection.py#L349
+        def __init__(self, address):
+            self._handle = socket.socket()
+            self._handle.connect(address)
+            self._handle.setblocking(1)
+
+        def send_bytes(self, buf):
+            self._check_closed()
+            n = len(buf)
+            # For wire compatibility with 3.2 and lower
+            header = struct.pack("!i", n)
+            if n > 16384:
+                # The payload is large so Nagle's algorithm won't be triggered
+                # and we'd better avoid the cost of concatenation.
+                chunks = [header, buf]
+            elif n > 0:
+                # Issue #20540: concatenate before sending, to avoid delays
+                # dueto Nagle's algorithm on a TCP socket.
+                chunks = [header + buf]
+            else:
+                # This code path is necessary to avoid "broken pipe" errors
+                # when sending a 0-length buffer if the other end closed the
+                # pipe.
+                chunks = [header]
+            for chunk in chunks:
+                self._handle.sendall(chunk)
+
+        def recv_bytes(self):
+            self._check_closed()
+            size, = struct.unpack("!i", self._handle.recv(4))
+            return self._handle.recv(size)
+
+        def _check_closed(self):
+            if self._handle is None:
+                raise IOError("handle is closed")
+
+        def close(self):
+            self._check_closed()
+            self._handle.close()
+            self._handle = None
+else:
+    from multiprocessing.connection import Client as Socket
