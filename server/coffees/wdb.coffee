@@ -16,6 +16,8 @@
 
 
 class Wdb extends Log
+  __version__: '2.0.0'
+
   constructor: ->
     super
     @started = false
@@ -75,6 +77,16 @@ class Wdb extends Log
       @$interpreter.on 'keydown', (e) =>
         if e.ctrlKey and 37 <= e.keyCode <= 40 or 118 <= e.keyCode <= 122
           return true
+
+        if e.shiftKey and e.keyCode in [33, 34]
+          scroll = @$interpreter.height() * 2 / 3
+          way = if e.keyCode is 33 then -1 else 1
+
+          @$interpreter
+            .stop(true, true)
+            .animate((scrollTop: @$interpreter.scrollTop() + way * scroll), 500)
+          return false
+
         @$eval.focus()
 
       false
@@ -93,6 +105,12 @@ class Wdb extends Log
     @$state.removeClass 'on'
 
   init: (data) ->
+    if data.version isnt @constructor::__version__
+      @print
+        for: 'Client Server version mismatch !'
+        result: "Client is #{@constructor::__version__} and
+                 Server is #{data.version or '<= 2.0'}"
+
     @cwd = data.cwd
     brks = data.breaks
     for brk in brks

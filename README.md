@@ -1,6 +1,7 @@
 # wdb - Web Debugger
 
-![](https://raw.github.com/Kozea/wdb/master/wdb.png)
+![](https://raw.github.com/Kozea/wdb/master/wdb.gif)
+*Colors are bad due to gif compression.*
 
 
 - [wdb - Web Debugger](#wdb---web-debugger)
@@ -211,7 +212,7 @@ cherrypy.quickstart(app)
 
 #### Tornado
 
-In tornado, which is not a wsgi server, you can use the `wdb_tornado` function which will monkey patch the execute methon on RequestHandlers:
+In tornado, which is not a wsgi server, you can use the `wdb_tornado` function which will monkey patch the execute method on RequestHandlers:
 
 ```python
     from wdb.ext import wdb_tornado
@@ -330,7 +331,7 @@ Depending on your system it might work with:
 echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
 ```
 
-Make sure that wdb is installed for the python running the program too.
+Make sure that wdb is installed for the python version running the program too.
 
 
 ## Importing wdb each time is exhausting
@@ -361,15 +362,14 @@ you can now use the `w` object any where in your code:
 
 ## Theming
 
-You can use the light theme like that:
+The Theme can be chosen in the server home page, or can be set at start like that:
 ```python
     wdb.server --theme=light  # and if you disable the debugger
     WdbMiddleware(app, theme='light') # or
     wdb_tornado(app, theme='light')
 ```
 
-But it is less polished than the dark theme.
-If you like writing css feel free to make your own and pull request it to me, css is generated using compass and most of the work will be setting variables.
+If you like writing css feel free to make your own and pull request it to me, css is generated using libsass and grunt and most of the work will be setting variables.
 
 
 ## Code completion
@@ -386,7 +386,7 @@ wdb is based on websockets and since 3812417 its layout relies on flexbox, brows
 - IE >= 11
 
 Better update you browser in any case.
-If it doesn't work with one of these version please report it.
+If it doesn't work with one of these versions please report it.
 
 
 ## FAQ

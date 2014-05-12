@@ -3,6 +3,7 @@ from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
 from .utils import get_source, get_doc, executable_line
+from . import __version__
 from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
@@ -224,6 +225,7 @@ class Interaction(object):
 
         self.db.send('Init|%s' % dump({
             'cwd': os.getcwd(),
+            'version': __version__,
             'breaks': self.db.breakpoints_to_json()
         }))
         self.db.send('Title|%s' % dump({
