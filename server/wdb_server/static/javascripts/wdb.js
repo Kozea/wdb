@@ -344,6 +344,8 @@
   Wdb = (function(_super) {
     __extends(Wdb, _super);
 
+    Wdb.prototype.__version__ = '2.0.0';
+
     function Wdb() {
       var e;
       Wdb.__super__.constructor.apply(this, arguments);
@@ -390,9 +392,17 @@
         $('#deactivate').click(this.disable.bind(this));
         this.$interpreter.on('keydown', (function(_this) {
           return function(e) {
-            var _ref, _ref1;
+            var scroll, way, _ref, _ref1, _ref2;
             if (e.ctrlKey && (37 <= (_ref = e.keyCode) && _ref <= 40) || (118 <= (_ref1 = e.keyCode) && _ref1 <= 122)) {
               return true;
+            }
+            if (e.shiftKey && ((_ref2 = e.keyCode) === 33 || _ref2 === 34)) {
+              scroll = _this.$interpreter.height() * 2 / 3;
+              way = e.keyCode === 33 ? -1 : 1;
+              _this.$interpreter.stop(true, true).animate({
+                scrollTop: _this.$interpreter.scrollTop() + way * scroll
+              }, 500);
+              return false;
             }
             return _this.$eval.focus();
           };
@@ -416,6 +426,12 @@
 
     Wdb.prototype.init = function(data) {
       var brk, brks, _base, _i, _len, _name, _results;
+      if (data.version !== this.constructor.prototype.__version__) {
+        this.print({
+          "for": 'Client Server version mismatch !',
+          result: "Client is " + this.constructor.prototype.__version__ + " and Server is " + (data.version || '<= 2.0')
+        });
+      }
       this.cwd = data.cwd;
       brks = data.breaks;
       _results = [];
