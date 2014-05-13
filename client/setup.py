@@ -23,7 +23,7 @@ options = dict(
     license="GPLv3",
     platforms="Any",
     packages=['wdb'],
-    install_requires=["log_colorizer", "jedi"],
+    install_requires=["log_colorizer>=1.6", "jedi>=0.8.0"],
     package_data={
         'wdb': [
             'res/*'
