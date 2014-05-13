@@ -344,7 +344,7 @@
   Wdb = (function(_super) {
     __extends(Wdb, _super);
 
-    Wdb.prototype.__version__ = '2.0.0';
+    Wdb.prototype.__version__ = '2.0.1';
 
     function Wdb() {
       var e;
