@@ -2,6 +2,7 @@
 from wdb_server import server
 from tornado.ioloop import IOLoop
 from tornado.options import options
+from tornado_systemd import SystemdHTTPServer
 from wdb_server.streams import handle_connection
 from tornado.netutil import bind_sockets, add_accept_handler
 from logging import getLogger
@@ -22,7 +23,8 @@ for socket in sockets:
 
 
 log.debug('Listening')
-server.listen(options.server_port)
+http_server = SystemdHTTPServer(server)
+http_server.listen(options.server_port)
 
 log.debug('Starting loop')
 ioloop.start()

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 from ._compat import (
     execute, StringIO, to_unicode_string, escape, loads, Socket)
