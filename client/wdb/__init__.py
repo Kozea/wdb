@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.0.3'
+__version__ = '2.0.4'
 
 from ._compat import (
     execute, StringIO, to_unicode_string, escape, loads, Socket)
@@ -360,7 +360,7 @@ class Wdb(object):
         try:
             self.breakpoints.remove(breakpoint)
             log.info('Breakpoint %r removed' % breakpoint)
-        except:
+        except Exception:
             log.info('Breakpoint %r not removed: not found' % breakpoint)
 
     def safe_repr(self, obj):
@@ -702,7 +702,7 @@ class Wdb(object):
         if self.connected:
             try:
                 self.send('Die')
-            except:
+            except Exception:
                 pass
             self._socket.close()
         self.pop()

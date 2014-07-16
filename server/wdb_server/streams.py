@@ -81,7 +81,7 @@ def read_uuid_size(stream, length):
 
 def handle_connection(connection, address):
     log.info('Connection received from %s' % str(address))
-    stream = IOStream(connection, ioloop)
+    stream = IOStream(connection, ioloop, max_buffer_size=1024 * 1024 * 1024)
     # Getting uuid
     try:
         stream.read_bytes(4, partial(read_uuid_size, stream))

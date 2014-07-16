@@ -176,7 +176,7 @@ class Interaction(object):
                         'for': 'Error in Wdb, this is bad',
                         'val': exc + '<br>' + link
                     }))
-                except:
+                except Exception:
                     log.exception('Error in loop exception handling')
                     self.db.send('Echo|%s' % dump({
                         'for': 'Too many errors',
@@ -359,7 +359,7 @@ class Interaction(object):
             rv = escape('\n'.join(out) + '\n'.join(err))
             try:
                 _ = dump(rv)
-            except:
+            except Exception:
                 rv = rv.decode('ascii', 'ignore')
 
             if rv and self.db.last_obj is None or not self.db.hooked:
@@ -410,7 +410,7 @@ class Interaction(object):
         if brk['lno'] is not None:
             try:
                 lno = int(brk['lno'])
-            except:
+            except Exception:
                 break_fail(
                     'Wrong breakpoint format must be '
                     '[file][:lineno][#function][,condition].')
@@ -499,7 +499,7 @@ class Interaction(object):
             len(segments[-1]) + indent, '')
         try:
             completions = script.completions()
-        except:
+        except Exception:
             self.db.send('Suggest')
             self.notify_exc('Completion failed for %s' % (
                 '\n'.join(reversed(segments))))
@@ -507,7 +507,7 @@ class Interaction(object):
 
         try:
             funs = script.call_signatures() or []
-        except:
+        except Exception:
             self.db.send('Suggest')
             self.notify_exc('Completion of function failed for %s' % (
                 '\n'.join(reversed(segments))))
@@ -530,7 +530,7 @@ class Interaction(object):
                     comp.complete)]
             }
             self.db.send('Suggest|%s' % dump(suggest_obj))
-        except:
+        except Exception:
             self.db.send('Suggest')
             self.notify_exc('Completion generation failed for %s' % (
                 '\n'.join(reversed(segments))))
