@@ -17,7 +17,7 @@ def pretty_frame(frame):
 def get_source(obj):
     try:
         return inspect.getsource(obj)
-    except:
+    except Exception:
         old_stdout = sys.stdout
         sys.stdout = StringIO()
         try:
@@ -26,7 +26,7 @@ def get_source(obj):
             rv = sys.stdout.read()
             sys.stdout = old_stdout
             return rv
-        except:
+        except Exception:
             sys.stdout = old_stdout
             return ''
 

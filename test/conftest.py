@@ -101,7 +101,7 @@ class Socket(object):
             self.listener = Listener((self.host, self.port))
         try:
             connection = self.listener.accept()
-        except:
+        except Exception:
             self.listener.close()
             raise
         self.started = True

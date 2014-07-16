@@ -102,7 +102,7 @@ class ConditionalBreakpoint(Breakpoint):
                 super(ConditionalBreakpoint, self).breaks(frame) and
                 (self.line is None or frame.f_lineno == self.line) and
                 eval(self.condition, frame.f_globals, frame.f_locals))
-        except:
+        except Exception:
             # Break in case of
             log.warning('Error in conditional break', exc_info=True)
             return True

@@ -46,7 +46,7 @@ class BaseSockets(object):
             try:
                 log.debug('Broadcast to socket %s' % uuid)
                 self.send(uuid, cmd, message)
-            except:
+            except Exception:
                 log.warn('Failed broadcast to socket %s' % uuid)
                 self.close(uuid)
                 self.remove(uuid)
@@ -70,7 +70,7 @@ class BaseSockets(object):
         sck = self.get(uuid)
         try:
             sck.close()
-        except:
+        except Exception:
             log.warn('Failed close to socket %s' % uuid)
 
     @property

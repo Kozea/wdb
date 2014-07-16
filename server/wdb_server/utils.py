@@ -76,6 +76,10 @@ def refresh_process(uuid=None):
                 proc.is_running() and
                 proc.status() != psutil.STATUS_ZOMBIE):
             try:
+                try:
+                    cpu = proc.cpu_percent(interval=.01)
+                except psutil.NoSuchProcess:
+                    cpu = 0
                 send('AddProcess', {
                     'pid': proc.pid,
                     'user': proc.username(),
@@ -83,7 +87,7 @@ def refresh_process(uuid=None):
                     'threads': proc.num_threads(),
                     'time': proc.create_time(),
                     'mem': proc.memory_percent(),
-                    'cpu': proc.cpu_percent(interval=.01)
+                    'cpu': cpu
                 })
                 remaining_pids.append(proc.pid)
                 for thread in proc.threads():
@@ -92,7 +96,7 @@ def refresh_process(uuid=None):
                         'of': proc.pid
                     })
                     remaining_tids.append(thread.id)
-            except:
+            except Exception:
                 log.warn('', exc_info=True)
                 continue
     send('KeepProcess', remaining_pids)
