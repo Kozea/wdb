@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.0.4'
+__version__ = '2.0.5'
 
 from ._compat import (
     execute, StringIO, to_unicode_string, escape, loads, Socket)
@@ -73,17 +73,20 @@ class Wdb(object):
     watchers = defaultdict(list)
 
     @staticmethod
-    def get(no_create=False):
+    def get(no_create=False, server=SOCKET_SERVER, port=SOCKET_PORT):
         """Get the thread local singleton"""
         pid = os.getpid()
         thread = threading.current_thread()
         wdb = Wdb._instances.get((pid, thread))
         if not wdb and not no_create:
             wdb = object.__new__(Wdb)
-            Wdb.__init__(wdb)
+            Wdb.__init__(wdb, server, port)
             wdb.pid = pid
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
+        else:
+            if wdb.server != server or wdb.port != port:
+                log.warn('Different server/port set, ignoring')
         return wdb
 
     @staticmethod
@@ -93,10 +96,10 @@ class Wdb(object):
         thread = threading.current_thread()
         Wdb._instances.pop((pid, thread))
 
-    def __new__(cls):
-        return cls.get()
+    def __new__(cls, server=SOCKET_SERVER, port=SOCKET_PORT):
+        return cls.get(server=server, port=port)
 
-    def __init__(self):
+    def __init__(self, server=SOCKET_SERVER, port=SOCKET_PORT):
         log.debug('New wdb instance %r' % self)
         self.obj_cache = {}
         self.tracing = False
@@ -110,6 +113,8 @@ class Wdb(object):
         self.state = Running(None)
         self.full = False
         self.below = False
+        self.server = server
+        self.port = port
         self._socket = None
         self.connect()
         self.get_breakpoints()
@@ -165,18 +170,18 @@ class Wdb(object):
 
     def connect(self):
         """Connect to wdb server"""
-        log.info('Connecting socket on %s:%d' % (SOCKET_SERVER, SOCKET_PORT))
+        log.info('Connecting socket on %s:%d' % (self.server, self.port))
         tries = 0
         while not self._socket and tries < 10:
             try:
                 time.sleep(.2 * tries)
-                self._socket = Socket((SOCKET_SERVER, SOCKET_PORT))
+                self._socket = Socket((self.server, self.port))
             except socket.error:
                 tries += 1
                 log.warning(
                     'You must start/install wdb.server '
                     '(Retrying on %s:%d) [Try #%d/10]' % (
-                        SOCKET_SERVER, SOCKET_PORT, tries))
+                        self.server, self.port, tries))
                 self._socket = None
 
         if not self._socket:
@@ -720,10 +725,11 @@ def set_trace(frame=None, skip=0):
     return wdb
 
 
-def start_trace(full=False, frame=None, below=False):
+def start_trace(full=False, frame=None, below=False,
+                server=SOCKET_SERVER, port=SOCKET_PORT):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
-    wdb = Wdb.get()
+    wdb = Wdb.get(server=server, port=port)
     if not wdb.stepping:
         wdb.start_trace(full, frame or sys._getframe().f_back, below)
     return wdb
@@ -743,11 +749,12 @@ def stop_trace(frame=None, close_on_exit=False):
 
 
 @contextmanager
-def trace(full=False, frame=None, below=False, close_on_exit=False):
+def trace(full=False, frame=None, below=False, close_on_exit=False,
+          server=SOCKET_SERVER, port=SOCKET_PORT):
     """Make a tracing context with `with trace():`"""
     # Contextmanager -> 2 calls to get here
     frame = frame or sys._getframe().f_back.f_back
-    start_trace(full, frame, below)
+    start_trace(full, frame, below, server, port)
     try:
         yield
     finally:
@@ -763,7 +770,7 @@ def cleanup():
 
 # Pdb compatibility
 
-def post_mortem(t=None):
+def post_mortem(t=None, server=SOCKET_SERVER, port=SOCKET_PORT):
     if t is None:
         t = sys.exc_info()[2]
         if t is None:
@@ -771,10 +778,10 @@ def post_mortem(t=None):
                 "A valid traceback must be passed if no "
                 "exception is being handled")
 
-    wdb = Wdb.get()
+    wdb = Wdb.get(server=server, port=port)
     wdb.reset()
     wdb.interaction(None, t)
 
 
-def pm():
-    post_mortem(sys.last_traceback)
+def pm(server=SOCKET_SERVER, port=SOCKET_PORT):
+    post_mortem(sys.last_traceback, server=server, port=port)
