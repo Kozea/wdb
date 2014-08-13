@@ -28,19 +28,11 @@ module.exports = (grunt) ->
             'bower_components/codemirror/mode/jinja2/jinja2.js'
           ]
 
-    sass_to_scss:
+    sass:
       wdb:
         expand: true
         cwd: 'sass/'
         src: '*.sass'
-        dest: 'sass/scss/'
-        ext: '.scss'
-
-    sass:
-      wdb:
-        expand: true
-        cwd: 'sass/scss'
-        src: '*.scss'
         dest: 'wdb_server/static/stylesheets/'
         ext: '.css'
 
@@ -103,7 +95,7 @@ module.exports = (grunt) ->
         files: [
           'sass/*.sass'
         ]
-        tasks: ['sass_to_scss', 'sass']
+        tasks: ['sass']
 
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-contrib-watch'
@@ -111,12 +103,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
   grunt.loadNpmTasks 'grunt-coffeelint'
   grunt.loadNpmTasks 'grunt-sass'
-  grunt.loadNpmTasks 'grunt-sass-to-scss'
   grunt.loadNpmTasks 'grunt-bower-task'
 
   grunt.registerTask 'dev', ['coffeelint', 'coffee', 'watch']
-  grunt.registerTask 'css', ['sass_to_scss', 'sass']
+  grunt.registerTask 'css', ['sass']
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
-    'sass_to_scss', 'sass',
+    'sass',
     'bower', 'uglify', 'cssmin']
