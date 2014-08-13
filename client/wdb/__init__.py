@@ -85,7 +85,7 @@ class Wdb(object):
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
         else:
-            if wdb.server != server or wdb.port != port:
+            if wdb and wdb.server != server or wdb.port != port:
                 log.warn('Different server/port set, ignoring')
         return wdb
 
