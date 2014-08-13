@@ -13,7 +13,7 @@
   src: url("../fonts/SourceCodePro-Bold.ttf.woff") format("woff")
   font-weight: 900
 
-@import 'hl'
+@import hl
 
 body, html
   color: $fg
@@ -589,33 +589,32 @@ code, code span
     animation-play-state: running
 
 @mixin pulse()
-  /* This is wrong, this is for sass_to_scss */
-  0% {
+  0%
     -webkit-transform: rotate(145deg)
     transform: rotate(145deg)
     opacity: 1
-  }
-  50% {
+
+  50%
     -webkit-transform: rotate(-120deg)
     transform: rotate(-120deg)
     opacity: 0
-  }
-  100% {
+
+  100%
     -webkit-transform: rotate(160deg)
     transform: rotate(160deg)
     opacity: 0
     box-shadow: 0 0 1px $state-outer
-  }
+
 
 @mixin pulseoff()
-  0% {
+  0%
     -webkit-transform: rotate(0deg)
     transform: rotate(0deg)
-  }
-  100% {
+
+  100%
     -webkit-transform: rotate(360deg)
     transform: rotate(360deg)
-  }
+
 
 @keyframes spinPulse
   +pulse

@@ -1,3 +1,4 @@
+/* Change this to hash when sass 3.3 is released */
 @font-face {
   font-family: "Source Code Pro";
   src: url("../fonts/SourceCodePro-Regular.ttf.woff") format("woff");
@@ -18,7 +19,12 @@
 
 .CodeMirror, .CodeMirror-standalone {
   background: none;
-  color: #c3c6c4; }
+  color: #c3c6c4;
+  /* Use each loop to hash when sass 3.3 is released */
+  /* span */
+  /*   @each $name, $color in $hl-colors */
+  /*     &.cm-# {$name} */
+  /*       color: $color */ }
   .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
     background: #3b3d40; }
   .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
@@ -397,6 +403,7 @@ code {
 .CodeMirror-gutter-elt {
   text-align: center; }
   .CodeMirror-gutter-elt .breakpoint {
+    /* Compensate a bit low unicode char */
     position: relative;
     top: -2px; }
 
@@ -558,6 +565,7 @@ code, code span {
 .cm-searching {
   background: #35393c; }
 
+/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
 .state {
   background-color: rgba(0, 0, 0, 0);
   border: 5px solid rgba(0, 183, 229, 0.9);

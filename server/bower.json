@@ -10,7 +10,7 @@
   "private": true,
   "dependencies": {
     "jquery": "~2.1.0",
-    "codemirror": "~4.3.0",
+    "codemirror": "~4.4.0",
     "jquery-autosize": "~1.18.9",
     "font-awesome": "~4.1.0"
   }
