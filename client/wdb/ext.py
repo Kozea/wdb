@@ -54,7 +54,8 @@ class WdbMiddleware(object):
                 # Enable wdb
                 Wdb.enabled = True
                 wdb = Wdb.get()
-                start_response('200 OK', [('Content-Type', 'text/html'), ('X-Thing', wdb.uuid)])
+                start_response('200 OK', [
+                    ('Content-Type', 'text/html'), ('X-Thing', wdb.uuid)])
                 yield to_bytes(' '*4096)
                 wdb = set_trace()
                 wdb.die()
@@ -104,16 +105,16 @@ def wdb_tornado(application, start_disabled=False):
             Wdb.enabled = True
             self.write('Wdb is now on')
     application.add_handlers(r'.*', ((r'/__wdb/on', WdbOn),))
-
+    below = 3 if hasattr(RequestHandler._execute, '__wrapped__') else 1
     old_execute = RequestHandler._execute
 
-    def _wdb_execute(self, transforms):
+    def _wdb_execute(*args, **kwargs):
         from wdb import trace, Wdb
         if Wdb.enabled:
-            with trace(close_on_exit=True, below=True):
-                old_execute(self, transforms)
+            with trace(close_on_exit=True, below=below):
+                old_execute(*args, **kwargs)
         else:
-            old_execute(self, transforms)
+            old_execute(*args, **kwargs)
             # Close set_trace debuggers
             stop_trace(close_on_exit=True)
 

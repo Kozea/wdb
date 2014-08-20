@@ -112,7 +112,7 @@ class Wdb(object):
         self.uuid = str(uuid4())
         self.state = Running(None)
         self.full = False
-        self.below = False
+        self.below = 0
         self.server = server
         self.port = port
         self._socket = None
@@ -212,12 +212,20 @@ class Wdb(object):
         """This function is called every line,
         function call, function return and exception during trace"""
         fun = getattr(self, 'handle_' + event)
-        if fun and (
-                (event == 'line' and self.breaks(frame)) or
-                (event == 'exception' and
-                 (self.full or frame == self.state.frame or
-                  (self.below and frame.f_back == self.state.frame))) or
-                self.state.stops(frame, event)):
+
+        back_frame = frame
+        for i in range(self.below):
+            back_frame = back_frame.f_back
+            if back_frame is None:
+                break
+        else:
+            below = back_frame == self.state.frame
+
+        if (fun and (
+            (event == 'line' and self.breaks(frame)) or
+            (event == 'exception' and (
+                self.full or frame == self.state.frame or below)) or
+                self.state.stops(frame, event))):
             fun(frame, arg)
         if event == 'return' and frame == self.state.frame:
             # Upping state
@@ -238,7 +246,7 @@ class Wdb(object):
                 self.die()
                 return
         if (event == 'call' and not self.stepping and not self.full and
-                not (self.below and frame.f_back == self.state.frame) and
+                not below and
                 not self.get_file_breaks(frame.f_code.co_filename)):
             # Don't trace anymore here
             return
@@ -262,7 +270,7 @@ class Wdb(object):
             return self.trace_debug_dispatch
         trace_log.debug("No trace %s" % pretty_frame(frame))
 
-    def start_trace(self, full=False, frame=None, below=False):
+    def start_trace(self, full=False, frame=None, below=0):
         """Start tracing from here"""
         if self.tracing:
             return
@@ -725,7 +733,7 @@ def set_trace(frame=None, skip=0):
     return wdb
 
 
-def start_trace(full=False, frame=None, below=False,
+def start_trace(full=False, frame=None, below=0,
                 server=SOCKET_SERVER, port=SOCKET_PORT):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
@@ -749,7 +757,7 @@ def stop_trace(frame=None, close_on_exit=False):
 
 
 @contextmanager
-def trace(full=False, frame=None, below=False, close_on_exit=False,
+def trace(full=False, frame=None, below=0, close_on_exit=False,
           server=SOCKET_SERVER, port=SOCKET_PORT):
     """Make a tracing context with `with trace():`"""
     # Contextmanager -> 2 calls to get here
