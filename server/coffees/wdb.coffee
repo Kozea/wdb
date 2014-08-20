@@ -16,7 +16,7 @@
 
 
 class Wdb extends Log
-  __version__: '2.0.5'
+  __version__: '2.0.6'
 
   constructor: ->
     super
@@ -108,8 +108,8 @@ class Wdb extends Log
     if data.version isnt @constructor::__version__
       @print
         for: 'Client Server version mismatch !'
-        result: "Client is #{@constructor::__version__} and
-                 Server is #{data.version or '<= 2.0'}"
+        result: "Server is #{@constructor::__version__} and
+                 Client is #{data.version or '<= 2.0'}"
 
     @cwd = data.cwd
     brks = data.breaks

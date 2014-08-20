@@ -344,7 +344,7 @@
   Wdb = (function(_super) {
     __extends(Wdb, _super);
 
-    Wdb.prototype.__version__ = '2.0.5';
+    Wdb.prototype.__version__ = '2.0.6';
 
     function Wdb() {
       var e;
@@ -429,7 +429,7 @@
       if (data.version !== this.constructor.prototype.__version__) {
         this.print({
           "for": 'Client Server version mismatch !',
-          result: "Client is " + this.constructor.prototype.__version__ + " and Server is " + (data.version || '<= 2.0')
+          result: "Server is " + this.constructor.prototype.__version__ + " and Client is " + (data.version || '<= 2.0')
         });
       }
       this.cwd = data.cwd;
