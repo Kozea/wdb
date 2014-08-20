@@ -266,20 +266,20 @@ class Wdb extends Log
       switch key
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
-        when 'd' then cmd 'Dump', data
+        when 'd' then cmd 'Dump', data if data
         when 'e' then @cm.toggle_edition()
         when 'g' then @cls()
         when 'h' then @print_help()
-        when 'j' then cmd 'Jump', data
+        when 'j' then cmd 'Jump', data if data
         when 'l' then cmd 'Breakpoints'
         when 'n' then cmd 'Next'
         when 'q' then cmd 'Quit'
         when 'r' then cmd 'Return'
         when 's' then cmd 'Step'
-        when 'i' then cmd 'Display', data
+        when 'i' then cmd 'Display', data if data
         when 't' then @toggle_break data, true
         when 'u' then cmd 'Until'
-        when 'w' then cmd 'Watch', data
+        when 'w' then cmd 'Watch', data if data
         when 'z' then @toggle_break data, false, true
         when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
       return
@@ -870,10 +870,8 @@ specify a module like `logging.config`.
       .add($(e.currentTarget).next())
       .toggleClass('hidden', 'shown')
 
-  unwatch: ->
-    @ws.send 'Unwatch', $(e.currentTarget)
-      .closest('.watching')
-      .attr('data-expr')
+  unwatch: (e) ->
+    @ws.send 'Unwatch', $(e.currentTarget).closest('.watching').attr 'data-expr'
     @working()
 
   paste_target: (e) ->
