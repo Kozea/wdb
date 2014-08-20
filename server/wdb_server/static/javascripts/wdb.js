@@ -617,7 +617,9 @@
             cmd('Continue');
             break;
           case 'd':
-            cmd('Dump', data);
+            if (data) {
+              cmd('Dump', data);
+            }
             break;
           case 'e':
             this.cm.toggle_edition();
@@ -629,7 +631,9 @@
             this.print_help();
             break;
           case 'j':
-            cmd('Jump', data);
+            if (data) {
+              cmd('Jump', data);
+            }
             break;
           case 'l':
             cmd('Breakpoints');
@@ -647,7 +651,9 @@
             cmd('Step');
             break;
           case 'i':
-            cmd('Display', data);
+            if (data) {
+              cmd('Display', data);
+            }
             break;
           case 't':
             this.toggle_break(data, true);
@@ -656,7 +662,9 @@
             cmd('Until');
             break;
           case 'w':
-            cmd('Watch', data);
+            if (data) {
+              cmd('Watch', data);
+            }
             break;
           case 'z':
             this.toggle_break(data, false, true);
@@ -1279,8 +1287,8 @@
       return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('hidden', 'shown');
     };
 
-    Wdb.prototype.unwatch = function() {
-      this.ws.send('Unwatch', $(e.currentTarget)).closest('.watching').attr('data-expr');
+    Wdb.prototype.unwatch = function(e) {
+      this.ws.send('Unwatch', $(e.currentTarget).closest('.watching').attr('data-expr'));
       return this.working();
     };
 
