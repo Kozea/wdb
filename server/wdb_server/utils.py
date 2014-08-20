@@ -78,24 +78,24 @@ def refresh_process(uuid=None):
             try:
                 try:
                     cpu = proc.cpu_percent(interval=.01)
-                except psutil.NoSuchProcess:
-                    cpu = 0
-                send('AddProcess', {
-                    'pid': proc.pid,
-                    'user': proc.username(),
-                    'cmd': ' '.join(proc.cmdline()),
-                    'threads': proc.num_threads(),
-                    'time': proc.create_time(),
-                    'mem': proc.memory_percent(),
-                    'cpu': cpu
-                })
-                remaining_pids.append(proc.pid)
-                for thread in proc.threads():
-                    send('AddThread', {
-                        'id': thread.id,
-                        'of': proc.pid
+                    send('AddProcess', {
+                        'pid': proc.pid,
+                        'user': proc.username(),
+                        'cmd': ' '.join(proc.cmdline()),
+                        'threads': proc.num_threads(),
+                        'time': proc.create_time(),
+                        'mem': proc.memory_percent(),
+                        'cpu': cpu
                     })
-                    remaining_tids.append(thread.id)
+                    remaining_pids.append(proc.pid)
+                    for thread in proc.threads():
+                        send('AddThread', {
+                            'id': thread.id,
+                            'of': proc.pid
+                        })
+                        remaining_tids.append(thread.id)
+                except psutil.NoSuchProcess:
+                    pass
             except Exception:
                 log.warn('', exc_info=True)
                 continue
