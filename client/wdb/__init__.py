@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.0.6'
+__version__ = '2.0.7'
 
 from ._compat import (
     execute, StringIO, to_unicode_string, escape, loads, Socket)
@@ -129,8 +129,7 @@ class Wdb(object):
             "__builtins__": __builtins__,
         })
         with open(filename, "rb") as fp:
-            statement = "exec(compile(%r, %r, 'exec'))" % (
-                fp.read(), filename)
+            statement = compile(fp.read(), filename, 'exec')
         self.run(statement, filename)
 
     def run(self, cmd, fn=None, globals=None, locals=None):
@@ -221,11 +220,10 @@ class Wdb(object):
         else:
             below = back_frame == self.state.frame
 
-        if (fun and (
+        if (self.state.stops(frame, event) or
             (event == 'line' and self.breaks(frame)) or
             (event == 'exception' and (
-                self.full or frame == self.state.frame or below)) or
-                self.state.stops(frame, event))):
+                self.full or frame == self.state.frame or below))):
             fun(frame, arg)
         if event == 'return' and frame == self.state.frame:
             # Upping state

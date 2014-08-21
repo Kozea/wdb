@@ -21,7 +21,7 @@ def test_main_on_running_script(socket):
     assert 'scripts/ok_script.py' in current_trace.file
     assert current_trace.flno == 1
     assert current_trace.function == '<module>'
-    assert current_trace.llno == 1
+    assert current_trace.llno == 4
     assert current_trace.lno == 1
 
     msg = socket.receive()
@@ -32,6 +32,10 @@ def test_main_on_running_script(socket):
     assert msg.command == 'Watched'
     assert msg.data == {}
 
+    socket.send('Next')
+    socket.assert_position(code='b = 5')
+    socket.send('Next')
+    socket.assert_position(code='c = a + b')
     socket.send('Continue')
     socket.join()
 
