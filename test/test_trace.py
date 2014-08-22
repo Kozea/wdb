@@ -195,7 +195,7 @@ def test_with_error_in_trace_under(socket):
         code='return below / 0',
         exception="ZeroDivisionError",
         bottom_code='uninteresting_function_not_catching(1)',
-        bottom_line=54)
+        bottom_line=52)
     socket.send('Continue')
 
     socket.assert_position(
@@ -203,7 +203,7 @@ def test_with_error_in_trace_under(socket):
         code='return below / 0',
         exception="ZeroDivisionError",
         bottom_code='uninteresting_function_catching(1)',
-        bottom_line=61)
+        bottom_line=59)
 
     socket.send('Continue')
 
@@ -212,7 +212,7 @@ def test_with_error_in_trace_under(socket):
         code='return below / 0',
         exception="ZeroDivisionError",
         bottom_code='one_more_step(uninteresting_function_not_catching, 2)',
-        bottom_line=78)
+        bottom_line=69)
     socket.send('Continue')
 
     socket.assert_position(
@@ -220,6 +220,58 @@ def test_with_error_in_trace_under(socket):
         code='return below / 0',
         exception="ZeroDivisionError",
         bottom_code='one_more_step(uninteresting_function_catching, 2)',
-        bottom_line=84)
+        bottom_line=75)
     socket.send('Continue')
+    socket.join()
+
+
+@use('error_in_with_below_under.py')
+def test_with_error_in_trace_below_under(socket):
+    socket.start()
+    # The first to stop must be the one with the full trace on parent
+    msg = socket.receive()
+    assert msg.command == 'Init'
+    assert 'cwd' in msg.data
+
+    socket.assert_position(
+        title='AttributeError',
+        code='return below.what',
+        exception='AttributeError',
+        bottom_code='uninteresting_function_catching(0)',
+        bottom_line=61)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_catching(0)',
+        bottom_line=61)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_catching(0)',
+        bottom_line=65)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_catching_with_a_step_more(1)',
+        bottom_line=77)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='one_more_step('
+                    'uninteresting_function_catching_with_a_step_more, 2)',
+        bottom_line=81)
+    socket.send('Continue')
+
     socket.join()

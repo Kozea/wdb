@@ -106,14 +106,13 @@ def wdb_tornado(application, start_disabled=False):
             self.write('Wdb is now on')
     application.add_handlers(r'.*', ((r'/__wdb/on', WdbOn),))
     old_execute = RequestHandler._execute
-    # below = getattr(RequestHandler._execute, '__wrapped__', None)
-    # below = below and below.__code__ else 1
-    below = 3
+    under = getattr(RequestHandler._execute, '__wrapped__', None)
+    below = 1
 
     def _wdb_execute(*args, **kwargs):
         from wdb import trace, Wdb
         if Wdb.enabled:
-            with trace(close_on_exit=True, below=below):
+            with trace(close_on_exit=True, below=below, under=under):
                 old_execute(*args, **kwargs)
         else:
             old_execute(*args, **kwargs)
