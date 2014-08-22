@@ -218,9 +218,7 @@ class Wdb(object):
             stop_frame = None
             iframe = frame
             while iframe is not None:
-                log.warn('Iterating %s' % pretty_frame(iframe))
                 if iframe.f_code == self.under.__code__:
-                    log.warn('Found')
                     stop_frame = iframe
                 iframe = iframe.f_back
         iframe = frame
@@ -233,8 +231,6 @@ class Wdb(object):
             below += 1
             iframe = iframe.f_back
 
-        log.warn('Exception in %s, level under %s is %d, looking for %d' % (
-            pretty_frame(frame), pretty_frame(stop_frame), below, self.below))
         return below == self.below, below == self.below
 
     def trace_dispatch(self, frame, event, arg):
@@ -700,7 +696,6 @@ class Wdb(object):
             'for': '__exception__',
             'val': escape('%s: %s') % (
                 exception, exception_description)})
-        log.warning(pretty_frame(frame))
         # User exception is 4 frames away from exception
         frame = frame or sys._getframe().f_back.f_back.f_back.f_back
         self.interaction(
