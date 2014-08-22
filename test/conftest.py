@@ -127,7 +127,8 @@ class Socket(object):
 
     def assert_position(self, title=None, subtitle=None, file=None,
                         code=None, function=None, line=None,
-                        breaks=None):
+                        breaks=None, call=None, return_=None, exception=None,
+                        bottom_code=None, bottom_line=None):
         titlemsg = self.receive()
         assert titlemsg.command == 'Title'
         if title is not None:
@@ -137,20 +138,48 @@ class Socket(object):
         tracemsg = self.receive()
 
         assert tracemsg.command == 'Trace'
-        last = tracemsg.data.trace[-1]
+        current = tracemsg.data.trace[-1]
+
         if file is not None:
-            assert last.file == file
+            assert current.file == file
         if code is not None:
-            assert last.code == code
+            assert current.code == code
         if function is not None:
-            assert last.function == function
+            assert current.function == function
         if line is not None:
-            assert last.lno == line
+            assert current.lno == line
+
+        for frame in tracemsg.data.trace:
+            if frame.file == self.slave.file:
+                break
+
+        if bottom_code is not None:
+            assert frame.code == bottom_code
+
+        if bottom_line is not None:
+            assert frame.lno == bottom_line
 
         selectmsg = self.receive()
         assert selectmsg.command == 'SelectCheck'
 
-        assert self.receive().command == 'Watched'
+        if any((exception, call, return_)):
+            echomsg = self.receive()
+            assert echomsg.command == 'Echo'
+
+            if exception:
+                assert echomsg.data['for'] == '__exception__'
+                assert exception in echomsg.data.val
+
+            if call:
+                assert echomsg.data['for'] == '__call__'
+                assert call in echomsg.data.val
+
+            if return_:
+                assert echomsg.data['for'] == '__return__'
+                assert return_ in echomsg.data.val
+
+        watchedmsg = self.receive()
+        assert watchedmsg.command == 'Watched'
 
     def receive(self, uuid=None):
         return Message(self.connection(uuid).recv_bytes().decode('utf-8'))

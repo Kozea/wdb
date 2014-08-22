@@ -26,7 +26,7 @@ from .breakpoint import (
 
 from collections import defaultdict
 from .ui import Interaction, dump
-from .utils import pretty_frame, executable_line
+from .utils import pretty_frame, executable_line, get_args
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
@@ -113,6 +113,7 @@ class Wdb(object):
         self.state = Running(None)
         self.full = False
         self.below = 0
+        self.under = None
         self.server = server
         self.port = port
         self._socket = None
@@ -207,23 +208,40 @@ class Wdb(object):
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
 
+    def check_below(self, frame):
+        stop_frame = self.state.frame
+
+        if not self.below and not self.under:
+            return frame == stop_frame, False
+
+        if self.under:
+            iframe = frame
+            while iframe is not None:
+                if iframe.f_code == self.under.__code__:
+                    stop_frame = iframe
+                iframe = iframe.f_back
+        iframe = frame
+        below = 0
+        while iframe is not None:
+            if stop_frame == iframe:
+                break
+            below += 1
+            iframe = iframe.f_back
+
+        # log.warn('Exception in %s, level under %s is %d, looking for %d' % (
+        #     pretty_frame(frame), pretty_frame(stop_frame), below, self.below))
+        return below == self.below, below == self.below
+
     def trace_dispatch(self, frame, event, arg):
         """This function is called every line,
         function call, function return and exception during trace"""
-        fun = getattr(self, 'handle_' + event)
-
-        back_frame = frame
-        for i in range(self.below):
-            back_frame = back_frame.f_back
-            if back_frame is None:
-                break
-        else:
-            below = back_frame == self.state.frame
-
+        fun = getattr(self, 'handle_' + event, None)
+        if not fun:
+            return self.trace_dispatch
+        below, continue_below = self.check_below(frame)
         if (self.state.stops(frame, event) or
             (event == 'line' and self.breaks(frame)) or
-            (event == 'exception' and (
-                self.full or frame == self.state.frame or below))):
+                (event == 'exception' and (self.full or below))):
             fun(frame, arg)
         if event == 'return' and frame == self.state.frame:
             # Upping state
@@ -243,8 +261,9 @@ class Wdb(object):
                 self.stop_trace()
                 self.die()
                 return
+
         if (event == 'call' and not self.stepping and not self.full and
-                not below and
+                not continue_below and
                 not self.get_file_breaks(frame.f_code.co_filename)):
             # Don't trace anymore here
             return
@@ -268,7 +287,7 @@ class Wdb(object):
             return self.trace_debug_dispatch
         trace_log.debug("No trace %s" % pretty_frame(frame))
 
-    def start_trace(self, full=False, frame=None, below=0):
+    def start_trace(self, full=False, frame=None, below=0, under=None):
         """Start tracing from here"""
         if self.tracing:
             return
@@ -279,6 +298,7 @@ class Wdb(object):
         self.set_trace(frame, break_=False)
         self.tracing = True
         self.below = below
+        self.under = under
         self.full = full
 
     def set_trace(self, frame=None, break_=True):
@@ -535,11 +555,6 @@ class Wdb(object):
         current = 0
 
         for i, (stack_frame, lno) in enumerate(stack):
-            if frame == stack_frame:
-                current = i
-                break
-
-        for i, (stack_frame, lno) in enumerate(stack):
             code = stack_frame.f_code
             filename = code.co_filename
             linecache.checkcache(filename)
@@ -548,6 +563,8 @@ class Wdb(object):
             line = line and line.strip()
             startlnos = dis.findlinestarts(code)
             lastlineno = list(startlnos)[-1][1]
+            if frame == stack_frame:
+                current = i
             frames.append({
                 'file': filename,
                 'function': code.co_name,
@@ -556,12 +573,10 @@ class Wdb(object):
                 'lno': lno,
                 'code': line,
                 'level': i,
-                'current': current == i
+                'current': frame == stack_frame
             })
 
         # While in exception always put the context to the top
-        current = len(frames) - 1
-
         return stack, frames, current
 
     def send(self, data):
@@ -633,9 +648,10 @@ class Wdb(object):
         that we ever need to stop in this function."""
         fun = frame.f_code.co_name
         log.info('Calling: %r' % fun)
+
         init = 'Echo|%s' % dump({
             'for': '__call__',
-            'val': fun})
+            'val': '%s(%s)' % (fun, get_args(frame))})
         self.interaction(
             frame, init=init,
             exception_description='Calling %s' % fun)
@@ -654,7 +670,7 @@ class Wdb(object):
             fun, return_value))
         init = 'Echo|%s' % dump({
             'for': '__return__',
-            'val': return_value
+            'val': self.safe_repr(return_value)
         })
         self.interaction(
             frame, init=init,
@@ -719,7 +735,7 @@ class Wdb(object):
         self.pop()
 
 
-def set_trace(frame=None, skip=0):
+def set_trace(frame=None, skip=0, server=SOCKET_SERVER, port=SOCKET_PORT):
     """Set trace on current line, or on given frame"""
     frame = frame or sys._getframe().f_back
     for i in range(skip):
@@ -731,13 +747,13 @@ def set_trace(frame=None, skip=0):
     return wdb
 
 
-def start_trace(full=False, frame=None, below=0,
+def start_trace(full=False, frame=None, below=0, under=None,
                 server=SOCKET_SERVER, port=SOCKET_PORT):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     wdb = Wdb.get(server=server, port=port)
     if not wdb.stepping:
-        wdb.start_trace(full, frame or sys._getframe().f_back, below)
+        wdb.start_trace(full, frame or sys._getframe().f_back, below, under)
     return wdb
 
 
@@ -754,17 +770,24 @@ def stop_trace(frame=None, close_on_exit=False):
     return wdb
 
 
-@contextmanager
-def trace(full=False, frame=None, below=0, close_on_exit=False,
-          server=SOCKET_SERVER, port=SOCKET_PORT):
-    """Make a tracing context with `with trace():`"""
-    # Contextmanager -> 2 calls to get here
-    frame = frame or sys._getframe().f_back.f_back
-    start_trace(full, frame, below, server, port)
-    try:
-        yield
-    finally:
-        stop_trace(frame, close_on_exit=close_on_exit)
+class trace(object):
+    def __init__(self, **kwargs):
+        """Make a tracing context with `with trace():`"""
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        #  2 calls to get here
+        kwargs = dict(self.kwargs)
+        if 'close_on_exit' in kwargs:
+            kwargs.pop('close_on_exit')
+        kwargs.setdefault('frame', sys._getframe().f_back)
+        start_trace(**kwargs)
+
+    def __exit__(self, *args):
+        kwargs = {}
+        kwargs['frame'] = self.kwargs.get('frame', sys._getframe().f_back)
+        kwargs['close_on_exit'] = self.kwargs.get('close_on_exit', False)
+        stop_trace(**kwargs)
 
 
 @atexit.register

@@ -43,7 +43,7 @@ def test_eval(socket):
 
 
 @use('movement.py')
-def test_eval(socket):
+def test_eval_2(socket):
     socket.start()
     socket.assert_init()
     socket.send('Next')

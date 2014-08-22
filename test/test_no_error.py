@@ -9,7 +9,7 @@ def test_with_error_not_ignored_because_of_full(socket):
     assert socket.receive().command == 'Title'
     trace = socket.receive()
     assert trace.command == 'Trace'
-    assert trace.data.trace[-1].current == True
+    assert trace.data.trace[-1].current
     assert socket.receive().command == 'SelectCheck'
     assert socket.receive().command == 'Echo'
     assert socket.receive().command == 'Watched'
@@ -18,8 +18,9 @@ def test_with_error_not_ignored_because_of_full(socket):
     assert socket.receive().command == 'Title'
     trace = socket.receive()
     assert trace.command == 'Trace'
-    assert trace.data.trace[-1].current == False
+    assert not trace.data.trace[-1].current
     assert socket.receive().command == 'SelectCheck'
+    assert socket.receive().command == 'Echo'
     assert socket.receive().command == 'Watched'
     socket.send('Continue')
 

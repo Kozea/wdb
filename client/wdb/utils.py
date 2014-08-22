@@ -3,6 +3,7 @@ import dis
 import sys
 from ._compat import StringIO
 
+
 def pretty_frame(frame):
     if frame:
         return '%s <%s:%d>' % (
@@ -49,3 +50,24 @@ def executable_line(line):
         (not line or (line[0] == '#') or
          (line[:3] == '"""') or
          line[:3] == "'''"))
+
+
+def get_args(frame):
+    code = frame.f_code
+    varnames = code.co_varnames
+    nargs = code.co_argcount
+    locals = frame.f_locals
+
+    # Regular args
+    vars = ['%s=%r' % (var, locals[var]) for var in varnames[:nargs]]
+
+    # Var args (*args)
+    if frame.f_code.co_flags & 0x4:
+        vars.append('*%s=%r' % (
+            varnames[nargs], locals[varnames[nargs]]))
+        nargs += 1
+
+    if frame.f_code.co_flags & 0x8:
+        vars.append('**%s=%r' % (
+            varnames[nargs], locals[varnames[nargs]]))
+    return ', '.join(vars)
