@@ -215,12 +215,17 @@ class Wdb(object):
             return frame == stop_frame, False
 
         if self.under:
+            stop_frame = None
             iframe = frame
             while iframe is not None:
+                log.warn('Iterating %s' % pretty_frame(iframe))
                 if iframe.f_code == self.under.__code__:
+                    log.warn('Found')
                     stop_frame = iframe
                 iframe = iframe.f_back
         iframe = frame
+        if not stop_frame:
+            return False, False
         below = 0
         while iframe is not None:
             if stop_frame == iframe:
@@ -228,8 +233,8 @@ class Wdb(object):
             below += 1
             iframe = iframe.f_back
 
-        # log.warn('Exception in %s, level under %s is %d, looking for %d' % (
-        #     pretty_frame(frame), pretty_frame(stop_frame), below, self.below))
+        log.warn('Exception in %s, level under %s is %d, looking for %d' % (
+            pretty_frame(frame), pretty_frame(stop_frame), below, self.below))
         return below == self.below, below == self.below
 
     def trace_dispatch(self, frame, event, arg):
