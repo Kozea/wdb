@@ -147,6 +147,9 @@ class Interaction(object):
             'frame': self.current,
             'name': self.current_file
         }))
+        if self.init_message:
+            self.db.send(self.init_message)
+            self.init_message = None
         self.hook('init')
 
     def parse_command(self, message):

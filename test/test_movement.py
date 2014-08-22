@@ -56,18 +56,18 @@ def test_step(socket):
     socket.start()
     socket.assert_init()
 
-    def step(code):
+    def step(code, **kwargs):
         socket.send('Step')
-        socket.assert_position(code=code)
+        socket.assert_position(code=code, **kwargs)
 
     step('l.append(3)')
     step('l += [8, 12]')
     step('l = modify_list(l)')
-    step('def modify_list(ll):')
+    step('def modify_list(ll):', call="modify_list(ll=[3, 8, 12])")
     step('ll[1] = 7')
     step('ll.insert(0, 3)')
     step('return ll')
-    step('return ll')
+    step('return ll', return_="[3, 3, 7, 12]")
 
     for i in range(3):
         step('for i, e in enumerate(l[:]):')
@@ -90,20 +90,20 @@ def test_return(socket):
     socket.start()
     socket.assert_init()
 
-    def ret(code):
+    def ret(code, **kwargs):
         socket.send('Return')
-        socket.assert_position(code=code)
+        socket.assert_position(code=code, **kwargs)
 
-    def step(code):
+    def step(code, **kwargs):
         socket.send('Step')
-        socket.assert_position(code=code)
+        socket.assert_position(code=code, **kwargs)
 
     step('l.append(3)')
     step('l += [8, 12]')
     step('l = modify_list(l)')
-    step('def modify_list(ll):')
+    step('def modify_list(ll):', call="modify_list(ll=[3, 8, 12])")
     step('ll[1] = 7')
-    ret('return ll')
+    ret('return ll', return_="[3, 3, 7, 12]")
 
     for i in range(3):
         step('for i, e in enumerate(l[:]):')

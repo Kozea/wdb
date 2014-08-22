@@ -84,3 +84,142 @@ def test_with_trace(socket):
 
     socket.send('Continue')
     socket.join()
+
+
+@use('error_in_with.py')
+def test_with_error_in_trace(socket):
+    socket.start()
+    # The first to stop must be the one with the full trace
+    msg = socket.receive()
+    assert msg.command == 'Init'
+    assert 'cwd' in msg.data
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return i / 0',
+        exception="ZeroDivisionError")
+    socket.send('Return')
+    socket.assert_position(code='return 2', return_="2")
+    socket.send('Next')
+    socket.assert_position(code='print(d + a)', line=24)
+
+    socket.send('Continue')
+    socket.join()
+
+
+@use('error_in_with_advanced.py')
+def test_with_error_in_trace_advanced(socket):
+    socket.start()
+    # The first to stop must be the one with the full trace on parent
+    msg = socket.receive()
+    assert msg.command == 'Init'
+    assert 'cwd' in msg.data
+
+    for i in range(2):
+        socket.assert_position(
+            title='ZeroDivisionError',
+            code='return i / 0',
+            exception="ZeroDivisionError")
+        socket.send('Next')
+        socket.assert_position(
+            code='return i / 0',
+            return_='None',
+            subtitle='Returning from make_error with value None')
+        # Full trace catch exception at everly traced level
+        socket.send('Next')
+        socket.assert_position(
+            title='ZeroDivisionError',
+            code='return i / 0',
+            bottom_code='parent()' if not i else 'grandparent()',
+            exception="ZeroDivisionError")
+
+        socket.send('Next')
+        socket.assert_position(code='except ZeroDivisionError:')
+        socket.send('Continue')
+    socket.join()
+
+
+@use('error_in_with_below.py')
+def test_with_error_in_trace_below(socket):
+    socket.start()
+    # The first to stop must be the one with the full trace on parent
+    msg = socket.receive()
+    assert msg.command == 'Init'
+    assert 'cwd' in msg.data
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_not_catching(1)',
+        bottom_line=54)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_catching(1)',
+        bottom_line=61)
+
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='one_more_step(uninteresting_function_not_catching, 2)',
+        bottom_line=78)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='one_more_step(uninteresting_function_catching, 2)',
+        bottom_line=84)
+    socket.send('Continue')
+    socket.join()
+
+
+@use('error_in_with_under.py')
+def test_with_error_in_trace_under(socket):
+    socket.start()
+    # The first to stop must be the one with the full trace on parent
+    msg = socket.receive()
+    assert msg.command == 'Init'
+    assert 'cwd' in msg.data
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_not_catching(1)',
+        bottom_line=54)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='uninteresting_function_catching(1)',
+        bottom_line=61)
+
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='one_more_step(uninteresting_function_not_catching, 2)',
+        bottom_line=78)
+    socket.send('Continue')
+
+    socket.assert_position(
+        title='ZeroDivisionError',
+        code='return below / 0',
+        exception="ZeroDivisionError",
+        bottom_code='one_more_step(uninteresting_function_catching, 2)',
+        bottom_line=84)
+    socket.send('Continue')
+    socket.join()
