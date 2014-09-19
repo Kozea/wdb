@@ -226,7 +226,7 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
         syncwebsockets.remove(self.uuid)
 
 
-tornado.options.define('theme', default="curve",
+tornado.options.define('theme', default="clean",
                        help="Wdb theme to use amongst %s" %
                        StyleHandler.themes)
 tornado.options.define("debug", default=False, help="Debug mode")

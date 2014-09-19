@@ -1,4 +1,6 @@
 module.exports = (grunt) ->
+  require('time-grunt') grunt
+  require('load-grunt-tasks')(grunt)
 
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
@@ -84,6 +86,9 @@ module.exports = (grunt) ->
       install: {}
 
     watch:
+      options:
+        livereload: true
+
       coffee:
         files: [
           'coffees/*.coffee'
