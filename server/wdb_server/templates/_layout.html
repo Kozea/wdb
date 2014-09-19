@@ -11,7 +11,7 @@
     <link href="{{ static_url('stylesheets/wdb-%s.css' % StyleHandler.theme) }}" rel="stylesheet" type="text/css">
   </head>
   <body {% if options.debug %}data-debug="true"{% end %}>
-    <section id="wdb">
+    <section id="wdb" data-page="{{ handler.__class__.__name__}}">
       {% block main %}
       {% end %}
     </section>

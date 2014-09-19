@@ -1,4 +1,13 @@
-/* Change this to hash when sass 3.3 is released */
+/* Soothe palette. Inspired from https://github.com/emacsfodder/emacs-soothe-theme */
+/* $hl-bg-comment:     $alt-background */
+/* $hl-variable:       $blue-1 */
+/* $hl-bg-variable:    $blue-1bg */
+/* $hl-variable-2:     $blue-2 */
+/* $hl-bg-variable-2:  $blue-1bg */
+/* $hl-variable-3:     $blue-3 */
+/* $hl-bg-variable-3:  $blue-1bg */
+/* $hl-attribute:      $hl-variable */
+/* $hl-bg-attribute:   $hl-bg-variable */
 @font-face {
   font-family: "Source Code Pro";
   src: url("../fonts/SourceCodePro-Regular.ttf.woff") format("woff");
@@ -15,95 +24,95 @@
   font-weight: 900; }
 
 .CodeMirror-focused .CodeMirror-selected {
-  background: #383c42; }
+  background: #1B333E; }
 
 .CodeMirror, .CodeMirror-standalone {
-  color: #c3c6c4;
-  background-color: transparent;
+  color: #F4EAD5;
+  background-color: #110F13;
   /* Use each loop to hash when sass 3.3 is released */ }
   .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
-    background: #3b3d40; }
+    background: #1E252F; }
   .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
-    border-right: 1px solid #303030; }
+    border-right: 1px solid black; }
     .CodeMirror .CodeMirror-gutters .CodeMirror-gutter, .CodeMirror-standalone .CodeMirror-gutters .CodeMirror-gutter {
-      background: #1d1f20; }
+      background: #141414; }
   .CodeMirror .CodeMirror-linenumber, .CodeMirror-standalone .CodeMirror-linenumber {
-    color: #4a4a4a; }
+    color: #F4EAD5; }
   .CodeMirror .CodeMirror-cursor, .CodeMirror-standalone .CodeMirror-cursor {
-    border-left: 1px solid white !important; }
+    border-left: 1px solid #E0E4CC !important; }
   .CodeMirror span.cm-keyword, .CodeMirror-standalone span.cm-keyword {
-    color: #b092b9;
-    background-color: transparent; }
+    color: #D94A05;
+    background-color: #1F1710; }
   .CodeMirror span.cm-atom, .CodeMirror-standalone span.cm-atom {
-    color: #845dc4;
-    background-color: transparent; }
+    color: #01535F;
+    background-color: #111013; }
   .CodeMirror span.cm-number, .CodeMirror-standalone span.cm-number {
-    color: #dd925f;
-    background-color: transparent; }
+    color: #7868B5;
+    background-color: #1D1B25; }
   .CodeMirror span.cm-def, .CodeMirror-standalone span.cm-def {
-    color: #efc371;
-    background-color: transparent; }
+    color: #B13120;
+    background-color: #1D1515; }
   .CodeMirror span.cm-variable, .CodeMirror-standalone span.cm-variable {
-    color: #c3c6c4;
-    background-color: transparent; }
+    color: #F4EAD5;
+    background-color: #110F13; }
   .CodeMirror span.cm-variable-2, .CodeMirror-standalone span.cm-variable-2 {
-    color: #efc371;
-    background-color: transparent; }
+    color: #F4EAD5;
+    background-color: #110F13; }
   .CodeMirror span.cm-variable-3, .CodeMirror-standalone span.cm-variable-3 {
-    color: #efc371;
-    background-color: transparent; }
+    color: #F4EAD5;
+    background-color: #110F13; }
   .CodeMirror span.cm-property, .CodeMirror-standalone span.cm-property {
-    color: #efc371;
-    background-color: transparent; }
+    color: #A23F1E;
+    background-color: #1D1515; }
   .CodeMirror span.cm-operator, .CodeMirror-standalone span.cm-operator {
-    color: #7c7c7c;
-    background-color: transparent; }
+    color: #D94A05;
+    background-color: #1F1710; }
   .CodeMirror span.cm-comment, .CodeMirror-standalone span.cm-comment {
-    color: #969696;
-    background-color: transparent; }
+    color: #073E46;
+    background-color: #110F13; }
   .CodeMirror span.cm-string, .CodeMirror-standalone span.cm-string {
-    color: #b5bc67;
-    background-color: transparent; }
+    color: #009090;
+    background-color: #031316; }
   .CodeMirror span.cm-string-2, .CodeMirror-standalone span.cm-string-2 {
-    color: #b5bc67;
-    background-color: transparent; }
+    color: #009090;
+    background-color: #0A0A0A; }
   .CodeMirror span.cm-meta, .CodeMirror-standalone span.cm-meta {
-    color: #89bdb5;
-    background-color: transparent; }
+    color: #D94A05;
+    background-color: #1F1710; }
   .CodeMirror span.cm-qualifier, .CodeMirror-standalone span.cm-qualifier {
-    color: #b5bc67;
-    background-color: transparent; }
+    color: #D94A05;
+    background-color: #1F1710; }
   .CodeMirror span.cm-builtin, .CodeMirror-standalone span.cm-builtin {
-    color: #80a1bc;
-    background-color: transparent; }
+    color: #A23F1E;
+    background-color: #1D1515; }
   .CodeMirror span.cm-bracket, .CodeMirror-standalone span.cm-bracket {
-    color: #808080;
-    background-color: transparent; }
+    color: #CEAE3E;
+    background-color: #18140C; }
   .CodeMirror span.cm-tag, .CodeMirror-standalone span.cm-tag {
-    color: #efc371;
-    background-color: transparent; }
+    color: #B13120;
+    background-color: #1D1515; }
   .CodeMirror span.cm-attribute, .CodeMirror-standalone span.cm-attribute {
-    color: #dd925f;
-    background-color: transparent; }
+    color: #F4EAD5;
+    background-color: #110F13; }
   .CodeMirror span.cm-header, .CodeMirror-standalone span.cm-header {
-    color: #969696;
-    background-color: transparent; }
+    color: #009090;
+    background-color: #0A0A0A; }
   .CodeMirror span.cm-quote, .CodeMirror-standalone span.cm-quote {
-    color: #969696;
-    background-color: transparent; }
+    color: #009090;
+    background-color: #0A0A0A; }
   .CodeMirror span.cm-hr, .CodeMirror-standalone span.cm-hr {
-    color: #80a1bc;
-    background-color: transparent; }
+    color: #828282;
+    background-color: #110F13; }
   .CodeMirror span.cm-link, .CodeMirror-standalone span.cm-link {
-    color: #80a1bc;
-    background-color: transparent; }
+    color: #317598;
+    background-color: #110F13; }
   .CodeMirror span.cm-error, .CodeMirror-standalone span.cm-error {
-    color: #cc6666;
-    background-color: transparent; }
+    color: #A23F1E;
+    background-color: #251C1E; }
 
 body, html {
-  color: #ccc;
-  background-color: #1d1f21;
+  color: #F4EAD5;
+  background-color: #110F13;
   height: 100%;
   margin: 0; }
 
@@ -121,7 +130,7 @@ body, html {
     #wdb > header #title {
       flex: 1;
       margin: 0;
-      font-family: inherit; }
+      font-family: "Source Code Pro"; }
   #wdb > article {
     flex: 1; }
     #wdb > article table, #wdb > article form, #wdb > article p {
@@ -136,12 +145,12 @@ body, html {
         #wdb > article table tbody td.action a, #wdb > article table tbody td.close a {
           text-decoration: none; }
           #wdb > article table tbody td.action a:hover:before, #wdb > article table tbody td.action a:focus:before, #wdb > article table tbody td.close a:hover:before, #wdb > article table tbody td.close a:focus:before {
-            color: #bbbbff; }
+            color: #d9402b; }
           #wdb > article table tbody td.action a:before, #wdb > article table tbody td.close a:before {
-            color: #88f;
+            color: #B13120;
             font-size: 18px; }
       #wdb > article table a {
-        color: #88f; }
+        color: #B13120; }
     #wdb > article.split {
       display: flex; }
     #wdb > article #source {
@@ -172,13 +181,13 @@ body, html {
       margin-right: 2em;
       display: flex; }
       #wdb #watchers > div .name {
-        color: #ccc;
+        color: #F4EAD5;
         cursor: pointer; }
       #wdb #watchers > div .value {
         flex: 1; }
 
 a {
-  color: #ccc; }
+  color: #F4EAD5; }
 
 abbr {
   font-weight: bold; }
@@ -189,17 +198,17 @@ table {
   table thead.toggle {
     cursor: pointer; }
   table tr {
-    color: #ccc; }
+    color: #F4EAD5; }
     table tr[data-tid] {
-      color: #777; }
+      color: #E0E4CC; }
     table tr td {
       padding: 0.25em;
-      border: 1px solid #050606; }
+      border: 1px solid black; }
 
 input {
-  border: 1px solid #050606;
-  background-color: #1d1f21;
-  color: #ccc;
+  border: 1px solid black;
+  background-color: #110F13;
+  color: #F4EAD5;
   padding: 0.25em; }
   input[name=debug_file] {
     width: 500px; }
@@ -211,13 +220,13 @@ input {
 h1 {
   font-size: 2em;
   font-weight: bold;
-  color: #ccc;
+  color: #F4EAD5;
   font-variant: small-caps;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden; }
   h1 small {
-    color: #777;
+    color: #E0E4CC;
     display: block;
     font-size: 0.5em;
     font-variant: normal;
@@ -243,9 +252,9 @@ code {
     right: -2em;
     content: 'Edit Mode';
     background: black;
-    color: #777;
-    border-top: 1px solid #555;
-    border-bottom: 1px solid #555;
+    color: #E0E4CC;
+    border-top: 1px solid #009090;
+    border-bottom: 1px solid #009090;
     padding: 0.2em 2em;
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg); }
@@ -279,32 +288,32 @@ code {
   padding: 0.5em 0 0 0; }
   #prompt:before, .prompted:before {
     font: 12px/1.5 "Source Code Pro", monospace;
-    color: #c3c6c4;
+    color: #F4EAD5;
     content: ">>> "; }
 
 #prompt {
   display: flex; }
   #prompt textarea {
-    color: #c3c6c4;
+    color: #F4EAD5;
     font: 12px/1.5 "Source Code Pro", monospace;
     margin-left: 0.5em;
     resize: none; }
 
 #completions .base {
-  color: #ccc; }
+  color: #F4EAD5; }
 #completions .completion {
-  color: #777; }
+  color: #E0E4CC; }
 #completions td {
   padding: 0.25em; }
   #completions td.active .base {
-    color: red; }
+    color: #B13120; }
   #completions td.active .completion {
-    color: orangered; }
+    color: #D94A05; }
   #completions td.active.complete .base {
-    color: #c66; }
+    color: #A23F1E; }
 
 #comp-desc, #backsearch {
-  color: #3BA7C2;
+  color: #7868B5;
   font-style: italic; }
 
 .trace {
@@ -318,64 +327,64 @@ code {
   overflow: hidden;
   width: 94%;
   margin-left: 6%;
-  background-color: #1b1b1b; }
+  background-color: #0F0D11; }
   .traceline:before {
-    background-color: #1b1b1b;
-    border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21; }
+    background-color: #0F0D11;
+    border-color: #0F0D11 #0F0D11 #110F13 #110F13; }
   .traceline .tracefunfun {
-    background-color: #1d1f21; }
+    background-color: #110F13; }
     .traceline .tracefunfun .tracefun {
-      background-color: #1b1b1b; }
+      background-color: #0F0D11; }
       .traceline .tracefunfun .tracefun:before {
-        border-color: #1b1b1b #1b1b1b #1d1f21 #1d1f21; }
+        border-color: #0F0D11 #0F0D11 #110F13 #110F13; }
   .traceline:nth-child(odd) {
-    background-color: #181818; }
+    background-color: #0F0D11; }
     .traceline:nth-child(odd):before {
-      background-color: #181818;
-      border-color: #181818 #181818 #1d1f21 #1d1f21; }
+      background-color: #0F0D11;
+      border-color: #0F0D11 #0F0D11 #110F13 #110F13; }
     .traceline:nth-child(odd) .tracefunfun {
-      background-color: #1d1f21; }
+      background-color: #110F13; }
       .traceline:nth-child(odd) .tracefunfun .tracefun {
-        background-color: #181818; }
+        background-color: #0F0D11; }
         .traceline:nth-child(odd) .tracefunfun .tracefun:before {
-          border-color: #181818 #181818 #1d1f21 #1d1f21; }
+          border-color: #0F0D11 #0F0D11 #110F13 #110F13; }
   .traceline:hover {
-    background-color: #0e0e0e; }
+    background-color: #020203; }
     .traceline:hover:before {
-      background-color: #0e0e0e;
-      border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21; }
+      background-color: #020203;
+      border-color: #020203 #020203 #110F13 #110F13; }
     .traceline:hover .tracefunfun {
-      background-color: #1d1f21; }
+      background-color: #110F13; }
       .traceline:hover .tracefunfun .tracefun {
-        background-color: #0e0e0e; }
+        background-color: #020203; }
         .traceline:hover .tracefunfun .tracefun:before {
-          border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21; }
+          border-color: #020203 #020203 #110F13 #110F13; }
   .traceline.real-selected {
-    background-color: #0e0e0e;
-    background-color: #0e0e0e; }
+    background-color: #020203;
+    background-color: #020203; }
     .traceline.real-selected:before {
-      background-color: #0e0e0e;
-      border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21; }
+      background-color: #020203;
+      border-color: #020203 #020203 #110F13 #110F13; }
     .traceline.real-selected .tracefunfun {
-      background-color: #1d1f21; }
+      background-color: #110F13; }
       .traceline.real-selected .tracefunfun .tracefun {
-        background-color: #0e0e0e; }
+        background-color: #020203; }
         .traceline.real-selected .tracefunfun .tracefun:before {
-          border-color: #0e0e0e #0e0e0e #1d1f21 #1d1f21; }
+          border-color: #020203 #020203 #110F13 #110F13; }
   .traceline.selected {
     width: 98%;
     margin-left: 2%;
-    background-color: #010101;
-    background-color: #010101; }
+    background-color: black;
+    background-color: black; }
     .traceline.selected:before {
-      background-color: #010101;
-      border-color: #010101 #010101 #1d1f21 #1d1f21; }
+      background-color: black;
+      border-color: black black #110F13 #110F13; }
     .traceline.selected .tracefunfun {
-      background-color: #1d1f21; }
+      background-color: #110F13; }
       .traceline.selected .tracefunfun .tracefun {
-        background-color: #010101; }
+        background-color: black; }
         .traceline.selected .tracefunfun .tracefun:before {
-          border-color: #010101 #010101 #1d1f21 #1d1f21; }
+          border-color: black black #110F13 #110F13; }
   .traceline .tracecode {
     padding: 0.5em;
     padding-top: 0.25em;
@@ -390,7 +399,7 @@ code {
       text-align: right;
       float: right;
       line-height: 1.2;
-      color: #88f;
+      color: #B13120;
       padding-right: 2%; }
       .traceline .tracefunfun .tracefun:before {
         content: '';
@@ -405,9 +414,9 @@ code {
     padding-bottom: 0.25em;
     word-wrap: break-word; }
     .traceline .tracefilelno .tracefile {
-      color: #555; }
+      color: #009090; }
     .traceline .tracefilelno .tracelno {
-      color: #999; }
+      color: #7868B5; }
       .traceline .tracefilelno .tracelno:before {
         content: ': '; }
 
@@ -436,36 +445,36 @@ code {
     border-left: 1px solid black;
     border-right: 1px solid black;
     color: #fff;
-    background-color: #181818; }
+    background-color: #141414; }
     .CodeMirror-linebackground.ctx.ctx-top {
       border-top: 1px solid black; }
     .CodeMirror-linebackground.ctx.ctx-bottom {
       border-bottom: 1px solid black; }
     .CodeMirror-linebackground.ctx:before {
       color: #fff;
-      background-color: #181818; }
+      background-color: #141414; }
   .CodeMirror-linebackground.footstep {
-    color: black;
-    background-color: #111 !important; }
+    color: #F4EAD5;
+    background-color: #111013 !important; }
   .CodeMirror-linebackground.breakpoint {
-    color: #ff5995;
-    background-color: rgba(255, 89, 149, 0.15) !important; }
+    color: #A23F1E;
+    background-color: #251C1E !important; }
   .CodeMirror-linebackground.highlighted {
-    color: #b6e354;
-    background-color: black !important; }
+    color: #F4EAD5;
+    background-color: #0F0D11 !important; }
   .CodeMirror-linebackground.breakpoint.highlighted {
-    background-color: rgba(242, 0, 88, 0.15) !important; }
+    background-color: black !important; }
   .CodeMirror-linebackground.ask-breakpoint {
-    color: yellow; }
+    color: #CEAE3E; }
 
 a.inspect {
   display: inline-block;
   text-decoration: none;
-  background-color: black;
-  border: 1px solid #111; }
+  background-color: #0F0D11;
+  border: 1px solid #111013; }
   a.inspect:hover {
-    background-color: #111;
-    border: 1px solid black; }
+    background-color: #111013;
+    border: 1px solid #0F0D11; }
 
 .long {
   display: none; }
@@ -476,13 +485,13 @@ a.inspect {
 #comp-desc {
   text-align: left; }
   #comp-desc .fun_name {
-    color: #fff; }
+    color: #B13120; }
   #comp-desc .fun_punct {
-    color: #fff; }
+    color: #D94A05; }
   #comp-desc .fun_param {
-    color: #969896; }
+    color: #009090; }
     #comp-desc .fun_param.active {
-      color: #de935f; }
+      color: #D94A05; }
 
 .backsearched {
   text-decoration: underline; }
@@ -491,13 +500,13 @@ a.inspect {
   display: inline; }
 
 .object {
-  border: 1px solid #191919;
+  border: 1px solid black;
   border-spacing: 0;
   border-collapse: collapse;
   width: 100%;
   font-size: 0.85em; }
   .object thead.toggle:hover {
-    background-color: #111; }
+    background-color: #111013; }
   .object thead.toggle td {
     text-align: center; }
     .object thead.toggle td:after {
@@ -506,7 +515,7 @@ a.inspect {
   .object thead.toggle.hidden td:after {
     content: '[+]'; }
   .object tbody td, .object thead td {
-    border: 2px solid #111;
+    border: 2px solid black;
     padding: 0.2em 0.5em;
     min-width: 100px; }
   .object tbody.hidden {
@@ -516,15 +525,15 @@ a.inspect {
   .object tbody table td {
     border: none; }
   .object .core {
-    background-color: #0e0e0e; }
+    background-color: #0F0D11; }
   .object .method {
-    background-color: #141414; }
+    background-color: #0F0D11; }
   .object .attr {
-    background-color: #181818; }
+    background-color: #0F0D11; }
   .object .doc {
-    background-color: #1c1c1c; }
+    background-color: #0F0D11; }
   .object .source {
-    background-color: #202020; }
+    background-color: #0F0D11; }
 
 .nogood {
   color: red !important; }
@@ -540,7 +549,7 @@ code, code span {
 .trace_500 {
   margin: 0 1em 1em; }
   .trace_500 .flno {
-    color: #777;
+    color: #E0E4CC;
     font-size: 1.3em;
     float: left; }
   .trace_500 .fun {
@@ -556,7 +565,7 @@ code, code span {
   width: 80px;
   margin: 0 10px;
   text-decoration: none;
-  background-color: #292c2f; }
+  background-color: #1e1a21; }
   #activate:before, #deactivate:before {
     display: block;
     width: 40px;
@@ -575,22 +584,22 @@ code, code span {
   background-color: green; }
 
 .CodeMirror-dialog {
-  background-color: #050606;
-  border-bottom-color: #1d1f21;
-  color: #ccc; }
+  background-color: black;
+  border-bottom-color: #110F13;
+  color: #F4EAD5; }
 
 .cm-searching {
-  background: #35393c; }
+  background: #2a2630; }
 
 /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
 .state {
   background-color: rgba(0, 0, 0, 0);
-  border: 5px solid rgba(0, 183, 229, 0.9);
+  border: 5px solid #AAAAAA;
   opacity: 0.9;
   border-right: 5px solid rgba(0, 0, 0, 0);
   border-left: 5px solid rgba(0, 0, 0, 0);
   border-radius: 50px;
-  box-shadow: 0 0 35px #2187e7;
+  box-shadow: 0 0 35px #828282;
   position: absolute;
   top: 20px;
   left: 10px;
@@ -628,7 +637,7 @@ code, code span {
     -webkit-transform: rotate(160deg);
     transform: rotate(160deg);
     opacity: 0;
-    box-shadow: 0 0 1px #2187e7; } }
+    box-shadow: 0 0 1px #828282; } }
 
 @keyframes spinoffPulse {
   0% {
@@ -654,7 +663,7 @@ code, code span {
     -webkit-transform: rotate(160deg);
     transform: rotate(160deg);
     opacity: 0;
-    box-shadow: 0 0 1px #2187e7; } }
+    box-shadow: 0 0 1px #828282; } }
 
 @-webkit-keyframes spinoffPulse {
   0% {
@@ -665,12 +674,24 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
-\::-webkit-scrollbar {
-  background: #1d1f21;
-  border: 1px solid black;
-  width: 0.75em;
-  height: 0.75em; }
+.CodeMirror {
+  line-height: 1.3; }
 
-\::-webkit-scrollbar-thumb {
-  background: #181818;
-  border: 1px solid black; }
+.CodeMirror-standalone {
+  background-color: transparent; }
+
+.tracefile {
+  background-color: #031316; }
+
+.tracelno {
+  background-color: #1D1B25; }
+
+#traceback .traceline .tracefunfun .tracefun {
+  background-color: #1D1515; }
+
+[data-page=IndexHandler] {
+  font-family: Verdana;
+  margin: 0 10%; }
+
+.cm-comment {
+  font-style: italic; }

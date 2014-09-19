@@ -595,9 +595,8 @@
       this.historize(snippet);
       cmd = (function(_this) {
         return function() {
-          var last_cmd;
           _this.ws.send.apply(_this.ws, arguments);
-          return last_cmd = arguments;
+          return _this.last_cmd = arguments;
         };
       })(this);
       if (snippet.indexOf('.') === 0) {
@@ -678,8 +677,8 @@
         this.working();
         this.suggest_stop();
         return;
-      } else if (snippet === '' && last_cmd) {
-        cmd.apply(this, last_cmd);
+      } else if (snippet === '' && this.last_cmd) {
+        cmd.apply(this, this.last_cmd);
         return;
       }
       if (snippet) {

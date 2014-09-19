@@ -253,7 +253,7 @@ class Wdb extends Log
 
     cmd = =>
       @ws.send.apply @ws, arguments
-      last_cmd = arguments
+      @last_cmd = arguments
 
     if snippet.indexOf('.') == 0
       space = snippet.indexOf(' ')
@@ -289,8 +289,8 @@ class Wdb extends Log
       @working()
       @suggest_stop()
       return
-    else if snippet is '' and last_cmd
-      cmd.apply @, last_cmd
+    else if snippet is '' and @last_cmd
+      cmd.apply @, @last_cmd
       return
     if snippet
       @ws.send 'Eval', snippet

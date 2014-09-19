@@ -522,8 +522,8 @@ class Interaction(object):
                     'params': [p.get_code().replace('\n', '')
                                for p in fun.params],
                     'index': fun.index,
-                    'module': fun.module.path,
-                    'call_name': fun.call_name} for fun in funs],
+                    'module': fun.module_name,
+                    'call_name': fun.name} for fun in funs],
                 'completions': [{
                     'base': comp.name[
                         :len(comp.name) - len(comp.complete)],
