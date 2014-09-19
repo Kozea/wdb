@@ -18,13 +18,9 @@
   background: #d7d4f0; }
 
 .CodeMirror, .CodeMirror-standalone {
-  background: none;
   color: grey;
-  /* Use each loop to hash when sass 3.3 is released */
-  /* span */
-  /*   @each $name, $color in $hl-colors */
-  /*     &.cm-# {$name} */
-  /*       color: $color */ }
+  background-color: none;
+  /* Use each loop to hash when sass 3.3 is released */ }
   .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
     background: #d9d9d9; }
   .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
@@ -36,51 +32,74 @@
   .CodeMirror .CodeMirror-cursor, .CodeMirror-standalone .CodeMirror-cursor {
     border-left: 1px solid black !important; }
   .CodeMirror span.cm-keyword, .CodeMirror-standalone span.cm-keyword {
-    color: #360795; }
+    color: #360795;
+    background-color: none; }
   .CodeMirror span.cm-atom, .CodeMirror-standalone span.cm-atom {
-    color: #219; }
+    color: #219;
+    background-color: none; }
   .CodeMirror span.cm-number, .CodeMirror-standalone span.cm-number {
-    color: #770088; }
+    color: #770088;
+    background-color: none; }
   .CodeMirror span.cm-def, .CodeMirror-standalone span.cm-def {
-    color: #00f; }
+    color: #00f;
+    background-color: none; }
   .CodeMirror span.cm-variable, .CodeMirror-standalone span.cm-variable {
-    color: #525252; }
+    color: #525252;
+    background-color: none; }
   .CodeMirror span.cm-variable-2, .CodeMirror-standalone span.cm-variable-2 {
-    color: #05a; }
+    color: #05a;
+    background-color: none; }
   .CodeMirror span.cm-variable-3, .CodeMirror-standalone span.cm-variable-3 {
-    color: #085; }
+    color: #085;
+    background-color: none; }
   .CodeMirror span.cm-property, .CodeMirror-standalone span.cm-property {
-    color: black; }
+    color: black;
+    background-color: none; }
   .CodeMirror span.cm-operator, .CodeMirror-standalone span.cm-operator {
-    color: black; }
+    color: black;
+    background-color: none; }
   .CodeMirror span.cm-comment, .CodeMirror-standalone span.cm-comment {
-    color: #95720F; }
+    color: #95720F;
+    background-color: none; }
   .CodeMirror span.cm-string, .CodeMirror-standalone span.cm-string {
-    color: #950728; }
+    color: #950728;
+    background-color: none; }
   .CodeMirror span.cm-string-2, .CodeMirror-standalone span.cm-string-2 {
-    color: #f50; }
+    color: #f50;
+    background-color: none; }
   .CodeMirror span.cm-meta, .CodeMirror-standalone span.cm-meta {
-    color: #555; }
+    color: #555;
+    background-color: none; }
   .CodeMirror span.cm-qualifier, .CodeMirror-standalone span.cm-qualifier {
-    color: #555; }
+    color: #555;
+    background-color: none; }
   .CodeMirror span.cm-builtin, .CodeMirror-standalone span.cm-builtin {
-    color: #BA00D4; }
+    color: #BA00D4;
+    background-color: none; }
   .CodeMirror span.cm-bracket, .CodeMirror-standalone span.cm-bracket {
-    color: #997; }
+    color: #997;
+    background-color: none; }
   .CodeMirror span.cm-tag, .CodeMirror-standalone span.cm-tag {
-    color: #170; }
+    color: #170;
+    background-color: none; }
   .CodeMirror span.cm-attribute, .CodeMirror-standalone span.cm-attribute {
-    color: #00c; }
+    color: #00c;
+    background-color: none; }
   .CodeMirror span.cm-header, .CodeMirror-standalone span.cm-header {
-    color: blue; }
+    color: blue;
+    background-color: none; }
   .CodeMirror span.cm-quote, .CodeMirror-standalone span.cm-quote {
-    color: #090; }
+    color: #090;
+    background-color: none; }
   .CodeMirror span.cm-hr, .CodeMirror-standalone span.cm-hr {
-    color: #999; }
+    color: #999;
+    background-color: none; }
   .CodeMirror span.cm-link, .CodeMirror-standalone span.cm-link {
-    color: #00c; }
+    color: #00c;
+    background-color: none; }
   .CodeMirror span.cm-error, .CodeMirror-standalone span.cm-error {
-    color: #f00; }
+    color: #f00;
+    background-color: none; }
 
 body, html {
   color: #000;
@@ -102,7 +121,7 @@ body, html {
     #wdb > header #title {
       flex: 1;
       margin: 0;
-      font-family: "WeblySleek", sans-serif; }
+      font-family: inherit; }
   #wdb > article {
     flex: 1; }
     #wdb > article table, #wdb > article form, #wdb > article p {
@@ -247,7 +266,7 @@ code {
   vertical-align: top; }
 
 #interpreter {
-  font: 14px/15px "Source Code Pro", monospace; }
+  font: 12px/1.5 "Source Code Pro", monospace; }
 
 #scrollback .display {
   box-shadow: inset -8px 0 20px #ddd;
@@ -261,7 +280,7 @@ code {
 #prompt, .prompted {
   padding: 0.5em 0 0 0; }
   #prompt:before, .prompted:before {
-    font: 14px/15px "Source Code Pro", monospace;
+    font: 12px/1.5 "Source Code Pro", monospace;
     color: grey;
     content: ">>> "; }
 
@@ -269,7 +288,7 @@ code {
   display: flex; }
   #prompt textarea {
     color: grey;
-    font: 14px/15px "Source Code Pro", monospace;
+    font: 12px/1.5 "Source Code Pro", monospace;
     margin-left: 0.5em;
     resize: none; }
 
@@ -291,12 +310,12 @@ code {
   font-style: italic; }
 
 .trace {
-  font: 14px/15px "Source Code Pro", monospace; }
+  font: 12px/1.5 "Source Code Pro", monospace; }
 
 .traceline {
   transition: border 750ms;
   margin: 0 0 1em 1em;
-  font: 14px/15px "Source Code Pro", monospace;
+  font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
   overflow: hidden;
   width: 94%;
@@ -444,7 +463,7 @@ code {
 a.inspect {
   display: inline-block;
   text-decoration: none;
-  background-color: #f3f3f3;
+  background-color: lightgrey;
   border: 1px solid #e3e3e3; }
   a.inspect:hover {
     background-color: #e3e3e3;

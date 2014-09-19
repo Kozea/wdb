@@ -18,13 +18,9 @@
   background: #1b1d1e; }
 
 .CodeMirror, .CodeMirror-standalone {
-  background: none;
   color: #01b7e5;
-  /* Use each loop to hash when sass 3.3 is released */
-  /* span */
-  /*   @each $name, $color in $hl-colors */
-  /*     &.cm-# {$name} */
-  /*       color: $color */ }
+  background-color: transparent;
+  /* Use each loop to hash when sass 3.3 is released */ }
   .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
     background: #1f2224; }
   .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
@@ -36,51 +32,74 @@
   .CodeMirror .CodeMirror-cursor, .CodeMirror-standalone .CodeMirror-cursor {
     border-left: 1px solid white !important; }
   .CodeMirror span.cm-keyword, .CodeMirror-standalone span.cm-keyword {
-    color: #e91861; }
+    color: #e91861;
+    background-color: transparent; }
   .CodeMirror span.cm-atom, .CodeMirror-standalone span.cm-atom {
-    color: #845dc4; }
+    color: #845dc4;
+    background-color: transparent; }
   .CodeMirror span.cm-number, .CodeMirror-standalone span.cm-number {
-    color: #E56F01; }
+    color: #E56F01;
+    background-color: transparent; }
   .CodeMirror span.cm-def, .CodeMirror-standalone span.cm-def {
-    color: #efc371; }
+    color: #efc371;
+    background-color: transparent; }
   .CodeMirror span.cm-variable, .CodeMirror-standalone span.cm-variable {
-    color: #c3c6c4; }
+    color: #c3c6c4;
+    background-color: transparent; }
   .CodeMirror span.cm-variable-2, .CodeMirror-standalone span.cm-variable-2 {
-    color: #b1b4b2; }
+    color: #b1b4b2;
+    background-color: transparent; }
   .CodeMirror span.cm-variable-3, .CodeMirror-standalone span.cm-variable-3 {
-    color: #9fa3a0; }
+    color: #9fa3a0;
+    background-color: transparent; }
   .CodeMirror span.cm-property, .CodeMirror-standalone span.cm-property {
-    color: #c5c8c6; }
+    color: #c5c8c6;
+    background-color: transparent; }
   .CodeMirror span.cm-operator, .CodeMirror-standalone span.cm-operator {
-    color: #80a1bc; }
+    color: #80a1bc;
+    background-color: transparent; }
   .CodeMirror span.cm-comment, .CodeMirror-standalone span.cm-comment {
-    color: #c5c8c6; }
+    color: #c5c8c6;
+    background-color: transparent; }
   .CodeMirror span.cm-string, .CodeMirror-standalone span.cm-string {
-    color: #e56f01; }
+    color: #e56f01;
+    background-color: transparent; }
   .CodeMirror span.cm-string-2, .CodeMirror-standalone span.cm-string-2 {
-    color: #e56f01; }
+    color: #e56f01;
+    background-color: transparent; }
   .CodeMirror span.cm-meta, .CodeMirror-standalone span.cm-meta {
-    color: #89bdb5; }
+    color: #89bdb5;
+    background-color: transparent; }
   .CodeMirror span.cm-qualifier, .CodeMirror-standalone span.cm-qualifier {
-    color: #89bdb5; }
+    color: #89bdb5;
+    background-color: transparent; }
   .CodeMirror span.cm-builtin, .CodeMirror-standalone span.cm-builtin {
-    color: #80a1bc; }
+    color: #80a1bc;
+    background-color: transparent; }
   .CodeMirror span.cm-bracket, .CodeMirror-standalone span.cm-bracket {
-    color: #80a1bc; }
+    color: #80a1bc;
+    background-color: transparent; }
   .CodeMirror span.cm-tag, .CodeMirror-standalone span.cm-tag {
-    color: #c5c8c6; }
+    color: #c5c8c6;
+    background-color: transparent; }
   .CodeMirror span.cm-attribute, .CodeMirror-standalone span.cm-attribute {
-    color: #cc6666; }
+    color: #cc6666;
+    background-color: transparent; }
   .CodeMirror span.cm-header, .CodeMirror-standalone span.cm-header {
-    color: #cc6666; }
+    color: #cc6666;
+    background-color: transparent; }
   .CodeMirror span.cm-quote, .CodeMirror-standalone span.cm-quote {
-    color: #cc6666; }
+    color: #cc6666;
+    background-color: transparent; }
   .CodeMirror span.cm-hr, .CodeMirror-standalone span.cm-hr {
-    color: #cc6666; }
+    color: #cc6666;
+    background-color: transparent; }
   .CodeMirror span.cm-link, .CodeMirror-standalone span.cm-link {
-    color: #80a1bc; }
+    color: #80a1bc;
+    background-color: transparent; }
   .CodeMirror span.cm-error, .CodeMirror-standalone span.cm-error {
-    color: #808080; }
+    color: #808080;
+    background-color: transparent; }
 
 body, html {
   color: #ccc;
@@ -444,7 +463,7 @@ code {
 a.inspect {
   display: inline-block;
   text-decoration: none;
-  background-color: #181818;
+  background-color: black;
   border: 1px solid #111; }
   a.inspect:hover {
     background-color: #111;

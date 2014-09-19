@@ -528,6 +528,10 @@ class Wdb(object):
     def get_file(self, filename):
         """Get file source from cache"""
         import linecache
+        # Hack for frozen importlib bootstrap
+        if filename == '<frozen importlib._bootstrap>':
+            filename = os.path.join(os.path.dirname(linecache.__file__),
+                                    'importlib', '_bootstrap.py')
         return to_unicode_string(
             ''.join(linecache.getlines(filename)), filename)
 
