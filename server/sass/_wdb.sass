@@ -181,9 +181,9 @@ code
     outline: none
 
   > .CodeMirror
-    font-family: "Source Code Pro" !important
-    font-weight: bold
-    font-size: 15px
+    font: $code-font
+
+
     box-shadow: inset -8px 0 20px $source-shadow
 
     &.rw:after
@@ -283,9 +283,12 @@ code
 
 $shift: 4%
 $margin: 2%
+$trace-bg-hover: darken($trace-bg, 5%) !default
+$trace-bg-real: darken($trace-bg, 5%) !default
+$trace-bg-selected: darken($trace-bg, 10%) !default
 
 .traceline
-  transition: border 750ms
+  transition: 750ms
   margin: 0 0 1em 1em
   font: $code-font
   clear: both
@@ -298,18 +301,18 @@ $margin: 2%
     +traceline($trace-alt-bg)
 
   &:hover
-    +traceline(darken($trace-bg, 5%))
+    +traceline($trace-bg-hover)
+
+  &.real-selected
+    +traceline($trace-bg-real)
+    background-color: $trace-bg-real
 
   &.selected
     width: 100% - $margin
     margin-left: $margin
 
-    +traceline(darken($trace-bg, 10%))
-    background-color: darken($trace-bg, 10%)
-
-  &.real-selected
-    +traceline(darken($trace-bg, 5%))
-    background-color: darken($trace-bg, 5%)
+    +traceline($trace-bg-selected)
+    background-color: $trace-bg-selected
 
   .tracecode
     padding: .5em
@@ -371,7 +374,7 @@ $margin: 2%
   width: .6em
 
 .CodeMirror-linebackground
-  transition: 1s
+  transition: background-color 1s
 
   &:hover
     transition: 1s

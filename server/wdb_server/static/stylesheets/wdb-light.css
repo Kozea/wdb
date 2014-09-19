@@ -235,9 +235,7 @@ code {
 #source-editor:focus {
   outline: none; }
 #source-editor > .CodeMirror {
-  font-family: "Source Code Pro" !important;
-  font-weight: bold;
-  font-size: 15px;
+  font: 12px/1.5 "Source Code Pro", monospace;
   box-shadow: inset -8px 0 20px #ddd; }
   #source-editor > .CodeMirror.rw:after {
     position: absolute;
@@ -313,7 +311,7 @@ code {
   font: 12px/1.5 "Source Code Pro", monospace; }
 
 .traceline {
-  transition: border 750ms;
+  transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
@@ -352,6 +350,18 @@ code {
         background-color: #d5d7ff; }
         .traceline:hover .tracefunfun .tracefun:before {
           border-color: #d5d7ff #d5d7ff #f8f8f8 #f8f8f8; }
+  .traceline.real-selected {
+    background-color: #d5d7ff;
+    background-color: #d5d7ff; }
+    .traceline.real-selected:before {
+      background-color: #d5d7ff;
+      border-color: #d5d7ff #d5d7ff #f8f8f8 #f8f8f8; }
+    .traceline.real-selected .tracefunfun {
+      background-color: #f8f8f8; }
+      .traceline.real-selected .tracefunfun .tracefun {
+        background-color: #d5d7ff; }
+        .traceline.real-selected .tracefunfun .tracefun:before {
+          border-color: #d5d7ff #d5d7ff #f8f8f8 #f8f8f8; }
   .traceline.selected {
     width: 98%;
     margin-left: 2%;
@@ -366,18 +376,6 @@ code {
         background-color: #bbc0ff; }
         .traceline.selected .tracefunfun .tracefun:before {
           border-color: #bbc0ff #bbc0ff #f8f8f8 #f8f8f8; }
-  .traceline.real-selected {
-    background-color: #d5d7ff;
-    background-color: #d5d7ff; }
-    .traceline.real-selected:before {
-      background-color: #d5d7ff;
-      border-color: #d5d7ff #d5d7ff #f8f8f8 #f8f8f8; }
-    .traceline.real-selected .tracefunfun {
-      background-color: #f8f8f8; }
-      .traceline.real-selected .tracefunfun .tracefun {
-        background-color: #d5d7ff; }
-        .traceline.real-selected .tracefunfun .tracefun:before {
-          border-color: #d5d7ff #d5d7ff #f8f8f8 #f8f8f8; }
   .traceline .tracecode {
     padding: 0.5em;
     padding-top: 0.25em;
@@ -430,7 +428,7 @@ code {
   width: 0.6em; }
 
 .CodeMirror-linebackground {
-  transition: 1s; }
+  transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
     transition: 1s;
     color: blue; }
