@@ -13,15 +13,10 @@
   src: url("../fonts/SourceCodePro-Bold.ttf.woff") format("woff");
   font-weight: 900; }
 
-.CodeMirror-focused .CodeMirror-selected {
-  background: inherit; }
-
 .CodeMirror, .CodeMirror-standalone {
   color: #666;
   background-color: transparent;
   /* Use each loop to hash when sass 3.3 is released */ }
-  .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
-    background: inherit; }
   .CodeMirror .CodeMirror-gutters, .CodeMirror-standalone .CodeMirror-gutters {
     border-right: 1px solid #eee; }
     .CodeMirror .CodeMirror-gutters .CodeMirror-gutter, .CodeMirror-standalone .CodeMirror-gutters .CodeMirror-gutter {
@@ -364,17 +359,17 @@ code {
   .traceline.selected {
     width: 98%;
     margin-left: 2%;
-    background-color: #fff;
-    background-color: #fff; }
+    background-color: rgba(255, 255, 255, 0);
+    background-color: rgba(255, 255, 255, 0); }
     .traceline.selected:before {
-      background-color: #fff;
-      border-color: #fff #fff #fff #fff; }
+      background-color: rgba(255, 255, 255, 0);
+      border-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0) #fff #fff; }
     .traceline.selected .tracefunfun {
       background-color: #fff; }
       .traceline.selected .tracefunfun .tracefun {
-        background-color: #fff; }
+        background-color: rgba(255, 255, 255, 0); }
         .traceline.selected .tracefunfun .tracefun:before {
-          border-color: #fff #fff #fff #fff; }
+          border-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0) #fff #fff; }
   .traceline .tracecode {
     padding: 0.5em;
     padding-top: 0.25em;
@@ -681,7 +676,7 @@ code, code span {
 .traceline {
   position: relative;
   padding-bottom: 0.5em;
-  border: 1px solid #fff;
+  border: 1px solid rgba(255, 255, 255, 0);
   border-radius: 4px; }
   .traceline:not(.selected) {
     border-color: #d8d8d8; }
@@ -699,3 +694,6 @@ code, code span {
 [data-page=IndexHandler] {
   font-family: Verdana;
   margin: 0 10%; }
+
+.traceline {
+  margin-bottom: -1px; }

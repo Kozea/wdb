@@ -49,16 +49,18 @@ $hl-error: $hl-default !default
 $hl-bg-error: $hl-bg-default !default
 
 
-.CodeMirror-focused
-  .CodeMirror-selected
-    background: $cm-focused-selected
+@if $cm-focused-selected
+  .CodeMirror-focused
+    .CodeMirror-selected
+      background: $cm-focused-selected
 
 .CodeMirror, .CodeMirror-standalone
   color: $hl-default
   background-color: $hl-bg-default
 
-  .CodeMirror-selected
-    background: $cm-selected
+  @if $cm-selected
+    .CodeMirror-selected
+      background: $cm-selected
 
   .CodeMirror-gutters
     border-right: 1px solid $cm-gutter-border
