@@ -265,6 +265,10 @@ code {
   background-color: white;
   border: 1px solid transparent;
   resize: both; }
+#scrollback .duration {
+  float: right;
+  padding: 0.5em 0 0 0;
+  opacity: 0.333; }
 #scrollback iframe.display {
   width: 100%;
   min-height: 300px; }

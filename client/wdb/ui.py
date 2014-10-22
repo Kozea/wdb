@@ -324,14 +324,17 @@ class Interaction(object):
         raw_data = raw_data.replace(' ', u(' '))
         # Compensate prompt for multi line
         raw_data = raw_data.replace('\n', '\n' + u(' ' * 4))
-
+        duration = None
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
                 self.db.compile_cache[id(compiled_code)] = data
+
                 l = self.locals[self.index]
+                start = time.time()
                 execute(compiled_code, self.get_globals(), l)
+                duration = int((time.time() - start) * 1000 * 1000)
             except NameError as e:
                 m = re.match("name '(.+)' is not defined", str(e))
                 if m:
@@ -372,7 +375,8 @@ class Interaction(object):
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
                 'result': result,
-                'suggest': suggest
+                'suggest': suggest,
+                'duration': duration
             }))
 
     def do_ping(self, data):
