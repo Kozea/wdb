@@ -102,6 +102,7 @@ class Wdb(object):
     def __init__(self, server=SOCKET_SERVER, port=SOCKET_PORT):
         log.debug('New wdb instance %r' % self)
         self.obj_cache = {}
+        self.compile_cache = {}
         self.tracing = False
         self.begun = False
         self.connected = False
@@ -142,7 +143,9 @@ class Wdb(object):
             locals = globals
         self.reset()
         if isinstance(cmd, str):
-            cmd = compile(cmd, fn or "<wdb>", "exec")
+            str_cmd = cmd
+            cmd = compile(str_cmd, fn or "<wdb>", "exec")
+            self.compile_cache[id(cmd)] = str_cmd
         if fn:
             from linecache import getline
             lno = 1
@@ -564,6 +567,8 @@ class Wdb(object):
             filename = code.co_filename
             linecache.checkcache(filename)
             line = linecache.getline(filename, lno, stack_frame.f_globals)
+            if not line:
+                line = self.compile_cache.get(id(code), '')
             line = to_unicode_string(line, filename)
             line = line and line.strip()
             startlnos = dis.findlinestarts(code)

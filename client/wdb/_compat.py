@@ -145,3 +145,19 @@ if python_version == 2:
             self._handle = None
 else:
     from multiprocessing.connection import Client as Socket
+
+
+try:
+    from importlib.util import find_spec
+
+    def existing_module(module):
+        return bool(find_spec(module))
+except ImportError:
+    import imp
+
+    def existing_module(module):
+        try:
+            imp.find_module(module)
+            return True
+        except ImportError:
+            return False
