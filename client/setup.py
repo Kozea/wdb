@@ -5,6 +5,7 @@
 wdb
 """
 import os
+import sys
 import re
 from setuptools import setup
 
@@ -24,6 +25,9 @@ options = dict(
     platforms="Any",
     packages=['wdb'],
     install_requires=["log_colorizer>=1.6", "jedi>=0.8.0"],
+    entry_points={'console_scripts': [
+        'wdb=wdb.__main__:main',
+        'wdb-%s=wdb.__main__:main' % sys.version[:3]]},
     package_data={
         'wdb': [
             'res/*'

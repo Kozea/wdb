@@ -605,6 +605,9 @@ class Wdb(object):
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 
+    def shell(self):
+        self.interaction(sys._getframe(), exception_description='Shell')
+
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
