@@ -357,6 +357,7 @@
       this.session_cmd_hist = {};
       this.file_cache = {};
       this.last_cmd = null;
+      this.eval_time = null;
       this.waited_for_ws = 0;
       this.$state = $('.state');
       this.$title = $('#title');
@@ -526,13 +527,16 @@
       });
     };
 
-    Wdb.prototype.code = function(parent, src, classes, html) {
+    Wdb.prototype.code = function(parent, src, classes, html, title) {
       var $code, $node, cls, _i, _len;
       if (classes == null) {
         classes = [];
       }
       if (html == null) {
         html = false;
+      }
+      if (title == null) {
+        title = null;
       }
       if (html) {
         if (src[0] !== '<' || src.slice(-1) !== '>') {
@@ -554,6 +558,9 @@
               cls = classes[_i];
               $code.addClass(cls);
             }
+            if (title) {
+              $code.attr('title', title);
+            }
             return setTimeout((function() {
               CodeMirror.runMode($code.text(), "python", $code.get(0));
               $code.removeClass('waiting_for_hl');
@@ -568,6 +575,9 @@
         for (_i = 0, _len = classes.length; _i < _len; _i++) {
           cls = classes[_i];
           $code.addClass(cls);
+        }
+        if (title) {
+          $code.attr('title', title);
         }
         parent.append($code);
         CodeMirror.runMode(src, "python", $code.get(0));
@@ -684,6 +694,7 @@
       if (snippet) {
         this.ws.send('Eval', snippet);
         this.$eval.val(this.$eval.val() + '...').trigger('autosize.resize').prop('disabled', true);
+        this.eval_time = typeof performance !== "undefined" && performance !== null ? performance.now() : void 0;
         return this.working();
       }
     };
@@ -717,10 +728,19 @@
     };
 
     Wdb.prototype.print = function(data) {
-      var snippet;
+      var $group, duration, snippet;
+      if (performance && this.eval_time) {
+        duration = parseInt((performance.now() - this.eval_time) * 1000);
+        this.eval_time = null;
+      }
       this.suggest_stop();
       snippet = this.$eval.val();
-      this.code(this.$scrollback, data["for"], ['prompted']);
+      $group = $('<div>');
+      this.$scrollback.append($group);
+      if (data.duration) {
+        this.code($group, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)));
+      }
+      this.code($group, data["for"], ['prompted']);
       this.code(this.$scrollback, data.result, [], true);
       this.$eval.val(data.suggest || '').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
       this.$completions.attr('style', '');
@@ -1305,6 +1325,30 @@
 
     Wdb.prototype.disable = function() {
       return this.ws.send('Disable');
+    };
+
+    Wdb.prototype.pretty_time = function(time) {
+      if (time < 1000) {
+        return "" + time + "μs";
+      }
+      time = time / 1000;
+      if (time < 10) {
+        return "" + (time.toFixed(2)) + "ms";
+      }
+      if (time < 100) {
+        return "" + (time.toFixed(1)) + "ms";
+      }
+      if (time < 1000) {
+        return "" + (time.toFixed(0)) + "ms";
+      }
+      time = time / 1000;
+      if (time < 10) {
+        return "" + (time.toFixed(2)) + "s";
+      }
+      if (time < 100) {
+        return "" + (time.toFixed(1)) + "s";
+      }
+      return "" + (time.toFixed(0)) + "s";
     };
 
     return Wdb;

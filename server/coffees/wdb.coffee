@@ -28,6 +28,7 @@ class Wdb extends Log
     @session_cmd_hist = {}
     @file_cache = {}
     @last_cmd = null
+    @eval_time = null
 
     @waited_for_ws = 0
 
@@ -202,7 +203,7 @@ class Wdb extends Log
         $(@).append $('<span class="short close">').text(txt.substr(0, 128))
         $(@).append $('<span class="long">').text(txt.substr(128))
 
-  code: (parent, src, classes=[], html=false) ->
+  code: (parent, src, classes=[], html=false, title=null) ->
     if html
       if src[0] != '<' or src.slice(-1) != '>'
         $node = $('<div>', class: 'out').html(src)
@@ -220,6 +221,7 @@ class Wdb extends Log
         $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone')
         for cls in classes
           $code.addClass(cls)
+        $code.attr('title', title) if title
         setTimeout (=>
           CodeMirror.runMode $code.text(), "python", $code.get(0)
           $code.removeClass('waiting_for_hl')
@@ -229,6 +231,7 @@ class Wdb extends Log
       $code = $('<code>', 'class': 'CodeMirror-standalone')
       for cls in classes
         $code.addClass(cls)
+      $code.attr('title', title) if title
       parent.append $code
       CodeMirror.runMode src, "python", $code.get(0)
       @ellipsize $code
@@ -297,6 +300,7 @@ class Wdb extends Log
       @$eval.val(@$eval.val() + '...')
         .trigger('autosize.resize')
         .prop('disabled', true)
+      @eval_time = performance?.now()
       @working()
 
   cls: ->
@@ -382,9 +386,19 @@ specify a module like `logging.config`.
       .animate((scrollTop: @$scrollback.height()), 1000)
 
   print: (data) ->
+    if performance and @eval_time
+      duration = parseInt((performance.now() - @eval_time) * 1000)
+      @eval_time = null
+
     @suggest_stop()
     snippet = @$eval.val()
-    @code(@$scrollback, data.for, ['prompted'])
+    $group = $('<div>')
+    @$scrollback.append($group)
+
+    @code($group,
+      @pretty_time(data.duration),
+      ['duration'], false, "Total #{@pretty_time(duration)}") if data.duration
+    @code($group, data.for, ['prompted'])
     @code(@$scrollback, data.result, [], true)
     @$eval
       .val(data.suggest or '')
@@ -884,5 +898,26 @@ specify a module like `logging.config`.
 
   disable: ->
     @ws.send 'Disable'
+
+  pretty_time: (time) ->
+    if time < 1000
+      return "#{time}μs"
+
+    time = time / 1000
+    if time < 10
+      return "#{time.toFixed(2)}ms"
+    if time < 100
+      return "#{time.toFixed(1)}ms"
+    if time < 1000
+      return "#{time.toFixed(0)}ms"
+
+    time = time / 1000
+    if time < 10
+      return "#{time.toFixed(2)}s"
+    if time < 100
+      return "#{time.toFixed(1)}s"
+
+    "#{time.toFixed(0)}s"
+
 
 $ => @wdb = new Wdb()
