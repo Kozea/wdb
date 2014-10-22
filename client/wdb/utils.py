@@ -1,7 +1,7 @@
 import inspect
 import dis
 import sys
-from ._compat import StringIO
+from ._compat import StringIO, existing_module
 
 
 def pretty_frame(frame):
@@ -71,3 +71,7 @@ def get_args(frame):
         vars.append('**%s=%r' % (
             varnames[nargs], locals[varnames[nargs]]))
     return ', '.join(vars)
+
+
+def importable_module(module):
+    return existing_module(module)

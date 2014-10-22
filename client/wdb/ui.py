@@ -2,7 +2,7 @@
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
-from .utils import get_source, get_doc, executable_line
+from .utils import get_source, get_doc, executable_line, importable_module
 from . import __version__
 from tokenize import generate_tokens, TokenError
 import token as tokens
@@ -27,7 +27,6 @@ import os
 import re
 import sys
 import time
-import pkgutil
 import traceback
 log = getLogger('wdb.ui')
 
@@ -42,26 +41,6 @@ class ReprEncoder(JSONEncoder):
 def dump(o):
     """Shortcut to json.dumps with ReprEncoder"""
     return dumps(o, cls=ReprEncoder, sort_keys=True)
-
-
-def handle_exc():
-    """Return a formated exception traceback for wdb.js use"""
-    type_, value = sys.exc_info()[:2]
-    return '<a title="%s">%s: %s</a>' % (
-        escape(traceback.format_exc().replace('"', '\'')),
-        escape(type_.__name__), escape(str(value)))
-
-
-def fail(db, cmd, title=None, message=None):
-    """Send back captured exceptions"""
-    if message is None:
-        message = handle_exc()
-    else:
-        message = escape(message)
-    db.send('Echo|%s' % dump({
-        'for': escape(title or '%s failed' % cmd),
-        'val': message
-    }))
 
 
 def tokenize_redir(raw_data):
@@ -89,8 +68,10 @@ class Interaction(object):
     }
 
     def __init__(
-            self, db, frame, tb, exception, exception_description, init=None):
+            self, db, frame, tb, exception, exception_description,
+            init=None, parent=None):
         self.db = db
+        self.parent = parent
         self.init_message = init
         self.stack, self.trace, self.index = self.db.get_trace(frame, tb)
         self.exception = exception
@@ -166,7 +147,7 @@ class Interaction(object):
             except Exception:
                 log.exception('Error in loop')
                 try:
-                    exc = handle_exc()
+                    exc = self.handle_exc()
                     type_, value = sys.exc_info()[:2]
                     link = (
                         '<a href="https://github.com/Kozea/wdb/issues/new?'
@@ -269,7 +250,23 @@ class Interaction(object):
         try:
             thing = self.db.obj_cache.get(int(data))
         except Exception:
-            fail(self.db, 'Inspect')
+            self.fail('Inspect')
+            return
+
+        if (isinstance(thing, tuple) and len(thing) == 3):
+            type_, value, tb = thing
+            iter_tb = tb
+            while iter_tb.tb_next != None:
+                iter_tb = iter_tb.tb_next
+
+            interaction = Interaction(
+                self.db, iter_tb.tb_frame, tb,
+                'RECURSIVE %s' % type_.__name__,
+                str(value), parent=self
+            )
+            interaction.init()
+            interaction.loop()
+            self.init()
             return
 
         self.db.send('Dump|%s' % dump({
@@ -284,7 +281,7 @@ class Interaction(object):
             thing = eval(
                 data, self.get_globals(), self.locals[self.index])
         except Exception:
-            fail(self.db, 'Dump')
+            self.fail('Dump')
             return
 
         self.db.send('Dump|%s' % dump({
@@ -308,7 +305,7 @@ class Interaction(object):
                 with open(filename, 'r') as f:
                     raw_data = f.read()
             except Exception:
-                fail(self.db, 'Eval', 'Unable to read from file %s' % filename)
+                self.fail('Eval', 'Unable to read from file %s' % filename)
                 return
 
         lines = raw_data.split('\n')
@@ -332,26 +329,26 @@ class Interaction(object):
                 with_hook=redir is None) as (out, err):
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
+                self.db.compile_cache[id(compiled_code)] = data
                 l = self.locals[self.index]
                 execute(compiled_code, self.get_globals(), l)
             except NameError as e:
                 m = re.match("name '(.+)' is not defined", str(e))
                 if m:
                     name = m.groups()[0]
-                    for loader, module, ispkg in pkgutil.iter_modules():
-                        if module == name:
-                            suggest = 'import %s' % module
-                            break
-                self.db.hooked = handle_exc()
+                    if importable_module(name):
+                        suggest = 'import %s' % name
+
+                self.db.hooked = self.handle_exc()
             except Exception:
-                self.db.hooked = handle_exc()
+                self.db.hooked = self.handle_exc()
 
         if redir and not self.db.hooked:
             try:
                 with open(redir, 'a' if append else 'w') as f:
                     f.write('\n'.join(out) + '\n'.join(err) + '\n')
             except Exception:
-                fail(self.db, 'Eval', 'Unable to write to file %s' % redir)
+                self.fail('Eval', 'Unable to write to file %s' % redir)
                 return
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
@@ -406,8 +403,8 @@ class Interaction(object):
         from linecache import getline
 
         brk = loads(data)
-        break_fail = lambda x: fail(
-            self.db, 'Break', 'Break on %s failed' % (
+        break_fail = lambda x: self.fail(
+            'Break', 'Break on %s failed' % (
                 '%s:%s' % (brk['fn'], brk['lno'])), message=x)
 
         if brk['lno'] is not None:
@@ -472,7 +469,7 @@ class Interaction(object):
         try:
             self.current_frame.f_lineno = lno
         except ValueError:
-            fail(self.db, 'Unbreak')
+            self.fail('Unbreak')
             return
 
         self.current['lno'] = lno
@@ -565,18 +562,20 @@ class Interaction(object):
     def do_display(self, data):
         if ';' in data:
             mime, data = data.split(';', 1)
+            forced = True
         else:
             mime = 'text/html'
+            forced = False
 
         try:
             thing = eval(
                 data, self.get_globals(), self.locals[self.index])
         except Exception:
-            fail(self.db, 'Display')
+            self.fail('Display')
             return
         else:
             thing = force_bytes(thing)
-            if magic:
+            if magic and not forced:
                 with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
                     mime = m.id_buffer(thing)
             self.db.send('Display|%s' % dump({
@@ -595,3 +594,24 @@ class Interaction(object):
         self.db.stepping = False
         self.db.stop_trace()
         sys.exit(1)
+
+    def handle_exc(self):
+        """Return a formated exception traceback for wdb.js use"""
+        exc_info = sys.exc_info()
+        type_, value = exc_info[:2]
+        self.db.obj_cache[id(exc_info)] = exc_info
+
+        return '<a href="%d" class="inspect">%s: %s</a>' % (
+            id(exc_info),
+            escape(type_.__name__), escape(str(value)))
+
+    def fail(self, cmd, title=None, message=None):
+        """Send back captured exceptions"""
+        if message is None:
+            message = self.handle_exc()
+        else:
+            message = escape(message)
+        self.db.send('Echo|%s' % dump({
+            'for': escape(title or '%s failed' % cmd),
+            'val': message
+        }))
