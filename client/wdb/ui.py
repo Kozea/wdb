@@ -6,7 +6,7 @@ from .utils import get_source, get_doc, executable_line, importable_module
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
-from jedi import Script
+from jedi import Interpreter
 from logging import getLogger
 from shutil import move
 from tempfile import gettempdir
@@ -499,35 +499,19 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
-        file_ = self.db.get_file(self.current_file)
-        file_ = to_unicode(file_)
-        lines = file_.splitlines()
-        lno = self.current['lno']
-        line_before = ''
-        if len(lines) >= lno:
-            line_before = lines[lno - 1]
-        indent = len(line_before) - len(line_before.lstrip())
-        segments = data.splitlines()
-        for segment in reversed(segments):
-            line = u(' ') * indent + segment
-            lines.insert(lno - 1, line)
-        script = Script(
-            u('\n').join(lines), lno - 1 + len(segments),
-            len(segments[-1]) + indent, '')
+        script = Interpreter(data, [self.current_locals, self.get_globals()])
         try:
             completions = script.completions()
         except Exception:
             self.db.send('Suggest')
-            self.notify_exc('Completion failed for %s' % (
-                '\n'.join(reversed(segments))))
+            self.notify_exc('Completion failed for %s' % data)
             return
 
         try:
             funs = script.call_signatures() or []
         except Exception:
             self.db.send('Suggest')
-            self.notify_exc('Completion of function failed for %s' % (
-                '\n'.join(reversed(segments))))
+            self.notify_exc('Completion of function failed for %s' % data)
             return
 
         try:
@@ -549,8 +533,7 @@ class Interaction(object):
             self.db.send('Suggest|%s' % dump(suggest_obj))
         except Exception:
             self.db.send('Suggest')
-            self.notify_exc('Completion generation failed for %s' % (
-                '\n'.join(reversed(segments))))
+            self.notify_exc('Completion generation failed for %s' % data)
 
     def do_save(self, data):
         fn, src = data.split('|', 1)
