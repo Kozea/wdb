@@ -595,6 +595,31 @@ code, code span {
 .cm-searching {
   background: #2a2630; }
 
+.hidden {
+  display: none; }
+
+.CodeMirror {
+  line-height: 1.3; }
+
+.CodeMirror-standalone {
+  background-color: transparent; }
+
+.tracefile {
+  background-color: #031316; }
+
+.tracelno {
+  background-color: #1D1B25; }
+
+#traceback .traceline .tracefunfun .tracefun {
+  background-color: #1D1515; }
+
+[data-page=IndexHandler] {
+  font-family: Verdana;
+  margin: 0 10%; }
+
+.cm-comment {
+  font-style: italic; }
+
 /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
 .state {
   background-color: rgba(0, 0, 0, 0);
@@ -610,21 +635,22 @@ code, code span {
   width: 50px;
   height: 50px;
   -webkit-animation: spinPulse 1s infinite linear;
-  animation: spinPulse 1s infinite linear;
-  -webkit-animation-play-state: paused;
-  animation-play-state: paused; }
+  animation: spinPulse 1s infinite linear; }
   .state.inner {
     width: 30px;
     height: 30px;
     top: 30px;
     left: 20px;
     -webkit-animation: spinoffPulse 1s infinite linear;
-    animation: spinoffPulse 1s infinite linear;
-    -webkit-animation-play-state: paused;
-    animation-play-state: paused; }
-  .state.on {
-    -webkit-animation-play-state: running;
-    animation-play-state: running; }
+    animation: spinoffPulse 1s infinite linear; }
+
+* {
+  -webkit-animation-play-state: paused !important;
+  animation-play-state: paused !important; }
+
+.on, .on * {
+  -webkit-animation-play-state: running !important;
+  animation-play-state: running !important; }
 
 @keyframes spinPulse {
   0% {
@@ -677,28 +703,3 @@ code, code span {
   100% {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
-
-.hidden {
-  display: none; }
-
-.CodeMirror {
-  line-height: 1.3; }
-
-.CodeMirror-standalone {
-  background-color: transparent; }
-
-.tracefile {
-  background-color: #031316; }
-
-.tracelno {
-  background-color: #1D1B25; }
-
-#traceback .traceline .tracefunfun .tracefun {
-  background-color: #1D1515; }
-
-[data-page=IndexHandler] {
-  font-family: Verdana;
-  margin: 0 10%; }
-
-.cm-comment {
-  font-style: italic; }

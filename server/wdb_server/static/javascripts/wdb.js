@@ -359,7 +359,7 @@
       this.last_cmd = null;
       this.eval_time = null;
       this.waited_for_ws = 0;
-      this.$state = $('.state');
+      this.$activity = $('#activity');
       this.$title = $('#title');
       this.$waiter = $('#waiter');
       this.$wdb = $('#wdb');
@@ -418,11 +418,11 @@
     };
 
     Wdb.prototype.working = function() {
-      return this.$state.addClass('on');
+      return this.$activity.addClass('on');
     };
 
     Wdb.prototype.chilling = function() {
-      return this.$state.removeClass('on');
+      return this.$activity.removeClass('on');
     };
 
     Wdb.prototype.init = function(data) {
@@ -1334,6 +1334,7 @@
       console.log('SHELL');
       this.$traceback.addClass('hidden');
       this.$source.find('#source-editor').addClass('hidden');
+      this.$eval.focus();
       return this.chilling();
     };
 
