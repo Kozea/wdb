@@ -16,6 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
 __version__ = '2.0.7'
+_initial_globals = dict(globals())
 
 from ._compat import (
     execute, StringIO, to_unicode_string, escape, loads, Socket)
@@ -605,18 +606,7 @@ class Wdb(object):
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 
-    def shell(self):
-        self.interaction(sys._getframe(), exception_description='Shell')
-
-    def interaction(
-            self, frame, tb=None,
-            exception='Wdb', exception_description='Stepping',
-            init=None):
-        """User interaction handling blocking on socket receive"""
-        log.info('Interaction %r %r %r %r' % (
-            frame, tb, exception, exception_description))
-        self.stepping = True
-
+    def open_browser(self):
         if not self.connected:
             log.debug('Launching browser and wait for connection')
             web_url = 'http://%s:%d/debug/session/%s' % (
@@ -642,8 +632,34 @@ class Wdb(object):
 
             self.connected = True
 
+    def shell(self, source=None):
+        interaction = self.interaction(
+            sys._getframe(), exception_description='Shell', shell=True)
+
+        if source:
+            with open(source) as f:
+                compiled_code = compile(f.read(), '<source>', 'exec')
+            execute(
+                compiled_code,
+                interaction.get_globals(),
+                interaction.current_locals)
+
+        interaction.loop()
+
+    def interaction(
+            self, frame, tb=None,
+            exception='Wdb', exception_description='Stepping',
+            init=None, shell=False):
+        """User interaction handling blocking on socket receive"""
+        log.info('Interaction %r %r %r %r' % (
+            frame, tb, exception, exception_description))
+        self.stepping = True
+
+        self.open_browser()
+
         interaction = Interaction(
-            self, frame, tb, exception, exception_description, init=init)
+            self, frame, tb, exception, exception_description,
+            init=init, shell=shell)
 
         # For meta debugging purpose
         self._ui = interaction
@@ -653,8 +669,10 @@ class Wdb(object):
             interaction.init()
         else:
             self.begun = True
+        if not shell:
+            interaction.loop()
 
-        interaction.loop()
+        return interaction
 
     def handle_call(self, frame, argument_list):
         """This method is called when there is the remote possibility

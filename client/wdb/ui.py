@@ -3,7 +3,7 @@ from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
 from .utils import get_source, get_doc, executable_line, importable_module
-from . import __version__
+from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
 from jedi import Script
@@ -69,15 +69,18 @@ class Interaction(object):
 
     def __init__(
             self, db, frame, tb, exception, exception_description,
-            init=None, parent=None):
+            init=None, parent=None, shell=False):
         self.db = db
         self.parent = parent
+        self.shell = shell
         self.init_message = init
         self.stack, self.trace, self.index = self.db.get_trace(frame, tb)
         self.exception = exception
         self.exception_description = exception_description
         # Copy locals to avoid strange cpython behaviour
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
+        if self.shell:
+            self.locals[self.index] = {}
 
     def hook(self, kind):
         for hook, events in self.hooks.items():
@@ -102,7 +105,10 @@ class Interaction(object):
 
     def get_globals(self):
         """Get enriched globals"""
-        globals_ = dict(self.current_frame.f_globals)
+        if self.shell:
+            globals_ = dict(_initial_globals)
+        else:
+            globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
         if cut is not None:
             globals_['cut'] = cut
@@ -120,14 +126,17 @@ class Interaction(object):
             'title': self.exception,
             'subtitle': self.exception_description
         }))
-        self.db.send('Trace|%s' % dump({
-            'trace': self.trace,
-            'cwd': os.getcwd()
-        }))
-        self.db.send('SelectCheck|%s' % dump({
-            'frame': self.current,
-            'name': self.current_file
-        }))
+        if self.shell:
+            self.db.send('Shell')
+        else:
+            self.db.send('Trace|%s' % dump({
+                'trace': self.trace,
+                'cwd': os.getcwd()
+            }))
+            self.db.send('SelectCheck|%s' % dump({
+                'frame': self.current,
+                'name': self.current_file
+            }))
         if self.init_message:
             self.db.send(self.init_message)
             self.init_message = None
@@ -216,16 +225,20 @@ class Interaction(object):
             'title': self.exception,
             'subtitle': self.exception_description
         }))
-        self.db.send('Trace|%s' % dump({
-            'trace': self.trace
-        }))
+        if self.shell:
+            self.db.send('Shell')
+        else:
+            self.db.send('Trace|%s' % dump({
+                'trace': self.trace
+            }))
 
-        # In case of exception always be at top frame to start
-        self.index = len(self.stack) - 1
-        self.db.send('SelectCheck|%s' % dump({
-            'frame': self.current,
-            'name': self.current_file
-        }))
+            # In case of exception always be at top frame to start
+            self.index = len(self.stack) - 1
+            self.db.send('SelectCheck|%s' % dump({
+                'frame': self.current,
+                'name': self.current_file
+            }))
+
         if self.init_message:
             self.db.send(self.init_message)
             self.init_message = None
