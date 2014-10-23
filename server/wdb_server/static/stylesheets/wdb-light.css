@@ -669,6 +669,9 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.hidden {
+  display: none; }
+
 @font-face {
   font-family: "WeblySleek";
   src: url("../fonts/weblysleekuil.ttf") format("truetype");

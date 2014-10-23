@@ -663,6 +663,9 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.hidden {
+  display: none; }
+
 #source-editor > .CodeMirror {
   border: 1px solid #ddd;
   border-radius: 4px;

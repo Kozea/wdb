@@ -452,6 +452,7 @@
 
     Wdb.prototype.trace = function(data) {
       var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, frame, suffix, _i, _len, _ref, _results;
+      this.$traceback.removeClass('hidden');
       this.$traceback.empty();
       _ref = data.trace;
       _results = [];
@@ -507,6 +508,7 @@
       var current_frame;
       current_frame = data.frame;
       this.$interpreter.show();
+      this.$source.find('#source-editor').removeClass('hidden');
       $('.traceline').removeClass('selected');
       $('#trace-' + current_frame.level).addClass('selected');
       this.$eval.val('').attr('data-index', -1).trigger('autosize.resize');
@@ -1163,9 +1165,10 @@
             return false;
           case 67:
             this.searchback_stop();
-            break;
+            return false;
           case 68:
             this.ws.send('Quit');
+            return false;
         }
         e.stopPropagation();
         return;
@@ -1325,6 +1328,13 @@
 
     Wdb.prototype.disable = function() {
       return this.ws.send('Disable');
+    };
+
+    Wdb.prototype.shell = function() {
+      console.log('SHELL');
+      this.$traceback.addClass('hidden');
+      this.$source.find('#source-editor').addClass('hidden');
+      return this.chilling();
     };
 
     Wdb.prototype.pretty_time = function(time) {

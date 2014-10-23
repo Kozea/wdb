@@ -128,6 +128,7 @@ class Wdb extends Log
           .attr('title', data.subtitle))
 
   trace: (data) ->
+    @$traceback.removeClass('hidden')
     @$traceback.empty()
     for frame in data.trace
       $traceline = $('<div>')
@@ -188,6 +189,7 @@ class Wdb extends Log
   select: (data) ->
     current_frame = data.frame
     @$interpreter.show()
+    @$source.find('#source-editor').removeClass('hidden')
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     @$eval.val('').attr('data-index', -1).trigger('autosize.resize')
@@ -745,8 +747,10 @@ specify a module like `logging.config`.
           return false
         when 67 # C
           @searchback_stop()
+          return false
         when 68 # D
           @ws.send 'Quit'
+          return false
 
       e.stopPropagation()
       return
@@ -898,6 +902,12 @@ specify a module like `logging.config`.
 
   disable: ->
     @ws.send 'Disable'
+
+  shell: ->
+    console.log 'SHELL'
+    @$traceback.addClass('hidden')
+    @$source.find('#source-editor').addClass('hidden')
+    @chilling()
 
   pretty_time: (time) ->
     if time < 1000

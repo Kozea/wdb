@@ -678,6 +678,9 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.hidden {
+  display: none; }
+
 .CodeMirror {
   line-height: 1.3; }
 

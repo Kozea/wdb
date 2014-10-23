@@ -669,6 +669,9 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.hidden {
+  display: none; }
+
 \::-webkit-scrollbar {
   background: #1d1f21;
   border: 1px solid black;

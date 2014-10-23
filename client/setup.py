@@ -13,6 +13,11 @@ ROOT = os.path.dirname(__file__)
 with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
     __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
 
+requires = ["log_colorizer>=1.6", "jedi>=0.8.0"]
+
+if sys.version_info[:2] <= (2, 6):
+    requires.append('argparse')
+
 options = dict(
     name="wdb",
     version=__version__,
@@ -24,7 +29,7 @@ options = dict(
     license="GPLv3",
     platforms="Any",
     packages=['wdb'],
-    install_requires=["log_colorizer>=1.6", "jedi>=0.8.0"],
+    install_requires=requires,
     entry_points={'console_scripts': [
         'wdb=wdb.__main__:main',
         'wdb-%s=wdb.__main__:main' % sys.version[:3]]},

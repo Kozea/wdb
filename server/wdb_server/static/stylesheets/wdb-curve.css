@@ -669,6 +669,9 @@ code, code span {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.hidden {
+  display: none; }
+
 @font-face {
   font-family: "neuropol-x";
   src: url("../fonts/neuropol-x.ttf") format("truetype");
