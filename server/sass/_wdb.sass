@@ -560,82 +560,83 @@ code, code span
 .cm-searching
   background: lighten($bg, 10%)
 
-
-/* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
-
-.state
-  background-color: rgba(0, 0, 0, 0)
-  border: 5px solid $state-inner
-  opacity: .9
-  border-right: 5px solid rgba(0, 0, 0, 0)
-  border-left: 5px solid rgba(0, 0, 0, 0)
-  border-radius: 50px
-  box-shadow: 0 0 35px $state-outer
-  position: absolute
-  top: 20px
-  left: 10px
-  width: 50px
-  height: 50px
-  -webkit-animation: spinPulse 1s infinite linear
-  animation: spinPulse 1s infinite linear
-
-  -webkit-animation-play-state: paused
-  animation-play-state: paused
-
-  &.inner
-    width: 30px
-    height: 30px
-    top: 30px
-    left: 20px
-    -webkit-animation: spinoffPulse 1s infinite linear
-    animation: spinoffPulse 1s infinite linear
-    -webkit-animation-play-state: paused
-    animation-play-state: paused
-
-  &.on
-    -webkit-animation-play-state: running
-    animation-play-state: running
-
-@mixin pulse()
-  0%
-    -webkit-transform: rotate(145deg)
-    transform: rotate(145deg)
-    opacity: 1
-
-  50%
-    -webkit-transform: rotate(-120deg)
-    transform: rotate(-120deg)
-    opacity: 0
-
-  100%
-    -webkit-transform: rotate(160deg)
-    transform: rotate(160deg)
-    opacity: 0
-    box-shadow: 0 0 1px $state-outer
-
-
-@mixin pulseoff()
-  0%
-    -webkit-transform: rotate(0deg)
-    transform: rotate(0deg)
-
-  100%
-    -webkit-transform: rotate(360deg)
-    transform: rotate(360deg)
-
-
-@keyframes spinPulse
-  +pulse
-
-@keyframes spinoffPulse
-  +pulseoff
-
-@-webkit-keyframes spinPulse
-  +pulse
-
-@-webkit-keyframes spinoffPulse
-  +pulseoff
-
-
 .hidden
   display: none
+
+=state
+  &, *
+    -webkit-animation-play-state: paused !important
+    animation-play-state: paused !important
+
+  &.on, &.on *
+    -webkit-animation-play-state: running !important
+    animation-play-state: running !important
+
+
+=pulse-activity
+  /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
+  .state
+    background-color: rgba(0, 0, 0, 0)
+    border: 5px solid $state-inner
+    opacity: .9
+    border-right: 5px solid rgba(0, 0, 0, 0)
+    border-left: 5px solid rgba(0, 0, 0, 0)
+    border-radius: 50px
+    box-shadow: 0 0 35px $state-outer
+    position: absolute
+    top: 20px
+    left: 10px
+    width: 50px
+    height: 50px
+    -webkit-animation: spinPulse 1s infinite linear
+    animation: spinPulse 1s infinite linear
+
+    &.inner
+      width: 30px
+      height: 30px
+      top: 30px
+      left: 20px
+      -webkit-animation: spinoffPulse 1s infinite linear
+      animation: spinoffPulse 1s infinite linear
+
+  +state
+
+  =pulse
+    0%
+      -webkit-transform: rotate(145deg)
+      transform: rotate(145deg)
+      opacity: 1
+
+    50%
+      -webkit-transform: rotate(-120deg)
+      transform: rotate(-120deg)
+      opacity: 0
+
+    100%
+      -webkit-transform: rotate(160deg)
+      transform: rotate(160deg)
+      opacity: 0
+      box-shadow: 0 0 1px $state-outer
+
+
+  =pulseoff
+    0%
+      -webkit-transform: rotate(0deg)
+      transform: rotate(0deg)
+
+    100%
+      -webkit-transform: rotate(360deg)
+      transform: rotate(360deg)
+
+
+  @keyframes spinPulse
+    +pulse
+
+  @keyframes spinoffPulse
+    +pulseoff
+
+  @-webkit-keyframes spinPulse
+    +pulse
+
+  @-webkit-keyframes spinoffPulse
+    +pulseoff

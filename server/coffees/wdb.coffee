@@ -33,7 +33,7 @@ class Wdb extends Log
     @waited_for_ws = 0
 
     # Page elements
-    @$state = $('.state')
+    @$activity = $('#activity')
     @$title = $('#title')
     @$waiter = $('#waiter')
     @$wdb = $('#wdb')
@@ -100,10 +100,10 @@ class Wdb extends Log
     @$eval.autosize()
 
   working: ->
-    @$state.addClass 'on'
+    @$activity.addClass 'on'
 
   chilling: ->
-    @$state.removeClass 'on'
+    @$activity.removeClass 'on'
 
   init: (data) ->
     if data.version isnt @constructor::__version__
@@ -907,6 +907,7 @@ specify a module like `logging.config`.
     console.log 'SHELL'
     @$traceback.addClass('hidden')
     @$source.find('#source-editor').addClass('hidden')
+    @$eval.focus()
     @chilling()
 
   pretty_time: (time) ->
