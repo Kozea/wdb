@@ -196,7 +196,6 @@ code
       border-top: 1px solid $trace-file
       border-bottom: 1px solid $trace-file
       padding: .2em 2em
-      -webkit-transform: rotate(45deg)
       transform: rotate(45deg)
 
     .breakpoints
@@ -564,12 +563,10 @@ code, code span
   display: none
 
 =state
-  &, *
-    -webkit-animation-play-state: paused !important
+  &, *, *:before, *:after
     animation-play-state: paused !important
 
-  &.on, &.on *
-    -webkit-animation-play-state: running !important
+  &.on, &.on *, &.on *:before, &.on *:afterg
     animation-play-state: running !important
 
 
@@ -588,7 +585,6 @@ code, code span
     left: 10px
     width: 50px
     height: 50px
-    -webkit-animation: spinPulse 1s infinite linear
     animation: spinPulse 1s infinite linear
 
     &.inner
@@ -596,24 +592,20 @@ code, code span
       height: 30px
       top: 30px
       left: 20px
-      -webkit-animation: spinoffPulse 1s infinite linear
       animation: spinoffPulse 1s infinite linear
 
   +state
 
   =pulse
     0%
-      -webkit-transform: rotate(145deg)
       transform: rotate(145deg)
       opacity: 1
 
     50%
-      -webkit-transform: rotate(-120deg)
       transform: rotate(-120deg)
       opacity: 0
 
     100%
-      -webkit-transform: rotate(160deg)
       transform: rotate(160deg)
       opacity: 0
       box-shadow: 0 0 1px $state-outer
@@ -621,11 +613,9 @@ code, code span
 
   =pulseoff
     0%
-      -webkit-transform: rotate(0deg)
       transform: rotate(0deg)
 
     100%
-      -webkit-transform: rotate(360deg)
       transform: rotate(360deg)
 
 
@@ -633,10 +623,4 @@ code, code span
     +pulse
 
   @keyframes spinoffPulse
-    +pulseoff
-
-  @-webkit-keyframes spinPulse
-    +pulse
-
-  @-webkit-keyframes spinoffPulse
     +pulseoff
