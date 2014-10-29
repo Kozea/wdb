@@ -38,6 +38,13 @@ module.exports = (grunt) ->
         dest: 'wdb_server/static/stylesheets/'
         ext: '.css'
 
+    autoprefixer:
+      hydra:
+        expand: true
+        cwd: 'wdb_server/static/stylesheets/'
+        src: '*.css'
+        dest: 'wdb_server/static/stylesheets/'
+
     cssmin:
       codemirror:
         files:
@@ -107,6 +114,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-uglify'
   grunt.loadNpmTasks 'grunt-contrib-cssmin'
   grunt.loadNpmTasks 'grunt-coffeelint'
+  grunt.loadNpmTasks 'grunt-autoprefixer'
   grunt.loadNpmTasks 'grunt-sass'
   grunt.loadNpmTasks 'grunt-bower-task'
 
@@ -114,5 +122,5 @@ module.exports = (grunt) ->
   grunt.registerTask 'css', ['sass']
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
-    'sass',
+    'sass', 'autoprefixer',
     'bower', 'uglify', 'cssmin']

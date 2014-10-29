@@ -1264,7 +1264,7 @@
     };
 
     Wdb.prototype.eval_input = function(e) {
-      var comp, hist, txt;
+      var hist, txt;
       txt = $(e.currentTarget).val();
       if (this.backsearch) {
         if (!txt) {
@@ -1277,14 +1277,11 @@
       }
       hist = this.session_cmd_hist[this.cm.state.fn] || [];
       if (txt && txt[0] !== '.') {
-        comp = hist.slice(0).reverse().filter(function(e) {
-          return e.indexOf('.') !== 0;
-        }).join('\n') + '\n' + txt;
         if (this.to_complete === null) {
-          this.ws.send('Complete', comp);
+          this.ws.send('Complete', txt);
           return this.to_complete = false;
         } else {
-          return this.to_complete = comp;
+          return this.to_complete = txt;
         }
       } else {
         return this.suggest_stop();
@@ -1331,7 +1328,6 @@
     };
 
     Wdb.prototype.shell = function() {
-      console.log('SHELL');
       this.$traceback.addClass('hidden');
       this.$source.find('#source-editor').addClass('hidden');
       this.$eval.focus();

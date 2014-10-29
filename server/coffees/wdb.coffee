@@ -612,10 +612,14 @@ specify a module like `logging.config`.
       $comp.append($tbody)
       @$completions.height(Math.max(height, $comp.height()))
       @termscroll()
+
+    # Complete queued completion
     if @to_complete
       @ws.send 'Complete', @to_complete
+      # Marking it with false -> waiting for suggest
       @to_complete = false
     else
+      # Making completion available
       @to_complete = null
 
   suggest_stop: ->
@@ -850,17 +854,15 @@ specify a module like `logging.config`.
       return
     hist = @session_cmd_hist[@cm.state.fn] or []
     if txt and txt[0] != '.'
-      comp = hist
-        .slice(0)
-        .reverse()
-        .filter((e) -> e.indexOf('.') != 0)
-        .join('\n') + '\n' + txt
 
+      # Completion available, complet
       if @to_complete == null
-        @ws.send 'Complete', comp
+        @ws.send 'Complete', txt
+        # Marking it with false -> waiting for suggest
         @to_complete = false
       else
-        @to_complete = comp
+        # Queuing completion for next suggest
+        @to_complete = txt
     else
       @suggest_stop()
 
@@ -904,7 +906,6 @@ specify a module like `logging.config`.
     @ws.send 'Disable'
 
   shell: ->
-    console.log 'SHELL'
     @$traceback.addClass('hidden')
     @$source.find('#source-editor').addClass('hidden')
     @$eval.focus()
