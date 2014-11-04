@@ -462,7 +462,7 @@ a.inspect
         &:after
           content: '[-]'
           float: right
-      &.hidden td:after
+      &.closed td:after
         content: '[+]'
 
   tbody, thead
@@ -472,7 +472,7 @@ a.inspect
       min-width: 100px
 
   tbody
-    &.hidden
+    &.closed
       display: none
     tr > :first-child
       vertical-align: top

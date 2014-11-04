@@ -578,13 +578,13 @@ a.inspect {
     .object thead.toggle td:after {
       content: '[-]';
       float: right; }
-  .object thead.toggle.hidden td:after {
+  .object thead.toggle.closed td:after {
     content: '[+]'; }
   .object tbody td, .object thead td {
     border: 2px solid black;
     padding: 0.2em 0.5em;
     min-width: 100px; }
-  .object tbody.hidden {
+  .object tbody.closed {
     display: none; }
   .object tbody tr > :first-child {
     vertical-align: top; }
