@@ -765,31 +765,31 @@
         "class": 'object'
       }).appendTo($container);
       $core_head = $('<thead>', {
-        "class": 'toggle hidden'
+        "class": 'toggle closed'
       }).append($('<tr>').append($('<td>', {
         "class": 'core',
         colspan: 2
       }).text('Core Members'))).appendTo($table);
       $core_tbody = $('<tbody>', {
-        "class": 'core hidden'
+        "class": 'core closed'
       }).appendTo($table);
       $method_head = $('<thead>', {
-        "class": 'toggle hidden'
+        "class": 'toggle closed'
       }).append($('<tr>').append($('<td>', {
         "class": 'method',
         colspan: 2
       }).text('Methods'))).appendTo($table);
       $method_tbody = $('<tbody>', {
-        "class": 'method hidden'
+        "class": 'method closed'
       }).appendTo($table);
       $attr_head = $('<thead>', {
-        "class": 'toggle hidden'
+        "class": 'toggle closed'
       }).append($('<tr>').append($('<td>', {
         "class": 'attr',
         colspan: 2
       }).text('Attributes'))).appendTo($table);
       $attr_tbody = $('<tbody>', {
-        "class": 'attr hidden'
+        "class": 'attr closed'
       }).appendTo($table);
       _ref = data.val;
       for (key in _ref) {
@@ -816,13 +816,13 @@
       }
       if (data.doc) {
         $table.append($('<thead>', {
-          "class": 'toggle hidden'
+          "class": 'toggle closed'
         }).append($('<tr>').append($('<td>', {
           "class": 'doc',
           colspan: 2
         }).text('Documentation'))));
         $('<tbody>', {
-          "class": 'doc hidden'
+          "class": 'doc closed'
         }).append($('<tr>').append($('<td>', {
           "class": 'doc',
           colspan: 2
@@ -830,13 +830,13 @@
       }
       if (data.source) {
         $table.append($('<thead>', {
-          "class": 'toggle hidden'
+          "class": 'toggle closed'
         }).append($('<tr>').append($('<td>', {
           "class": 'source',
           colspan: 2
         }).text('Source'))));
         $('<tbody>', {
-          "class": 'source hidden'
+          "class": 'source closed'
         }).append($('<tr>').append($('<td>', {
           "class": 'source',
           colspan: 2
@@ -1303,7 +1303,7 @@
     };
 
     Wdb.prototype.toggle_visibility = function(e) {
-      return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('hidden', 'shown');
+      return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('closed', 'shown');
     };
 
     Wdb.prototype.unwatch = function(e) {

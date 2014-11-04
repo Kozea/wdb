@@ -423,25 +423,25 @@ specify a module like `logging.config`.
     $container = $('<div>')
     $table = $('<table>', class: 'object').appendTo($container)
     $core_head =
-      $('<thead>', class: 'toggle hidden').append(
+      $('<thead>', class: 'toggle closed').append(
         $('<tr>')
           .append($('<td>', class: 'core', colspan: 2)
           .text('Core Members'))).appendTo($table)
-    $core_tbody = $('<tbody>', class: 'core hidden').appendTo($table)
+    $core_tbody = $('<tbody>', class: 'core closed').appendTo($table)
 
     $method_head =
-      $('<thead>', class: 'toggle hidden').append(
+      $('<thead>', class: 'toggle closed').append(
         $('<tr>')
           .append($('<td>', class: 'method', colspan: 2)
           .text('Methods'))).appendTo($table)
-    $method_tbody = $('<tbody>', class: 'method hidden').appendTo($table)
+    $method_tbody = $('<tbody>', class: 'method closed').appendTo($table)
 
     $attr_head =
-      $('<thead>', class: 'toggle hidden').append(
+      $('<thead>', class: 'toggle closed').append(
         $('<tr>').append(
           $('<td>', class: 'attr', colspan: 2)
             .text('Attributes'))).appendTo($table)
-    $attr_tbody = $('<tbody>', class: 'attr hidden').appendTo($table)
+    $attr_tbody = $('<tbody>', class: 'attr closed').appendTo($table)
 
     for key, val of data.val
       $tbody = $attr_tbody
@@ -468,24 +468,24 @@ specify a module like `logging.config`.
 
     if data.doc
       $table.append(
-        $('<thead>', class: 'toggle hidden').append(
+        $('<thead>', class: 'toggle closed').append(
           $('<tr>').append(
             $('<td>', class: 'doc', colspan: 2)
               .text('Documentation'))))
 
-      $('<tbody>', class: 'doc hidden').append(
+      $('<tbody>', class: 'doc closed').append(
         $('<tr>').append(
           $('<td>', class: 'doc', colspan: 2)
             .text(data.doc))).appendTo($table)
 
     if data.source
       $table.append(
-        $('<thead>', class: 'toggle hidden').append(
+        $('<thead>', class: 'toggle closed').append(
           $('<tr>').append(
             $('<td>', class: 'source', colspan: 2)
               .text('Source'))))
 
-      $('<tbody>', class: 'source hidden').append(
+      $('<tbody>', class: 'source closed').append(
         $('<tr>').append(
           $('<td>', class: 'source', colspan: 2)
             .text(data.source))).appendTo($table)
@@ -888,7 +888,7 @@ specify a module like `logging.config`.
   toggle_visibility: (e) ->
     $(e.currentTarget)
       .add($(e.currentTarget).next())
-      .toggleClass('hidden', 'shown')
+      .toggleClass('closed', 'shown')
 
   unwatch: (e) ->
     @ws.send 'Unwatch', $(e.currentTarget).closest('.watching').attr 'data-expr'
