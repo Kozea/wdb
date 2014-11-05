@@ -6,6 +6,7 @@ from .utils import get_source, get_doc, executable_line, importable_module
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 from difflib import HtmlDiff
+import datadiff
 import token as tokens
 from jedi import Interpreter
 from logging import getLogger
@@ -604,6 +605,17 @@ class Interaction(object):
         self.db.send('RawHTML|%s' % dump({
             'for': u('Difference between %s') % (data),
             'val': self.htmldiff.make_file([file1],  [file2])}))
+
+    def do_structureddiff(self, data):
+        left_struct, right_struct = map(
+            lambda x: eval(x, self.get_globals(), self.locals[self.index]),
+            data.split('<>'))
+        datadiff.diff(left_struct, right_struct)
+        self.db.send('Echo|%s' % dump({
+            'for': u('Difference of structures %s' % data),
+            'val': (datadiff.diff(left_struct, right_struct).stringify()
+                    .replace('\n', '<br />'))
+        }))
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""
