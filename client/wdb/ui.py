@@ -7,6 +7,7 @@ from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 from difflib import HtmlDiff
 import datadiff
+from datadiff import DiffNotImplementedForType
 import token as tokens
 from jedi import Interpreter
 from logging import getLogger
@@ -599,18 +600,31 @@ class Interaction(object):
         sys.exit(1)
 
     def do_diff(self, data):
+        split = data.split('!') if '!' in data else data.split('<>')
         file1, file2 = map(
             lambda x: eval(x, self.get_globals(), self.locals[self.index]),
-            data.split('<>'))
+            split)
+        try:
+            file1, file2 = str(file1), str(file2)
+        except TypeError:
+            self.fail('Diff', title='TypeError',
+                      message='Strings are expected as input.')
+            return
         self.db.send('RawHTML|%s' % dump({
             'for': u('Difference between %s') % (data),
             'val': self.htmldiff.make_file([file1],  [file2])}))
 
     def do_structureddiff(self, data):
+        split = data.split('!') if '!' in data else data.split('<>')
         left_struct, right_struct = map(
             lambda x: eval(x, self.get_globals(), self.locals[self.index]),
-            data.split('<>'))
-        datadiff.diff(left_struct, right_struct)
+            split)
+        try:
+            datadiff.diff(left_struct, right_struct)
+        except DiffNotImplementedForType:
+            self.fail('StructuredDiff',
+                      title='TypeError', message='A structure was expected')
+            return
         self.db.send('Echo|%s' % dump({
             'for': u('Difference of structures %s' % data),
             'val': (datadiff.diff(left_struct, right_struct).stringify()
