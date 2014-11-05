@@ -13,7 +13,7 @@ ROOT = os.path.dirname(__file__)
 with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
     __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
 
-requires = ["log_colorizer>=1.6", "jedi>=0.8.0"]
+requires = ["log_colorizer>=1.6", "jedi>=0.8.0", "datadiff>=1.1.6"]
 
 if sys.version_info[:2] <= (2, 6):
     requires.append('argparse')

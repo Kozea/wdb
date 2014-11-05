@@ -287,7 +287,8 @@ class Wdb extends Log
         when 'w' then cmd 'Watch', data if data
         when 'z' then @toggle_break data, false, true
         when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
-        when 'x' then cmd 'Diff', data if data
+        when 'x' then cmd 'Diff', data
+        when 'y' then cmd 'Structureddiff', data
       return
 
     else if snippet.indexOf('?') == 0
@@ -359,6 +360,10 @@ class Wdb extends Log
  Clear prompt
 .i [mime/type;]expression      : \
  Display the result in an embed, mime type defaults to "text/html"
+.x left<>right                 : \
+ Display the difference between the string 'left' and the string 'right'
+.y left<>right
+ Display the difference between the structure 'left' and the structure 'right'
 iterable!sthg                  : \
  If cutter is installed, executes cut(iterable).sthg
 expr >! file                   : \
