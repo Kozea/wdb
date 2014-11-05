@@ -360,9 +360,9 @@ class Wdb extends Log
  Clear prompt
 .i [mime/type;]expression      : \
  Display the result in an embed, mime type defaults to "text/html"
-.x left<>right                 : \
+.x left<>right or left!right   : \
  Display the difference between the string 'left' and the string 'right'
-.y left<>right
+.y left<>right or left!right   : \
  Display the difference between the structure 'left' and the structure 'right'
 iterable!sthg                  : \
  If cutter is installed, executes cut(iterable).sthg
