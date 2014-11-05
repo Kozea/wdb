@@ -332,6 +332,8 @@
           return 'python';
         case 'jinja2':
           return 'jinja2';
+        case 'diff':
+          return 'diff';
         default:
           return 'python';
       }
@@ -529,7 +531,7 @@
       });
     };
 
-    Wdb.prototype.code = function(parent, src, classes, html, title) {
+    Wdb.prototype.code = function(parent, src, classes, html, title, mode) {
       var $code, $node, cls, _i, _len;
       if (classes == null) {
         classes = [];
@@ -539,6 +541,9 @@
       }
       if (title == null) {
         title = null;
+      }
+      if (mode == null) {
+        mode = "python";
       }
       if (html) {
         if (src[0] !== '<' || src.slice(-1) !== '>') {
@@ -564,7 +569,7 @@
               $code.attr('title', title);
             }
             return setTimeout((function() {
-              CodeMirror.runMode($code.text(), "python", $code.get(0));
+              CodeMirror.runMode($code.text(), mode, $code.get(0));
               $code.removeClass('waiting_for_hl');
               return _this.ellipsize($code);
             }), 50);
@@ -582,7 +587,7 @@
           $code.attr('title', title);
         }
         parent.append($code);
-        CodeMirror.runMode(src, "python", $code.get(0));
+        CodeMirror.runMode(src, mode, $code.get(0));
         this.ellipsize($code);
       }
       return $code;
@@ -758,7 +763,7 @@
 
     Wdb.prototype.echo = function(data) {
       this.code(this.$scrollback, data["for"], ['prompted']);
-      this.code(this.$scrollback, data.val || '', [], true);
+      this.code(this.$scrollback, data.val || '', [], true, null, data.mode);
       this.termscroll();
       return this.chilling();
     };

@@ -194,5 +194,7 @@ class Codemirror extends Log
         'python'
       when 'jinja2'
         'jinja2'
+      when 'diff'
+        'diff'
       else
         'python'

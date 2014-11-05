@@ -205,7 +205,7 @@ class Wdb extends Log
         $(@).append $('<span class="short close">').text(txt.substr(0, 128))
         $(@).append $('<span class="long">').text(txt.substr(128))
 
-  code: (parent, src, classes=[], html=false, title=null) ->
+  code: (parent, src, classes=[], html=false, title=null, mode="python") ->
     if html
       if src[0] != '<' or src.slice(-1) != '>'
         $node = $('<div>', class: 'out').html(src)
@@ -225,7 +225,7 @@ class Wdb extends Log
           $code.addClass(cls)
         $code.attr('title', title) if title
         setTimeout (=>
-          CodeMirror.runMode $code.text(), "python", $code.get(0)
+          CodeMirror.runMode $code.text(), mode, $code.get(0)
           $code.removeClass('waiting_for_hl')
           @ellipsize $code
         ), 50
@@ -235,7 +235,7 @@ class Wdb extends Log
         $code.addClass(cls)
       $code.attr('title', title) if title
       parent.append $code
-      CodeMirror.runMode src, "python", $code.get(0)
+      CodeMirror.runMode src, mode, $code.get(0)
       @ellipsize $code
 
     $code
@@ -420,7 +420,7 @@ specify a module like `logging.config`.
 
   echo: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
-    @code(@$scrollback, data.val or '', [], true)
+    @code(@$scrollback, data.val or '', [], true, null, data.mode)
     @termscroll()
     @chilling()
 
