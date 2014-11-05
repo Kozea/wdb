@@ -287,6 +287,7 @@ class Wdb extends Log
         when 'w' then cmd 'Watch', data if data
         when 'z' then @toggle_break data, false, true
         when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
+        when 'x' then cmd 'Diff', data if data
       return
 
     else if snippet.indexOf('?') == 0
@@ -415,6 +416,12 @@ specify a module like `logging.config`.
   echo: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
     @code(@$scrollback, data.val or '', [], true)
+    @termscroll()
+    @chilling()
+
+  rawhtml: (data) ->
+    @code(@$scrollback, data.for, ['prompted'])
+    @$scrollback.append(data.val)
     @termscroll()
     @chilling()
 

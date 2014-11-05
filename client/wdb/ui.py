@@ -5,6 +5,7 @@ from ._compat import (
 from .utils import get_source, get_doc, executable_line, importable_module
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
+from difflib import HtmlDiff
 import token as tokens
 from jedi import Interpreter
 from logging import getLogger
@@ -79,6 +80,7 @@ class Interaction(object):
         self.exception_description = exception_description
         # Copy locals to avoid strange cpython behaviour
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
+        self.htmldiff = HtmlDiff()
         if self.shell:
             self.locals[self.index] = {}
 
@@ -594,6 +596,14 @@ class Interaction(object):
         self.db.stepping = False
         self.db.stop_trace()
         sys.exit(1)
+
+    def do_diff(self, data):
+        file1, file2 = map(
+            lambda x: eval(x, self.get_globals(), self.locals[self.index]),
+            data.split('<>'))
+        self.db.send('RawHTML|%s' % dump({
+            'for': u('Difference between %s') % (data),
+            'val': self.htmldiff.make_file([file1],  [file2])}))
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""
