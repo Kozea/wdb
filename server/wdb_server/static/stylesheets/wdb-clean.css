@@ -257,13 +257,13 @@ table {
     table.diff .diff_next {
       display: none; }
     table.diff .diff_sub {
-      color: transparent;
+      color: inherit;
       background-color: #ffdddd; }
     table.diff .diff_add {
-      color: transparent;
+      color: inherit;
       background-color: #dbffdb; }
     table.diff .diff_chg {
-      color: transparent;
+      color: inherit;
       background-color: #dcdcff; }
 
 input {
