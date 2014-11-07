@@ -109,40 +109,21 @@ body, html {
 
 #wdb {
   box-sizing: border-box;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
   height: 100%; }
   #wdb > header {
     height: 100px;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center; }
+    align-items: center; }
     #wdb > header #activity {
       width: 100px; }
     #wdb > header #title {
-      -webkit-box-flex: 1;
-      -webkit-flex: 1;
-          -ms-flex: 1;
-              flex: 1;
+      flex: 1;
       margin: 0;
       font-family: inherit; }
   #wdb > article {
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-        -ms-flex: 1;
-            flex: 1; }
+    flex: 1; }
     #wdb > article table, #wdb > article form, #wdb > article p {
       margin: 0 auto;
       width: 90%; }
@@ -162,72 +143,39 @@ body, html {
       #wdb > article table a {
         color: #88f; }
     #wdb > article.split {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
       display: flex; }
     #wdb > article #source {
-      -webkit-box-flex: 7;
-      -webkit-flex: 7;
-          -ms-flex: 7;
-              flex: 7;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
+      flex: 7;
       display: flex;
-      -webkit-box-orient: vertical;
-      -webkit-box-direction: normal;
-      -webkit-flex-direction: column;
-          -ms-flex-direction: column;
-              flex-direction: column;
+      flex-direction: column;
       margin-left: 5px; }
       #wdb > article #source #source-editor {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1;
+        flex: 1;
         position: relative; }
         #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
           width: 100%; }
       #wdb > article #source #interpreter {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1;
+        flex: 1;
         overflow-y: auto; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
     #wdb > article #traceback {
-      -webkit-box-flex: 3;
-      -webkit-flex: 3;
-          -ms-flex: 3;
-              flex: 3;
+      flex: 3;
       overflow-y: auto; }
   #wdb #watchers {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-flex-flow: row wrap;
-        -ms-flex-flow: row wrap;
-            flex-flow: row wrap; }
+    flex-flow: row wrap; }
     #wdb #watchers > div {
       margin-left: 5px;
       margin-right: 2em;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
       display: flex; }
       #wdb #watchers > div .name {
         color: #ccc;
         cursor: pointer; }
       #wdb #watchers > div .value {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1; }
+        flex: 1; }
 
 a {
   color: #ccc; }
@@ -247,6 +195,30 @@ table {
     table tr td {
       padding: 0.25em;
       border: 1px solid #050606; }
+  table.diff {
+    border: 1px solid #303030; }
+    table.diff thead {
+      border: 1px solid #303030; }
+    table.diff td {
+      width: 49%;
+      border-top: none;
+      border-bottom: none; }
+    table.diff .diff_header {
+      background: #1d1f20;
+      width: 1%; }
+    table.diff td:not(.diff_header) {
+      border: none; }
+    table.diff .diff_next {
+      display: none; }
+    table.diff .diff_sub {
+      color: black;
+      background-color: #ffdddd; }
+    table.diff .diff_add {
+      color: black;
+      background-color: #dbffdb; }
+    table.diff .diff_chg {
+      color: black;
+      background-color: #dcdcff; }
 
 input {
   border: 1px solid #050606;
@@ -299,9 +271,7 @@ code {
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
     padding: 0.2em 2em;
-    -webkit-transform: rotate(45deg);
-        -ms-transform: rotate(45deg);
-            transform: rotate(45deg); }
+    transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
     width: 0.6em;
     border: none; }
@@ -309,10 +279,7 @@ code {
 #eval {
   background-color: transparent;
   border: none;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  flex: 1;
   margin: 0;
   outline: none;
   overflow: hidden;
@@ -343,9 +310,6 @@ code {
     content: ">>> "; }
 
 #prompt {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex; }
   #prompt textarea {
     color: #c3c6c4;
@@ -374,8 +338,7 @@ code {
   font: 12px/1.5 "Source Code Pro", monospace; }
 
 .traceline {
-  -webkit-transition: 750ms;
-          transition: 750ms;
+  transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
@@ -492,11 +455,9 @@ code {
   width: 0.6em; }
 
 .CodeMirror-linebackground {
-  -webkit-transition: background-color 1s;
-          transition: background-color 1s; }
+  transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
-    -webkit-transition: 1s;
-            transition: 1s;
+    transition: 1s;
     color: #8cedff; }
   .CodeMirror-linebackground.ctx {
     border-left: 1px solid black;
@@ -601,8 +562,7 @@ a.inspect {
   opacity: 0.4; }
 
 code, code span {
-  -webkit-transition: opacity 50ms;
-          transition: opacity 50ms; }
+  transition: opacity 50ms; }
 
 .trace_500 {
   margin: 0 1em 1em; }
@@ -676,72 +636,37 @@ code, code span {
   left: 10px;
   width: 50px;
   height: 50px;
-  -webkit-animation: spinPulse 1s infinite linear;
-          animation: spinPulse 1s infinite linear; }
+  animation: spinPulse 1s infinite linear; }
   .state.inner {
     width: 30px;
     height: 30px;
     top: 30px;
     left: 20px;
-    -webkit-animation: spinoffPulse 1s infinite linear;
-            animation: spinoffPulse 1s infinite linear; }
+    animation: spinoffPulse 1s infinite linear; }
 
 *, *:before, *:after {
-  -webkit-animation-play-state: paused !important;
-          animation-play-state: paused !important; }
+  animation-play-state: paused !important; }
 
 .on, .on *, .on *:before, .on *:afterg {
-  -webkit-animation-play-state: running !important;
-          animation-play-state: running !important; }
-
-@-webkit-keyframes spinPulse {
-  0% {
-    -webkit-transform: rotate(145deg);
-            transform: rotate(145deg);
-    opacity: 1; }
-
-  50% {
-    -webkit-transform: rotate(-120deg);
-            transform: rotate(-120deg);
-    opacity: 0; }
-
-  100% {
-    -webkit-transform: rotate(160deg);
-            transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #2187e7; } }
+  animation-play-state: running !important; }
 
 @keyframes spinPulse {
   0% {
-    -webkit-transform: rotate(145deg);
-            transform: rotate(145deg);
+    transform: rotate(145deg);
     opacity: 1; }
 
   50% {
-    -webkit-transform: rotate(-120deg);
-            transform: rotate(-120deg);
+    transform: rotate(-120deg);
     opacity: 0; }
 
   100% {
-    -webkit-transform: rotate(160deg);
-            transform: rotate(160deg);
+    transform: rotate(160deg);
     opacity: 0;
     box-shadow: 0 0 1px #2187e7; } }
 
-@-webkit-keyframes spinoffPulse {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-
-  100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
-
 @keyframes spinoffPulse {
   0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
+    transform: rotate(0deg); }
 
   100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
+    transform: rotate(360deg); } }

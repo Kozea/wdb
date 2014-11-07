@@ -428,6 +428,10 @@ specify a module like `logging.config`.
     @code(@$scrollback, data.for, ['prompted'])
     @$scrollback.append(data.val)
     @termscroll()
+    @$eval.val('')
+      .prop('disabled', false)
+      .trigger('autosize.resize')
+      .focus()
     @chilling()
 
   dump: (data) ->

@@ -1,6 +1,7 @@
 import inspect
 import dis
 import sys
+from difflib import HtmlDiff
 from ._compat import StringIO, existing_module
 
 
@@ -75,3 +76,13 @@ def get_args(frame):
 
 def importable_module(module):
     return existing_module(module)
+
+
+class Html5Diff(HtmlDiff):
+    _table_template = """
+      <table class="diff">
+        %(header_row)s
+        <tbody>
+          %(data_rows)s
+        </tbody>
+      </table>"""
