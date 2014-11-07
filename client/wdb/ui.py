@@ -2,10 +2,10 @@
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes)
-from .utils import get_source, get_doc, executable_line, importable_module
+from .utils import (
+    get_source, get_doc, executable_line, importable_module, Html5Diff)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
-from difflib import HtmlDiff
 import datadiff
 from datadiff import DiffNotImplementedForType
 import token as tokens
@@ -82,7 +82,7 @@ class Interaction(object):
         self.exception_description = exception_description
         # Copy locals to avoid strange cpython behaviour
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
-        self.htmldiff = HtmlDiff()
+        self.htmldiff = Html5Diff(4)
         if self.shell:
             self.locals[self.index] = {}
 
@@ -204,7 +204,7 @@ class Interaction(object):
         for watcher in self.db.watchers[self.current_file]:
             try:
                 watched[watcher] = self.db.safe_better_repr(eval(
-                    watcher, self.get_globals(), self.locals[self.index]))
+                    watcher, self.get_globals(), self.current_locals))
             except Exception as e:
                 watched[watcher] = type(e).__name__
 
@@ -296,7 +296,7 @@ class Interaction(object):
     def do_dump(self, data):
         try:
             thing = eval(
-                data, self.get_globals(), self.locals[self.index])
+                data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Dump')
             return
@@ -348,7 +348,7 @@ class Interaction(object):
                 compiled_code = compile(data, '<stdin>', 'single')
                 self.db.compile_cache[id(compiled_code)] = data
 
-                l = self.locals[self.index]
+                l = self.current_locals
                 start = time.time()
                 execute(compiled_code, self.get_globals(), l)
                 duration = int((time.time() - start) * 1000 * 1000)
@@ -573,7 +573,7 @@ class Interaction(object):
 
         try:
             thing = eval(
-                data, self.get_globals(), self.locals[self.index])
+                data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Display')
             return
@@ -600,24 +600,36 @@ class Interaction(object):
         sys.exit(1)
 
     def do_diff(self, data):
-        split = data.split('!') if '!' in data else data.split('<>')
-        file1, file2 = map(
-            lambda x: eval(x, self.get_globals(), self.locals[self.index]),
-            split)
-        try:
-            file1, file2 = str(file1), str(file2)
-        except TypeError:
-            self.fail('Diff', title='TypeError',
-                      message='Strings are expected as input.')
+        if '!' not in data and '<>' not in data:
+            self.fail('Diff', 'You must provide two expression '
+                      'separated by "!" or "<>" to make a diff')
             return
+        expressions = data.split('!') if '!' in data else data.split('<>')
+        strings = []
+        for expression in expressions:
+            try:
+                strings.append(str(eval(
+                    expression, self.get_globals(), self.current_locals)))
+            except Exception:
+                self.fail(
+                    'Diff',
+                    "Diff failed: Expression %s "
+                    "failed to evaluate to a string" % expression)
+                return
+
         self.db.send('RawHTML|%s' % dump({
-            'for': u('Difference between %s') % (data),
-            'val': self.htmldiff.make_file([file1],  [file2])}))
+            'for': u('Difference between %s') % (' and '.join(expressions)),
+            'val': self.htmldiff.make_table(
+                strings[0].splitlines(1),
+                strings[1].splitlines(1),
+                expressions[0],
+                expressions[1]
+            )}))
 
     def do_structureddiff(self, data):
         split = data.split('!') if '!' in data else data.split('<>')
         left_struct, right_struct = map(
-            lambda x: eval(x, self.get_globals(), self.locals[self.index]),
+            lambda x: eval(x, self.get_globals(), self.current_locals),
             split)
         try:
             datadiff.diff(left_struct, right_struct)

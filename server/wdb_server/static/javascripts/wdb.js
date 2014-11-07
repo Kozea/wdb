@@ -767,6 +767,7 @@
       this.code(this.$scrollback, data["for"], ['prompted']);
       this.$scrollback.append(data.val);
       this.termscroll();
+      this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
       return this.chilling();
     };
 
