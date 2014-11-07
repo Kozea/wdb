@@ -640,8 +640,8 @@ class Interaction(object):
         self.db.send('Echo|%s' % dump({
             'for': u('Difference of structures %s' % data),
             'val': (datadiff.diff(left_struct, right_struct).stringify()
-                    .replace('\n', '<br />'))
-        }))
+                    .replace('\n', '<br />')),
+            'mode': 'diff'}))
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""

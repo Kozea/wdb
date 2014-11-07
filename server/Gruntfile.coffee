@@ -28,6 +28,7 @@ module.exports = (grunt) ->
             'bower_components/codemirror/addon/dialog/dialog.js'
             'bower_components/codemirror/mode/python/python.js'
             'bower_components/codemirror/mode/jinja2/jinja2.js'
+            'bower_components/codemirror/mode/diff/diff.js'
           ]
 
     sass:
