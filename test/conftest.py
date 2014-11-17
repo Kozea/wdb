@@ -227,7 +227,8 @@ signal.signal(signal.SIGALRM, timeout_handler)
 def socket(request):
     log.info('Fixture')
     socket = Socket(request.function._wdb_use,
-                    port=sys.hexversion % 60000 + 1024)
+                    port=sys.hexversion % 60000 + 1024 + (
+                        1 if hasattr(sys, 'pypy_version_info') else 0))
 
     # If it takes more than 5 seconds, it must be an error
     if not os.getenv('NO_WDB_TIMEOUT'):
