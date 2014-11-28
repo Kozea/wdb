@@ -690,9 +690,6 @@
             break;
           case 'x':
             cmd('Diff', data);
-            break;
-          case 'y':
-            cmd('Structureddiff', data);
         }
         return;
       } else if (snippet.indexOf('?') === 0) {
@@ -730,7 +727,7 @@
     Wdb.prototype.print_help = function() {
       return this.print({
         "for": 'Supported commands',
-        result: '.s or [Ctrl] + [↓] or [F11]    : Step into\n.n or [Ctrl] + [→] or [F10]    : Step over (Next)\n.r or [Ctrl] + [↑] or [F9]     : Step out (Return)\n.c or [Ctrl] + [←] or [F8]     : Continue\n.u or [F7]                     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.f                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left<>right or left!right   : Display the difference between the string \'left\' and the string \'right\'\n.y left<>right or left!right   : Display the difference between the structure \'left\' and the structure \'right\'\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
+        result: '.s or [Ctrl] + [↓] or [F11]    : Step into\n.n or [Ctrl] + [→] or [F10]    : Step over (Next)\n.r or [Ctrl] + [↑] or [F9]     : Step out (Return)\n.c or [Ctrl] + [←] or [F8]     : Continue\n.u or [F7]                     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.f                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left ? right   : Display the difference between the pretty print of \'left\' and \'right\'\n.x left <> right   : Display the difference between the repr of \'left\' and \'right\'\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
       });
     };
 
@@ -772,7 +769,7 @@
       this.code(this.$scrollback, data["for"], ['prompted']);
       this.$scrollback.append(data.val);
       this.termscroll();
-      this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
+      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
       return this.chilling();
     };
 
@@ -863,7 +860,7 @@
       }
       this.code(this.$scrollback, $container.html(), [], true);
       this.termscroll();
-      this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus();
+      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
       return this.chilling();
     };
 

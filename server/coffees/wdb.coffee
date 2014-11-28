@@ -288,7 +288,6 @@ class Wdb extends Log
         when 'z' then @toggle_break data, false, true
         when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
         when 'x' then cmd 'Diff', data
-        when 'y' then cmd 'Structureddiff', data
       return
 
     else if snippet.indexOf('?') == 0
@@ -360,10 +359,10 @@ class Wdb extends Log
  Clear prompt
 .i [mime/type;]expression      : \
  Display the result in an embed, mime type defaults to "text/html"
-.x left<>right or left!right   : \
- Display the difference between the string 'left' and the string 'right'
-.y left<>right or left!right   : \
- Display the difference between the structure 'left' and the structure 'right'
+.x left ? right   : \
+ Display the difference between the pretty print of 'left' and 'right'
+.x left <> right   : \
+ Display the difference between the repr of 'left' and 'right'
 iterable!sthg                  : \
  If cutter is installed, executes cut(iterable).sthg
 expr >! file                   : \
@@ -430,6 +429,7 @@ specify a module like `logging.config`.
     @termscroll()
     @$eval.val('')
       .prop('disabled', false)
+      .attr('data-index', -1)
       .trigger('autosize.resize')
       .focus()
     @chilling()
@@ -510,6 +510,7 @@ specify a module like `logging.config`.
     @termscroll()
     @$eval.val('')
       .prop('disabled', false)
+      .attr('data-index', -1)
       .trigger('autosize.resize')
       .focus()
     @chilling()

@@ -257,28 +257,40 @@ table {
       padding: 0.25em;
       border: 1px solid black; }
   table.diff {
+    line-height: normal;
     border: 1px solid black; }
     table.diff thead {
       border: 1px solid black; }
     table.diff td {
       width: 49%;
       border-top: none;
-      border-bottom: none; }
-    table.diff .diff_header {
+      border-bottom: none;
+      padding-top: 0;
+      padding-bottom: 0; }
+    table.diff .diff_lno {
       background: #141414;
+      color: #F4EAD5;
+      min-width: 50px;
+      padding-left: 10px;
+      padding-right: 10px;
       width: 1%; }
-    table.diff td:not(.diff_header) {
-      border: none; }
-    table.diff .diff_next {
-      display: none; }
+    table.diff .diff_line {
+      white-space: pre-wrap;
+      word-break: break-word; }
     table.diff .diff_sub {
       color: #B13120;
+      background-color: #1D1515; }
+    table.diff .diff_line_sub {
       background-color: #1D1515; }
     table.diff .diff_add {
       color: #719F34;
       background-color: #1A2321; }
+    table.diff .diff_line_add {
+      background-color: #1A2321; }
     table.diff .diff_chg {
       color: #CEAE3E;
+      background-color: #18140C; }
+    table.diff .diff_line_chg {
       background-color: #18140C; }
 
 input {

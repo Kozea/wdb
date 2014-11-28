@@ -31,6 +31,7 @@ else:
         exec(cmd, globals_, locals_)
 
 if python_version == 2:
+    basestr = basestring
     import codecs
     import re
     _cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
@@ -72,6 +73,8 @@ if python_version == 2:
             return bytes_.encode('utf-8')
         return bytes_
 else:
+    basestr = (str, bytes)
+
     def to_unicode(string):
         return string
 
@@ -88,6 +91,10 @@ else:
         if isinstance(bytes_, str):
             return bytes_.encode('utf-8')
         return bytes_
+
+
+def is_str(string):
+    return isinstance(string, basestr)
 
 
 def u(s):

@@ -406,14 +406,14 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self, obj, context=None):
+    def safe_better_repr(self, obj, context=None, html=True, level=0):
         """Repr with inspect links on objects"""
         context = context or {}
         if id(obj) not in context:
             recursive = False
             context[id(obj)] = obj
             try:
-                rv = self.better_repr(obj)
+                rv = self.better_repr(obj, None, html, level + 1)
             except Exception:
                 rv = None
             if rv:
@@ -422,15 +422,19 @@ class Wdb(object):
             recursive = True
 
         self.obj_cache[id(obj)] = obj
-        return '<a href="%d" class="inspect">%s%s</a>' % (
-            id(obj),
+        if html:
+            return '<a href="%d" class="inspect">%s%s</a>' % (
+                id(obj),
+                'Recursion of ' if recursive else '',
+                escape(self.safe_repr(obj)))
+        return '%s%s' % (
             'Recursion of ' if recursive else '',
-            escape(repr(obj)))
+            self.safe_repr(obj))
 
-    def better_repr(self, obj, context=None):
-        """Repr with html decorations"""
-        context = context or None
+    def better_repr(self, obj, context=None, html=True, level=1):
+        """Repr with html decorations or indentation"""
         if isinstance(obj, dict):
+            dict_repr = '  ' * (level - 1)
             if type(obj) != dict:
                 dict_repr = type(obj).__name__ + '({'
                 closer = '})'
@@ -438,17 +442,30 @@ class Wdb(object):
                 dict_repr = '{'
                 closer = '}'
             if len(obj) > 2:
-                dict_repr += '<table>'
-                dict_repr += ''.join([
-                    '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
-                    '<td>' + self.safe_better_repr(val, context) +
-                    '</td></tr>'
-                    for key, val in sorted(obj.items(), key=lambda x: x[0])])
-                dict_repr += '</table>'
+                dict_repr += '\n' + '  ' * level
+                if html:
+                    dict_repr += '<table>'
+                    dict_repr += ''.join([
+                        '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
+                        '<td>' + self.safe_better_repr(
+                            val, context, html, level) +
+                        '</td></tr>'
+                        for key, val in sorted(
+                            obj.items(),
+                            key=lambda x: x[0])])
+                    dict_repr += '</table>'
+                else:
+                    dict_repr += ('\n' + '  ' * level).join([
+                        self.safe_repr(key) + ': ' + self.safe_better_repr(
+                            val, context, html, level)
+                        for key, val in sorted(
+                            obj.items(),
+                            key=lambda x: x[0])])
+                closer = '\n' + '  ' * (level - 1) + closer
             else:
                 dict_repr += ', '.join([
                     self.safe_repr(key) + ': ' + self.safe_better_repr(
-                        val, context)
+                        val, context, html, level)
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
@@ -457,6 +474,7 @@ class Wdb(object):
                 isinstance(obj, list),
                 isinstance(obj, set),
                 isinstance(obj, tuple)]):
+            iter_repr = '  ' * (level - 1)
             if type(obj) == list:
                 iter_repr = '['
                 closer = ']'
@@ -472,12 +490,13 @@ class Wdb(object):
 
             splitter = ', '
             if len(obj) > 2:
-                splitter += '\n'
-                iter_repr += '\n'
-                closer = '\n' + closer
+                splitter += '\n' + '  ' * level
+                iter_repr += '\n' + '  ' * level
+                closer = '\n' + '  ' * (level - 1) + closer
 
             iter_repr += splitter.join(
-                [self.safe_better_repr(val, context) for val in obj])
+                [self.safe_better_repr(val, context, html, level)
+                 for val in obj])
 
             iter_repr += closer
             return iter_repr
