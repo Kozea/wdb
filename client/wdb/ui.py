@@ -1,13 +1,11 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
-    to_unicode_string, from_bytes, force_bytes)
+    to_unicode_string, from_bytes, force_bytes, is_str)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
-import datadiff
-from datadiff import DiffNotImplementedForType
 import token as tokens
 from jedi import Interpreter
 from logging import getLogger
@@ -32,6 +30,10 @@ import sys
 import time
 import traceback
 log = getLogger('wdb.ui')
+
+
+def eval_(src, *args, **kwargs):
+    return eval(compile(src,  '<stdin>', 'eval'), *args, **kwargs)
 
 
 class ReprEncoder(JSONEncoder):
@@ -203,7 +205,7 @@ class Interaction(object):
         watched = {}
         for watcher in self.db.watchers[self.current_file]:
             try:
-                watched[watcher] = self.db.safe_better_repr(eval(
+                watched[watcher] = self.db.safe_better_repr(eval_(
                     watcher, self.get_globals(), self.current_locals))
             except Exception as e:
                 watched[watcher] = type(e).__name__
@@ -295,7 +297,7 @@ class Interaction(object):
 
     def do_dump(self, data):
         try:
-            thing = eval(
+            thing = eval_(
                 data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Dump')
@@ -572,7 +574,7 @@ class Interaction(object):
             forced = False
 
         try:
-            thing = eval(
+            thing = eval_(
                 data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Display')
@@ -600,16 +602,22 @@ class Interaction(object):
         sys.exit(1)
 
     def do_diff(self, data):
-        if '!' not in data and '<>' not in data:
-            self.fail('Diff', 'You must provide two expression '
-                      'separated by "!" or "<>" to make a diff')
+        if '?' not in data and '<>' not in data:
+            self.fail('Diff', 'Diff error',
+                      'You must provide two expression '
+                      'separated by "?" or "<>" to make a diff')
             return
-        expressions = data.split('!') if '!' in data else data.split('<>')
+        pretty = '?' in data
+        expressions = [
+            expression.strip()
+            for expression in
+            (data.split('?') if '?' in data
+             else data.split('<>'))]
         strings = []
         for expression in expressions:
             try:
-                strings.append(str(eval(
-                    expression, self.get_globals(), self.current_locals)))
+                strings.append(eval_(
+                    expression, self.get_globals(), self.current_locals))
             except Exception:
                 self.fail(
                     'Diff',
@@ -617,31 +625,19 @@ class Interaction(object):
                     "failed to evaluate to a string" % expression)
                 return
 
+        render = (
+            (lambda x: self.db.better_repr(x, html=False) or repr(x))
+        ) if pretty else str
+        strings = [render(string) if not is_str(string) else string
+                   for string in strings]
         self.db.send('RawHTML|%s' % dump({
             'for': u('Difference between %s') % (' and '.join(expressions)),
             'val': self.htmldiff.make_table(
-                strings[0].splitlines(1),
-                strings[1].splitlines(1),
+                strings[0].splitlines(keepends=True),
+                strings[1].splitlines(keepends=True),
                 expressions[0],
                 expressions[1]
             )}))
-
-    def do_structureddiff(self, data):
-        split = data.split('!') if '!' in data else data.split('<>')
-        left_struct, right_struct = map(
-            lambda x: eval(x, self.get_globals(), self.current_locals),
-            split)
-        try:
-            datadiff.diff(left_struct, right_struct)
-        except DiffNotImplementedForType:
-            self.fail('StructuredDiff',
-                      title='TypeError', message='A structure was expected')
-            return
-        self.db.send('Echo|%s' % dump({
-            'for': u('Difference of structures %s' % data),
-            'val': (datadiff.diff(left_struct, right_struct).stringify()
-                    .replace('\n', '<br />')),
-            'mode': 'diff'}))
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""

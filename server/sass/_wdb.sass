@@ -139,6 +139,7 @@ table
       border: 1px solid darken($bg, 10%)
 
   &.diff
+    line-height: normal
     border: 1px solid $cm-gutter-border
 
     thead
@@ -148,27 +149,42 @@ table
       width: 49%
       border-top: none
       border-bottom: none
+      padding-top: 0
+      padding-bottom: 0
 
-    .diff_header
+    .diff_lno
       background: $cm-gutter
+      color: $cm-gutter-text
+
+      min-width: 50px
+      padding-left: 10px
+      padding-right: 10px
       width: 1%
 
-    td:not(.diff_header)
-      border: none
-    .diff_next
-      display: none
+    .diff_line
+      white-space: pre-wrap
+      word-break: break-word
 
     .diff_sub
       color: $diff-sub-fg
       background-color: $diff-sub-bg
 
+    .diff_line_sub
+      background-color: $diff-sub-td-bg
+
     .diff_add
       color: $diff-add-fg
       background-color: $diff-add-bg
 
+    .diff_line_add
+      background-color: $diff-add-td-bg
+
     .diff_chg
       color: $diff-chg-fg
       background-color: $diff-chg-bg
+
+    .diff_line_chg
+      background-color: $diff-chg-td-bg
 
 input
   border: 1px solid darken($bg, 10%)

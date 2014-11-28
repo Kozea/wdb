@@ -4,3 +4,6 @@ node_modules/
 *.src.coffee
 client/build/
 server/build/
+junit-py*
+coverage-py*
+.cov-py*

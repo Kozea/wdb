@@ -242,29 +242,41 @@ table {
       padding: 0.25em;
       border: 1px solid #e6e6e6; }
   table.diff {
+    line-height: normal;
     border: 1px solid #eee; }
     table.diff thead {
       border: 1px solid #eee; }
     table.diff td {
       width: 49%;
       border-top: none;
-      border-bottom: none; }
-    table.diff .diff_header {
+      border-bottom: none;
+      padding-top: 0;
+      padding-bottom: 0; }
+    table.diff .diff_lno {
       background: #fefefe;
+      color: rgba(0, 0, 0, 0.3);
+      min-width: 50px;
+      padding-left: 10px;
+      padding-right: 10px;
       width: 1%; }
-    table.diff td:not(.diff_header) {
-      border: none; }
-    table.diff .diff_next {
-      display: none; }
+    table.diff .diff_line {
+      white-space: pre-wrap;
+      word-break: break-word; }
     table.diff .diff_sub {
       color: inherit;
-      background-color: #ffdddd; }
+      background-color: #f8cbcb; }
+    table.diff .diff_line_sub {
+      background-color: #ffecec; }
     table.diff .diff_add {
       color: inherit;
-      background-color: #dbffdb; }
+      background-color: #a6f3a6; }
+    table.diff .diff_line_add {
+      background-color: #eaffea; }
     table.diff .diff_chg {
       color: inherit;
-      background-color: #dcdcff; }
+      background-color: #f2f1a1; }
+    table.diff .diff_line_chg {
+      background-color: #fffeeb; }
 
 input {
   border: 1px solid #e6e6e6;
