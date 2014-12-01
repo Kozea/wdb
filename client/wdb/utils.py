@@ -200,3 +200,140 @@ class Html5Diff(HtmlDiff):
                 replace('\0^', '<span class="diff_chg">').
                 replace('\1', '</span>').
                 replace('\t', '&nbsp;'))
+
+
+def search_key_in_obj(key, obj, matches=None, path='', context=None):
+    context = context or []
+    matches = matches or []
+    if id(obj) in context:
+        return matches
+    context.append(id(obj))
+
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if not isinstance(k, str):
+                continue
+            if isinstance(v, type(sys)):
+                continue
+            if key in k:
+                matches.append(("%s['%s']" % (
+                    path.rstrip('.'),
+                    k.replace(key, '<mark>%s</mark>' % key)), v))
+            try:
+                matches = search_key_in_obj(
+                    key, v, matches,
+                    "%s['%s']." % (path.rstrip('.'), k), context)
+            except Exception:
+                pass
+
+    if isinstance(obj, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, type(sys)):
+                continue
+            try:
+                matches = search_key_in_obj(
+                    key, v, matches,
+                    "%s[%d]." % (path.rstrip('.'), i), context)
+            except Exception:
+                pass
+
+    for k in dir(obj):
+        if k.startswith('__') and k not in ('__class__',):
+            continue
+        v = getattr(obj, k, None)
+        v2 = getattr(obj, k, None)
+        if id(v) != id(v2):
+            continue
+        if isinstance(v, type(sys)):
+            continue
+        if key in k:
+            matches.append(('%s%s' % (
+                path,
+                k.replace(key, '<mark>%s</mark>' % key)), v))
+        try:
+            matches = search_key_in_obj(
+                key, v, matches, '%s%s.' % (path, k), context)
+        except Exception:
+            pass
+
+    return matches
+
+
+def search_value_in_obj(fun, obj, matches=None, path='', context=None):
+    context = context or []
+    matches = matches or []
+    if id(obj) in context:
+        return matches
+    context.append(id(obj))
+
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if not isinstance(k, str):
+                continue
+            if isinstance(v, type(sys)):
+                continue
+
+            res = None
+            try:
+                res = eval(fun, {'x': v})
+            except Exception:
+                pass
+            new_path = "%s['%s']" % (path.rstrip('.'), k)
+
+            if res:
+                matches.append((new_path, v))
+            try:
+                matches = search_value_in_obj(
+                    fun, v, matches, new_path + '.', context)
+            except Exception:
+                pass
+
+    if isinstance(obj, list):
+        for i, v in enumerate(obj):
+            if isinstance(v, type(sys)):
+                continue
+
+            res = None
+            try:
+                res = eval(fun, {'x': v})
+            except Exception:
+                pass
+
+            new_path = "%s[%d]" % (path.rstrip('.'), i)
+
+            if res:
+                matches.append((new_path, v))
+            try:
+                matches = search_value_in_obj(
+                    fun, v, matches,
+                    new_path + '.', context)
+            except Exception:
+                pass
+
+    for k in dir(obj):
+        if k.startswith('__') and k not in ('__class__',):
+            continue
+        v = getattr(obj, k, None)
+        v2 = getattr(obj, k, None)
+        if id(v) != id(v2):
+            continue
+        if isinstance(v, type(sys)):
+            continue
+
+        res = None
+        try:
+            res = eval(fun, {'x': v})
+        except Exception:
+            pass
+
+        new_path = '%s%s' % (path, k)
+
+        if res:
+            matches.append((new_path, v))
+        try:
+            matches = search_value_in_obj(
+                fun, v, matches, new_path + '.', context)
+        except Exception:
+            pass
+
+    return matches
