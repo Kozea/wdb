@@ -3,7 +3,8 @@ from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes, is_str)
 from .utils import (
-    get_source, get_doc, executable_line, importable_module, Html5Diff)
+    get_source, get_doc, executable_line, importable_module, Html5Diff,
+    search_key_in_obj, search_value_in_obj)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
@@ -638,6 +639,34 @@ class Interaction(object):
                 expressions[0],
                 expressions[1]
             )}))
+
+    def do_find(self, data):
+        if ' in ' not in data and ' of ' not in data:
+            self.fail('Find', 'Find error',
+                      'Syntax for find is: "key in expression" '
+                      'or "value testing function of expression"')
+        if ' in ' in data:
+            key, expr = data.split(' in ')
+        else:
+            key, expr = data.split(' of ')
+
+        try:
+            value = eval_(
+                expr, self.get_globals(), self.current_locals)
+        except:
+            self.fail('Find')
+            return
+        if ' in ' in data:
+            matches = search_key_in_obj(key, value, path='%s.' % expr)
+        else:
+            matches = search_value_in_obj(key, value, path='%s.' % expr)
+
+        self.db.send('Print|%s' % dump({
+            'for': 'Finding %s in %s' % (key, expr),
+            'result': escape('Found:\n%s' % '\n'.join(
+                ['%s: -> %s' % (k, val) for k, val in matches]
+            ) if matches else 'Not found')
+        }))
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""

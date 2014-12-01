@@ -259,6 +259,7 @@ class Wdb extends Log
     cmd = =>
       @ws.send.apply @ws, arguments
       @last_cmd = arguments
+      @working()
 
     if snippet.indexOf('.') == 0
       space = snippet.indexOf(' ')
@@ -269,42 +270,43 @@ class Wdb extends Log
         key = snippet.substr(1)
         data = ''
       switch key
+        when 'a' then @print_hist @session_cmd_hist[@cm.state.fn]
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
         when 'd' then cmd 'Dump', data if data
         when 'e' then @cm.toggle_edition()
+        when 'f' then cmd 'Find', data if data
         when 'g' then @cls()
         when 'h' then @print_help()
+        when 'i' then cmd 'Display', data if data
         when 'j' then cmd 'Jump', data if data
         when 'l' then cmd 'Breakpoints'
         when 'n' then cmd 'Next'
         when 'q' then cmd 'Quit'
         when 'r' then cmd 'Return'
         when 's' then cmd 'Step'
-        when 'i' then cmd 'Display', data if data
         when 't' then @toggle_break data, true
         when 'u' then cmd 'Until'
         when 'w' then cmd 'Watch', data if data
-        when 'z' then @toggle_break data, false, true
-        when 'f' then @print_hist @session_cmd_hist[@cm.state.fn]
         when 'x' then cmd 'Diff', data
+        when 'z' then @toggle_break data, false, true
       return
 
     else if snippet.indexOf('?') == 0
       cmd 'Dump', snippet.slice(1).trim()
-      @working()
       @suggest_stop()
       return
+
     else if snippet is '' and @last_cmd
       cmd.apply @, @last_cmd
       return
     if snippet
+      @working()
       @ws.send 'Eval', snippet
       @$eval.val(@$eval.val() + '...')
         .trigger('autosize.resize')
         .prop('disabled', true)
       @eval_time = performance?.now()
-      @working()
 
   cls: ->
     @$completions.height(
@@ -343,7 +345,7 @@ class Wdb extends Log
  Delete existing breakpoint
 .l                             : \
  List active breakpoints
-.f                             : \
+.a                             : \
  Echo all typed commands in the current debugging session
 .d expression                  : \
  Dump the result of expression in a table
@@ -359,10 +361,15 @@ class Wdb extends Log
  Clear prompt
 .i [mime/type;]expression      : \
  Display the result in an embed, mime type defaults to "text/html"
-.x left ? right   : \
+.x left ? right                : \
  Display the difference between the pretty print of 'left' and 'right'
-.x left <> right   : \
+.x left <> right               : \
  Display the difference between the repr of 'left' and 'right'
+.f key in expression           : \
+ Search recursively the presence of key in expression object tree
+.f test of expression          : \
+ Search recursively values that match test in expression inner tree.
+ i.e.: .f type(x) == int of sys
 iterable!sthg                  : \
  If cutter is installed, executes cut(iterable).sthg
 expr >! file                   : \
