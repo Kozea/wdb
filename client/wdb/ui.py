@@ -663,9 +663,10 @@ class Interaction(object):
 
         self.db.send('Print|%s' % dump({
             'for': 'Finding %s in %s' % (key, expr),
-            'result': escape('Found:\n%s' % '\n'.join(
-                ['%s: -> %s' % (k, val) for k, val in matches]
-            ) if matches else 'Not found')
+            'result': 'Found:\n%s' % '\n'.join(
+                ['%s: -> %s' % (k, escape(self.db.safe_repr(val)))
+                 for k, val in matches]
+            ) if matches else 'Not found'
         }))
 
     def handle_exc(self):
