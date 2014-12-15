@@ -4,7 +4,7 @@ from ._compat import (
     to_unicode_string, from_bytes, force_bytes, is_str)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
-    search_key_in_obj, search_value_in_obj)
+    search_key_in_obj, search_value_in_obj, timeout_of)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
@@ -508,14 +508,16 @@ class Interaction(object):
     def do_complete(self, data):
         script = Interpreter(data, [self.current_locals, self.get_globals()])
         try:
-            completions = script.completions()
+            with timeout_of(.75):
+                completions = script.completions()
         except Exception:
             self.db.send('Suggest')
             self.notify_exc('Completion failed for %s' % data)
             return
 
         try:
-            funs = script.call_signatures() or []
+            with timeout_of(.25):
+                funs = script.call_signatures() or []
         except Exception:
             self.db.send('Suggest')
             self.notify_exc('Completion of function failed for %s' % data)

@@ -658,9 +658,11 @@ class Wdb(object):
         if source:
             with open(source) as f:
                 compiled_code = compile(f.read(), '<source>', 'exec')
+            # Executing in locals to keep local scope
+            # (http://bugs.python.org/issue16781)
             execute(
                 compiled_code,
-                interaction.get_globals(),
+                interaction.current_locals,
                 interaction.current_locals)
 
         interaction.loop()
