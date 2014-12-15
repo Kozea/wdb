@@ -1,6 +1,7 @@
 import inspect
 import dis
 import sys
+import signal
 from difflib import HtmlDiff, _mdiff
 from ._compat import StringIO, existing_module
 
@@ -337,3 +338,32 @@ def search_value_in_obj(fun, obj, matches=None, path='', context=None):
             pass
 
     return matches
+
+
+class timeout_of(object):
+    def __init__(self, time):
+        self.time = time
+        try:
+            # Ignoring when not active + disabling if no alarm signal (Windows)
+            signal.signal(signal.SIGALRM, signal.SIG_IGN)
+        except:
+            self.active = False
+        else:
+            self.active = True
+
+    def timeout(self, signum, frame):
+        raise Exception('Timeout')
+
+    def __enter__(self):
+        if not self.active:
+            return
+
+        signal.signal(signal.SIGALRM, self.timeout)
+        signal.setitimer(signal.ITIMER_REAL, self.time)
+
+    def __exit__(self, *args):
+        if not self.active:
+            return
+
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, signal.SIG_IGN)
