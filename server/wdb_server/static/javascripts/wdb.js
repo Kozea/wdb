@@ -427,6 +427,16 @@
       return this.$activity.removeClass('on');
     };
 
+    Wdb.prototype.done = function(suggest) {
+      if (suggest == null) {
+        suggest = null;
+      }
+      this.termscroll();
+      this.$eval.val(suggest || '').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
+      this.$completions.attr('style', '');
+      return this.chilling();
+    };
+
     Wdb.prototype.init = function(data) {
       var brk, brks, _base, _i, _len, _name, _results;
       if (data.version !== this.constructor.prototype.__version__) {
@@ -513,10 +523,9 @@
       this.$source.find('#source-editor').removeClass('hidden');
       $('.traceline').removeClass('selected');
       $('#trace-' + current_frame.level).addClass('selected');
-      this.$eval.val('').attr('data-index', -1).trigger('autosize.resize');
       this.file_cache[data.name] = data.file;
       this.cm.open(data, current_frame);
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.ellipsize = function($code) {
@@ -716,8 +725,7 @@
 
     Wdb.prototype.cls = function() {
       this.$completions.height(this.$interpreter.height() - this.$prompt.innerHeight());
-      this.termscroll();
-      return this.$eval.val('').trigger('autosize.resize');
+      return this.done();
     };
 
     Wdb.prototype.print_hist = function(hist) {
@@ -757,25 +765,19 @@
       }
       this.code($group, data["for"], ['prompted']);
       this.code(this.$scrollback, data.result, [], true);
-      this.$eval.val(data.suggest || '').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      this.$completions.attr('style', '');
-      this.termscroll();
-      return this.chilling();
+      return this.done(data.suggest);
     };
 
     Wdb.prototype.echo = function(data) {
       this.code(this.$scrollback, data["for"], ['prompted']);
       this.code(this.$scrollback, data.val || '', [], true, null, data.mode);
-      this.termscroll();
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.rawhtml = function(data) {
       this.code(this.$scrollback, data["for"], ['prompted']);
       this.$scrollback.append(data.val);
-      this.termscroll();
-      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.dump = function(data) {
@@ -864,27 +866,27 @@
         }).text(data.source))).appendTo($table);
       }
       this.code(this.$scrollback, $container.html(), [], true);
-      this.termscroll();
-      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.breakset = function(data) {
       var _ref;
       this.cm.set_breakpoint(data);
       if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't')) {
-        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus().attr('data-index', -1);
+        return this.done();
+      } else {
+        return this.chilling();
       }
-      return this.chilling();
     };
 
     Wdb.prototype.breakunset = function(data) {
       var _ref;
       this.cm.clear_breakpoint(data);
       if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't' || _ref === 'z')) {
-        this.$eval.val('').prop('disabled', false).trigger('autosize.resize').focus().attr('data-index', -1);
+        return this.done();
+      } else {
+        return this.chilling();
       }
-      return this.chilling();
     };
 
     Wdb.prototype.split = function(str, char) {
@@ -1088,10 +1090,7 @@
       $tag.addClass('display');
       $tag.attr('src', "data:" + data.type + ";charset=UTF-8;base64," + data.val);
       this.$scrollback.append($tag);
-      this.$eval.val('').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-      this.$completions.attr('style', '');
-      this.termscroll();
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.searchback = function() {
@@ -1351,8 +1350,7 @@
     Wdb.prototype.shell = function() {
       this.$traceback.addClass('hidden');
       this.$source.find('#source-editor').addClass('hidden');
-      this.$eval.focus();
-      return this.chilling();
+      return this.done();
     };
 
     Wdb.prototype.pretty_time = function(time) {

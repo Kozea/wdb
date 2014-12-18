@@ -28,7 +28,8 @@ body, html
   height: 100%
 
   > header
-    height: 100px
+    flex: 0 0 100px
+    min-height: 0
     display: flex
     align-items: center
 
@@ -41,8 +42,7 @@ body, html
       font-family: $font
 
   > article
-    flex: 1
-
+    min-height: 0
 
     table, form, p
       margin: 0 auto
@@ -99,6 +99,7 @@ body, html
     #traceback
       flex: 3
       overflow-y: auto
+      overflow-x: hidden
 
   #watchers
     display: flex
@@ -230,7 +231,6 @@ code
   > .CodeMirror
     font: $code-font
 
-
     box-shadow: inset -8px 0 20px $source-shadow
 
     &.rw:after
@@ -344,6 +344,9 @@ $trace-bg-selected: darken($trace-bg, 10%) !default
   font: $code-font
   clear: both
   overflow: hidden
+  &:hover
+    overflow: auto
+
   width: 100% - $shift - $margin
   margin-left: $shift + $margin
 

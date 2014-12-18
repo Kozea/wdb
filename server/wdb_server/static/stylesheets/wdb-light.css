@@ -18,7 +18,7 @@
   background: #d7d4f0; }
 
 .CodeMirror, .CodeMirror-standalone {
-  color: grey;
+  color: gray;
   background-color: none;
   /* Use each loop to hash when sass 3.3 is released */ }
   .CodeMirror .CodeMirror-selected, .CodeMirror-standalone .CodeMirror-selected {
@@ -109,21 +109,41 @@ body, html {
 
 #wdb {
   box-sizing: border-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
   height: 100%; }
   #wdb > header {
-    height: 100px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 100px;
+        -ms-flex: 0 0 100px;
+            flex: 0 0 100px;
+    min-height: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center; }
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
     #wdb > header #activity {
       width: 100px; }
     #wdb > header #title {
-      flex: 1;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1;
       margin: 0;
       font-family: inherit; }
   #wdb > article {
-    flex: 1; }
+    min-height: 0; }
     #wdb > article table, #wdb > article form, #wdb > article p {
       margin: 0 auto;
       width: 90%; }
@@ -136,46 +156,80 @@ body, html {
         #wdb > article table tbody td.action a, #wdb > article table tbody td.close a {
           text-decoration: none; }
           #wdb > article table tbody td.action a:hover:before, #wdb > article table tbody td.action a:focus:before, #wdb > article table tbody td.close a:hover:before, #wdb > article table tbody td.close a:focus:before {
-            color: #a200bb; }
+            color: #a400bb; }
           #wdb > article table tbody td.action a:before, #wdb > article table tbody td.close a:before {
             color: #770088;
             font-size: 18px; }
       #wdb > article table a {
         color: #770088; }
     #wdb > article.split {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex; }
     #wdb > article #source {
-      flex: 7;
+      -webkit-box-flex: 7;
+      -webkit-flex: 7;
+          -ms-flex: 7;
+              flex: 7;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex-direction: column;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+              flex-direction: column;
       margin-left: 5px; }
       #wdb > article #source #source-editor {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         position: relative; }
         #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
           width: 100%; }
       #wdb > article #source #interpreter {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         overflow-y: auto; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
     #wdb > article #traceback {
-      flex: 3;
-      overflow-y: auto; }
+      -webkit-box-flex: 3;
+      -webkit-flex: 3;
+          -ms-flex: 3;
+              flex: 3;
+      overflow-y: auto;
+      overflow-x: hidden; }
   #wdb #watchers {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-flow: row wrap; }
+    -webkit-flex-flow: row wrap;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap; }
     #wdb #watchers > div {
       margin-left: 5px;
       margin-right: 2em;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex; }
       #wdb #watchers > div .name {
         color: #000;
         cursor: pointer; }
       #wdb #watchers > div .value {
-        flex: 1; }
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1; }
 
 a {
   color: #000; }
@@ -283,7 +337,9 @@ code {
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
     padding: 0.2em 2em;
-    transform: rotate(45deg); }
+    -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+            transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
     width: 0.6em;
     border: none; }
@@ -291,7 +347,10 @@ code {
 #eval {
   background-color: transparent;
   border: none;
-  flex: 1;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
   margin: 0;
   outline: none;
   overflow: hidden;
@@ -318,13 +377,16 @@ code {
   padding: 0.5em 0 0 0; }
   #prompt:before, .prompted:before {
     font: 12px/1.5 "Source Code Pro", monospace;
-    color: grey;
+    color: gray;
     content: ">>> "; }
 
 #prompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
   #prompt textarea {
-    color: grey;
+    color: gray;
     font: 12px/1.5 "Source Code Pro", monospace;
     margin-left: 0.5em;
     resize: none; }
@@ -350,7 +412,8 @@ code {
   font: 12px/1.5 "Source Code Pro", monospace; }
 
 .traceline {
-  transition: 750ms;
+  -webkit-transition: 750ms;
+          transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
@@ -358,6 +421,8 @@ code {
   width: 94%;
   margin-left: 6%;
   background-color: #eeefff; }
+  .traceline:hover {
+    overflow: auto; }
   .traceline:before {
     background-color: #eeefff;
     border-color: #eeefff #eeefff #f8f8f8 #f8f8f8; }
@@ -404,17 +469,17 @@ code {
   .traceline.selected {
     width: 98%;
     margin-left: 2%;
-    background-color: #bbc0ff;
-    background-color: #bbc0ff; }
+    background-color: #bbbfff;
+    background-color: #bbbfff; }
     .traceline.selected:before {
-      background-color: #bbc0ff;
-      border-color: #bbc0ff #bbc0ff #f8f8f8 #f8f8f8; }
+      background-color: #bbbfff;
+      border-color: #bbbfff #bbbfff #f8f8f8 #f8f8f8; }
     .traceline.selected .tracefunfun {
       background-color: #f8f8f8; }
       .traceline.selected .tracefunfun .tracefun {
-        background-color: #bbc0ff; }
+        background-color: #bbbfff; }
         .traceline.selected .tracefunfun .tracefun:before {
-          border-color: #bbc0ff #bbc0ff #f8f8f8 #f8f8f8; }
+          border-color: #bbbfff #bbbfff #f8f8f8 #f8f8f8; }
   .traceline .tracecode {
     padding: 0.5em;
     padding-top: 0.25em;
@@ -467,9 +532,11 @@ code {
   width: 0.6em; }
 
 .CodeMirror-linebackground {
-  transition: background-color 1s; }
+  -webkit-transition: background-color 1s;
+          transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
-    transition: 1s;
+    -webkit-transition: 1s;
+            transition: 1s;
     color: blue; }
   .CodeMirror-linebackground.ctx {
     border-left: 1px solid #e4e4e4;
@@ -563,7 +630,7 @@ a.inspect {
   .object .doc {
     background-color: #f0f0f0; }
   .object .source {
-    background-color: #f5f5f5; }
+    background-color: whitesmoke; }
 
 .nogood {
   color: red !important; }
@@ -574,7 +641,8 @@ a.inspect {
   opacity: 0.4; }
 
 code, code span {
-  transition: opacity 50ms; }
+  -webkit-transition: opacity 50ms;
+          transition: opacity 50ms; }
 
 .trace_500 {
   margin: 0 1em 1em; }
@@ -736,6 +804,7 @@ code, code span {
           position: absolute;
           width: 97%; }
       #wdb article section input[type="submit"] {
+        background: -webkit-linear-gradient(#770088, #4a0055);
         background: linear-gradient(#770088, #4a0055);
         border-color: #4a0055;
         border-radius: 3px;
@@ -860,43 +929,78 @@ footer {
   border-right: 5px solid rgba(0, 0, 0, 0);
   border-left: 5px solid rgba(0, 0, 0, 0);
   border-radius: 50px;
-  box-shadow: 0 0 35px rgba(162, 0, 187, 0.7);
+  box-shadow: 0 0 35px rgba(164, 0, 187, 0.7);
   position: absolute;
   top: 20px;
   left: 10px;
   width: 50px;
   height: 50px;
-  animation: spinPulse 1s infinite linear; }
+  -webkit-animation: spinPulse 1s infinite linear;
+          animation: spinPulse 1s infinite linear; }
   .state.inner {
     width: 30px;
     height: 30px;
     top: 30px;
     left: 20px;
-    animation: spinoffPulse 1s infinite linear; }
+    -webkit-animation: spinoffPulse 1s infinite linear;
+            animation: spinoffPulse 1s infinite linear; }
 
 *, *:before, *:after {
-  animation-play-state: paused !important; }
+  -webkit-animation-play-state: paused !important;
+          animation-play-state: paused !important; }
 
 .on, .on *, .on *:before, .on *:after {
-  animation-play-state: running !important; }
+  -webkit-animation-play-state: running !important;
+          animation-play-state: running !important; }
 
-@keyframes spinPulse {
+@-webkit-keyframes spinPulse {
   0% {
-    transform: rotate(145deg);
+    -webkit-transform: rotate(145deg);
+            transform: rotate(145deg);
     opacity: 1; }
 
   50% {
-    transform: rotate(-120deg);
+    -webkit-transform: rotate(-120deg);
+            transform: rotate(-120deg);
     opacity: 0; }
 
   100% {
-    transform: rotate(160deg);
+    -webkit-transform: rotate(160deg);
+            transform: rotate(160deg);
     opacity: 0;
-    box-shadow: 0 0 1px rgba(162, 0, 187, 0.7); } }
+    box-shadow: 0 0 1px rgba(164, 0, 187, 0.7); } }
+
+@keyframes spinPulse {
+  0% {
+    -webkit-transform: rotate(145deg);
+            transform: rotate(145deg);
+    opacity: 1; }
+
+  50% {
+    -webkit-transform: rotate(-120deg);
+            transform: rotate(-120deg);
+    opacity: 0; }
+
+  100% {
+    -webkit-transform: rotate(160deg);
+            transform: rotate(160deg);
+    opacity: 0;
+    box-shadow: 0 0 1px rgba(164, 0, 187, 0.7); } }
+
+@-webkit-keyframes spinoffPulse {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }
 
 @keyframes spinoffPulse {
   0% {
-    transform: rotate(0deg); }
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg); }
 
   100% {
-    transform: rotate(360deg); } }
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg); } }

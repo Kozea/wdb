@@ -105,6 +105,16 @@ class Wdb extends Log
   chilling: ->
     @$activity.removeClass 'on'
 
+  done: (suggest=null)->
+    @termscroll()
+    @$eval.val(suggest or '')
+      .prop('disabled', false)
+      .attr('data-index', -1)
+      .trigger('autosize.resize')
+      .focus()
+    @$completions.attr('style', '')
+    @chilling()
+
   init: (data) ->
     if data.version isnt @constructor::__version__
       @print
@@ -192,10 +202,9 @@ class Wdb extends Log
     @$source.find('#source-editor').removeClass('hidden')
     $('.traceline').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
-    @$eval.val('').attr('data-index', -1).trigger('autosize.resize')
     @file_cache[data.name] = data.file
     @cm.open(data, current_frame)
-    @chilling()
+    @done()
 
   ellipsize: ($code) ->
     $code.find('span.cm-string').each ->
@@ -311,8 +320,7 @@ class Wdb extends Log
   cls: ->
     @$completions.height(
       @$interpreter.height() - @$prompt.innerHeight())
-    @termscroll()
-    @$eval.val('').trigger('autosize.resize')
+    @done()
 
   print_hist: (hist) ->
     @print
@@ -414,32 +422,17 @@ specify a module like `logging.config`.
       ['duration'], false, "Total #{@pretty_time(duration)}") if data.duration
     @code($group, data.for, ['prompted'])
     @code(@$scrollback, data.result, [], true)
-    @$eval
-      .val(data.suggest or '')
-      .prop('disabled', false)
-      .attr('data-index', -1)
-      .trigger('autosize.resize')
-      .focus()
-    @$completions.attr('style', '')
-    @termscroll()
-    @chilling()
+    @done(data.suggest)
 
   echo: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
     @code(@$scrollback, data.val or '', [], true, null, data.mode)
-    @termscroll()
-    @chilling()
+    @done()
 
   rawhtml: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
     @$scrollback.append(data.val)
-    @termscroll()
-    @$eval.val('')
-      .prop('disabled', false)
-      .attr('data-index', -1)
-      .trigger('autosize.resize')
-      .focus()
-    @chilling()
+    @done()
 
   dump: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
@@ -514,29 +507,23 @@ specify a module like `logging.config`.
             .text(data.source))).appendTo($table)
 
     @code(@$scrollback, $container.html(), [], true)
-    @termscroll()
-    @$eval.val('')
-      .prop('disabled', false)
-      .attr('data-index', -1)
-      .trigger('autosize.resize')
-      .focus()
-    @chilling()
+    @done()
 
   breakset: (data) ->
     @cm.set_breakpoint data
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't']
-      @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
-        .attr('data-index', -1)
-    @chilling()
+      @done()
+    else
+      @chilling()
 
   breakunset: (data) ->
     @cm.clear_breakpoint data
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't', 'z']
-      @$eval.val('').prop('disabled', false).trigger('autosize.resize').focus()
-        .attr('data-index', -1)
-    @chilling()
+      @done()
+    else
+      @chilling()
 
   split: (str, char) ->
     # Returns the split on last occurence of char
@@ -688,15 +675,7 @@ specify a module like `logging.config`.
     $tag.addClass('display')
     $tag.attr('src', "data:#{data.type};charset=UTF-8;base64,#{data.val}")
     @$scrollback.append($tag)
-    @$eval
-      .val('')
-      .prop('disabled', false)
-      .attr('data-index', -1)
-      .trigger('autosize.resize')
-      .focus()
-    @$completions.attr('style', '')
-    @termscroll()
-    @chilling()
+    @done()
 
   searchback: ->
     @suggest_stop()
@@ -932,8 +911,8 @@ specify a module like `logging.config`.
   shell: ->
     @$traceback.addClass('hidden')
     @$source.find('#source-editor').addClass('hidden')
-    @$eval.focus()
-    @chilling()
+    @done()
+
 
   pretty_time: (time) ->
     if time < 1000

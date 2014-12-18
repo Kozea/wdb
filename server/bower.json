@@ -1,6 +1,6 @@
 {
   "name": "wdb",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "homepage": "https://github.com/Kozea/wdb",
   "authors": [
     "Florian Mounier <florian.mounier@kozea.fr>"
@@ -9,9 +9,9 @@
   "license": "GPLv3",
   "private": true,
   "dependencies": {
-    "jquery": "~2.1.0",
-    "codemirror": "~4.4.0",
-    "jquery-autosize": "~1.18.9",
-    "font-awesome": "~4.1.0"
+    "jquery": "~2.1.2",
+    "codemirror": "~4.8.0",
+    "jquery-autosize": "~1.18.17",
+    "font-awesome": "~4.2.0"
   }
 }

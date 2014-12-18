@@ -103,21 +103,41 @@ body, html {
 
 #wdb {
   box-sizing: border-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
   height: 100%; }
   #wdb > header {
-    height: 100px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 100px;
+        -ms-flex: 0 0 100px;
+            flex: 0 0 100px;
+    min-height: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center; }
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
     #wdb > header #activity {
       width: 100px; }
     #wdb > header #title {
-      flex: 1;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1;
       margin: 0;
       font-family: "Helvetica, arial, freesans, clean, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol'"; }
   #wdb > article {
-    flex: 1; }
+    min-height: 0; }
     #wdb > article table, #wdb > article form, #wdb > article p {
       margin: 0 auto;
       width: 90%; }
@@ -137,39 +157,73 @@ body, html {
       #wdb > article table a {
         color: #0086b3; }
     #wdb > article.split {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex; }
     #wdb > article #source {
-      flex: 7;
+      -webkit-box-flex: 7;
+      -webkit-flex: 7;
+          -ms-flex: 7;
+              flex: 7;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex-direction: column;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+              flex-direction: column;
       margin-left: 5px; }
       #wdb > article #source #source-editor {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         position: relative; }
         #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
           width: 100%; }
       #wdb > article #source #interpreter {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         overflow-y: auto; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
     #wdb > article #traceback {
-      flex: 3;
-      overflow-y: auto; }
+      -webkit-box-flex: 3;
+      -webkit-flex: 3;
+          -ms-flex: 3;
+              flex: 3;
+      overflow-y: auto;
+      overflow-x: hidden; }
   #wdb #watchers {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    flex-flow: row wrap; }
+    -webkit-flex-flow: row wrap;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap; }
     #wdb #watchers > div {
       margin-left: 5px;
       margin-right: 2em;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex; }
       #wdb #watchers > div .name {
         color: #666;
         cursor: pointer; }
       #wdb #watchers > div .value {
-        flex: 1; }
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1; }
 
 a {
   color: #666; }
@@ -277,7 +331,9 @@ code {
     border-top: 1px solid #d01040;
     border-bottom: 1px solid #d01040;
     padding: 0.2em 2em;
-    transform: rotate(45deg); }
+    -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+            transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
     width: 0.6em;
     border: none; }
@@ -285,7 +341,10 @@ code {
 #eval {
   background-color: transparent;
   border: none;
-  flex: 1;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
   margin: 0;
   outline: none;
   overflow: hidden;
@@ -316,6 +375,9 @@ code {
     content: ">>> "; }
 
 #prompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
   #prompt textarea {
     color: #666;
@@ -344,7 +406,8 @@ code {
   font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace; }
 
 .traceline {
-  transition: 750ms;
+  -webkit-transition: 750ms;
+          transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace;
   clear: both;
@@ -352,6 +415,8 @@ code {
   width: 94%;
   margin-left: 6%;
   background-color: #f7f7f7; }
+  .traceline:hover {
+    overflow: auto; }
   .traceline:before {
     background-color: #f7f7f7;
     border-color: #f7f7f7 #f7f7f7 #fff #fff; }
@@ -461,9 +526,11 @@ code {
   width: 0.6em; }
 
 .CodeMirror-linebackground {
-  transition: background-color 1s; }
+  -webkit-transition: background-color 1s;
+          transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
-    transition: 1s;
+    -webkit-transition: 1s;
+            transition: 1s;
     color: rgba(0, 0, 0, 0.4); }
   .CodeMirror-linebackground.ctx {
     border-left: 1px solid transparent;
@@ -568,7 +635,8 @@ a.inspect {
   opacity: 0.4; }
 
 code, code span {
-  transition: opacity 50ms; }
+  -webkit-transition: opacity 50ms;
+          transition: opacity 50ms; }
 
 .trace_500 {
   margin: 0 1em 1em; }
@@ -688,33 +756,66 @@ code, code span {
       border: 13px double rgba(0, 0, 0, 0.2);
       border-radius: 100%; }
     #wdb > header > #activity .state:before {
-      animation: rotate 2s infinite linear; }
+      -webkit-animation: rotate 2s infinite linear;
+              animation: rotate 2s infinite linear; }
     #wdb > header > #activity .state:after {
-      animation: rotate2 2s infinite linear;
-      animation-delay: -0.5s; }
+      -webkit-animation: rotate2 2s infinite linear;
+              animation: rotate2 2s infinite linear;
+      -webkit-animation-delay: -0.5s;
+              animation-delay: -0.5s; }
     #wdb > header > #activity .state.inner:before {
-      animation: rotate3 2s infinite linear;
-      animation-delay: -1.5s; }
+      -webkit-animation: rotate3 2s infinite linear;
+              animation: rotate3 2s infinite linear;
+      -webkit-animation-delay: -1.5s;
+              animation-delay: -1.5s; }
     #wdb > header > #activity .state.inner:after {
-      animation: rotate4 2s infinite linear;
-      animation-delay: -1s; }
+      -webkit-animation: rotate4 2s infinite linear;
+              animation: rotate4 2s infinite linear;
+      -webkit-animation-delay: -1s;
+              animation-delay: -1s; }
   #wdb > header > #activity, #wdb > header > #activity *, #wdb > header > #activity *:before, #wdb > header > #activity *:after {
-    animation-play-state: paused !important; }
+    -webkit-animation-play-state: paused !important;
+            animation-play-state: paused !important; }
   #wdb > header > #activity.on, #wdb > header > #activity.on *, #wdb > header > #activity.on *:before, #wdb > header > #activity.on *:after {
-    animation-play-state: running !important; }
+    -webkit-animation-play-state: running !important;
+            animation-play-state: running !important; }
+
+@-webkit-keyframes rotate {
+  100% {
+    -webkit-transform: rotate3d(2, 1, 1, 360deg);
+            transform: rotate3d(2, 1, 1, 360deg); } }
 
 @keyframes rotate {
   100% {
-    transform: rotate3d(2, 1, 1, 360deg); } }
+    -webkit-transform: rotate3d(2, 1, 1, 360deg);
+            transform: rotate3d(2, 1, 1, 360deg); } }
+
+@-webkit-keyframes rotate2 {
+  100% {
+    -webkit-transform: rotate3d(1, 2, 1, 360deg);
+            transform: rotate3d(1, 2, 1, 360deg); } }
 
 @keyframes rotate2 {
   100% {
-    transform: rotate3d(1, 2, 1, 360deg); } }
+    -webkit-transform: rotate3d(1, 2, 1, 360deg);
+            transform: rotate3d(1, 2, 1, 360deg); } }
+
+@-webkit-keyframes rotate3 {
+  100% {
+    -webkit-transform: rotate3d(2, -2, 1, 360deg);
+            transform: rotate3d(2, -2, 1, 360deg); } }
 
 @keyframes rotate3 {
   100% {
-    transform: rotate3d(2, -2, 1, 360deg); } }
+    -webkit-transform: rotate3d(2, -2, 1, 360deg);
+            transform: rotate3d(2, -2, 1, 360deg); } }
+
+@-webkit-keyframes rotate4 {
+  100% {
+    -webkit-transform: rotate3d(-1, 2, 2, 360deg);
+            transform: rotate3d(-1, 2, 2, 360deg); } }
 
 @keyframes rotate4 {
   100% {
-    transform: rotate3d(-1, 2, 2, 360deg); } }
+    -webkit-transform: rotate3d(-1, 2, 2, 360deg);
+            transform: rotate3d(-1, 2, 2, 360deg); } }
