@@ -19,6 +19,7 @@
             - [Tornado](#tornado)
             - [Page loading time become slow](#page-loading-time-become-slow)
     - [Remote debugging](#remote-debugging)
+        - [Docker](#docker)
     - [In browser usage](#in-browser-usage)
     - [Wdb Server](#wdb-server)
     - [Importing wdb each time is exhausting](#importing-wdb-each-time-is-exhausting)
@@ -270,6 +271,90 @@ WDB_WEB_SERVER            # WDB server host for browser openning
 WDB_WEB_PORT              # WDB server http port
 WDB_NO_BROWSER_AUTO_OPEN  # To disable the automagic browser openning (which can't be done if the browser is not on the same machine)
 ```
+
+
+### Docker
+
+If you are developing locally with [Docker](http://www.docker.com/), you can
+also use wdb to debug a code running inside a container. The basic setup looks
+like this:
+
+1. Start `wdb.server.py ` running in a container and expose port `1984` to your
+   host computer, this will server the debugging web server.
+2. Start debugging in your app container, making sure to set `WDB_SOCKET_SERVER`
+   to the address of the server container, and point it to the expoed port
+   `19840` on that server.
+3. When a trace is reached, open up `http://<your-docker-hostname>:1984`
+
+I will walk through this process in detail, using
+[Fig](http://orchardup.github.io/fig/) to set up the containers. So, before
+you proceed, but should work without fig, without much work.
+
+Let's say your `fig.yml` looks like
+[their example for using with Django](http://orchardup.github.io/fig/django.html):
+
+```yaml
+db:
+  image: orchardup/postgresql
+web:
+  build: .
+  command: python manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  links:
+    - db
+```
+
+Next lets add the wdb server part now and tell the web to link to it:
+
+```yaml
+db:
+  image: orchardup/postgresql
+web:
+  build: .
+  command: python manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  links:
+    - db
+    - wdb
+  environment:
+    WDB_SOCKET_SERVER: wdb
+    WDB_NO_BROWSER_AUTO_OPEN: True
+wdb:
+  image: Kozea/wdb-server
+  ports:
+    - "1984:1984"
+```
+
+And add `wdb` to your `requirements.txt` in your web app:
+
+```bash
+$ echo 'wdb' >> requirements.txt
+```
+
+Now we can use `wdb.set_trace()` in our python app.
+
+```python
+# ... some code
+import wdb
+wdb.set_trace()
+```
+Then you have to rebuild your web application and start everything up again
+
+```bash
+$ fig stop
+$ fig build web
+$ fig up
+```
+
+
+Now you can access `http://<local docker server>:1984`, to
+see the traces as they come up in your app.
 
 
 ## In browser usage
