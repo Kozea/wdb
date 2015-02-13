@@ -16,7 +16,7 @@ def main():
     """Wdb entry point"""
     sys.path.insert(0, os.getcwd())
     args, extrargs = parser.parse_known_args()
-    sys.argv = ['wdb'] + extrargs
+    sys.argv = ['wdb'] + args.args + extrargs
 
     if args.file:
         file = os.path.join(os.getcwd(), args.file)
