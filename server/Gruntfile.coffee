@@ -1,9 +1,37 @@
 module.exports = (grunt) ->
   require('time-grunt') grunt
   require('load-grunt-tasks')(grunt)
+  jsdeps = [
+    'bower_components/jquery/dist/jquery.min.js'
+    'bower_components/jquery-autosize/jquery.autosize.min.js'
+    'bower_components/codemirror/lib/codemirror.js'
+    'bower_components/codemirror/addon/runmode/runmode.js'
+    'bower_components/codemirror/addon/dialog/dialog.js'
+    'bower_components/codemirror/mode/python/python.js'
+    'bower_components/codemirror/mode/jinja2/jinja2.js'
+    'bower_components/codemirror/mode/diff/diff.js'
+  ]
+  cssdeps = [
+    'bower_components/font-awesome/css/font-awesome.min.css'
+    'bower_components/codemirror/lib/codemirror.css'
+    'bower_components/codemirror/addon/dialog/dialog.css'
+  ]
 
   grunt.initConfig
     pkg: grunt.file.readJSON('package.json')
+    fileExists:
+      jsdeps: jsdeps
+      cssdeps: cssdeps
+
+    imageEmbed:
+      options:
+        maxImageSize: 0
+        regexInclude: /^[^#].+$/g
+        regexExclude: /^#.+$/g
+
+      cssdeps:
+        files:
+          'wdb_server/static/stylesheets/deps.embed.css': cssdeps
 
     uglify:
       options:
@@ -20,16 +48,7 @@ module.exports = (grunt) ->
 
       deps:
         files:
-          'wdb_server/static/javascripts/wdb/deps.min.js': [
-            'bower_components/jquery/dist/jquery.min.js'
-            'bower_components/jquery-autosize/jquery.autosize.min.js'
-            'bower_components/codemirror/lib/codemirror.js'
-            'bower_components/codemirror/addon/runmode/runmode.js'
-            'bower_components/codemirror/addon/dialog/dialog.js'
-            'bower_components/codemirror/mode/python/python.js'
-            'bower_components/codemirror/mode/jinja2/jinja2.js'
-            'bower_components/codemirror/mode/diff/diff.js'
-          ]
+          'wdb_server/static/javascripts/wdb/deps.min.js': jsdeps
 
     sass:
       wdb:
@@ -49,11 +68,8 @@ module.exports = (grunt) ->
     cssmin:
       codemirror:
         files:
-          'wdb_server/static/stylesheets/deps.min.css': [
-            'bower_components/font-awesome/css/font-awesome.min.css'
-            'bower_components/codemirror/lib/codemirror.css'
-            'bower_components/codemirror/addon/dialog/dialog.css'
-          ]
+          'wdb_server/static/stylesheets/deps.min.css': (
+            'wdb_server/static/stylesheets/deps.embed.css')
 
     coffee:
       options:
@@ -124,4 +140,6 @@ module.exports = (grunt) ->
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
     'sass', 'autoprefixer',
-    'bower', 'uglify', 'cssmin']
+    'bower', 'fileExists',
+    'imageEmbed',
+    'uglify', 'cssmin']

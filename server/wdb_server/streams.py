@@ -44,7 +44,10 @@ def read_frame(stream, uuid, frame):
     if frame.decode('utf-8') == 'ServerBreaks':
         sockets.send(uuid, json.dumps(breakpoints.get()))
     else:
-        websockets.send(uuid, frame)
+        if frame.decode('utf-8') == 'PING':
+            log.info('%s PONG' % uuid)
+        else:
+            websockets.send(uuid, frame)
     try:
         stream.read_bytes(4, partial(read_header, stream, uuid))
     except StreamClosedError:

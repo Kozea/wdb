@@ -71,7 +71,7 @@ class Wdb(object):
     _sockets = []
     enabled = True
     breakpoints = set()
-    watchers = defaultdict(list)
+    watchers = defaultdict(set)
 
     @staticmethod
     def get(no_create=False, server=SOCKET_SERVER, port=SOCKET_PORT):

@@ -655,6 +655,7 @@ specify a module like `logging.config`.
       $watcher.addClass('updated')
     @$watchers.find('.watching:not(.updated)').remove()
     @$watchers.find('.watching').removeClass('updated')
+    @done()
 
   ack: ->
     @$eval.val('').trigger('autosize.resize')

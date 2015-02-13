@@ -26,11 +26,6 @@ class Websocket extends Log
     @ws.onerror = @error.bind(@)
     @ws.onmessage = @message.bind(@)
 
-  time: ->
-    date = new Date()
-    "#{date.getHours()}:#{date.getMinutes()}:" +
-    "#{date.getSeconds()}.#{date.getMilliseconds()}"
-
   close: (m) ->
     @log "Closed", m
     @wdb.die()
@@ -66,5 +61,5 @@ class Websocket extends Log
       msg = "#{cmd}|#{data}"
     else
       msg = cmd
-    @log @time(), '->', msg
+    @log '->', msg
     @ws.send msg

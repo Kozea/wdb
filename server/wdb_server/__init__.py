@@ -230,6 +230,7 @@ tornado.options.define('theme', default="clean",
                        help="Wdb theme to use amongst %s" %
                        StyleHandler.themes)
 tornado.options.define("debug", default=False, help="Debug mode")
+tornado.options.define("more", default=False, help="Set the debug more verbose")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
 tornado.options.define("socket_port", default=19840,

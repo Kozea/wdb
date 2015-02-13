@@ -7,10 +7,16 @@
       this.debug = $('body').attr('data-debug') || false;
     }
 
+    Log.prototype.time = function() {
+      var date;
+      date = new Date();
+      return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
+    };
+
     Log.prototype.log = function() {
       var log_args, name;
       if (this.debug) {
-        name = "[" + this.constructor.name + "]";
+        name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
         log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
         return console.log.apply(console, log_args);
       }
