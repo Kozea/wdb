@@ -9,10 +9,16 @@
       this.debug = $('body').attr('data-debug') || false;
     }
 
+    Log.prototype.time = function() {
+      var date;
+      date = new Date();
+      return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
+    };
+
     Log.prototype.log = function() {
       var log_args, name;
       if (this.debug) {
-        name = "[" + this.constructor.name + "]";
+        name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
         log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
         return console.log.apply(console, log_args);
       }
@@ -43,12 +49,6 @@
       this.ws.onerror = this.error.bind(this);
       this.ws.onmessage = this.message.bind(this);
     }
-
-    Websocket.prototype.time = function() {
-      var date;
-      date = new Date();
-      return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
-    };
 
     Websocket.prototype.close = function(m) {
       this.log("Closed", m);
@@ -96,7 +96,7 @@
       } else {
         msg = cmd;
       }
-      this.log(this.time(), '->', msg);
+      this.log('->', msg);
       return this.ws.send(msg);
     };
 
@@ -1060,7 +1060,8 @@
         $watcher.addClass('updated');
       }
       this.$watchers.find('.watching:not(.updated)').remove();
-      return this.$watchers.find('.watching').removeClass('updated');
+      this.$watchers.find('.watching').removeClass('updated');
+      return this.done();
     };
 
     Wdb.prototype.ack = function() {

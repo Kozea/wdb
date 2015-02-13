@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* Change this to hash when sass 3.3 is released */
 @font-face {
   font-family: "Source Code Pro";
@@ -211,29 +212,44 @@ body, html {
               flex: 3;
       overflow-y: auto;
       overflow-x: hidden; }
-  #wdb #watchers {
+  #wdb > footer {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    -webkit-flex-flow: row wrap;
-        -ms-flex-flow: row wrap;
-            flex-flow: row wrap; }
-    #wdb #watchers > div {
-      margin-left: 5px;
-      margin-right: 2em;
+    min-height: 0; }
+    #wdb > footer #watchers {
       display: -webkit-box;
       display: -webkit-flex;
       display: -ms-flexbox;
-      display: flex; }
-      #wdb #watchers > div .name {
-        color: #ccc;
-        cursor: pointer; }
-      #wdb #watchers > div .value {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1; }
+      display: flex;
+      -webkit-flex-flow: row wrap;
+          -ms-flex-flow: row wrap;
+              flex-flow: row wrap;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1; }
+      #wdb > footer #watchers > div {
+        margin-left: 5px;
+        margin-right: 2em;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex; }
+        #wdb > footer #watchers > div .name {
+          color: #ccc;
+          cursor: pointer; }
+        #wdb > footer #watchers > div .value {
+          -webkit-box-flex: 1;
+          -webkit-flex: 1;
+              -ms-flex: 1;
+                  flex: 1; }
+    #wdb > footer #home {
+      -webkit-align-self: flex-end;
+          -ms-flex-item-align: end;
+              align-self: flex-end;
+      margin: 0 5px; }
 
 a {
   color: #ccc; }
@@ -251,7 +267,7 @@ table {
     table tr[data-tid] {
       color: #777; }
     table tr td {
-      padding: 0.25em;
+      padding: .25em;
       border: 1px solid #050606; }
   table.diff {
     line-height: normal;
@@ -294,13 +310,13 @@ input {
   border: 1px solid #050606;
   background-color: #1d1f21;
   color: #ccc;
-  padding: 0.25em; }
+  padding: .25em; }
   input[name=debug_file] {
     width: 500px; }
   input[type=submit] {
     font-weight: bold;
-    padding-left: 0.5em;
-    padding-right: 0.5em; }
+    padding-left: .5em;
+    padding-right: .5em; }
 
 h1 {
   font-size: 2em;
@@ -313,7 +329,7 @@ h1 {
   h1 small {
     color: #777;
     display: block;
-    font-size: 0.5em;
+    font-size: .5em;
     font-variant: normal;
     margin-left: 15px;
     white-space: nowrap;
@@ -340,12 +356,12 @@ code {
     color: #777;
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
-    padding: 0.2em 2em;
+    padding: .2em 2em;
     -webkit-transform: rotate(45deg);
         -ms-transform: rotate(45deg);
             transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
-    width: 0.6em;
+    width: .6em;
     border: none; }
 
 #eval {
@@ -372,7 +388,7 @@ code {
 #scrollback .duration {
   float: right;
   padding: 0.5em 0 0 0;
-  opacity: 0.333; }
+  opacity: .333; }
 #scrollback iframe.display {
   width: 100%;
   min-height: 300px; }
@@ -485,8 +501,8 @@ code {
         .traceline.selected .tracefunfun .tracefun:before {
           border-color: #010101 #010101 #1d1f21 #1d1f21; }
   .traceline .tracecode {
-    padding: 0.5em;
-    padding-top: 0.25em;
+    padding: .5em;
+    padding-top: .25em;
     clear: both; }
     .traceline .tracecode > code {
       white-space: nowrap; }
@@ -494,7 +510,7 @@ code {
     overflow: hidden; }
     .traceline .tracefunfun .tracefun {
       font-weight: bolder;
-      font-size: 0.8em;
+      font-size: .8em;
       text-align: right;
       float: right;
       line-height: 1.2;
@@ -505,12 +521,12 @@ code {
         width: 0;
         height: 0;
         border-style: solid;
-        border-width: 0.7em;
+        border-width: .7em;
         display: inline-block;
         vertical-align: top; }
   .traceline .tracefilelno {
-    padding: 0.5em;
-    padding-bottom: 0.25em;
+    padding: .5em;
+    padding-bottom: .25em;
     word-wrap: break-word; }
     .traceline .tracefilelno .tracefile {
       color: #555; }
@@ -533,7 +549,7 @@ code {
     top: -2px; }
 
 .CodeMirror-gutter.breaks {
-  width: 0.6em; }
+  width: .6em; }
 
 .CodeMirror-linebackground {
   -webkit-transition: background-color 1s;
@@ -642,7 +658,7 @@ a.inspect {
     color: red !important; }
 
 .waiting_for_hl {
-  opacity: 0.4; }
+  opacity: .4; }
 
 code, code span {
   -webkit-transition: opacity 50ms;
@@ -659,7 +675,7 @@ code, code span {
     float: right; }
   .trace_500 code {
     font-size: 1.3em;
-    padding: 0.5em;
+    padding: .5em;
     clear: left; }
 
 #activate, #deactivate {
@@ -699,8 +715,8 @@ code, code span {
 \::-webkit-scrollbar {
   background: #1d1f21;
   border: 1px solid black;
-  width: 0.75em;
-  height: 0.75em; }
+  width: .75em;
+  height: .75em; }
 
 \::-webkit-scrollbar-thumb {
   background: #181818;
@@ -708,11 +724,11 @@ code, code span {
 
 /* Got from http://www.alessioatzeni.com/blog/css3-loading-animation-loop/ */
 .state {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
   border: 5px solid rgba(0, 183, 229, 0.9);
-  opacity: 0.9;
-  border-right: 5px solid rgba(0, 0, 0, 0);
-  border-left: 5px solid rgba(0, 0, 0, 0);
+  opacity: .9;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
   border-radius: 50px;
   box-shadow: 0 0 35px #2187e7;
   position: absolute;

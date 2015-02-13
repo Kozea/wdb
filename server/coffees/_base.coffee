@@ -18,9 +18,14 @@ class Log
   constructor: ->
     @debug = $('body').attr('data-debug') or false
 
+  time: ->
+    date = new Date()
+    "#{date.getHours()}:#{date.getMinutes()}:" +
+    "#{date.getSeconds()}.#{date.getMilliseconds()}"
+
   log: ->
     if @debug
-      name = "[#{@constructor.name}]"
+      name = "[#{@constructor.name}] (#{@time()})"
       log_args = [name].concat Array.prototype.slice.call(arguments, 0)
       console.log.apply console, log_args
 

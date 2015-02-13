@@ -102,21 +102,30 @@ body, html
       overflow-y: auto
       overflow-x: hidden
 
-  #watchers
+  > footer
     display: flex
-    flex-flow: row wrap
+    min-height: 0
 
-    > div
-      margin-left: 5px
-      margin-right: 2em
+    #watchers
       display: flex
+      flex-flow: row wrap
+      flex: 1
 
-      .name
-        color: $fg
-        cursor: pointer
+      > div
+        margin-left: 5px
+        margin-right: 2em
+        display: flex
 
-      .value
-        flex: 1
+        .name
+          color: $fg
+          cursor: pointer
+
+        .value
+          flex: 1
+
+    #home
+      align-self: flex-end
+      margin: 0 5px
 
 a
   color: $fg

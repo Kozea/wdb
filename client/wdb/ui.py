@@ -478,7 +478,7 @@ class Interaction(object):
         }))
 
     def do_watch(self, data):
-        self.db.watchers[self.current_file].append(data)
+        self.db.watchers[self.current_file].add(data)
         self.db.send('Ack')
 
     def do_unwatch(self, data):
