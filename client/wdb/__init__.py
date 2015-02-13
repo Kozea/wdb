@@ -172,6 +172,19 @@ class Wdb(object):
         import linecache
         linecache.checkcache()
 
+    def reconnect_if_needed(self):
+        try:
+            # Sending PING twice
+            self.send('PING')
+            self.send('PING')
+            log.debug('Dual ping sent')
+        except BrokenPipeError:
+            log.warning('BrokenPipe on ping, connection lost retrying')
+            self._socket = None
+            self.connected = False
+            self.begun = False
+            self.connect()
+
     def connect(self):
         """Connect to wdb server"""
         log.info('Connecting socket on %s:%d' % (self.server, self.port))
@@ -651,9 +664,10 @@ class Wdb(object):
 
             self.connected = True
 
-    def shell(self, source=None):
+    def shell(self, source=None, vars=None):
         interaction = self.interaction(
-            sys._getframe(), exception_description='Shell', shell=True)
+            sys._getframe(), exception_description='Shell',
+            shell=True, shell_vars=vars)
 
         if source:
             with open(source) as f:
@@ -670,17 +684,18 @@ class Wdb(object):
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
-            init=None, shell=False):
+            init=None, shell=False, shell_vars=None):
         """User interaction handling blocking on socket receive"""
         log.info('Interaction %r %r %r %r' % (
             frame, tb, exception, exception_description))
+        self.reconnect_if_needed()
         self.stepping = True
 
         self.open_browser()
 
         interaction = Interaction(
             self, frame, tb, exception, exception_description,
-            init=init, shell=shell)
+            init=init, shell=shell, shell_vars=shell_vars)
 
         # For meta debugging purpose
         self._ui = interaction
@@ -846,6 +861,11 @@ def cleanup():
     """Close all sockets at exit"""
     for sck in Wdb._sockets:
         sck.close()
+
+
+def shell(source=None, vars=None):
+    """Start a shell sourcing source or using vars as locals"""
+    Wdb.get().shell(source=source, vars=vars)
 
 
 # Pdb compatibility

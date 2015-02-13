@@ -75,7 +75,7 @@ class Interaction(object):
 
     def __init__(
             self, db, frame, tb, exception, exception_description,
-            init=None, parent=None, shell=False):
+            init=None, parent=None, shell=False, shell_vars=None):
         self.db = db
         self.parent = parent
         self.shell = shell
@@ -87,7 +87,7 @@ class Interaction(object):
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
         self.htmldiff = Html5Diff(4)
         if self.shell:
-            self.locals[self.index] = {}
+            self.locals[self.index] = shell_vars or {}
 
     def hook(self, kind):
         for hook, events in self.hooks.items():
