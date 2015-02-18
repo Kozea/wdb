@@ -119,6 +119,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if isinstance(self.uuid, bytes):
             self.uuid = self.uuid.decode('utf-8')
 
+        if self.uuid in websockets.uuids:
+            log.warn(
+                'Websocket already opened for %s. Closing previous one' %
+                self.uuid)
+            websockets.send(self.uuid, 'Die')
+            websockets.close(uuid)
+
         if self.uuid not in sockets.uuids:
             log.warn(
                 'Websocket opened for %s with no correponding socket' %

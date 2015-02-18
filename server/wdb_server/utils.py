@@ -33,7 +33,7 @@ try:
 except ImportError:
     LibPythonWatcher = None
 else:
-    class LibPythonWatcher(pyinotify.TornadoAsyncNotifier):
+    class LibPythonWatcher(object):
         def __init__(self):
             inotify = pyinotify.WatchManager()
             self.files = glob('/usr/lib/libpython*')
