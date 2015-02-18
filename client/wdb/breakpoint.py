@@ -60,10 +60,11 @@ class Breakpoint(object):
 
     def to_dict(self):
         return {
-            'fn': getattr(self, 'file', None),
+            'fn': self.file,
             'lno': getattr(self, 'line', None),
             'cond': getattr(self, 'condition', None),
-            'fun': getattr(self, 'function', None)
+            'fun': getattr(self, 'function', None),
+            'temporary': self.temporary
         }
 
 
