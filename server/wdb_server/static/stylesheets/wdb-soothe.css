@@ -403,11 +403,19 @@ code {
   min-height: 300px; }
 
 #prompt, .prompted {
-  padding: 0.5em 0 0 0; }
+  padding: 0.5em 0 0 0;
+  position: relative; }
   #prompt:before, .prompted:before {
     font: 12px/1.5 "Source Code Pro", monospace;
     color: #F4EAD5;
     content: ">>> "; }
+  #prompt.multiline:after, .prompted.multiline:after {
+    font: 12px/1.5 "Source Code Pro", monospace;
+    color: #F4EAD5;
+    content: "... ";
+    position: absolute;
+    bottom: 1.25em;
+    left: 0; }
 
 #prompt {
   display: -webkit-box;
@@ -484,7 +492,6 @@ code {
         .traceline:hover .tracefunfun .tracefun:before {
           border-color: #020203 #020203 #110F13 #110F13; }
   .traceline.real-selected {
-    background-color: #020203;
     background-color: #020203; }
     .traceline.real-selected:before {
       background-color: #020203;
@@ -509,6 +516,17 @@ code {
         background-color: black; }
         .traceline.selected .tracefunfun .tracefun:before {
           border-color: black black #110F13 #110F13; }
+  .traceline.breakpoint {
+    background-color: #251C1E; }
+    .traceline.breakpoint:before {
+      background-color: #251C1E;
+      border-color: #251C1E #251C1E #110F13 #110F13; }
+    .traceline.breakpoint .tracefunfun {
+      background-color: #110F13; }
+      .traceline.breakpoint .tracefunfun .tracefun {
+        background-color: #251C1E; }
+        .traceline.breakpoint .tracefunfun .tracefun:before {
+          border-color: #251C1E #251C1E #110F13 #110F13; }
   .traceline .tracecode {
     padding: .5em;
     padding-top: .25em;

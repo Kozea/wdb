@@ -290,11 +290,20 @@ code
 
 #prompt, .prompted
   padding: 0.5em 0 0 0
+  position: relative
 
   &:before
     font: $code-font
     color: $hl-default
     content: ">>> "
+
+  &.multiline:after
+    font: $code-font
+    color: $hl-default
+    content: "... "
+    position: absolute
+    bottom: 1.25em
+    left: 0
 
 #prompt
   display: flex
@@ -369,7 +378,6 @@ $trace-bg-selected: darken($trace-bg, 10%) !default
 
   &.real-selected
     +traceline($trace-bg-real)
-    background-color: $trace-bg-real
 
   &.selected
     width: 100% - $margin
@@ -377,6 +385,9 @@ $trace-bg-selected: darken($trace-bg, 10%) !default
 
     +traceline($trace-bg-selected)
     background-color: $trace-bg-selected
+
+  &.breakpoint
+    +traceline($trace-bg-breakpoint)
 
   .tracecode
     padding: .5em
