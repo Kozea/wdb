@@ -403,6 +403,10 @@ expr >! file                   : \
  Eval the content of file
 [Enter]                        : \
  Eval the current selected text in page, useful to eval code in the source
+[Shift] + [Enter]              : \
+ Insert the current selected text in page in the prompt
+[Ctrl] + [Enter]               : \
+ Multiline prompt or execute if already in multiline mode.
 
 * arg is using the following syntax:
     [file/module][:lineno][#function][,condition]
