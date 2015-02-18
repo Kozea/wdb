@@ -386,7 +386,7 @@
 
     Wdb.prototype.opening = function() {
       if (!this.started) {
-        this.$eval.on('keydown', this.eval_key.bind(this)).on('input', this.eval_input.bind(this)).on('blur', this.searchback_stop.bind(this));
+        this.$eval.on('keydown', this.eval_key.bind(this)).on('keyup', this.eval_carret_change.bind(this)).on('mouseup', this.eval_carret_change.bind(this)).on('blur', this.searchback_stop.bind(this));
         $(window).on('keydown', this.global_key.bind(this));
         this.$traceback.on('click', '.traceline', this.select_click.bind(this));
         this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
@@ -396,7 +396,7 @@
         this.$interpreter.on('keydown', (function(_this) {
           return function(e) {
             var scroll, way, _ref, _ref1, _ref2;
-            if (e.ctrlKey && (37 <= (_ref = e.keyCode) && _ref <= 40) || (118 <= (_ref1 = e.keyCode) && _ref1 <= 122)) {
+            if (e.ctrlKey && (37 <= (_ref = e.keyCode) && _ref <= 40) || (118 <= (_ref1 = e.keyCode) && _ref1 <= 122) || e.keyCode === 13) {
               return true;
             }
             if (e.shiftKey && ((_ref2 = e.keyCode) === 33 || _ref2 === 34)) {
@@ -428,11 +428,15 @@
     };
 
     Wdb.prototype.done = function(suggest) {
+      var eval_val;
       if (suggest == null) {
         suggest = null;
       }
       this.termscroll();
-      this.$eval.val(suggest || '').prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
+      eval_val = suggest || '';
+      if (this.$eval.val() !== eval_val) {
+        this.$eval.val(eval_val).prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
+      }
       this.$completions.attr('style', '');
       return this.chilling();
     };
@@ -463,7 +467,7 @@
     };
 
     Wdb.prototype.trace = function(data) {
-      var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, frame, suffix, _i, _len, _ref, _results;
+      var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, brk, frame, suffix, _i, _j, _len, _len1, _ref, _ref1, _results;
       this.$traceback.removeClass('hidden');
       this.$traceback.empty();
       _ref = data.trace;
@@ -471,6 +475,14 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         frame = _ref[_i];
         $traceline = $('<div>').addClass('traceline').attr('id', 'trace-' + frame.level).attr('data-level', frame.level);
+        _ref1 = this.cm.breakpoints[frame.file] || [];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          brk = _ref1[_j];
+          if (!(brk.cond || brk.fun || brk.lno)) {
+            $traceline.addClass('breakpoint');
+            break;
+          }
+        }
         if (frame.current) {
           $traceline.addClass('real-selected');
         }
@@ -617,6 +629,7 @@
 
     Wdb.prototype.execute = function(snippet) {
       var cmd, data, key, space;
+      console.log(snippet);
       snippet = snippet.trim();
       this.historize(snippet);
       cmd = (function(_this) {
@@ -701,7 +714,9 @@
             }
             break;
           case 'x':
-            cmd('Diff', data);
+            if (data) {
+              cmd('Diff', data);
+            }
             break;
           case 'z':
             this.toggle_break(data, false, true);
@@ -724,7 +739,10 @@
     };
 
     Wdb.prototype.cls = function() {
-      this.$completions.height(this.$interpreter.height() - this.$prompt.innerHeight());
+      this.$scrollback.empty();
+      this.searchback_stop();
+      this.suggest_stop();
+      this.multiline_stop();
       return this.done();
     };
 
@@ -740,7 +758,7 @@
     Wdb.prototype.print_help = function() {
       return this.print({
         "for": 'Supported commands',
-        result: '.s or [Ctrl] + [↓] or [F11]    : Step into\n.n or [Ctrl] + [→] or [F10]    : Step over (Next)\n.r or [Ctrl] + [↑] or [F9]     : Step out (Return)\n.c or [Ctrl] + [←] or [F8]     : Continue\n.u or [F7]                     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.a                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left ? right                : Display the difference between the pretty print of \'left\' and \'right\'\n.x left <> right               : Display the difference between the repr of \'left\' and \'right\'\n.f key in expression           : Search recursively the presence of key in expression object tree\n.f test of expression          : Search recursively values that match test in expression inner tree.\n i.e.: .f type(x) == int of sys\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
+        result: '.s or [Alt] + [↓] or [F11]     : Step into\n.n or [Alt] + [→] or [F10]     : Step over (Next)\n.r or [Alt] + [↑] or [F9]      : Step out (Return)\n.c or [Alt] + [Enter] or [F8]  : Continue\n.u or [Alt] + [<-] or [F7]     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.a                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left ? right                : Display the difference between the pretty print of \'left\' and \'right\'\n.x left <> right               : Display the difference between the repr of \'left\' and \'right\'\n.f key in expression           : Search recursively the presence of key in expression object tree\n.f test of expression          : Search recursively values that match test in expression inner tree.\n i.e.: .f type(x) == int of sys\n\nAll the upper commands are prefixed with a dot and can be executed with [Alt] + [the command letter], i.e.: [Alt] + [h]\n\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
       });
     };
 
@@ -872,6 +890,9 @@
     Wdb.prototype.breakset = function(data) {
       var _ref;
       this.cm.set_breakpoint(data);
+      if (!data.lno && !data.fun && !data.cond) {
+        this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').addClass('breakpoint');
+      }
       if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't')) {
         return this.done();
       } else {
@@ -882,6 +903,9 @@
     Wdb.prototype.breakunset = function(data) {
       var _ref;
       this.cm.clear_breakpoint(data);
+      if (!data.lno && !data.fun && !data.cond) {
+        this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').removeClass('breakpoint');
+      }
       if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't' || _ref === 'z')) {
         return this.done();
       } else {
@@ -919,12 +943,12 @@
       _ref1 = this.split(remaining, '#'), remaining = _ref1[0], brk.fun = _ref1[1];
       _ref2 = this.split(remaining, ':'), remaining = _ref2[0], brk.lno = _ref2[1];
       brk.fn = remaining || this.cm.state.fn;
-      brk.lno = parseInt(brk.lno);
+      brk.lno = parseInt(brk.lno) || null;
       exist = false;
       _ref3 = this.cm.breakpoints[brk.fn] || [];
       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
         ebrk = _ref3[_i];
-        if (ebrk.fn === brk.fn && ebrk.lno === brk.lno && ebrk.cond === brk.cond && ebrk.fun === brk.fun && ebrk.temporary === brk.temporary) {
+        if (ebrk.fn === brk.fn && ebrk.lno === brk.lno && ebrk.cond === brk.cond && ebrk.fun === brk.fun && (ebrk.temporary === brk.temporary || remove_only)) {
           exist = true;
           brk = ebrk;
           break;
@@ -984,7 +1008,7 @@
     };
 
     Wdb.prototype.suggest = function(data) {
-      var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, param, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, param, startPos, txtarea, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       if (data) {
         $comp = this.$completions.find('table').empty();
         $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
@@ -998,8 +1022,11 @@
         if (data.completions.length) {
           $tbody = $('<tbody>');
           base_len = data.completions[0].base.length;
+          txtarea = this.$eval.get(0);
+          startPos = txtarea.selectionStart;
           this.$eval.data({
-            root: this.$eval.val().substr(0, this.$eval.val().length - base_len)
+            start: this.$eval.val().substr(0, startPos - base_len),
+            end: this.$eval.val().substr(startPos)
           });
         }
         _ref1 = data.completions;
@@ -1014,7 +1041,7 @@
           }
           $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
           if (!completion.complete) {
-            $td.addClass('active complete');
+            $td.addClass('complete');
             $('#comp-desc').html($td.attr('title'));
           }
         }
@@ -1031,7 +1058,12 @@
     };
 
     Wdb.prototype.suggest_stop = function() {
-      return this.$completions.find('table').empty();
+      if (this.$completions.find('table td,table tr').size()) {
+        this.$completions.find('table').empty();
+        return true;
+      } else {
+        return false;
+      }
     };
 
     Wdb.prototype.watched = function(data) {
@@ -1119,11 +1151,16 @@
     };
 
     Wdb.prototype.searchback_stop = function(validate) {
-      if (validate === true) {
-        this.$eval.val(this.$backsearch.text()).trigger('autosize.resize');
+      if (this.backsearch) {
+        if (validate === true) {
+          this.$eval.val(this.$backsearch.text()).trigger('autosize.resize');
+        }
+        this.$backsearch.html('');
+        this.backsearch = null;
+        return true;
+      } else {
+        return false;
       }
-      this.$backsearch.html('');
-      return this.backsearch = null;
     };
 
     Wdb.prototype.die = function() {
@@ -1134,45 +1171,89 @@
       }), 10);
     };
 
+    Wdb.prototype.multiline_stop = function() {
+      if (this.$prompt.hasClass('multiline')) {
+        this.$prompt.removeClass('multiline');
+        return true;
+      } else {
+        return false;
+      }
+    };
+
     Wdb.prototype.global_key = function(e) {
-      var sel;
+      var char, extra, sel, _ref, _ref1, _ref2;
       if (this.cm.rw) {
         return true;
       }
+      if (e.altKey && ((65 <= (_ref = e.keyCode) && _ref <= 90) || (37 <= (_ref1 = e.keyCode) && _ref1 <= 40) || e.keyCode === 13) || (119 <= (_ref2 = e.keyCode) && _ref2 <= 122)) {
+        char = (function() {
+          switch (e.keyCode) {
+            case 13:
+            case 119:
+              return 'c';
+            case 37:
+            case 118:
+              return 'u';
+            case 38:
+            case 120:
+              return 'r';
+            case 39:
+            case 121:
+              return 'n';
+            case 40:
+            case 122:
+              return 's';
+            default:
+              return String.fromCharCode(e.keyCode);
+          }
+        })();
+        char = char.toLowerCase();
+        extra = '';
+        if (char === 'b' || char === 't' || char === 'z') {
+          extra += ' :' + this.cm.state.lno;
+        }
+        if (char === 'i') {
+          extra = getSelection().toString();
+        }
+        this.execute('.' + char + extra);
+        return false;
+      }
       if (e.keyCode === 13) {
-        sel = this.cm.get_selection();
+        sel = getSelection().toString();
         if (!sel) {
           return;
         }
-        this.historize(sel);
-        this.ws.send('Eval', sel);
+        if (e.shiftKey) {
+          this.eval_insert(sel);
+        } else {
+          this.historize(sel);
+          this.execute(sel);
+        }
+        return false;
       }
-      if ((e.ctrlKey && e.keyCode === 37) || e.keyCode === 119) {
-        this.ws.send('Continue');
-      } else if ((e.ctrlKey && e.keyCode === 38) || e.keyCode === 120) {
-        this.ws.send('Return');
-      } else if ((e.ctrlKey && e.keyCode === 39) || e.keyCode === 121) {
-        this.ws.send('Next');
-      } else if ((e.ctrlKey && e.keyCode === 40) || e.keyCode === 122) {
-        this.ws.send('Step');
-      } else if (e.keyCode === 118) {
-        this.ws.send('Until');
-      } else {
-        return true;
-      }
-      this.working();
-      return false;
     };
 
     Wdb.prototype.eval_key = function(e) {
-      var $table, endPos, index, startPos, to_set, txtarea;
+      var $table, eof, multiline;
       if (e.altKey && e.keyCode === 82 && this.backsearch) {
         this.backsearch = Math.max(this.backsearch - 1, 1);
         this.searchback();
         return false;
       }
+      if (e.altKey) {
+        return;
+      }
       if (e.ctrlKey) {
         switch (e.keyCode) {
+          case 13:
+            if (this.$prompt.hasClass('multiline')) {
+              this.$prompt.removeClass('multiline');
+              this.execute(this.$eval.val());
+              return false;
+            }
+            this.$prompt.addClass('multiline');
+            this.eval_insert('\n');
+            return true;
           case 82:
             if (this.backsearch == null) {
               this.backsearch = 0;
@@ -1190,9 +1271,9 @@
           case 68:
             this.ws.send('Quit');
             return false;
+          case 32:
+            this.eval_move_suggest(1, true);
         }
-        e.stopPropagation();
-        return;
       }
       switch (e.keyCode) {
         case 13:
@@ -1205,82 +1286,69 @@
             this.suggest_stop();
             return false;
           }
-          if (!e.shiftKey) {
+          if (!this.$prompt.hasClass('multiline')) {
             this.execute(this.$eval.val());
             return false;
           }
           break;
         case 27:
-          this.suggest_stop();
-          this.searchback_stop();
+          this.searchback_stop() || this.suggest_stop() || this.multiline_stop();
           return false;
         case 9:
         case 39:
-          if (e.keyCode === 39 && this.$eval.get(0).selectionStart !== this.$eval.val().length) {
+          eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
+          multiline = this.$prompt.hasClass('multiline');
+          if (e.keyCode === 9 && multiline) {
+            this.eval_insert('  ');
+            return false;
+          }
+          if (!(e.keyCode === 39 && !eof && !multiline)) {
+            if (this.backsearch) {
+              return false;
+            }
+            if (this.eval_move_suggest((!e.shiftKey ? 1 : -1), !multiline)) {
+              return false;
+            }
+          }
+          return true;
+        case 37:
+          if (this.eval_move_suggest(-1)) {
+            return false;
+          }
+          return true;
+        case 38:
+          if (this.eval_move_suggest(-5)) {
+            return false;
+          }
+          if (this.$prompt.hasClass('multiline')) {
             return true;
           }
-          if (this.backsearch) {
-            return false;
-          }
-          this.move_suggest((!e.shiftKey ? 1 : -1), true);
-          if (e.shiftKey) {
-            txtarea = this.$eval.get(0);
-            startPos = txtarea.selectionStart;
-            endPos = txtarea.selectionEnd;
-            if (startPos || startPos === '0') {
-              this.$eval.val(this.$eval.val().substring(0, startPos) + '  ' + this.$eval.val().substring(endPos, this.$eval.val().length)).trigger('autosize.resize');
-            } else {
-              this.$eval.val(this.$eval.val() + '  ').trigger('autosize.resize');
-            }
-            return false;
-          }
+          this.eval_move_history(1);
           return false;
-        case 37:
-          if (this.move_suggest(-1)) {
-            return false;
-          }
-          break;
-        case 38:
-          if (this.move_suggest(-5)) {
-            return false;
-          }
-          if (!e.shiftKey) {
-            index = parseInt(this.$eval.attr('data-index')) + 1;
-            if (index >= 0 && index < this.cmd_hist.length) {
-              to_set = this.cmd_hist[index];
-              if (index === 0) {
-                this.$eval.attr('data-current', this.$eval.val());
-              }
-              this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
-              this.suggest_stop();
-              this.termscroll();
-              return false;
-            }
-          }
-          break;
         case 40:
-          if (this.move_suggest(5)) {
+          if (this.eval_move_suggest(5)) {
             return false;
           }
-          if (!e.shiftKey) {
-            index = parseInt(this.$eval.attr('data-index')) - 1;
-            if (index >= -1 && index < this.cmd_hist.length) {
-              if (index === -1) {
-                to_set = this.$eval.attr('data-current');
-              } else {
-                to_set = this.cmd_hist[index];
-              }
-              this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
-              this.suggest_stop();
-              this.termscroll();
-              return false;
-            }
+          if (this.$prompt.hasClass('multiline')) {
+            return true;
           }
+          this.eval_move_history(-1);
+          return false;
       }
     };
 
-    Wdb.prototype.move_suggest = function(shift, trigger) {
-      var $active, $tds, base, completion, index;
+    Wdb.prototype.eval_insert = function(char) {
+      var endPos, startPos, txtarea;
+      txtarea = this.$eval.get(0);
+      startPos = txtarea.selectionStart;
+      endPos = txtarea.selectionEnd;
+      this.$eval.val(this.$eval.val().substring(0, startPos) + char + this.$eval.val().substring(endPos, this.$eval.val().length));
+      txtarea.setSelectionRange(startPos + char.length, startPos + char.length);
+      return this.$eval.trigger('autosize.resize');
+    };
+
+    Wdb.prototype.eval_move_suggest = function(shift, trigger) {
+      var $active, $tds, base, completion, index, root;
       if (trigger == null) {
         trigger = false;
       }
@@ -1294,29 +1362,65 @@
           return false;
         }
         $active = $tds.first().addClass('active');
-        return true;
+      } else {
+        index = $tds.index($active);
+        index += shift;
+        if (index < 0) {
+          index = $tds.length - 1;
+        }
+        if (index >= $tds.length) {
+          index = 0;
+        }
+        $active.removeClass('active complete');
+        $active = $tds.eq(index).addClass('active');
       }
-      index = $tds.index($active);
-      index += shift;
-      if (index < 0) {
-        index = $tds.length - 1;
-      }
-      if (index >= $tds.length) {
-        index = 0;
-      }
-      $active.removeClass('active complete');
-      $active = $tds.eq(index).addClass('active');
       base = $active.find('.base').text();
       completion = $active.find('.completion').text();
-      this.$eval.val(this.$eval.data().root + base + completion).trigger('autosize.resize');
+      root = this.$eval.data().start + base + completion;
+      this.$eval.val(root + this.$eval.data().end);
+      this.$eval.get(0).setSelectionRange(root.length, root.length);
+      this.$eval.trigger('autosize.resize');
       $('#comp-desc').text($active.attr('title'));
       this.termscroll();
       return true;
     };
 
-    Wdb.prototype.eval_input = function(e) {
-      var hist, txt;
-      txt = $(e.currentTarget).val();
+    Wdb.prototype.eval_move_history = function(shift) {
+      var index, to_set;
+      index = parseInt(this.$eval.attr('data-index')) + shift;
+      if (index >= -1 && index < this.cmd_hist.length) {
+        if (index === -1) {
+          to_set = this.$eval.attr('data-current');
+        } else {
+          to_set = this.cmd_hist[index];
+        }
+        if (index === 0 && shift === 1) {
+          this.$eval.attr('data-current', this.$eval.val());
+        }
+        this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
+        this.suggest_stop();
+        return this.termscroll();
+      }
+    };
+
+    Wdb.prototype.eval_before_cursor = function() {
+      var startPos, txtarea;
+      txtarea = this.$eval.get(0);
+      startPos = txtarea.selectionStart;
+      return this.$eval.val().substring(0, startPos);
+    };
+
+    Wdb.prototype.eval_carret_change = function(e) {
+      var eof, multiline, txt, _ref;
+      if (this.$completions.find('table td').filter('.active').size()) {
+        eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
+        multiline = this.$prompt.hasClass('multiline');
+        if (!(e.keyCode && e.keyCode < 27 || (37 <= (_ref = e.keyCode) && _ref <= 40) || (e.ctrlKey && e.keyCode === 32))) {
+          this.suggest_stop();
+        }
+        return;
+      }
+      txt = this.eval_before_cursor();
       if (this.backsearch) {
         if (!txt) {
           this.searchback_stop();
@@ -1326,7 +1430,6 @@
         }
         return;
       }
-      hist = this.session_cmd_hist[this.cm.state.fn] || [];
       if (txt && txt[0] !== '.') {
         if (this.to_complete === null) {
           this.ws.send('Complete', txt);
@@ -1334,8 +1437,6 @@
         } else {
           return this.to_complete = txt;
         }
-      } else {
-        return this.suggest_stop();
       }
     };
 

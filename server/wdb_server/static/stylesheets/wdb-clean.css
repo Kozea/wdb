@@ -388,11 +388,19 @@ code {
   min-height: 300px; }
 
 #prompt, .prompted {
-  padding: 0.5em 0 0 0; }
+  padding: 0.5em 0 0 0;
+  position: relative; }
   #prompt:before, .prompted:before {
     font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace;
     color: #666;
     content: ">>> "; }
+  #prompt.multiline:after, .prompted.multiline:after {
+    font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: #666;
+    content: "... ";
+    position: absolute;
+    bottom: 1.25em;
+    left: 0; }
 
 #prompt {
   display: -webkit-box;
@@ -469,7 +477,6 @@ code {
         .traceline:hover .tracefunfun .tracefun:before {
           border-color: #fff #fff #fff #fff; }
   .traceline.real-selected {
-    background-color: #f8f8f8;
     background-color: #f8f8f8; }
     .traceline.real-selected:before {
       background-color: #f8f8f8;
@@ -494,6 +501,17 @@ code {
         background-color: rgba(255, 255, 255, 0); }
         .traceline.selected .tracefunfun .tracefun:before {
           border-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0) #fff #fff; }
+  .traceline.breakpoint {
+    background-color: rgba(255, 0, 0, 0.1); }
+    .traceline.breakpoint:before {
+      background-color: rgba(255, 0, 0, 0.1);
+      border-color: rgba(255, 0, 0, 0.1) rgba(255, 0, 0, 0.1) #fff #fff; }
+    .traceline.breakpoint .tracefunfun {
+      background-color: #fff; }
+      .traceline.breakpoint .tracefunfun .tracefun {
+        background-color: rgba(255, 0, 0, 0.1); }
+        .traceline.breakpoint .tracefunfun .tracefun:before {
+          border-color: rgba(255, 0, 0, 0.1) rgba(255, 0, 0, 0.1) #fff #fff; }
   .traceline .tracecode {
     padding: .5em;
     padding-top: .25em;
