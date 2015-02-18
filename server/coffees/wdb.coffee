@@ -354,7 +354,7 @@ class Wdb extends Log
  Step out (Return)
 .c or [Alt] + [Enter] or [F8]  : \
  Continue
-.u or [Alt] + [<-] or [F7]     : \
+.u or [Alt] + [←] or [F7]     : \
  Until (Next over loops)
 .j lineno                      : \
  Jump to lineno (Must be at bottom frame and in the same function)
