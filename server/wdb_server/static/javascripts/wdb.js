@@ -1165,7 +1165,7 @@
     };
 
     Wdb.prototype.eval_key = function(e) {
-      var $active, $table, $tds, base, completion, endPos, index, startPos, to_set, txtarea;
+      var $table, endPos, index, startPos, to_set, txtarea;
       if (e.altKey && e.keyCode === 82 && this.backsearch) {
         this.backsearch = Math.max(this.backsearch - 1, 1);
         this.searchback();
@@ -1215,6 +1215,14 @@
           this.searchback_stop();
           return false;
         case 9:
+        case 39:
+          if (e.keyCode === 39 && this.$eval.get(0).selectionStart !== this.$eval.val().length) {
+            return true;
+          }
+          if (this.backsearch) {
+            return false;
+          }
+          this.move_suggest((!e.shiftKey ? 1 : -1), true);
           if (e.shiftKey) {
             txtarea = this.$eval.get(0);
             startPos = txtarea.selectionStart;
@@ -1226,32 +1234,16 @@
             }
             return false;
           }
-          if (this.backsearch) {
+          return false;
+        case 37:
+          if (this.move_suggest(-1)) {
             return false;
           }
-          $tds = this.$completions.find('table td');
-          $active = $tds.filter('.active');
-          if ($tds.length) {
-            if (!$active.length) {
-              $active = $tds.first().addClass('active');
-            } else {
-              index = $tds.index($active);
-              if (index === $tds.length - 1) {
-                index = 0;
-              } else {
-                index++;
-              }
-              $active.removeClass('active complete');
-              $active = $tds.eq(index).addClass('active');
-            }
-            base = $active.find('.base').text();
-            completion = $active.find('.completion').text();
-            this.$eval.val(this.$eval.data().root + base + completion).trigger('autosize.resize');
-            $('#comp-desc').text($active.attr('title'));
-            this.termscroll();
-          }
-          return false;
+          break;
         case 38:
+          if (this.move_suggest(-5)) {
+            return false;
+          }
           if (!e.shiftKey) {
             index = parseInt(this.$eval.attr('data-index')) + 1;
             if (index >= 0 && index < this.cmd_hist.length) {
@@ -1267,6 +1259,9 @@
           }
           break;
         case 40:
+          if (this.move_suggest(5)) {
+            return false;
+          }
           if (!e.shiftKey) {
             index = parseInt(this.$eval.attr('data-index')) - 1;
             if (index >= -1 && index < this.cmd_hist.length) {
@@ -1282,6 +1277,41 @@
             }
           }
       }
+    };
+
+    Wdb.prototype.move_suggest = function(shift, trigger) {
+      var $active, $tds, base, completion, index;
+      if (trigger == null) {
+        trigger = false;
+      }
+      $tds = this.$completions.find('table td');
+      $active = $tds.filter('.active');
+      if (!$tds.length) {
+        return false;
+      }
+      if (!$active.length) {
+        if (!trigger) {
+          return false;
+        }
+        $active = $tds.first().addClass('active');
+        return true;
+      }
+      index = $tds.index($active);
+      index += shift;
+      if (index < 0) {
+        index = $tds.length - 1;
+      }
+      if (index >= $tds.length) {
+        index = 0;
+      }
+      $active.removeClass('active complete');
+      $active = $tds.eq(index).addClass('active');
+      base = $active.find('.base').text();
+      completion = $active.find('.completion').text();
+      this.$eval.val(this.$eval.data().root + base + completion).trigger('autosize.resize');
+      $('#comp-desc').text($active.attr('title'));
+      this.termscroll();
+      return true;
     };
 
     Wdb.prototype.eval_input = function(e) {

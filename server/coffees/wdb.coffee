@@ -782,7 +782,13 @@ specify a module like `logging.config`.
         @searchback_stop()
         return false
 
-      when 9 # Tab
+      when 9, 39 # Tab, Right
+        if e.keyCode is 39 and
+            @$eval.get(0).selectionStart isnt @$eval.val().length
+          return true
+        if @backsearch
+          return false
+        @move_suggest (unless e.shiftKey then 1 else -1), true
         if e.shiftKey
           txtarea = @$eval.get(0)
           startPos = txtarea.selectionStart
@@ -796,31 +802,15 @@ specify a module like `logging.config`.
           else
             @$eval.val(@$eval.val() + '  ').trigger('autosize.resize')
           return false
-        if @backsearch
-          return false
-        $tds = @$completions.find('table td')
-        $active = $tds.filter('.active')
-        if $tds.length
-          if not $active.length
-            $active = $tds.first().addClass('active')
-          else
-            index = $tds.index($active)
-            if index is $tds.length - 1
-              index = 0
-            else
-              index++
-            $active.removeClass('active complete')
-            $active = $tds.eq(index).addClass('active')
-          base = $active.find('.base').text()
-          completion = $active.find('.completion').text()
-          @$eval
-            .val(@$eval.data().root + base + completion)
-            .trigger('autosize.resize')
-          $('#comp-desc').text($active.attr('title'))
-          @termscroll()
         return false
 
+      when 37  # Left
+        if @move_suggest -1
+          return false
+
       when 38  # Up
+        if @move_suggest -5
+          return false
         if not e.shiftKey
           index = parseInt(@$eval.attr('data-index')) + 1
           if index >= 0 and index < @cmd_hist.length
@@ -834,6 +824,8 @@ specify a module like `logging.config`.
             return false
 
       when 40  # Down
+        if @move_suggest 5
+          return false
         if not e.shiftKey
           index = parseInt(@$eval.attr('data-index')) - 1
           if index >= -1 and index < @cmd_hist.length
@@ -846,6 +838,32 @@ specify a module like `logging.config`.
             @suggest_stop()
             @termscroll()
             return false
+
+  move_suggest: (shift, trigger=false) ->
+    $tds = @$completions.find('table td')
+    $active = $tds.filter('.active')
+    return false unless $tds.length
+    unless $active.length
+      return false unless trigger
+      $active = $tds.first().addClass('active')
+      return true
+
+    index = $tds.index($active)
+    index += shift
+    if index < 0
+      index = $tds.length - 1
+    if index >= $tds.length
+      index = 0
+    $active.removeClass('active complete')
+    $active = $tds.eq(index).addClass('active')
+    base = $active.find('.base').text()
+    completion = $active.find('.completion').text()
+    @$eval
+      .val(@$eval.data().root + base + completion)
+      .trigger('autosize.resize')
+    $('#comp-desc').text($active.attr('title'))
+    @termscroll()
+    true
 
   eval_input: (e) ->
     txt = $(e.currentTarget).val()
