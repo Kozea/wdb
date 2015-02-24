@@ -15,7 +15,7 @@ with open(os.path.join(ROOT, 'wdb_server', '__init__.py')) as fd:
 
 requires = [
     "wdb==%s" % __version__, "tornado>=3.2", "log_colorizer>=1.6",
-    "jedi>=0.8.1-final0", "filemagic>=1.6", "psutil>=2.1", 'tornado_systemd']
+    "jedi>=0.8.1", "filemagic>=1.6", "psutil>=2.1", 'tornado_systemd']
 if sys.platform == 'linux':
     requires.append('pyinotify')
 
