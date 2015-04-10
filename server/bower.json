@@ -11,7 +11,7 @@
   "dependencies": {
     "jquery": "~2.1.3",
     "codemirror": "~5.1.0",
-    "jquery-autosize": "~2.0.0",
+    "jquery-autosize": "~1.18.18",
     "font-awesome": "~4.3.0"
   }
 }
