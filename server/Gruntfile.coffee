@@ -3,7 +3,7 @@ module.exports = (grunt) ->
   require('load-grunt-tasks')(grunt)
   jsdeps = [
     'bower_components/jquery/dist/jquery.min.js'
-    'bower_components/jquery-autosize/src/autosize.js'
+    'bower_components/jquery-autosize/jquery.autosize.min.js'
     'bower_components/codemirror/lib/codemirror.js'
     'bower_components/codemirror/addon/runmode/runmode.js'
     'bower_components/codemirror/addon/dialog/dialog.js'
