@@ -1,8 +1,8 @@
 (function() {
   var Codemirror, Log, Wdb, Websocket,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Log = (function() {
     function Log() {
@@ -12,7 +12,7 @@
     Log.prototype.time = function() {
       var date;
       date = new Date();
-      return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
+      return ((date.getHours()) + ":" + (date.getMinutes()) + ":") + ((date.getSeconds()) + "." + (date.getMilliseconds()));
     };
 
     Log.prototype.log = function() {
@@ -35,8 +35,8 @@
 
   })();
 
-  Websocket = (function(_super) {
-    __extends(Websocket, _super);
+  Websocket = (function(superClass) {
+    extend(Websocket, superClass);
 
     function Websocket(wdb, uuid) {
       this.wdb = wdb;
@@ -92,7 +92,7 @@
         if (typeof data !== 'string') {
           data = JSON.stringify(data);
         }
-        msg = "" + cmd + "|" + data;
+        msg = cmd + "|" + data;
       } else {
         msg = cmd;
       }
@@ -104,8 +104,8 @@
 
   })(Log);
 
-  Codemirror = (function(_super) {
-    __extends(Codemirror, _super);
+  Codemirror = (function(superClass) {
+    extend(Codemirror, superClass);
 
     function Codemirror(wdb) {
       this.wdb = wdb;
@@ -144,7 +144,7 @@
     Codemirror.prototype.save = function() {
       var new_file;
       new_file = this.code_mirror.getValue();
-      this.wdb.ws.send('Save', "" + this.state.fn + "|" + new_file);
+      this.wdb.ws.send('Save', this.state.fn + "|" + new_file);
       return this.state.file = new_file;
     };
 
@@ -153,11 +153,11 @@
     };
 
     Codemirror.prototype.clear_breakpoint = function(brk) {
-      var _base, _name;
-      if ((_base = this.breakpoints)[_name = brk.fn] == null) {
-        _base[_name] = [];
+      var base1, name1;
+      if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
+        base1[name1] = [];
       }
-      if (__indexOf.call(this.breakpoints[brk.fn], brk) >= 0) {
+      if (indexOf.call(this.breakpoints[brk.fn], brk) >= 0) {
         this.breakpoints[brk.fn].splice(this.breakpoints[brk.fn].indexOf(brk));
       }
       if (brk.lno) {
@@ -172,9 +172,9 @@
     };
 
     Codemirror.prototype.set_breakpoint = function(brk) {
-      var _base, _name;
-      if ((_base = this.breakpoints)[_name = brk.fn] == null) {
-        _base[_name] = [];
+      var base1, name1;
+      if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
+        base1[name1] = [];
       }
       this.breakpoints[brk.fn].push(brk);
       return this.mark_breakpoint(brk);
@@ -213,13 +213,13 @@
     };
 
     Codemirror.prototype.get_breakpoint = function(n) {
-      var brk, _base, _i, _len, _name, _ref;
-      if ((_base = this.breakpoints)[_name = this.state.fn] == null) {
-        _base[_name] = [];
+      var base1, brk, j, len, name1, ref;
+      if ((base1 = this.breakpoints)[name1 = this.state.fn] == null) {
+        base1[name1] = [];
       }
-      _ref = this.breakpoints[this.state.fn];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        brk = _ref[_i];
+      ref = this.breakpoints[this.state.fn];
+      for (j = 0, len = ref.length; j < len; j++) {
+        brk = ref[j];
         if (brk.lno === n) {
           return brk;
         }
@@ -279,19 +279,19 @@
     };
 
     Codemirror.prototype.set_state = function(new_state) {
-      var brk, lno, rescope, step, _base, _i, _j, _k, _l, _len, _len1, _name, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
+      var base1, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
       rescope = true;
       if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
         this.code_mirror.setValue(new_state.file);
-        _ref = this.breakpoints[new_state.fn] || [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          brk = _ref[_i];
+        ref = this.breakpoints[new_state.fn] || [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          brk = ref[j];
           this.mark_breakpoint(brk);
         }
       } else {
         if (this.state.fun !== new_state.fun && this.state.fun !== '<module>') {
           this.remove_class(this.state.flno, 'ctx-top');
-          for (lno = _j = _ref1 = this.state.flno, _ref2 = this.state.llno; _ref1 <= _ref2 ? _j <= _ref2 : _j >= _ref2; lno = _ref1 <= _ref2 ? ++_j : --_j) {
+          for (lno = k = ref1 = this.state.flno, ref2 = this.state.llno; ref1 <= ref2 ? k <= ref2 : k >= ref2; lno = ref1 <= ref2 ? ++k : --k) {
             this.remove_class(lno, 'ctx');
           }
           this.remove_class(this.state.llno, 'ctx-bottom');
@@ -301,23 +301,23 @@
       }
       this.state = new_state;
       this.code_mirror.clearGutter('CodeMirror-linenumbers');
-      _ref3 = this.footsteps[this.state.fn] || [];
-      for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
-        step = _ref3[_k];
+      ref3 = this.footsteps[this.state.fn] || [];
+      for (l = 0, len1 = ref3.length; l < len1; l++) {
+        step = ref3[l];
         this.remove_class(step, 'highlighted');
         this.add_class(step, 'footstep');
       }
       if (rescope && this.state.fun !== '<module>') {
         this.add_class(this.state.flno, 'ctx-top');
-        for (lno = _l = _ref4 = this.state.flno, _ref5 = this.state.llno; _ref4 <= _ref5 ? _l <= _ref5 : _l >= _ref5; lno = _ref4 <= _ref5 ? ++_l : --_l) {
+        for (lno = o = ref4 = this.state.flno, ref5 = this.state.llno; ref4 <= ref5 ? o <= ref5 : o >= ref5; lno = ref4 <= ref5 ? ++o : --o) {
           this.add_class(lno, 'ctx');
         }
         this.add_class(this.state.llno, 'ctx-bottom');
       }
       this.add_class(this.state.lno, 'highlighted');
       this.add_mark(this.state.lno, 'highlighted', 'CodeMirror-linenumbers', '➤');
-      if ((_base = this.footsteps)[_name = this.state.fn] == null) {
-        _base[_name] = [];
+      if ((base1 = this.footsteps)[name1 = this.state.fn] == null) {
+        base1[name1] = [];
       }
       this.footsteps[this.state.fn].push(this.state.lno);
       return this.code_mirror.scrollIntoView({
@@ -343,8 +343,8 @@
 
   })(Log);
 
-  Wdb = (function(_super) {
-    __extends(Wdb, _super);
+  Wdb = (function(superClass) {
+    extend(Wdb, superClass);
 
     Wdb.prototype.__version__ = '2.0.7';
 
@@ -395,11 +395,11 @@
         $('#deactivate').click(this.disable.bind(this));
         this.$interpreter.on('keydown', (function(_this) {
           return function(e) {
-            var scroll, way, _ref, _ref1, _ref2;
-            if (e.ctrlKey && (37 <= (_ref = e.keyCode) && _ref <= 40) || (118 <= (_ref1 = e.keyCode) && _ref1 <= 122) || e.keyCode === 13) {
+            var ref, ref1, ref2, scroll, way;
+            if (e.ctrlKey && (37 <= (ref = e.keyCode) && ref <= 40) || (118 <= (ref1 = e.keyCode) && ref1 <= 122) || e.keyCode === 13) {
               return true;
             }
-            if (e.shiftKey && ((_ref2 = e.keyCode) === 33 || _ref2 === 34)) {
+            if (e.shiftKey && ((ref2 = e.keyCode) === 33 || ref2 === 34)) {
               scroll = _this.$interpreter.height() * 2 / 3;
               way = e.keyCode === 33 ? -1 : 1;
               _this.$interpreter.stop(true, true).animate({
@@ -442,7 +442,7 @@
     };
 
     Wdb.prototype.init = function(data) {
-      var brk, brks, _base, _i, _len, _name, _results;
+      var base1, brk, brks, j, len, name1, results;
       if (data.version !== this.constructor.prototype.__version__) {
         this.print({
           "for": 'Client Server version mismatch !',
@@ -451,15 +451,15 @@
       }
       this.cwd = data.cwd;
       brks = data.breaks;
-      _results = [];
-      for (_i = 0, _len = brks.length; _i < _len; _i++) {
-        brk = brks[_i];
-        if ((_base = this.cm.breakpoints)[_name = brk.fn] == null) {
-          _base[_name] = [];
+      results = [];
+      for (j = 0, len = brks.length; j < len; j++) {
+        brk = brks[j];
+        if ((base1 = this.cm.breakpoints)[name1 = brk.fn] == null) {
+          base1[name1] = [];
         }
-        _results.push(this.cm.breakpoints[brk.fn].push(brk));
+        results.push(this.cm.breakpoints[brk.fn].push(brk));
       }
-      return _results;
+      return results;
     };
 
     Wdb.prototype.title = function(data) {
@@ -467,17 +467,17 @@
     };
 
     Wdb.prototype.trace = function(data) {
-      var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, brk, frame, suffix, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, brk, frame, j, k, len, len1, ref, ref1, results, suffix;
       this.$traceback.removeClass('hidden');
       this.$traceback.empty();
-      _ref = data.trace;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        frame = _ref[_i];
+      ref = data.trace;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        frame = ref[j];
         $traceline = $('<div>').addClass('traceline').attr('id', 'trace-' + frame.level).attr('data-level', frame.level);
-        _ref1 = this.cm.breakpoints[frame.file] || [];
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          brk = _ref1[_j];
+        ref1 = this.cm.breakpoints[frame.file] || [];
+        for (k = 0, len1 = ref1.length; k < len1; k++) {
+          brk = ref1[k];
           if (!(brk.cond || brk.fun || brk.lno)) {
             $traceline.addClass('breakpoint');
             break;
@@ -510,9 +510,9 @@
         $traceline.append($tracefilelno);
         $traceline.append($tracecode);
         $traceline.append($tracefunfun);
-        _results.push(this.$traceback.prepend($traceline));
+        results.push(this.$traceback.prepend($traceline));
       }
-      return _results;
+      return results;
     };
 
     Wdb.prototype.select_click = function(e) {
@@ -553,7 +553,7 @@
     };
 
     Wdb.prototype.code = function(parent, src, classes, html, title, mode) {
-      var $code, $node, cls, _i, _len;
+      var $code, $node, cls, j, len;
       if (classes == null) {
         classes = [];
       }
@@ -579,11 +579,11 @@
           return this.nodeType === 3 && this.nodeValue.length > 0 && !$(this.parentElement).closest('thead').size();
         }).wrap('<code>').parent().each((function(_this) {
           return function(i, elt) {
-            var $code, cls, _i, _len;
+            var $code, cls, j, len;
             $code = $(elt);
             $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone');
-            for (_i = 0, _len = classes.length; _i < _len; _i++) {
-              cls = classes[_i];
+            for (j = 0, len = classes.length; j < len; j++) {
+              cls = classes[j];
               $code.addClass(cls);
             }
             if (title) {
@@ -600,8 +600,8 @@
         $code = $('<code>', {
           'class': 'CodeMirror-standalone'
         });
-        for (_i = 0, _len = classes.length; _i < _len; _i++) {
-          cls = classes[_i];
+        for (j = 0, len = classes.length; j < len; j++) {
+          cls = classes[j];
           $code.addClass(cls);
         }
         if (title) {
@@ -758,7 +758,7 @@
     Wdb.prototype.print_help = function() {
       return this.print({
         "for": 'Supported commands',
-        result: '.s or [Alt] + [↓] or [F11]     : Step into\n.n or [Alt] + [→] or [F10]     : Step over (Next)\n.r or [Alt] + [↑] or [F9]      : Step out (Return)\n.c or [Alt] + [Enter] or [F8]  : Continue\n.u or [Alt] + [<-] or [F7]     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.a                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left ? right                : Display the difference between the pretty print of \'left\' and \'right\'\n.x left <> right               : Display the difference between the repr of \'left\' and \'right\'\n.f key in expression           : Search recursively the presence of key in expression object tree\n.f test of expression          : Search recursively values that match test in expression inner tree.\n i.e.: .f type(x) == int of sys\n\nAll the upper commands are prefixed with a dot and can be executed with [Alt] + [the command letter], i.e.: [Alt] + [h]\n\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n[Shift] + [Enter]              : Insert the current selected text in page in the prompt\n[Ctrl] + [Enter]               : Multiline prompt or execute if already in multiline mode.\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
+        result: '.s or [Alt] + [↓] or [F11]     : Step into\n.n or [Alt] + [→] or [F10]     : Step over (Next)\n.r or [Alt] + [↑] or [F9]      : Step out (Return)\n.c or [Alt] + [Enter] or [F8]  : Continue\n.u or [Alt] + [←] or [F7]     : Until (Next over loops)\n.j lineno                      : Jump to lineno (Must be at bottom frame and in the same function)\n.b arg                         : Set a session breakpoint  see below for what arg can be*\n.t arg                         : Set a temporary breakpoint, arg follow the same syntax as .b\n.z arg                         : Delete existing breakpoint\n.l                             : List active breakpoints\n.a                             : Echo all typed commands in the current debugging session\n.d expression                  : Dump the result of expression in a table\n.w expression                  : Watch expression in curent file (Click on the name to remove)\n.q                             : Quit\n.h                             : Get some help\n.e                             : Toggle file edition mode\n.g                             : Clear prompt\n.i [mime/type;]expression      : Display the result in an embed, mime type defaults to "text/html"\n.x left ? right                : Display the difference between the pretty print of \'left\' and \'right\'\n.x left <> right               : Display the difference between the repr of \'left\' and \'right\'\n.f key in expression           : Search recursively the presence of key in expression object tree\n.f test of expression          : Search recursively values that match test in expression inner tree.\n i.e.: .f type(x) == int of sys\n\nAll the upper commands are prefixed with a dot and can be executed with [Alt] + [the command letter], i.e.: [Alt] + [h]\n\niterable!sthg                  : If cutter is installed, executes cut(iterable).sthg\nexpr >! file                   : Write the result of expr in file\n!< file                        : Eval the content of file\n[Enter]                        : Eval the current selected text in page, useful to eval code in the source\n[Shift] + [Enter]              : Insert the current selected text in page in the prompt\n[Ctrl] + [Enter]               : Multiline prompt or execute if already in multiline mode.\n\n* arg is using the following syntax:\n    [file/module][:lineno][#function][,condition]\nwhich means:\n    - [file]                    : Break if any line of `file` is executed\n    - [file]:lineno             : Break on `file` at `lineno`\n    - [file][:lineno],condition : Break on `file` at `lineno` if `condition` is True (ie: i == 10)\n    - [file]#function           : Break when inside `function` function\nFile is always current file by default and you can also specify a module like `logging.config`.'
       });
     };
 
@@ -799,7 +799,7 @@
     };
 
     Wdb.prototype.dump = function(data) {
-      var $attr_head, $attr_tbody, $container, $core_head, $core_tbody, $method_head, $method_tbody, $table, $tbody, key, val, _ref;
+      var $attr_head, $attr_tbody, $container, $core_head, $core_tbody, $method_head, $method_tbody, $table, $tbody, key, ref, val;
       this.code(this.$scrollback, data["for"], ['prompted']);
       $container = $('<div>');
       $table = $('<table>', {
@@ -832,9 +832,9 @@
       $attr_tbody = $('<tbody>', {
         "class": 'attr closed'
       }).appendTo($table);
-      _ref = data.val;
-      for (key in _ref) {
-        val = _ref[key];
+      ref = data.val;
+      for (key in ref) {
+        val = ref[key];
         $tbody = $attr_tbody;
         if (key.indexOf('__') === 0 && key.indexOf('__', key.length - 2) !== -1) {
           $tbody = $core_tbody;
@@ -888,12 +888,12 @@
     };
 
     Wdb.prototype.breakset = function(data) {
-      var _ref;
+      var ref;
       this.cm.set_breakpoint(data);
       if (!data.lno && !data.fun && !data.cond) {
         this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').addClass('breakpoint');
       }
-      if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't')) {
+      if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't')) {
         return this.done();
       } else {
         return this.chilling();
@@ -901,12 +901,12 @@
     };
 
     Wdb.prototype.breakunset = function(data) {
-      var _ref;
+      var ref;
       this.cm.clear_breakpoint(data);
       if (!data.lno && !data.fun && !data.cond) {
         this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').removeClass('breakpoint');
       }
-      if (this.$eval.val()[0] === '.' && ((_ref = this.$eval.val()[1]) === 'b' || _ref === 't' || _ref === 'z')) {
+      if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't' || ref === 'z')) {
         return this.done();
       } else {
         return this.chilling();
@@ -915,7 +915,7 @@
 
     Wdb.prototype.split = function(str, char) {
       var split;
-      if (__indexOf.call(str, char) >= 0) {
+      if (indexOf.call(str, char) >= 0) {
         split = str.split(char);
         return [split[0], split.slice(1).join(char).trim()];
       } else {
@@ -924,7 +924,7 @@
     };
 
     Wdb.prototype.toggle_break = function(arg, temporary, remove_only) {
-      var brk, cmd, ebrk, exist, remaining, _i, _len, _ref, _ref1, _ref2, _ref3;
+      var brk, cmd, ebrk, exist, j, len, ref, ref1, ref2, ref3, remaining;
       if (temporary == null) {
         temporary = false;
       }
@@ -939,15 +939,15 @@
         temporary: temporary
       };
       remaining = arg;
-      _ref = this.split(remaining, ','), remaining = _ref[0], brk.cond = _ref[1];
-      _ref1 = this.split(remaining, '#'), remaining = _ref1[0], brk.fun = _ref1[1];
-      _ref2 = this.split(remaining, ':'), remaining = _ref2[0], brk.lno = _ref2[1];
+      ref = this.split(remaining, ','), remaining = ref[0], brk.cond = ref[1];
+      ref1 = this.split(remaining, '#'), remaining = ref1[0], brk.fun = ref1[1];
+      ref2 = this.split(remaining, ':'), remaining = ref2[0], brk.lno = ref2[1];
       brk.fn = remaining || this.cm.state.fn;
       brk.lno = parseInt(brk.lno) || null;
       exist = false;
-      _ref3 = this.cm.breakpoints[brk.fn] || [];
-      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-        ebrk = _ref3[_i];
+      ref3 = this.cm.breakpoints[brk.fn] || [];
+      for (j = 0, len = ref3.length; j < len; j++) {
+        ebrk = ref3[j];
         if (ebrk.fn === brk.fn && ebrk.lno === brk.lno && ebrk.cond === brk.cond && ebrk.fun === brk.fun && (ebrk.temporary === brk.temporary || remove_only)) {
           exist = true;
           brk = ebrk;
@@ -976,7 +976,7 @@
     };
 
     Wdb.prototype.format_fun = function(p) {
-      var cls, i, param, tags, _i, _len, _ref;
+      var cls, i, j, len, param, ref, tags;
       tags = [
         $('<span>', {
           "class": 'fun_name',
@@ -985,9 +985,9 @@
           "class": 'fun_punct'
         }).text('(')
       ];
-      _ref = p.params;
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        param = _ref[i];
+      ref = p.params;
+      for (i = j = 0, len = ref.length; j < len; i = ++j) {
+        param = ref[i];
         cls = 'fun_param';
         if (i === p.index || (i === p.params.length - 1 && p.index > i)) {
           cls = 'fun_param active';
@@ -1008,15 +1008,15 @@
     };
 
     Wdb.prototype.suggest = function(data) {
-      var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, param, startPos, txtarea, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, j, k, len, len1, param, ref, ref1, ref2, startPos, txtarea;
       if (data) {
         $comp = this.$completions.find('table').empty();
         $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
         height = this.$completions.height();
         added = [];
-        _ref = data.params;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          param = _ref[_i];
+        ref = data.params;
+        for (j = 0, len = ref.length; j < len; j++) {
+          param = ref[j];
           $('#comp-desc').append(this.format_fun(param));
         }
         if (data.completions.length) {
@@ -1029,10 +1029,10 @@
             end: this.$eval.val().substr(startPos)
           });
         }
-        _ref1 = data.completions;
-        for (index = _j = 0, _len1 = _ref1.length; _j < _len1; index = ++_j) {
-          completion = _ref1[index];
-          if (_ref2 = completion.base + completion.complete, __indexOf.call(added, _ref2) >= 0) {
+        ref1 = data.completions;
+        for (index = k = 0, len1 = ref1.length; k < len1; index = ++k) {
+          completion = ref1[index];
+          if (ref2 = completion.base + completion.complete, indexOf.call(added, ref2) >= 0) {
             continue;
           }
           added.push(completion.base + completion.complete);
@@ -1069,7 +1069,7 @@
     Wdb.prototype.watched = function(data) {
       var $name, $value, $watcher, value, watcher;
       for (watcher in data) {
-        if (!__hasProp.call(data, watcher)) continue;
+        if (!hasProp.call(data, watcher)) continue;
         value = data[watcher];
         $watcher = this.$watchers.find(".watching").filter(function(e) {
           return $(e).attr('data-expr') === watcher;
@@ -1127,13 +1127,13 @@
     };
 
     Wdb.prototype.searchback = function() {
-      var h, index, re, val, _i, _len, _ref;
+      var h, index, j, len, re, ref, val;
       this.suggest_stop();
       index = this.backsearch;
       val = this.$eval.val();
-      _ref = this.cmd_hist;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        h = _ref[_i];
+      ref = this.cmd_hist;
+      for (j = 0, len = ref.length; j < len; j++) {
+        h = ref[j];
         re = new RegExp('(' + val + ')', 'gi');
         if (re.test(h)) {
           index--;
@@ -1181,11 +1181,11 @@
     };
 
     Wdb.prototype.global_key = function(e) {
-      var char, extra, sel, _ref, _ref1, _ref2;
+      var char, extra, ref, ref1, ref2, sel;
       if (this.cm.rw) {
         return true;
       }
-      if (e.altKey && ((65 <= (_ref = e.keyCode) && _ref <= 90) || (37 <= (_ref1 = e.keyCode) && _ref1 <= 40) || e.keyCode === 13) || (119 <= (_ref2 = e.keyCode) && _ref2 <= 122)) {
+      if (e.altKey && ((65 <= (ref = e.keyCode) && ref <= 90) || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || e.keyCode === 13) || (119 <= (ref2 = e.keyCode) && ref2 <= 122)) {
         char = (function() {
           switch (e.keyCode) {
             case 13:
@@ -1411,11 +1411,11 @@
     };
 
     Wdb.prototype.eval_carret_change = function(e) {
-      var eof, multiline, txt, _ref;
+      var eof, multiline, ref, txt;
       if (this.$completions.find('table td').filter('.active').size()) {
         eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
         multiline = this.$prompt.hasClass('multiline');
-        if (!(e.keyCode && e.keyCode < 27 || (37 <= (_ref = e.keyCode) && _ref <= 40) || (e.ctrlKey && e.keyCode === 32))) {
+        if (!(e.keyCode && e.keyCode < 27 || (37 <= (ref = e.keyCode) && ref <= 40) || (e.ctrlKey && e.keyCode === 32))) {
           this.suggest_stop();
         }
         return;
@@ -1487,26 +1487,26 @@
 
     Wdb.prototype.pretty_time = function(time) {
       if (time < 1000) {
-        return "" + time + "μs";
+        return time + "μs";
       }
       time = time / 1000;
       if (time < 10) {
-        return "" + (time.toFixed(2)) + "ms";
+        return (time.toFixed(2)) + "ms";
       }
       if (time < 100) {
-        return "" + (time.toFixed(1)) + "ms";
+        return (time.toFixed(1)) + "ms";
       }
       if (time < 1000) {
-        return "" + (time.toFixed(0)) + "ms";
+        return (time.toFixed(0)) + "ms";
       }
       time = time / 1000;
       if (time < 10) {
-        return "" + (time.toFixed(2)) + "s";
+        return (time.toFixed(2)) + "s";
       }
       if (time < 100) {
-        return "" + (time.toFixed(1)) + "s";
+        return (time.toFixed(1)) + "s";
       }
-      return "" + (time.toFixed(0)) + "s";
+      return (time.toFixed(0)) + "s";
     };
 
     return Wdb;
