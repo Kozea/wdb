@@ -9,7 +9,7 @@
     Log.prototype.time = function() {
       var date;
       date = new Date();
-      return ("" + (date.getHours()) + ":" + (date.getMinutes()) + ":") + ("" + (date.getSeconds()) + "." + (date.getMilliseconds()));
+      return ((date.getHours()) + ":" + (date.getMinutes()) + ":") + ((date.getSeconds()) + "." + (date.getMilliseconds()));
     };
 
     Log.prototype.log = function() {
@@ -33,7 +33,7 @@
   })();
 
   $(function() {
-    var $code, $trace, code, file, fun, lno, _i, _len, _ref, _ref1, _results;
+    var $code, $trace, code, file, fun, i, len, lno, ref, ref1, results;
     $('#activate').click(function() {
       $.get('/__wdb/on').done(function() {
         return location.reload(true);
@@ -45,10 +45,10 @@
       $('#wdb').append($trace = $('<article>', {
         "class": 'trace_500'
       }));
-      _ref = trace.trace;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], file = _ref1[0], lno = _ref1[1], fun = _ref1[2], code = _ref1[3];
+      ref = trace.trace;
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        ref1 = ref[i], file = ref1[0], lno = ref1[1], fun = ref1[2], code = ref1[3];
         $trace.append($('<div>', {
           "class": 'traceline'
         }).append($('<div>', {
@@ -58,9 +58,9 @@
         }).text(fun), $code = $('<code>', {
           "class": 'cm'
         })));
-        _results.push(CodeMirror.runMode(code || ' ', "python", $code.get(0)));
+        results.push(CodeMirror.runMode(code || ' ', "python", $code.get(0)));
       }
-      return _results;
+      return results;
     }
   });
 
