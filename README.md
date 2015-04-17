@@ -325,7 +325,7 @@ web:
     WDB_SOCKET_SERVER: wdb
     WDB_NO_BROWSER_AUTO_OPEN: True
 wdb:
-  image: Kozea/wdb-server
+  image: kozea/wdb-server
   ports:
     - "1984:1984"
 ```
