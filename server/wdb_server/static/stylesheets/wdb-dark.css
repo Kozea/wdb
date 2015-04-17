@@ -202,6 +202,7 @@ body, html {
         -webkit-flex: 1;
             -ms-flex: 1;
                 flex: 1;
+        max-height: 50vh;
         overflow-y: auto; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
