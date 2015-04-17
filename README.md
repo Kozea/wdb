@@ -287,15 +287,14 @@ like this:
 3. When a trace is reached, open up `http://<your-docker-hostname>:1984`
 
 I will walk through this process in detail, using
-[Fig](http://orchardup.github.io/fig/) to set up the containers. So, before
-you proceed, but should work without fig, without much work.
+[Docker Compose](https://docs.docker.com/compose/) to set up the containers.
 
-Let's say your `fig.yml` looks like
-[their example for using with Django](http://orchardup.github.io/fig/django.html):
+Let's say your `docker-compose.yml` looks like
+[their example for using with Django](https://docs.docker.com/compose/django/):
 
 ```yaml
 db:
-  image: orchardup/postgresql
+  image: postgres
 web:
   build: .
   command: python manage.py runserver 0.0.0.0:8000
@@ -311,7 +310,7 @@ Next lets add the wdb server part now and tell the web to link to it:
 
 ```yaml
 db:
-  image: orchardup/postgresql
+  image: postgres
 web:
   build: .
   command: python manage.py runserver 0.0.0.0:8000
@@ -347,9 +346,9 @@ wdb.set_trace()
 Then you have to rebuild your web application and start everything up again
 
 ```bash
-$ fig stop
-$ fig build web
-$ fig up
+$ docker-compose stop
+$ docker-compose build web
+$ docker-compose up
 ```
 
 
