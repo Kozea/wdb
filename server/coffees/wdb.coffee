@@ -16,7 +16,7 @@
 
 
 class Wdb extends Log
-  __version__: '2.0.7'
+  __version__: '2.1.0'
 
   constructor: ->
     super
