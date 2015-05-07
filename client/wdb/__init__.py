@@ -426,7 +426,7 @@ class Wdb(object):
             recursive = False
             context[id(obj)] = obj
             try:
-                rv = self.better_repr(obj, None, html, level + 1)
+                rv = self.better_repr(obj, context, html, level + 1)
             except Exception:
                 rv = None
             if rv:
