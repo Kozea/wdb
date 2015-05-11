@@ -1,8 +1,5 @@
 (function() {
-  var Codemirror, Log, Wdb, Websocket,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty,
-    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var Log;
 
   Log = (function() {
     function Log() {
@@ -34,6 +31,13 @@
     return Log;
 
   })();
+
+}).call(this);
+
+(function() {
+  var Websocket,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
 
   Websocket = (function(superClass) {
     extend(Websocket, superClass);
@@ -104,6 +108,14 @@
 
   })(Log);
 
+}).call(this);
+
+(function() {
+  var Codemirror,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
   Codemirror = (function(superClass) {
     extend(Codemirror, superClass);
 
@@ -153,9 +165,9 @@
     };
 
     Codemirror.prototype.clear_breakpoint = function(brk) {
-      var base1, name1;
-      if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
-        base1[name1] = [];
+      var base, name;
+      if ((base = this.breakpoints)[name = brk.fn] == null) {
+        base[name] = [];
       }
       if (indexOf.call(this.breakpoints[brk.fn], brk) >= 0) {
         this.breakpoints[brk.fn].splice(this.breakpoints[brk.fn].indexOf(brk));
@@ -172,9 +184,9 @@
     };
 
     Codemirror.prototype.set_breakpoint = function(brk) {
-      var base1, name1;
-      if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
-        base1[name1] = [];
+      var base, name;
+      if ((base = this.breakpoints)[name = brk.fn] == null) {
+        base[name] = [];
       }
       this.breakpoints[brk.fn].push(brk);
       return this.mark_breakpoint(brk);
@@ -213,13 +225,13 @@
     };
 
     Codemirror.prototype.get_breakpoint = function(n) {
-      var base1, brk, j, len, name1, ref;
-      if ((base1 = this.breakpoints)[name1 = this.state.fn] == null) {
-        base1[name1] = [];
+      var base, brk, i, len, name, ref;
+      if ((base = this.breakpoints)[name = this.state.fn] == null) {
+        base[name] = [];
       }
       ref = this.breakpoints[this.state.fn];
-      for (j = 0, len = ref.length; j < len; j++) {
-        brk = ref[j];
+      for (i = 0, len = ref.length; i < len; i++) {
+        brk = ref[i];
         if (brk.lno === n) {
           return brk;
         }
@@ -279,19 +291,19 @@
     };
 
     Codemirror.prototype.set_state = function(new_state) {
-      var base1, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
+      var base, brk, i, j, k, l, len, len1, lno, name, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
       rescope = true;
       if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
         this.code_mirror.setValue(new_state.file);
         ref = this.breakpoints[new_state.fn] || [];
-        for (j = 0, len = ref.length; j < len; j++) {
-          brk = ref[j];
+        for (i = 0, len = ref.length; i < len; i++) {
+          brk = ref[i];
           this.mark_breakpoint(brk);
         }
       } else {
         if (this.state.fun !== new_state.fun && this.state.fun !== '<module>') {
           this.remove_class(this.state.flno, 'ctx-top');
-          for (lno = k = ref1 = this.state.flno, ref2 = this.state.llno; ref1 <= ref2 ? k <= ref2 : k >= ref2; lno = ref1 <= ref2 ? ++k : --k) {
+          for (lno = j = ref1 = this.state.flno, ref2 = this.state.llno; ref1 <= ref2 ? j <= ref2 : j >= ref2; lno = ref1 <= ref2 ? ++j : --j) {
             this.remove_class(lno, 'ctx');
           }
           this.remove_class(this.state.llno, 'ctx-bottom');
@@ -302,22 +314,22 @@
       this.state = new_state;
       this.code_mirror.clearGutter('CodeMirror-linenumbers');
       ref3 = this.footsteps[this.state.fn] || [];
-      for (l = 0, len1 = ref3.length; l < len1; l++) {
-        step = ref3[l];
+      for (k = 0, len1 = ref3.length; k < len1; k++) {
+        step = ref3[k];
         this.remove_class(step, 'highlighted');
         this.add_class(step, 'footstep');
       }
       if (rescope && this.state.fun !== '<module>') {
         this.add_class(this.state.flno, 'ctx-top');
-        for (lno = o = ref4 = this.state.flno, ref5 = this.state.llno; ref4 <= ref5 ? o <= ref5 : o >= ref5; lno = ref4 <= ref5 ? ++o : --o) {
+        for (lno = l = ref4 = this.state.flno, ref5 = this.state.llno; ref4 <= ref5 ? l <= ref5 : l >= ref5; lno = ref4 <= ref5 ? ++l : --l) {
           this.add_class(lno, 'ctx');
         }
         this.add_class(this.state.llno, 'ctx-bottom');
       }
       this.add_class(this.state.lno, 'highlighted');
       this.add_mark(this.state.lno, 'highlighted', 'CodeMirror-linenumbers', '➤');
-      if ((base1 = this.footsteps)[name1 = this.state.fn] == null) {
-        base1[name1] = [];
+      if ((base = this.footsteps)[name = this.state.fn] == null) {
+        base[name] = [];
       }
       this.footsteps[this.state.fn].push(this.state.lno);
       return this.code_mirror.scrollIntoView({
@@ -342,6 +354,14 @@
     return Codemirror;
 
   })(Log);
+
+}).call(this);
+
+(function() {
+  var Wdb,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   Wdb = (function(superClass) {
     extend(Wdb, superClass);
@@ -442,7 +462,7 @@
     };
 
     Wdb.prototype.init = function(data) {
-      var base1, brk, brks, j, len, name1, results;
+      var base1, brk, brks, j, len, name, results;
       if (data.version !== this.constructor.prototype.__version__) {
         this.print({
           "for": 'Client Server version mismatch !',
@@ -454,8 +474,8 @@
       results = [];
       for (j = 0, len = brks.length; j < len; j++) {
         brk = brks[j];
-        if ((base1 = this.cm.breakpoints)[name1 = brk.fn] == null) {
-          base1[name1] = [];
+        if ((base1 = this.cm.breakpoints)[name = brk.fn] == null) {
+          base1[name] = [];
         }
         results.push(this.cm.breakpoints[brk.fn].push(brk));
       }
@@ -1520,5 +1540,3 @@
   })(this));
 
 }).call(this);
-
-//# sourceMappingURL=wdb.js.map

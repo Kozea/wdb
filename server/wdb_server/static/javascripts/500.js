@@ -32,6 +32,9 @@
 
   })();
 
+}).call(this);
+
+(function() {
   $(function() {
     var $code, $trace, code, file, fun, i, len, lno, ref, ref1, results;
     $('#activate').click(function() {
@@ -65,5 +68,3 @@
   });
 
 }).call(this);
-
-//# sourceMappingURL=500.js.map
