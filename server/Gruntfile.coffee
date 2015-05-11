@@ -37,7 +37,6 @@ module.exports = (grunt) ->
       options:
         banner: '/*! <%= pkg.name %>
            <%= grunt.template.today("yyyy-mm-dd") %> */\n'
-        sourceMap: true
 
       wdb:
         expand: true
@@ -72,9 +71,6 @@ module.exports = (grunt) ->
             'wdb_server/static/stylesheets/deps.embed.css')
 
     coffee:
-      options:
-        sourceMap: true
-
       wdb:
         files:
           'wdb_server/static/javascripts/wdb.js': [
