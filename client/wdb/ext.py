@@ -97,7 +97,9 @@ class WdbMiddleware(object):
 
 
 def wdb_tornado(application, start_disabled=False):
-    from tornado.web import RequestHandler, HTTPError
+    from tornado.web import (
+        RequestHandler, ErrorHandler, HTTPError, StaticFileHandler)
+    from tornado.gen import coroutine
     Wdb.enabled = not start_disabled
 
     class WdbOn(RequestHandler):
@@ -107,12 +109,19 @@ def wdb_tornado(application, start_disabled=False):
     application.add_handlers(r'.*', ((r'/__wdb/on', WdbOn),))
     old_execute = RequestHandler._execute
     under = getattr(RequestHandler._execute, '__wrapped__', None)
-    below = 1
 
+    @coroutine
     def _wdb_execute(*args, **kwargs):
         from wdb import trace, Wdb
-        if Wdb.enabled:
-            with trace(close_on_exit=True, below=below, under=under):
+        interesting = True
+        if len(args) > 0 and isinstance(args[0], ErrorHandler):
+            interesting = False
+        elif len(args) > 2 and isinstance(
+                args[0], StaticFileHandler) and args[2] == 'favicon.ico':
+            interesting = False
+
+        if Wdb.enabled and interesting:
+            with trace(close_on_exit=True, under=under):
                 old_execute(*args, **kwargs)
         else:
             old_execute(*args, **kwargs)
