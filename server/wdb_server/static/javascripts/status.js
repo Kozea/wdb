@@ -1,6 +1,5 @@
 (function() {
-  var Log, create_socket, get_proc_thread_val, make_brk_line, make_process_line, make_thread_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
-    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var Log;
 
   Log = (function() {
     function Log() {
@@ -32,6 +31,12 @@
     return Log;
 
   })();
+
+}).call(this);
+
+(function() {
+  var create_socket, get_proc_thread_val, make_brk_line, make_process_line, make_thread_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
+    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   ws = null;
 
@@ -352,5 +357,3 @@
   });
 
 }).call(this);
-
-//# sourceMappingURL=status.js.map
