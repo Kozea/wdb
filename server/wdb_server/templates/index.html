@@ -1,7 +1,7 @@
 {% extends _layout.html %}
 
 {% block script %}
-  <script src="{{ static_url('javascripts/' + ('status.js' if options.debug else 'wdb/status.min.js')) }}"></script>
+  <script src="{{ static_url('javascripts/' + ('status.js' if options.unminified else 'wdb/status.min.js')) }}"></script>
 {% end %}
 
 {% block main %}

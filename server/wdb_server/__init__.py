@@ -237,6 +237,8 @@ tornado.options.define('theme', default="clean",
                        help="Wdb theme to use amongst %s" %
                        StyleHandler.themes)
 tornado.options.define("debug", default=False, help="Debug mode")
+tornado.options.define("unminified", default=False,
+                       help="Use the unminified js (for development only)")
 tornado.options.define("more", default=False, help="Set the debug more verbose")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
