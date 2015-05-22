@@ -760,10 +760,10 @@ specify a module like `logging.config`.
 
     if e.altKey and (
       65 <= e.keyCode <= 90 or 37 <= e.keyCode <= 40 or e.keyCode is 13
-      ) or 119 <= e.keyCode <= 122
+      ) or 118 <= e.keyCode <= 122
       char = switch e.keyCode
-        when 13, 119 then 'c' # Enter / F7
-        when 37, 118 then 'u' # <     / F8
+        when 37, 118 then 'u' # <     / F7
+        when 13, 119 then 'c' # Enter / F8
         when 38, 120 then 'r' # ^     / F9
         when 39, 121 then 'n' # >     / F10
         when 40, 122 then 's' # v     / F11

@@ -1184,15 +1184,15 @@ Wdb = (function(superClass) {
     if (this.cm.rw) {
       return true;
     }
-    if (e.altKey && ((65 <= (ref = e.keyCode) && ref <= 90) || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || e.keyCode === 13) || (119 <= (ref2 = e.keyCode) && ref2 <= 122)) {
+    if (e.altKey && ((65 <= (ref = e.keyCode) && ref <= 90) || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || e.keyCode === 13) || (118 <= (ref2 = e.keyCode) && ref2 <= 122)) {
       char = (function() {
         switch (e.keyCode) {
-          case 13:
-          case 119:
-            return 'c';
           case 37:
           case 118:
             return 'u';
+          case 13:
+          case 119:
+            return 'c';
           case 38:
           case 120:
             return 'r';
