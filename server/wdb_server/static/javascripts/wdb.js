@@ -374,7 +374,7 @@ Wdb = (function(superClass) {
     this.$traceback = $('#traceback');
     this.$watchers = $('#watchers');
     try {
-      this.cmd_hist = JSON.parse(localStorage['cmd_hist'] || '{}');
+      this.cmd_hist = JSON.parse(localStorage['cmd_hist'] || '[]');
     } catch (_error) {
       e = _error;
       this.fail(e);
