@@ -48,7 +48,7 @@ class Wdb extends Log
     @$watchers = $('#watchers')
 
     try
-      @cmd_hist = JSON.parse(localStorage['cmd_hist'] or '{}')
+      @cmd_hist = JSON.parse(localStorage['cmd_hist'] or '[]')
     catch e
       @fail e
 
