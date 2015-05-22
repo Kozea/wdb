@@ -1,359 +1,351 @@
-(function() {
-  var Log;
+var Log, create_socket, get_proc_thread_val, make_brk_line, make_process_line, make_thread_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  Log = (function() {
-    function Log() {
-      this.debug = $('body').attr('data-debug') || false;
-    }
+Log = (function() {
+  function Log() {
+    this.debug = $('body').attr('data-debug') || false;
+  }
 
-    Log.prototype.time = function() {
-      var date;
-      date = new Date();
-      return ((date.getHours()) + ":" + (date.getMinutes()) + ":") + ((date.getSeconds()) + "." + (date.getMilliseconds()));
-    };
+  Log.prototype.time = function() {
+    var date;
+    date = new Date();
+    return ((date.getHours()) + ":" + (date.getMinutes()) + ":") + ((date.getSeconds()) + "." + (date.getMilliseconds()));
+  };
 
-    Log.prototype.log = function() {
-      var log_args, name;
-      if (this.debug) {
-        name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
-        log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
-        return console.log.apply(console, log_args);
-      }
-    };
-
-    Log.prototype.fail = function() {
-      var log_args, name;
-      name = this.constructor.name;
+  Log.prototype.log = function() {
+    var log_args, name;
+    if (this.debug) {
+      name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
       log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
-      return console.error.apply(console, log_args);
-    };
-
-    return Log;
-
-  })();
-
-}).call(this);
-
-(function() {
-  var create_socket, get_proc_thread_val, make_brk_line, make_process_line, make_thread_line, make_uuid_line, null_if_void, rm_brk_line, rm_uuid_line, wait, ws, ws_message,
-    indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  ws = null;
-
-  wait = 25;
-
-  make_uuid_line = function(uuid, socket) {
-    var $line;
-    if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
-      $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"> <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a> </td>");
-      $('.sessions tbody').append($line);
+      return console.log.apply(console, log_args);
     }
-    return $line.find("." + socket).text('Yes');
   };
 
-  rm_uuid_line = function(uuid, socket) {
-    var $line;
-    if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
-      return;
+  Log.prototype.fail = function() {
+    var log_args, name;
+    name = this.constructor.name;
+    log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+    return console.error.apply(console, log_args);
+  };
+
+  return Log;
+
+})();
+
+ws = null;
+
+wait = 25;
+
+make_uuid_line = function(uuid, socket) {
+  var $line;
+  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
+    $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"> <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a> </td>");
+    $('.sessions tbody').append($line);
+  }
+  return $line.find("." + socket).text('Yes');
+};
+
+rm_uuid_line = function(uuid, socket) {
+  var $line;
+  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
+    return;
+  }
+  if ((socket === 'socket' && $line.find('.websocket').text() === 'No') || (socket === 'websocket' && $line.find('.socket').text() === 'No')) {
+    return $line.remove();
+  } else {
+    return $line.find("." + socket).text('No');
+  }
+};
+
+make_brk_line = function(brk) {
+  var elt, i, len, line, ref;
+  line = '<tr>';
+  ref = ['fn', 'lno', 'cond', 'fun'];
+  for (i = 0, len = ref.length; i < len; i++) {
+    elt = ref[i];
+    line += "<td class=\"" + elt + "\">" + (brk[elt] || '∅') + "</td>";
+  }
+  line += "<td class=\"action\"> <a class=\"fa fa-folder-open open\" title=\"Open\"></a> <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a> </td>";
+  line += '</tr>';
+  return $('.breakpoints tbody').append($(line));
+};
+
+rm_brk_line = function(brk) {
+  var $tr, elt, i, j, len, len1, ref, ref1, results, same, tr;
+  ref = $('.breakpoints tr');
+  results = [];
+  for (i = 0, len = ref.length; i < len; i++) {
+    tr = ref[i];
+    $tr = $(tr);
+    same = true;
+    ref1 = ['fn', 'lno', 'cond', 'fun'];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      elt = ref1[j];
+      same = same && $tr.find("." + elt).text() === '' + (brk[elt] || '∅');
     }
-    if ((socket === 'socket' && $line.find('.websocket').text() === 'No') || (socket === 'websocket' && $line.find('.socket').text() === 'No')) {
-      return $line.remove();
+    if (same) {
+      results.push($tr.remove());
     } else {
-      return $line.find("." + socket).text('No');
+      results.push(void 0);
     }
-  };
+  }
+  return results;
+};
 
-  make_brk_line = function(brk) {
-    var elt, i, len, line, ref;
-    line = '<tr>';
-    ref = ['fn', 'lno', 'cond', 'fun'];
+get_proc_thread_val = function(obj, elt) {
+  var i, len, part, parts, ref, timeSince, val;
+  val = obj[elt];
+  if (val == null) {
+    return '∅';
+  }
+  if (elt === 'time') {
+    timeSince = function(date) {
+      var interval, seconds;
+      seconds = Math.floor((new Date() - date) / 1000);
+      interval = Math.floor(seconds / 31536000);
+      if (interval > 1) {
+        return interval + "y";
+      }
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) {
+        return interval + "mo";
+      }
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) {
+        return interval + "d";
+      }
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) {
+        return interval + "h";
+      }
+      interval = Math.floor(seconds / 60);
+      if (interval > 1) {
+        return interval + "m";
+      }
+      return Math.floor(seconds) + "s";
+    };
+    val = timeSince(1000 * val);
+  } else if (elt === 'mem' || elt === 'cpu') {
+    val = val.toFixed(2) + '%';
+  } else if (elt === 'cmd') {
+    parts = [];
+    ref = val.split(' ');
     for (i = 0, len = ref.length; i < len; i++) {
-      elt = ref[i];
-      line += "<td class=\"" + elt + "\">" + (brk[elt] || '∅') + "</td>";
+      part = ref[i];
+      if (part.indexOf('/') === 0) {
+        parts.push("<abbr title=\"" + part + "\">" + (part.split('/').slice(-1)) + "</abbr>");
+      } else if (part.indexOf(':') === 1 && part.indexOf('\\') === 2) {
+        parts.push("<abbr title=\"" + part + "\"> " + (part.slice(3).split('\\').slice(-1)) + "</abbr>");
+      } else {
+        parts.push(part);
+      }
     }
-    line += "<td class=\"action\"> <a class=\"fa fa-folder-open open\" title=\"Open\"></a> <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a> </td>";
-    line += '</tr>';
-    return $('.breakpoints tbody').append($(line));
-  };
+    val = parts.join(' ');
+  }
+  return val;
+};
 
-  rm_brk_line = function(brk) {
-    var $tr, elt, i, j, len, len1, ref, ref1, results, same, tr;
-    ref = $('.breakpoints tr');
+make_process_line = function(proc) {
+  var $tr, elt, i, j, len, len1, line, ref, ref1, results;
+  if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
+    ref = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
-      tr = ref[i];
-      $tr = $(tr);
-      same = true;
-      ref1 = ['fn', 'lno', 'cond', 'fun'];
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        elt = ref1[j];
-        same = same && $tr.find("." + elt).text() === '' + (brk[elt] || '∅');
-      }
-      if (same) {
-        results.push($tr.remove());
-      } else {
-        results.push(void 0);
-      }
+      elt = ref[i];
+      results.push($tr.find("." + elt).html(get_proc_thread_val(proc, elt)));
     }
     return results;
-  };
-
-  get_proc_thread_val = function(obj, elt) {
-    var i, len, part, parts, ref, timeSince, val;
-    val = obj[elt];
-    if (val == null) {
-      return '∅';
+  } else {
+    line = "<tr data-pid=\"" + proc.pid + "\" " + (proc.threadof ? 'data-threadof="' + proc.threadof + '"' : '') + ">";
+    ref1 = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
+    for (j = 0, len1 = ref1.length; j < len1; j++) {
+      elt = ref1[j];
+      line += "<td class=\"rowspan " + elt + "\"> " + (get_proc_thread_val(proc, elt)) + "</td>";
     }
-    if (elt === 'time') {
-      timeSince = function(date) {
-        var interval, seconds;
-        seconds = Math.floor((new Date() - date) / 1000);
-        interval = Math.floor(seconds / 31536000);
-        if (interval > 1) {
-          return interval + "y";
-        }
-        interval = Math.floor(seconds / 2592000);
-        if (interval > 1) {
-          return interval + "mo";
-        }
-        interval = Math.floor(seconds / 86400);
-        if (interval > 1) {
-          return interval + "d";
-        }
-        interval = Math.floor(seconds / 3600);
-        if (interval > 1) {
-          return interval + "h";
-        }
-        interval = Math.floor(seconds / 60);
-        if (interval > 1) {
-          return interval + "m";
-        }
-        return Math.floor(seconds) + "s";
-      };
-      val = timeSince(1000 * val);
-    } else if (elt === 'mem' || elt === 'cpu') {
-      val = val.toFixed(2) + '%';
-    } else if (elt === 'cmd') {
-      parts = [];
-      ref = val.split(' ');
+    line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a></td>";
+    line += "<td class=\"action\">";
+    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
+    line += "</td>";
+    line += '</tr>';
+    return $('.processes tbody').append($(line));
+  }
+};
+
+make_thread_line = function(thread) {
+  var $next, $proc, $tr, elt, i, len, line, ref, results;
+  $proc = $(".processes tbody tr[data-pid=" + thread.of + "]");
+  if (!$proc.size()) {
+    return;
+  }
+  if (($tr = $(".processes tbody tr[data-tid=" + thread.id + "]")).size()) {
+    ref = ['id', 'of'];
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      elt = ref[i];
+      results.push($tr.find("." + elt).text(get_proc_thread_val(thread, elt)));
+    }
+    return results;
+  } else {
+    line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\">";
+    line += "<td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>";
+    line += "<td class=\"action\">";
+    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
+    line += "</td>";
+    line += '</tr>';
+    $next = $proc.nextAll('[data-pid]');
+    if ($next.size()) {
+      $next.before(line);
+    } else {
+      $(".processes tbody").append(line);
+    }
+    return $proc.find('.rowspan').attr('rowspan', (+$proc.find('.rowspan').attr('rowspan') || 1) + 1);
+  }
+};
+
+ws_message = function(event) {
+  var $proc, $tr, cmd, data, i, j, len, len1, message, pipe, ref, ref1, ref2, ref3, results, results1, tr;
+  wait = 25;
+  message = event.data;
+  pipe = message.indexOf('|');
+  if (pipe > -1) {
+    cmd = message.substr(0, pipe);
+    data = JSON.parse(message.substr(pipe + 1));
+  } else {
+    cmd = message;
+    data = '';
+  }
+  switch (cmd) {
+    case 'AddWebSocket':
+      return make_uuid_line(data, 'websocket');
+    case 'AddSocket':
+      return make_uuid_line(data, 'socket');
+    case 'RemoveWebSocket':
+      return rm_uuid_line(data, 'websocket');
+    case 'RemoveSocket':
+      return rm_uuid_line(data, 'socket');
+    case 'AddBreak':
+      return make_brk_line(data);
+    case 'RemoveBreak':
+      return rm_brk_line(data);
+    case 'AddProcess':
+      return make_process_line(data);
+    case 'AddThread':
+      return make_thread_line(data);
+    case 'KeepProcess':
+      ref = $('.processes tbody tr[data-pid]');
+      results = [];
       for (i = 0, len = ref.length; i < len; i++) {
-        part = ref[i];
-        if (part.indexOf('/') === 0) {
-          parts.push("<abbr title=\"" + part + "\">" + (part.split('/').slice(-1)) + "</abbr>");
-        } else if (part.indexOf(':') === 1 && part.indexOf('\\') === 2) {
-          parts.push("<abbr title=\"" + part + "\"> " + (part.slice(3).split('\\').slice(-1)) + "</abbr>");
+        tr = ref[i];
+        $tr = $(tr);
+        if (ref1 = parseInt($tr.attr('data-pid')), indexOf.call(data, ref1) < 0) {
+          $(".processes [data-of=" + ($tr.attr('data-pid')) + "]").remove();
+          results.push($tr.remove());
         } else {
-          parts.push(part);
+          results.push(void 0);
         }
-      }
-      val = parts.join(' ');
-    }
-    return val;
-  };
-
-  make_process_line = function(proc) {
-    var $tr, elt, i, j, len, len1, line, ref, ref1, results;
-    if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
-      ref = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        elt = ref[i];
-        results.push($tr.find("." + elt).html(get_proc_thread_val(proc, elt)));
       }
       return results;
-    } else {
-      line = "<tr data-pid=\"" + proc.pid + "\" " + (proc.threadof ? 'data-threadof="' + proc.threadof + '"' : '') + ">";
-      ref1 = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
-      for (j = 0, len1 = ref1.length; j < len1; j++) {
-        elt = ref1[j];
-        line += "<td class=\"rowspan " + elt + "\"> " + (get_proc_thread_val(proc, elt)) + "</td>";
-      }
-      line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a></td>";
-      line += "<td class=\"action\">";
-      line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
-      line += "</td>";
-      line += '</tr>';
-      return $('.processes tbody').append($(line));
-    }
-  };
-
-  make_thread_line = function(thread) {
-    var $next, $proc, $tr, elt, i, len, line, ref, results;
-    $proc = $(".processes tbody tr[data-pid=" + thread.of + "]");
-    if (!$proc.size()) {
-      return;
-    }
-    if (($tr = $(".processes tbody tr[data-tid=" + thread.id + "]")).size()) {
-      ref = ['id', 'of'];
-      results = [];
-      for (i = 0, len = ref.length; i < len; i++) {
-        elt = ref[i];
-        results.push($tr.find("." + elt).text(get_proc_thread_val(thread, elt)));
-      }
-      return results;
-    } else {
-      line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\">";
-      line += "<td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>";
-      line += "<td class=\"action\">";
-      line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
-      line += "</td>";
-      line += '</tr>';
-      $next = $proc.nextAll('[data-pid]');
-      if ($next.size()) {
-        $next.before(line);
-      } else {
-        $(".processes tbody").append(line);
-      }
-      return $proc.find('.rowspan').attr('rowspan', (+$proc.find('.rowspan').attr('rowspan') || 1) + 1);
-    }
-  };
-
-  ws_message = function(event) {
-    var $proc, $tr, cmd, data, i, j, len, len1, message, pipe, ref, ref1, ref2, ref3, results, results1, tr;
-    wait = 25;
-    message = event.data;
-    pipe = message.indexOf('|');
-    if (pipe > -1) {
-      cmd = message.substr(0, pipe);
-      data = JSON.parse(message.substr(pipe + 1));
-    } else {
-      cmd = message;
-      data = '';
-    }
-    switch (cmd) {
-      case 'AddWebSocket':
-        return make_uuid_line(data, 'websocket');
-      case 'AddSocket':
-        return make_uuid_line(data, 'socket');
-      case 'RemoveWebSocket':
-        return rm_uuid_line(data, 'websocket');
-      case 'RemoveSocket':
-        return rm_uuid_line(data, 'socket');
-      case 'AddBreak':
-        return make_brk_line(data);
-      case 'RemoveBreak':
-        return rm_brk_line(data);
-      case 'AddProcess':
-        return make_process_line(data);
-      case 'AddThread':
-        return make_thread_line(data);
-      case 'KeepProcess':
-        ref = $('.processes tbody tr[data-pid]');
-        results = [];
-        for (i = 0, len = ref.length; i < len; i++) {
-          tr = ref[i];
-          $tr = $(tr);
-          if (ref1 = parseInt($tr.attr('data-pid')), indexOf.call(data, ref1) < 0) {
-            $(".processes [data-of=" + ($tr.attr('data-pid')) + "]").remove();
-            results.push($tr.remove());
-          } else {
-            results.push(void 0);
-          }
+      break;
+    case 'KeepProcess':
+      ref2 = $('.processes tbody tr[data-tid]');
+      results1 = [];
+      for (j = 0, len1 = ref2.length; j < len1; j++) {
+        tr = ref2[j];
+        $tr = $(tr);
+        if (ref3 = parseInt($tr.attr('data-tid')), indexOf.call(data, ref3) < 0) {
+          $tr.remove();
+          $proc = $(".processes [data-pid=" + ($tr.attr('data-of')) + "]");
+          results1.push($proc.attr('rowspan', +$proc.attr('rowspan') - 1));
+        } else {
+          results1.push(void 0);
         }
-        return results;
-        break;
-      case 'KeepProcess':
-        ref2 = $('.processes tbody tr[data-tid]');
-        results1 = [];
-        for (j = 0, len1 = ref2.length; j < len1; j++) {
-          tr = ref2[j];
-          $tr = $(tr);
-          if (ref3 = parseInt($tr.attr('data-tid')), indexOf.call(data, ref3) < 0) {
-            $tr.remove();
-            $proc = $(".processes [data-pid=" + ($tr.attr('data-of')) + "]");
-            results1.push($proc.attr('rowspan', +$proc.attr('rowspan') - 1));
-          } else {
-            results1.push(void 0);
-          }
-        }
-        return results1;
-        break;
-      case 'StartLoop':
-        return setInterval((function() {
-          return ws.send('ListProcesses');
-        }), 2000);
-    }
-  };
+      }
+      return results1;
+      break;
+    case 'StartLoop':
+      return setInterval((function() {
+        return ws.send('ListProcesses');
+      }), 2000);
+  }
+};
 
-  create_socket = function() {
-    ws = new WebSocket("ws://" + location.host + "/status");
-    ws.onopen = function() {
-      console.log("WebSocket open", arguments);
-      $("tbody tr").remove();
-      ws.send('ListSockets');
-      ws.send('ListWebSockets');
-      ws.send('ListBreaks');
-      return ws.send('ListProcesses');
-    };
-    ws.onerror = function() {
-      return console.log("WebSocket error", arguments);
-    };
-    ws.onmessage = ws_message;
-    return ws.onclose = function() {
-      console.log("WebSocket closed", arguments);
-      wait *= 2;
-      return setTimeout(create_socket, wait);
-    };
+create_socket = function() {
+  ws = new WebSocket("ws://" + location.host + "/status");
+  ws.onopen = function() {
+    console.log("WebSocket open", arguments);
+    $("tbody tr").remove();
+    ws.send('ListSockets');
+    ws.send('ListWebSockets');
+    ws.send('ListBreaks');
+    return ws.send('ListProcesses');
   };
-
-  null_if_void = function(s) {
-    if (s === '∅') {
-      return null;
-    } else {
-      return s;
-    }
+  ws.onerror = function() {
+    return console.log("WebSocket error", arguments);
   };
+  ws.onmessage = ws_message;
+  return ws.onclose = function() {
+    console.log("WebSocket closed", arguments);
+    wait *= 2;
+    return setTimeout(create_socket, wait);
+  };
+};
 
-  $(function() {
-    create_socket();
-    $('.sessions tbody').on('click', '.remove', function(e) {
-      ws.send('RemoveUUID|' + $(this).closest('tr').attr('data-uuid'));
-      return false;
-    });
-    $('.breakpoints tbody').on('click', '.open', function(e) {
-      var $tr;
-      $tr = $(this).closest('tr');
-      ws.send('RunFile|' + $tr.find('.fn').text());
-      return false;
-    });
-    $('.breakpoints tbody').on('click', '.remove', function(e) {
-      var $tr, brk;
-      $tr = $(this).closest('tr');
-      brk = {
-        fn: $tr.find('.fn').text(),
-        lno: parseInt($tr.find('.lno').text()),
-        cond: null_if_void($tr.find('.cond').text()),
-        fun: null_if_void($tr.find('.fun').text())
-      };
-      ws.send('RemoveBreak|' + JSON.stringify(brk));
-      return false;
-    });
-    $('.processes tbody').on('click', '.pause', function(e) {
-      var $tr;
-      $tr = $(this).closest('tr');
-      ws.send('Pause|' + ($tr.attr('data-pid') || $tr.attr('data-tid')));
-      return false;
-    }).on('click', '.minus', function(e) {
-      var $a, $tr;
-      $a = $(this);
-      $tr = $a.closest('tr');
-      $("[data-of=" + ($tr.attr('data-pid')) + "]").hide();
-      $tr.find('.rowspan').attr('rowspan', 1);
-      $a.attr('class', $a.attr('class').replace(/minus/g, 'plus'));
-      return false;
-    }).on('click', '.plus', function(e) {
-      var $a, $tr, rowspan;
-      $a = $(this);
-      $tr = $a.closest('tr');
-      rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().size();
-      $tr.find('.rowspan').attr('rowspan', rowspan + 1);
-      $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
-      return false;
-    });
-    return $('.runfile').on('submit', function() {
-      ws.send('RunFile|' + $(this).find('[type=text]').val());
-      return false;
-    });
+null_if_void = function(s) {
+  if (s === '∅') {
+    return null;
+  } else {
+    return s;
+  }
+};
+
+$(function() {
+  create_socket();
+  $('.sessions tbody').on('click', '.remove', function(e) {
+    ws.send('RemoveUUID|' + $(this).closest('tr').attr('data-uuid'));
+    return false;
   });
-
-}).call(this);
+  $('.breakpoints tbody').on('click', '.open', function(e) {
+    var $tr;
+    $tr = $(this).closest('tr');
+    ws.send('RunFile|' + $tr.find('.fn').text());
+    return false;
+  });
+  $('.breakpoints tbody').on('click', '.remove', function(e) {
+    var $tr, brk;
+    $tr = $(this).closest('tr');
+    brk = {
+      fn: $tr.find('.fn').text(),
+      lno: parseInt($tr.find('.lno').text()),
+      cond: null_if_void($tr.find('.cond').text()),
+      fun: null_if_void($tr.find('.fun').text())
+    };
+    ws.send('RemoveBreak|' + JSON.stringify(brk));
+    return false;
+  });
+  $('.processes tbody').on('click', '.pause', function(e) {
+    var $tr;
+    $tr = $(this).closest('tr');
+    ws.send('Pause|' + ($tr.attr('data-pid') || $tr.attr('data-tid')));
+    return false;
+  }).on('click', '.minus', function(e) {
+    var $a, $tr;
+    $a = $(this);
+    $tr = $a.closest('tr');
+    $("[data-of=" + ($tr.attr('data-pid')) + "]").hide();
+    $tr.find('.rowspan').attr('rowspan', 1);
+    $a.attr('class', $a.attr('class').replace(/minus/g, 'plus'));
+    return false;
+  }).on('click', '.plus', function(e) {
+    var $a, $tr, rowspan;
+    $a = $(this);
+    $tr = $a.closest('tr');
+    rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().size();
+    $tr.find('.rowspan').attr('rowspan', rowspan + 1);
+    $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
+    return false;
+  });
+  return $('.runfile').on('submit', function() {
+    ws.send('RunFile|' + $(this).find('[type=text]').val());
+    return false;
+  });
+});

@@ -71,6 +71,9 @@ module.exports = (grunt) ->
             'wdb_server/static/stylesheets/deps.embed.css')
 
     coffee:
+      options:
+        bare: true
+        join: true
       wdb:
         files:
           'wdb_server/static/javascripts/wdb.js': [
