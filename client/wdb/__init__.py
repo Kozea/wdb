@@ -419,33 +419,32 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self, obj, context=None, html=True, level=0):
+    def safe_better_repr(self, obj, context=None, html=True, level=0,
+                         recursion=False):
         """Repr with inspect links on objects"""
         context = context or {}
-        if id(obj) not in context:
-            recursive = False
-            context[id(obj)] = obj
+        context[id(obj)] = obj
+        if not recursion:
             try:
                 rv = self.better_repr(obj, context, html, level + 1)
             except Exception:
                 rv = None
             if rv:
                 return rv
-        else:
-            recursive = True
 
         self.obj_cache[id(obj)] = obj
         if html:
             return '<a href="%d" class="inspect">%s%s</a>' % (
                 id(obj),
-                'Recursion of ' if recursive else '',
+                'Recursion of ' if recursion else '',
                 escape(self.safe_repr(obj)))
         return '%s%s' % (
-            'Recursion of ' if recursive else '',
+            'Recursion of ' if recursion else '',
             self.safe_repr(obj))
 
     def better_repr(self, obj, context=None, html=True, level=1):
         """Repr with html decorations or indentation"""
+        current_ids = context.keys()
         if isinstance(obj, dict):
             dict_repr = '  ' * (level - 1)
             if type(obj) != dict:
@@ -461,7 +460,8 @@ class Wdb(object):
                     dict_repr += ''.join([
                         '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
                         '<td>' + self.safe_better_repr(
-                            val, context, html, level) +
+                            val, context, html, level,
+                            id(val) in current_ids) +
                         '</td></tr>'
                         for key, val in sorted(
                             obj.items(),
@@ -470,7 +470,8 @@ class Wdb(object):
                 else:
                     dict_repr += ('\n' + '  ' * level).join([
                         self.safe_repr(key) + ': ' + self.safe_better_repr(
-                            val, context, html, level)
+                            val, context, html, level,
+                            id(val) in current_ids)
                         for key, val in sorted(
                             obj.items(),
                             key=lambda x: x[0])])
@@ -478,7 +479,7 @@ class Wdb(object):
             else:
                 dict_repr += ', '.join([
                     self.safe_repr(key) + ': ' + self.safe_better_repr(
-                        val, context, html, level)
+                        val, context, html, level, id(val) in current_ids)
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
@@ -487,6 +488,7 @@ class Wdb(object):
                 isinstance(obj, list),
                 isinstance(obj, set),
                 isinstance(obj, tuple)]):
+            current_ids = dict(context)
             iter_repr = '  ' * (level - 1)
             if type(obj) == list:
                 iter_repr = '['
@@ -508,7 +510,9 @@ class Wdb(object):
                 closer = '\n' + '  ' * (level - 1) + closer
 
             iter_repr += splitter.join(
-                [self.safe_better_repr(val, context, html, level)
+                [self.safe_better_repr(
+                    val, context, html, level,
+                    id(val) in current_ids)
                  for val in obj])
 
             iter_repr += closer
