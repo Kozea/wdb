@@ -290,7 +290,7 @@ class Interaction(object):
             return
 
         self.db.send('Dump|%s' % dump({
-            'for': repr(thing),
+            'for': self.db.safe_repr(thing),
             'val': self.db.dmp(thing),
             'doc': get_doc(thing),
             'source': get_source(thing)
@@ -305,7 +305,7 @@ class Interaction(object):
             return
 
         self.db.send('Dump|%s' % dump({
-            'for': u('%s ⟶ %s ') % (data, repr(thing)),
+            'for': u('%s ⟶ %s ') % (data, self.db.safe_repr(thing)),
             'val': self.db.dmp(thing),
             'doc': get_doc(thing),
             'source': get_source(thing)}))
@@ -316,6 +316,8 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
+        if data == 'a':
+            self.db.set_trace()
         redir = None
         suggest = None
         raw_data = data.strip()
@@ -427,9 +429,14 @@ class Interaction(object):
         from linecache import getline
 
         brk = loads(data)
+
         break_fail = lambda x: self.fail(
             'Break', 'Break on %s failed' % (
                 '%s:%s' % (brk['fn'], brk['lno'])), message=x)
+
+        if not brk.get('fn'):
+            break_fail('Can’t break with no current file')
+            return
 
         if brk['lno'] is not None:
             try:
@@ -629,7 +636,7 @@ class Interaction(object):
                 return
 
         render = (
-            (lambda x: self.db.better_repr(x, html=False) or repr(x))
+            (lambda x: self.db.better_repr(x, html=False) or self.db.safe_repr(x))
         ) if pretty else str
         strings = [render(string) if not is_str(string) else string
                    for string in strings]

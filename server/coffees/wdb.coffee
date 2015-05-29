@@ -16,7 +16,7 @@
 
 
 class Wdb extends Log
-  __version__: '2.1.1'
+  __version__: '2.1.2'
 
   constructor: ->
     super
@@ -54,6 +54,7 @@ class Wdb extends Log
 
     @ws = new Websocket(@, @$wdb.find('> header').attr('data-uuid'))
     @cm = new Codemirror(@)
+    @$eval.focus()
 
   opening: ->
     # Start by getting current trace

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 _initial_globals = dict(globals())
 
 from ._compat import (
@@ -419,12 +419,12 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self, obj, context=None, html=True, level=0,
-                         recursion=False):
+    def safe_better_repr(self, obj, context=None, html=True, level=0):
         """Repr with inspect links on objects"""
-        context = context or {}
-        context[id(obj)] = obj
+        context = context and dict(context) or {}
+        recursion = id(obj) in context
         if not recursion:
+            context[id(obj)] = obj
             try:
                 rv = self.better_repr(obj, context, html, level + 1)
             except Exception:
@@ -444,7 +444,6 @@ class Wdb(object):
 
     def better_repr(self, obj, context=None, html=True, level=1):
         """Repr with html decorations or indentation"""
-        current_ids = context.keys()
         if isinstance(obj, dict):
             dict_repr = '  ' * (level - 1)
             if type(obj) != dict:
@@ -460,8 +459,7 @@ class Wdb(object):
                     dict_repr += ''.join([
                         '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
                         '<td>' + self.safe_better_repr(
-                            val, context, html, level,
-                            id(val) in current_ids) +
+                            val, context, html, level) +
                         '</td></tr>'
                         for key, val in sorted(
                             obj.items(),
@@ -470,8 +468,7 @@ class Wdb(object):
                 else:
                     dict_repr += ('\n' + '  ' * level).join([
                         self.safe_repr(key) + ': ' + self.safe_better_repr(
-                            val, context, html, level,
-                            id(val) in current_ids)
+                            val, context, html, level)
                         for key, val in sorted(
                             obj.items(),
                             key=lambda x: x[0])])
@@ -479,7 +476,7 @@ class Wdb(object):
             else:
                 dict_repr += ', '.join([
                     self.safe_repr(key) + ': ' + self.safe_better_repr(
-                        val, context, html, level, id(val) in current_ids)
+                        val, context, html, level)
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
@@ -488,7 +485,6 @@ class Wdb(object):
                 isinstance(obj, list),
                 isinstance(obj, set),
                 isinstance(obj, tuple)]):
-            current_ids = dict(context)
             iter_repr = '  ' * (level - 1)
             if type(obj) == list:
                 iter_repr = '['
@@ -511,8 +507,7 @@ class Wdb(object):
 
             iter_repr += splitter.join(
                 [self.safe_better_repr(
-                    val, context, html, level,
-                    id(val) in current_ids)
+                    val, context, html, level)
                  for val in obj])
 
             iter_repr += closer
