@@ -201,7 +201,8 @@ body, html {
         -webkit-flex: 1;
             -ms-flex: 1;
                 flex: 1;
-        position: relative; }
+        position: relative;
+        min-height: 45vh; }
         #wdb > article #source #source-editor .CodeMirror {
           position: absolute;
           height: 100%;
@@ -211,7 +212,7 @@ body, html {
         -webkit-flex: 1;
             -ms-flex: 1;
                 flex: 1;
-        max-height: 50vh;
+        min-height: 40vh;
         overflow-y: auto; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
