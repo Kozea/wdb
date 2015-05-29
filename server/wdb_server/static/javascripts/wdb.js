@@ -345,7 +345,7 @@ Codemirror = (function(superClass) {
 Wdb = (function(superClass) {
   extend(Wdb, superClass);
 
-  Wdb.prototype.__version__ = '2.1.1';
+  Wdb.prototype.__version__ = '2.1.2';
 
   function Wdb() {
     var e;
@@ -381,6 +381,7 @@ Wdb = (function(superClass) {
     }
     this.ws = new Websocket(this, this.$wdb.find('> header').attr('data-uuid'));
     this.cm = new Codemirror(this);
+    this.$eval.focus();
   }
 
   Wdb.prototype.opening = function() {
