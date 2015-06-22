@@ -66,7 +66,7 @@ class WdbMiddleware(object):
             def trace_wsgi(environ, start_response):
                 appiter = None
                 try:
-                    with trace(close_on_exit=True):
+                    with trace(close_on_exit=True, under=self.app):
                         appiter = self.app(environ, start_response)
                         for item in appiter:
                             yield item
