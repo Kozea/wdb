@@ -118,7 +118,7 @@ class Interaction(object):
             globals_ = dict(self.current_frame.f_globals)
         globals_['_'] = self.db.last_obj
         if cut is not None:
-            globals_['cut'] = cut
+            globals_.setdefault('cut', cut)
         # For meta debuging purpose
         globals_['___wdb'] = self.db
         # Hack for function scope eval
