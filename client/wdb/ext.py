@@ -106,7 +106,12 @@ def wdb_tornado(application, start_disabled=False):
         def get(self):
             Wdb.enabled = True
             self.write('Wdb is now on')
-    application.add_handlers(r'.*', ((r'/__wdb/on', WdbOn),))
+    class WdbOff(RequestHandler):
+        def get(self):
+            Wdb.enabled = False
+            self.write('Wdb is now off')
+    application.add_handlers(r'.*', ((r'/__wdb/on', WdbOn),
+                                     (r'/__wdb/off', WdbOff)))
     old_execute = RequestHandler._execute
     under = getattr(RequestHandler._execute, '__wrapped__', None)
 
