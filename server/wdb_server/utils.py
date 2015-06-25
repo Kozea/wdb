@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import sys
+import fnmatch
 from logging import getLogger
 from wdb_server.state import syncwebsockets
 from glob import glob
@@ -39,6 +42,11 @@ else:
             self.files = glob('/usr/lib/libpython*')
             if not self.files:
                 self.files = glob('/lib/libpython*')
+
+            # Handle custom installation paths
+            for root, dirnames, filenames in os.walk(sys.base_prefix):
+                for filename in fnmatch.filter(filenames, 'libpython*'):
+                    self.files.append(os.path.join(root, filename))
 
             log.debug('Watching for %s' % self.files)
             self.notifier = pyinotify.TornadoAsyncNotifier(
