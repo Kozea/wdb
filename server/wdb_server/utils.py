@@ -37,16 +37,17 @@ except ImportError:
     LibPythonWatcher = None
 else:
     class LibPythonWatcher(object):
-        def __init__(self):
+        def __init__(self, extra_search_path=None):
             inotify = pyinotify.WatchManager()
             self.files = glob('/usr/lib/libpython*')
             if not self.files:
                 self.files = glob('/lib/libpython*')
 
-            # Handle custom installation paths
-            for root, dirnames, filenames in os.walk(sys.base_prefix):
-                for filename in fnmatch.filter(filenames, 'libpython*'):
-                    self.files.append(os.path.join(root, filename))
+            if extra_search_path is not None:
+                # Handle custom installation paths
+                for root, dirnames, filenames in os.walk(extra_search_path):
+                    for filename in fnmatch.filter(filenames, 'libpython*'):
+                        self.files.append(os.path.join(root, filename))
 
             log.debug('Watching for %s' % self.files)
             self.notifier = pyinotify.TornadoAsyncNotifier(
