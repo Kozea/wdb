@@ -20,6 +20,7 @@ import tornado.process
 import tornado.web
 import tornado.websocket
 import os
+import sys
 import logging
 import json
 from wdb_server.state import (
@@ -246,6 +247,9 @@ tornado.options.define("socket_port", default=19840,
                        help="Port used to communicate with wdb instances")
 tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
+tornado.options.define("extra_search_path", default=False,
+                       help=("Try harder to find the 'libpython*' shared library "
+                             "at the cost of a slower server startup."))
 
 tornado.options.parse_command_line()
 from wdb_server.utils import refresh_process, LibPythonWatcher
@@ -258,7 +262,8 @@ for l in (log, logging.getLogger('tornado.access'),
     l.setLevel(10 if tornado.options.options.debug else 30)
 
 if LibPythonWatcher:
-    LibPythonWatcher()
+    LibPythonWatcher(
+        sys.base_prefix if tornado.options.options.extra_search_path else None)
 
 server = tornado.web.Application(
     [

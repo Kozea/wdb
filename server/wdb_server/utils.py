@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import sys
+import fnmatch
 from logging import getLogger
 from wdb_server.state import syncwebsockets
 from glob import glob
@@ -34,11 +37,17 @@ except ImportError:
     LibPythonWatcher = None
 else:
     class LibPythonWatcher(object):
-        def __init__(self):
+        def __init__(self, extra_search_path=None):
             inotify = pyinotify.WatchManager()
             self.files = glob('/usr/lib/libpython*')
             if not self.files:
                 self.files = glob('/lib/libpython*')
+
+            if extra_search_path is not None:
+                # Handle custom installation paths
+                for root, dirnames, filenames in os.walk(extra_search_path):
+                    for filename in fnmatch.filter(filenames, 'libpython*'):
+                        self.files.append(os.path.join(root, filename))
 
             log.debug('Watching for %s' % self.files)
             self.notifier = pyinotify.TornadoAsyncNotifier(
