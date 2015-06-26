@@ -1092,8 +1092,7 @@ Wdb = (function(superClass) {
       $watcher.addClass('updated');
     }
     this.$watchers.find('.watching:not(.updated)').remove();
-    this.$watchers.find('.watching').removeClass('updated');
-    return this.done();
+    return this.$watchers.find('.watching').removeClass('updated');
   };
 
   Wdb.prototype.ack = function() {
