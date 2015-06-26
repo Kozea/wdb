@@ -1,6 +1,7 @@
 import os.path
 from log_colorizer import get_color_logger
 from hashlib import sha1
+from wdb._compat import import_module
 
 log = get_color_logger('wdb.bp')
 
@@ -17,13 +18,13 @@ def canonic(filename):
 
 def file_from_import(filename, function=None):
     try:
-        module = __import__(filename)
+        module = import_module(filename)
     except ImportError:
         return filename
     if function is None:
         return module.__file__
     fun = getattr(module, function, None)
-    if not fun:
+    if not fun or not hasattr(fun, '__code__'):
         return filename
     return fun.__code__.co_filename
 

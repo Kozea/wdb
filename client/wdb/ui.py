@@ -276,8 +276,10 @@ class Interaction(object):
         if (isinstance(thing, tuple) and len(thing) == 3):
             type_, value, tb = thing
             iter_tb = tb
-            while iter_tb.tb_next != None:
+            while iter_tb.tb_next is not None:
                 iter_tb = iter_tb.tb_next
+
+            self.db.extra_vars['__recursive_exception__'] = value
 
             interaction = Interaction(
                 self.db, iter_tb.tb_frame, tb,
@@ -636,7 +638,8 @@ class Interaction(object):
                 return
 
         render = (
-            (lambda x: self.db.better_repr(x, html=False) or self.db.safe_repr(x))
+            (lambda x: self.db.better_repr(
+                x, html=False) or self.db.safe_repr(x))
         ) if pretty else str
         strings = [render(string) if not is_str(string) else string
                    for string in strings]

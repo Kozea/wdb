@@ -156,6 +156,7 @@ else:
 
 try:
     from importlib.util import find_spec
+    from importlib import import_module
 
     def existing_module(module):
         return bool(find_spec(module))
@@ -168,3 +169,9 @@ except ImportError:
             return True
         except ImportError:
             return False
+
+    def import_module(module):
+        __import__(module)
+        if module not in sys.modules:
+            raise ImportError(module)
+        return sys.modules[module]
