@@ -515,8 +515,8 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
-        script = Interpreter(data, [self.current_locals, self.get_globals()])
         try:
+            script = Interpreter(data, [self.current_locals, self.get_globals()])
             with timeout_of(.75):
                 completions = script.completions()
         except Exception:
@@ -535,7 +535,7 @@ class Interaction(object):
         try:
             suggest_obj = {
                 'params': [{
-                    'params': [p.get_code().replace('\n', '')
+                    'params': [p.description.replace('\n', '')
                                for p in fun.params],
                     'index': fun.index,
                     'module': fun.module_name,

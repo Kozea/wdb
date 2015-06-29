@@ -29,6 +29,7 @@ class Wdb extends Log
     @file_cache = {}
     @last_cmd = null
     @eval_time = null
+    @completion_cols = 5
 
     @waited_for_ws = 0
 
@@ -65,7 +66,11 @@ class Wdb extends Log
         .on 'mouseup', @eval_carret_change.bind @
         .on 'blur', @searchback_stop.bind @
 
-      $(window).on 'keydown', @global_key.bind @
+      $(window)
+        .on 'keydown', @global_key.bind @
+        .on 'resize', =>
+          @completion_cols = Math.max(
+            1, ((@$interpreter.width() / 100) << 0) - 1)
 
       @$traceback.on 'click', '.traceline', @select_click.bind @
       @$scrollback.add(@$watchers)
@@ -88,7 +93,7 @@ class Wdb extends Log
 
           @$interpreter
             .stop(true, true)
-            .animate((scrollTop: @$interpreter.scrollTop() + way * scroll), 500)
+            .animate((scrollTop: @$interpreter.scrollTop() + way * scroll), 250)
           return false
 
         @$eval.focus()
@@ -196,6 +201,7 @@ class Wdb extends Log
       $traceline.append $tracecode
       $traceline.append $tracefunfun
       @$traceback.prepend $traceline
+      $(window).trigger('resize')
 
   select_click: (e) ->
     @ws.send 'Select', $(e.currentTarget).attr('data-level')
@@ -425,9 +431,18 @@ specify a module like `logging.config`.
 '''
 
   termscroll: ->
+    from = @$interpreter.scrollTop()
+    to = Math.max 0, (
+      @$scrollback.outerHeight() +
+       @$prompt.outerHeight() -
+         @$interpreter.height())
+    to += Math.min(@$completions.outerHeight(), @$interpreter.height() / 4)
+
+    return if to - from is 0
+
     @$interpreter
       .stop(true)
-      .animate((scrollTop: @$scrollback.height()), 1000)
+      .animate((scrollTop: to), 250)
 
   print: (data) ->
     if performance and @eval_time
@@ -626,13 +641,16 @@ specify a module like `logging.config`.
   suggest: (data) ->
     if data
       $comp = @$completions.find('table').empty()
-      $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'))
-      height = @$completions.height()
+
       added = []
       for param in data.params
         $('#comp-desc').append(@format_fun(param))
 
       if data.completions.length
+        $comp.append(
+          $('<thead><tr><th id="comp-desc" colspan="' +
+            @completion_cols +
+          '">'))
         $tbody = $('<tbody>')
         base_len = data.completions[0].base.length
         txtarea = @$eval.get(0)
@@ -644,7 +662,7 @@ specify a module like `logging.config`.
         if (completion.base + completion.complete) in added
           continue
         added.push(completion.base + completion.complete)
-        if index % 5 == 0
+        if index % @completion_cols is 0
           $tbody.append($appender = $('<tr>'))
 
         $appender.append($td = $('<td>').attr('title', completion.description)
@@ -654,7 +672,7 @@ specify a module like `logging.config`.
           $td.addClass('complete')
           $('#comp-desc').html($td.attr('title'))
       $comp.append($tbody)
-      @$completions.height(Math.max(height, $comp.height()))
+
       @termscroll()
 
     # Complete queued completion
@@ -856,7 +874,7 @@ specify a module like `logging.config`.
           if @eval_move_suggest (
             unless e.shiftKey then 1 else -1), not multiline
             return false
-        return true
+        return e.keyCode is 39
 
       when 37  # Left
         if @eval_move_suggest -1
@@ -937,6 +955,7 @@ specify a module like `logging.config`.
     @$eval.val().substring(0, startPos)
 
   eval_carret_change: (e) ->
+    return true if e.keyCode and 16 <= e.keyCode <= 18
     if @$completions.find('table td').filter('.active').size()
       eof = @$eval.get(0).selectionStart is @$eval.val().length
       multiline = @$prompt.hasClass('multiline')
@@ -948,6 +967,7 @@ specify a module like `logging.config`.
 
     txt = @eval_before_cursor()
     if @backsearch
+      return if e.keyCode and e.keyCode is 82 and (e.ctrlKey or e.altKey)
       if not txt
         @searchback_stop()
       else
@@ -964,6 +984,7 @@ specify a module like `logging.config`.
       else
         # Queuing completion for next suggest
         @to_complete = txt
+    return
 
   inspect: (e) ->
     @ws.send 'Inspect', $(e.currentTarget).attr('href')

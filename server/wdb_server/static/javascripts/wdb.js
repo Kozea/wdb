@@ -359,6 +359,7 @@ Wdb = (function(superClass) {
     this.file_cache = {};
     this.last_cmd = null;
     this.eval_time = null;
+    this.completion_cols = 5;
     this.waited_for_ws = 0;
     this.$activity = $('#activity');
     this.$title = $('#title');
@@ -387,7 +388,11 @@ Wdb = (function(superClass) {
   Wdb.prototype.opening = function() {
     if (!this.started) {
       this.$eval.on('keydown', this.eval_key.bind(this)).on('keyup', this.eval_carret_change.bind(this)).on('mouseup', this.eval_carret_change.bind(this)).on('blur', this.searchback_stop.bind(this));
-      $(window).on('keydown', this.global_key.bind(this));
+      $(window).on('keydown', this.global_key.bind(this)).on('resize', (function(_this) {
+        return function() {
+          return _this.completion_cols = Math.max(1, ((_this.$interpreter.width() / 100) << 0) - 1);
+        };
+      })(this));
       this.$traceback.on('click', '.traceline', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
@@ -404,7 +409,7 @@ Wdb = (function(superClass) {
             way = e.keyCode === 33 ? -1 : 1;
             _this.$interpreter.stop(true, true).animate({
               scrollTop: _this.$interpreter.scrollTop() + way * scroll
-            }, 500);
+            }, 250);
             return false;
           }
           return _this.$eval.focus();
@@ -510,7 +515,8 @@ Wdb = (function(superClass) {
       $traceline.append($tracefilelno);
       $traceline.append($tracecode);
       $traceline.append($tracefunfun);
-      results.push(this.$traceback.prepend($traceline));
+      this.$traceback.prepend($traceline);
+      results.push($(window).trigger('resize'));
     }
     return results;
   };
@@ -763,9 +769,16 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.termscroll = function() {
+    var from, to;
+    from = this.$interpreter.scrollTop();
+    to = Math.max(0, this.$scrollback.outerHeight() + this.$prompt.outerHeight() - this.$interpreter.height());
+    to += Math.min(this.$completions.outerHeight(), this.$interpreter.height() / 4);
+    if (to - from === 0) {
+      return;
+    }
     return this.$interpreter.stop(true).animate({
-      scrollTop: this.$scrollback.height()
-    }, 1000);
+      scrollTop: to
+    }, 250);
   };
 
   Wdb.prototype.print = function(data) {
@@ -1008,11 +1021,9 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.suggest = function(data) {
-    var $appender, $comp, $tbody, $td, added, base_len, completion, height, index, j, k, len, len1, param, ref, ref1, ref2, startPos, txtarea;
+    var $appender, $comp, $tbody, $td, added, base_len, completion, index, j, k, len, len1, param, ref, ref1, ref2, startPos, txtarea;
     if (data) {
       $comp = this.$completions.find('table').empty();
-      $comp.append($('<thead><tr><th id="comp-desc" colspan="5">'));
-      height = this.$completions.height();
       added = [];
       ref = data.params;
       for (j = 0, len = ref.length; j < len; j++) {
@@ -1020,6 +1031,7 @@ Wdb = (function(superClass) {
         $('#comp-desc').append(this.format_fun(param));
       }
       if (data.completions.length) {
+        $comp.append($('<thead><tr><th id="comp-desc" colspan="' + this.completion_cols + '">'));
         $tbody = $('<tbody>');
         base_len = data.completions[0].base.length;
         txtarea = this.$eval.get(0);
@@ -1036,7 +1048,7 @@ Wdb = (function(superClass) {
           continue;
         }
         added.push(completion.base + completion.complete);
-        if (index % 5 === 0) {
+        if (index % this.completion_cols === 0) {
           $tbody.append($appender = $('<tr>'));
         }
         $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
@@ -1046,7 +1058,6 @@ Wdb = (function(superClass) {
         }
       }
       $comp.append($tbody);
-      this.$completions.height(Math.max(height, $comp.height()));
       this.termscroll();
     }
     if (this.to_complete) {
@@ -1309,7 +1320,7 @@ Wdb = (function(superClass) {
             return false;
           }
         }
-        return true;
+        return e.keyCode === 39;
       case 37:
         if (this.eval_move_suggest(-1)) {
           return false;
@@ -1410,17 +1421,23 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.eval_carret_change = function(e) {
-    var eof, multiline, ref, txt;
+    var eof, multiline, ref, ref1, txt;
+    if (e.keyCode && (16 <= (ref = e.keyCode) && ref <= 18)) {
+      return true;
+    }
     if (this.$completions.find('table td').filter('.active').size()) {
       eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
       multiline = this.$prompt.hasClass('multiline');
-      if (!(e.keyCode && e.keyCode < 27 || (37 <= (ref = e.keyCode) && ref <= 40) || (e.ctrlKey && e.keyCode === 32))) {
+      if (!(e.keyCode && e.keyCode < 27 || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || (e.ctrlKey && e.keyCode === 32))) {
         this.suggest_stop();
       }
       return;
     }
     txt = this.eval_before_cursor();
     if (this.backsearch) {
+      if (e.keyCode && e.keyCode === 82 && (e.ctrlKey || e.altKey)) {
+        return;
+      }
       if (!txt) {
         this.searchback_stop();
       } else {
@@ -1432,9 +1449,9 @@ Wdb = (function(superClass) {
     if (txt && txt[0] !== '.') {
       if (this.to_complete === null) {
         this.ws.send('Complete', txt);
-        return this.to_complete = false;
+        this.to_complete = false;
       } else {
-        return this.to_complete = txt;
+        this.to_complete = txt;
       }
     }
   };
