@@ -104,18 +104,37 @@ body, html {
 
 #wdb {
   box-sizing: border-box;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
-  flex-direction: column;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
   height: 100%; }
   #wdb > header {
-    flex: 0 0 100px;
+    -webkit-box-flex: 0;
+    -webkit-flex: 0 0 100px;
+        -ms-flex: 0 0 100px;
+            flex: 0 0 100px;
     min-height: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
-    align-items: center; }
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
     #wdb > header #activity {
       width: 100px; }
     #wdb > header #title {
-      flex: 1;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1;
       margin: 0;
       font-family: "Helvetica, arial, freesans, clean, sans-serif, 'Segoe UI Emoji', 'Segoe UI Symbol'"; }
   #wdb > article {
@@ -139,15 +158,34 @@ body, html {
       #wdb > article table a {
         color: #0086b3; }
     #wdb > article.split {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex: 1; }
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1; }
     #wdb > article #source {
-      flex: 7;
+      -webkit-box-flex: 7;
+      -webkit-flex: 7;
+          -ms-flex: 7;
+              flex: 7;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex-direction: column;
+      -webkit-box-orient: vertical;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: column;
+          -ms-flex-direction: column;
+              flex-direction: column;
       margin-left: 5px; }
       #wdb > article #source #source-editor {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         position: relative;
         min-height: 45vh; }
         #wdb > article #source #source-editor .CodeMirror {
@@ -155,34 +193,59 @@ body, html {
           height: 100%;
           width: 100%; }
       #wdb > article #source #interpreter {
-        flex: 1;
+        -webkit-box-flex: 1;
+        -webkit-flex: 1;
+            -ms-flex: 1;
+                flex: 1;
         min-height: 40vh;
         overflow-y: auto;
         padding-bottom: 1em; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
     #wdb > article #traceback {
-      flex: 3;
+      -webkit-box-flex: 3;
+      -webkit-flex: 3;
+          -ms-flex: 3;
+              flex: 3;
       overflow-y: auto;
       overflow-x: hidden; }
   #wdb > footer {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
     display: flex;
     min-height: 0; }
     #wdb > footer #watchers {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
       display: flex;
-      flex-flow: row wrap;
-      flex: 1; }
+      -webkit-flex-flow: row wrap;
+          -ms-flex-flow: row wrap;
+              flex-flow: row wrap;
+      -webkit-box-flex: 1;
+      -webkit-flex: 1;
+          -ms-flex: 1;
+              flex: 1; }
       #wdb > footer #watchers > div {
         margin-left: 5px;
         margin-right: 2em;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
         display: flex; }
         #wdb > footer #watchers > div .name {
           color: #666;
           cursor: pointer; }
         #wdb > footer #watchers > div .value {
-          flex: 1; }
+          -webkit-box-flex: 1;
+          -webkit-flex: 1;
+              -ms-flex: 1;
+                  flex: 1; }
     #wdb > footer #home {
-      align-self: flex-end;
+      -webkit-align-self: flex-end;
+          -ms-flex-item-align: end;
+              align-self: flex-end;
       margin: 0 5px; }
 
 a {
@@ -291,7 +354,9 @@ code {
     border-top: 1px solid #d01040;
     border-bottom: 1px solid #d01040;
     padding: .2em 2em;
-    transform: rotate(45deg); }
+    -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+            transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
     width: .6em;
     border: none; }
@@ -299,7 +364,10 @@ code {
 #eval {
   background-color: transparent;
   border: none;
-  flex: 1;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
   margin: 0;
   outline: none;
   overflow: hidden;
@@ -338,6 +406,9 @@ code {
     left: 0; }
 
 #prompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex; }
   #prompt textarea {
     color: #666;
@@ -366,7 +437,8 @@ code {
   font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace; }
 
 .traceline {
-  transition: 750ms;
+  -webkit-transition: 750ms;
+          transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace;
   clear: both;
@@ -495,9 +567,11 @@ code {
   width: .6em; }
 
 .CodeMirror-linebackground {
-  transition: background-color 1s; }
+  -webkit-transition: background-color 1s;
+          transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
-    transition: 1s;
+    -webkit-transition: 1s;
+            transition: 1s;
     color: rgba(0, 0, 0, 0.4); }
   .CodeMirror-linebackground.ctx {
     border-left: 1px solid transparent;
@@ -602,7 +676,8 @@ a.inspect {
   opacity: .4; }
 
 code, code span {
-  transition: opacity 50ms; }
+  -webkit-transition: opacity 50ms;
+          transition: opacity 50ms; }
 
 .trace_500 {
   margin: 0 1em 1em; }
@@ -722,33 +797,66 @@ code, code span {
       border: 13px double rgba(0, 0, 0, 0.2);
       border-radius: 100%; }
     #wdb > header > #activity .state:before {
-      animation: rotate 2s infinite linear; }
+      -webkit-animation: rotate 2s infinite linear;
+              animation: rotate 2s infinite linear; }
     #wdb > header > #activity .state:after {
-      animation: rotate2 2s infinite linear;
-      animation-delay: -.5s; }
+      -webkit-animation: rotate2 2s infinite linear;
+              animation: rotate2 2s infinite linear;
+      -webkit-animation-delay: -.5s;
+              animation-delay: -.5s; }
     #wdb > header > #activity .state.inner:before {
-      animation: rotate3 2s infinite linear;
-      animation-delay: -1.5s; }
+      -webkit-animation: rotate3 2s infinite linear;
+              animation: rotate3 2s infinite linear;
+      -webkit-animation-delay: -1.5s;
+              animation-delay: -1.5s; }
     #wdb > header > #activity .state.inner:after {
-      animation: rotate4 2s infinite linear;
-      animation-delay: -1s; }
+      -webkit-animation: rotate4 2s infinite linear;
+              animation: rotate4 2s infinite linear;
+      -webkit-animation-delay: -1s;
+              animation-delay: -1s; }
   #wdb > header > #activity, #wdb > header > #activity *, #wdb > header > #activity *:before, #wdb > header > #activity *:after {
-    animation-play-state: paused !important; }
+    -webkit-animation-play-state: paused !important;
+            animation-play-state: paused !important; }
   #wdb > header > #activity.on, #wdb > header > #activity.on *, #wdb > header > #activity.on *:before, #wdb > header > #activity.on *:after {
-    animation-play-state: running !important; }
+    -webkit-animation-play-state: running !important;
+            animation-play-state: running !important; }
+
+@-webkit-keyframes rotate {
+  100% {
+    -webkit-transform: rotate3d(2, 1, 1, 360deg);
+            transform: rotate3d(2, 1, 1, 360deg); } }
 
 @keyframes rotate {
   100% {
-    transform: rotate3d(2, 1, 1, 360deg); } }
+    -webkit-transform: rotate3d(2, 1, 1, 360deg);
+            transform: rotate3d(2, 1, 1, 360deg); } }
+
+@-webkit-keyframes rotate2 {
+  100% {
+    -webkit-transform: rotate3d(1, 2, 1, 360deg);
+            transform: rotate3d(1, 2, 1, 360deg); } }
 
 @keyframes rotate2 {
   100% {
-    transform: rotate3d(1, 2, 1, 360deg); } }
+    -webkit-transform: rotate3d(1, 2, 1, 360deg);
+            transform: rotate3d(1, 2, 1, 360deg); } }
+
+@-webkit-keyframes rotate3 {
+  100% {
+    -webkit-transform: rotate3d(2, -2, 1, 360deg);
+            transform: rotate3d(2, -2, 1, 360deg); } }
 
 @keyframes rotate3 {
   100% {
-    transform: rotate3d(2, -2, 1, 360deg); } }
+    -webkit-transform: rotate3d(2, -2, 1, 360deg);
+            transform: rotate3d(2, -2, 1, 360deg); } }
+
+@-webkit-keyframes rotate4 {
+  100% {
+    -webkit-transform: rotate3d(-1, 2, 2, 360deg);
+            transform: rotate3d(-1, 2, 2, 360deg); } }
 
 @keyframes rotate4 {
   100% {
-    transform: rotate3d(-1, 2, 2, 360deg); } }
+    -webkit-transform: rotate3d(-1, 2, 2, 360deg);
+            transform: rotate3d(-1, 2, 2, 360deg); } }

@@ -938,7 +938,11 @@ specify a module like `logging.config`.
     @$eval.get(0).setSelectionRange(root.length, root.length)
     @$eval.trigger('autosize.resize')
     $('#comp-desc').text($active.attr('title'))
-    @termscroll()
+
+    unless (0 <
+      $active.position().top - @$interpreter.position().top <
+       @$interpreter.height())
+      $active.get(0).scrollIntoView?(false)
     true
 
   eval_move_history: (shift) ->
