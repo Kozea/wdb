@@ -1365,7 +1365,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.eval_move_suggest = function(shift, trigger) {
-    var $active, $tds, base, completion, index, root;
+    var $active, $tds, base, base1, completion, index, ref, root;
     if (trigger == null) {
       trigger = false;
     }
@@ -1398,7 +1398,11 @@ Wdb = (function(superClass) {
     this.$eval.get(0).setSelectionRange(root.length, root.length);
     this.$eval.trigger('autosize.resize');
     $('#comp-desc').text($active.attr('title'));
-    this.termscroll();
+    if (!((0 < (ref = $active.position().top - this.$interpreter.position().top) && ref < this.$interpreter.height()))) {
+      if (typeof (base1 = $active.get(0)).scrollIntoView === "function") {
+        base1.scrollIntoView(false);
+      }
+    }
     return true;
   };
 
