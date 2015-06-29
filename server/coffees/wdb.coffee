@@ -1,6 +1,6 @@
 # This file is part of wdb
 #
-# wdb Copyright (C) 2012  Florian Mounier, Kozea
+# wdb Copyright (C) 2012-2015 Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,6 @@ class Wdb extends Log
     @file_cache = {}
     @last_cmd = null
     @eval_time = null
-    @completion_cols = 5
 
     @waited_for_ws = 0
 
@@ -68,9 +67,6 @@ class Wdb extends Log
 
       $(window)
         .on 'keydown', @global_key.bind @
-        .on 'resize', =>
-          @completion_cols = Math.max(
-            1, ((@$interpreter.width() / 100) << 0) - 1)
 
       @$traceback.on 'click', '.traceline', @select_click.bind @
       @$scrollback.add(@$watchers)
@@ -201,7 +197,6 @@ class Wdb extends Log
       $traceline.append $tracecode
       $traceline.append $tracefunfun
       @$traceback.prepend $traceline
-      $(window).trigger('resize')
 
   select_click: (e) ->
     @ws.send 'Select', $(e.currentTarget).attr('data-level')
@@ -279,7 +274,6 @@ class Wdb extends Log
     localStorage and localStorage['cmd_hist'] = JSON.stringify @cmd_hist
 
   execute: (snippet) ->
-    console.log snippet
     snippet = snippet.trim()
     @historize snippet
 
@@ -437,7 +431,7 @@ specify a module like `logging.config`.
        @$prompt.outerHeight() -
          @$interpreter.height())
     to += Math.min(@$completions.outerHeight(), @$interpreter.height() / 4)
-
+    to = Math.min(@$scrollback.outerHeight(), to)
     return if to - from is 0
 
     @$interpreter
@@ -641,38 +635,50 @@ specify a module like `logging.config`.
   suggest: (data) ->
     if data
       $comp = @$completions.find('table').empty()
+      height = @$completions.height()
+      if data.completions.length
+        max_width = @$interpreter.width()
+        cols = Math.max(1, ((@$interpreter.width() / 100) << 0) - 1)
+        while cols > 0
+          $comp = @$completions.find('table').empty()
+          added = []
+          $comp.append(
+            $('<thead><tr><th id="comp-desc" colspan="' +
+              cols +
+            '">'))
+          $tbody = $('<tbody>')
+          base_len = data.completions[0].base.length
+          txtarea = @$eval.get(0)
+          startPos = txtarea.selectionStart
+          @$eval.data
+            start: @$eval.val().substr(0, startPos - base_len)
+            end: @$eval.val().substr(startPos)
+          for completion, index in data.completions
+            if (completion.base + completion.complete) in added
+              continue
+            added.push(completion.base + completion.complete)
+            if index % cols is 0
+              $tbody.append($appender = $('<tr>'))
 
-      added = []
+            $appender.append(
+              $td = $('<td>').attr('title', completion.description)
+              .append($('<span>')
+                .addClass('base').text(completion.base))
+              .append($('<span>')
+                .addClass('completion').text(completion.complete)))
+            if not completion.complete
+              $td.addClass('complete')
+              $('#comp-desc').html($td.attr('title'))
+          $comp.append($tbody)
+          if $comp.width() > max_width
+            cols--
+          else
+            break
+
       for param in data.params
         $('#comp-desc').append(@format_fun(param))
 
-      if data.completions.length
-        $comp.append(
-          $('<thead><tr><th id="comp-desc" colspan="' +
-            @completion_cols +
-          '">'))
-        $tbody = $('<tbody>')
-        base_len = data.completions[0].base.length
-        txtarea = @$eval.get(0)
-        startPos = txtarea.selectionStart
-        @$eval.data
-          start: @$eval.val().substr(0, startPos - base_len)
-          end: @$eval.val().substr(startPos)
-      for completion, index in data.completions
-        if (completion.base + completion.complete) in added
-          continue
-        added.push(completion.base + completion.complete)
-        if index % @completion_cols is 0
-          $tbody.append($appender = $('<tr>'))
-
-        $appender.append($td = $('<td>').attr('title', completion.description)
-          .append($('<span>').addClass('base').text(completion.base))
-          .append($('<span>').addClass('completion').text(completion.complete)))
-        if not completion.complete
-          $td.addClass('complete')
-          $('#comp-desc').html($td.attr('title'))
-      $comp.append($tbody)
-
+      @$completions.height(Math.max(height, $comp.height()))
       @termscroll()
 
     # Complete queued completion
@@ -685,6 +691,7 @@ specify a module like `logging.config`.
       @to_complete = null
 
   suggest_stop: ->
+    @$completions.attr('style', null)
     if @$completions.find('table td,table tr').size()
       @$completions.find('table').empty()
       true
@@ -984,6 +991,8 @@ specify a module like `logging.config`.
       else
         # Queuing completion for next suggest
         @to_complete = txt
+    else
+      @suggest_stop()
     return
 
   inspect: (e) ->

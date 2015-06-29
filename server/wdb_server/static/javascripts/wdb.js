@@ -359,7 +359,6 @@ Wdb = (function(superClass) {
     this.file_cache = {};
     this.last_cmd = null;
     this.eval_time = null;
-    this.completion_cols = 5;
     this.waited_for_ws = 0;
     this.$activity = $('#activity');
     this.$title = $('#title');
@@ -388,11 +387,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.opening = function() {
     if (!this.started) {
       this.$eval.on('keydown', this.eval_key.bind(this)).on('keyup', this.eval_carret_change.bind(this)).on('mouseup', this.eval_carret_change.bind(this)).on('blur', this.searchback_stop.bind(this));
-      $(window).on('keydown', this.global_key.bind(this)).on('resize', (function(_this) {
-        return function() {
-          return _this.completion_cols = Math.max(1, ((_this.$interpreter.width() / 100) << 0) - 1);
-        };
-      })(this));
+      $(window).on('keydown', this.global_key.bind(this));
       this.$traceback.on('click', '.traceline', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
@@ -515,8 +510,7 @@ Wdb = (function(superClass) {
       $traceline.append($tracefilelno);
       $traceline.append($tracecode);
       $traceline.append($tracefunfun);
-      this.$traceback.prepend($traceline);
-      results.push($(window).trigger('resize'));
+      results.push(this.$traceback.prepend($traceline));
     }
     return results;
   };
@@ -635,7 +629,6 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.execute = function(snippet) {
     var cmd, data, key, space;
-    console.log(snippet);
     snippet = snippet.trim();
     this.historize(snippet);
     cmd = (function(_this) {
@@ -773,6 +766,7 @@ Wdb = (function(superClass) {
     from = this.$interpreter.scrollTop();
     to = Math.max(0, this.$scrollback.outerHeight() + this.$prompt.outerHeight() - this.$interpreter.height());
     to += Math.min(this.$completions.outerHeight(), this.$interpreter.height() / 4);
+    to = Math.min(this.$scrollback.outerHeight(), to);
     if (to - from === 0) {
       return;
     }
@@ -1021,43 +1015,55 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.suggest = function(data) {
-    var $appender, $comp, $tbody, $td, added, base_len, completion, index, j, k, len, len1, param, ref, ref1, ref2, startPos, txtarea;
+    var $appender, $comp, $tbody, $td, added, base_len, cols, completion, height, index, j, k, len, len1, max_width, param, ref, ref1, ref2, startPos, txtarea;
     if (data) {
       $comp = this.$completions.find('table').empty();
-      added = [];
-      ref = data.params;
-      for (j = 0, len = ref.length; j < len; j++) {
-        param = ref[j];
+      height = this.$completions.height();
+      if (data.completions.length) {
+        max_width = this.$interpreter.width();
+        cols = Math.max(1, ((this.$interpreter.width() / 100) << 0) - 1);
+        while (cols > 0) {
+          $comp = this.$completions.find('table').empty();
+          added = [];
+          $comp.append($('<thead><tr><th id="comp-desc" colspan="' + cols + '">'));
+          $tbody = $('<tbody>');
+          base_len = data.completions[0].base.length;
+          txtarea = this.$eval.get(0);
+          startPos = txtarea.selectionStart;
+          this.$eval.data({
+            start: this.$eval.val().substr(0, startPos - base_len),
+            end: this.$eval.val().substr(startPos)
+          });
+          ref = data.completions;
+          for (index = j = 0, len = ref.length; j < len; index = ++j) {
+            completion = ref[index];
+            if (ref1 = completion.base + completion.complete, indexOf.call(added, ref1) >= 0) {
+              continue;
+            }
+            added.push(completion.base + completion.complete);
+            if (index % cols === 0) {
+              $tbody.append($appender = $('<tr>'));
+            }
+            $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
+            if (!completion.complete) {
+              $td.addClass('complete');
+              $('#comp-desc').html($td.attr('title'));
+            }
+          }
+          $comp.append($tbody);
+          if ($comp.width() > max_width) {
+            cols--;
+          } else {
+            break;
+          }
+        }
+      }
+      ref2 = data.params;
+      for (k = 0, len1 = ref2.length; k < len1; k++) {
+        param = ref2[k];
         $('#comp-desc').append(this.format_fun(param));
       }
-      if (data.completions.length) {
-        $comp.append($('<thead><tr><th id="comp-desc" colspan="' + this.completion_cols + '">'));
-        $tbody = $('<tbody>');
-        base_len = data.completions[0].base.length;
-        txtarea = this.$eval.get(0);
-        startPos = txtarea.selectionStart;
-        this.$eval.data({
-          start: this.$eval.val().substr(0, startPos - base_len),
-          end: this.$eval.val().substr(startPos)
-        });
-      }
-      ref1 = data.completions;
-      for (index = k = 0, len1 = ref1.length; k < len1; index = ++k) {
-        completion = ref1[index];
-        if (ref2 = completion.base + completion.complete, indexOf.call(added, ref2) >= 0) {
-          continue;
-        }
-        added.push(completion.base + completion.complete);
-        if (index % this.completion_cols === 0) {
-          $tbody.append($appender = $('<tr>'));
-        }
-        $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
-        if (!completion.complete) {
-          $td.addClass('complete');
-          $('#comp-desc').html($td.attr('title'));
-        }
-      }
-      $comp.append($tbody);
+      this.$completions.height(Math.max(height, $comp.height()));
       this.termscroll();
     }
     if (this.to_complete) {
@@ -1069,6 +1075,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.suggest_stop = function() {
+    this.$completions.attr('style', null);
     if (this.$completions.find('table td,table tr').size()) {
       this.$completions.find('table').empty();
       return true;
@@ -1453,6 +1460,8 @@ Wdb = (function(superClass) {
       } else {
         this.to_complete = txt;
       }
+    } else {
+      this.suggest_stop();
     }
   };
 
