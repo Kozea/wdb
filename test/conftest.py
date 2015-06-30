@@ -182,7 +182,10 @@ class Socket(object):
         assert watchedmsg.command == 'Watched'
 
     def receive(self, uuid=None):
-        return Message(self.connection(uuid).recv_bytes().decode('utf-8'))
+        got = self.connection(uuid).recv_bytes().decode('utf-8')
+        if got == 'PING':
+            return self.receive(uuid)
+        return Message(got)
 
     def send(self, command, data=None, uuid=None):
         message = '%s|%s' % (command, data) if data else command
