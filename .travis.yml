@@ -8,7 +8,8 @@ python:
   - pypy
 
 install:
-  - pip install .
+  - pip install -e client
+  - pip install -e server
   - pip install pytest
   - pip install pytest-flake8
   - pip install pytest-cov
