@@ -10,4 +10,5 @@ def u(s):
 
 print(u('יאח'))
 
-import wdb; wdb.set_trace()
+import wdb
+wdb.set_trace()

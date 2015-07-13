@@ -240,16 +240,17 @@ tornado.options.define('theme', default="clean",
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define("unminified", default=False,
                        help="Use the unminified js (for development only)")
-tornado.options.define("more", default=False, help="Set the debug more verbose")
+tornado.options.define("more", default=False,
+                       help="Set the debug more verbose")
 tornado.options.define("detached_session", default=False,
                        help="Whether to continue program on browser close")
 tornado.options.define("socket_port", default=19840,
                        help="Port used to communicate with wdb instances")
 tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
-tornado.options.define("extra_search_path", default=False,
-                       help=("Try harder to find the 'libpython*' shared library "
-                             "at the cost of a slower server startup."))
+tornado.options.define("extra_search_path", default=False, help=(
+    "Try harder to find the 'libpython*' shared library "
+    "at the cost of a slower server startup."))
 
 tornado.options.parse_command_line()
 from wdb_server.utils import refresh_process, LibPythonWatcher

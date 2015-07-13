@@ -23,8 +23,8 @@ def test_with_trace(socket):
     assert 'scripts/trace_in_script.py' in current_trace.file
     assert current_trace.flno == 11
     assert current_trace.function == 'fun2'
-    assert current_trace.llno == 15
-    assert current_trace.lno == 13
+    assert current_trace.llno == 16
+    assert current_trace.lno == 14
 
     msg = socket.receive()
     assert msg.command == 'SelectCheck'
@@ -39,7 +39,7 @@ def test_with_trace(socket):
     msg = socket.receive()
     assert msg.command == 'Select'
     assert msg.data.name == file
-    assert len(msg.data.file) == 261
+    assert len(msg.data.file) == 263
 
     socket.send('Continue')
 
@@ -64,8 +64,8 @@ def test_with_trace(socket):
     assert 'scripts/trace_in_script.py' in current_trace.file
     assert current_trace.flno == 3
     assert current_trace.function == '<module>'
-    assert current_trace.llno == 24
-    assert current_trace.lno == 24
+    assert current_trace.llno == 26
+    assert current_trace.lno == 26
 
     msg = socket.receive()
     assert msg.command == 'SelectCheck'
@@ -80,7 +80,7 @@ def test_with_trace(socket):
     msg = socket.receive()
     assert msg.command == 'Select'
     assert msg.data.name == file
-    assert len(msg.data.file) == 261
+    assert len(msg.data.file) == 263
 
     socket.send('Continue')
     socket.join()

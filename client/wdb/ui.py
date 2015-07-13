@@ -1,6 +1,6 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
-    loads, dumps, JSONEncoder, quote, execute, to_unicode, u, StringIO, escape,
+    loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape,
     to_unicode_string, from_bytes, force_bytes, is_str)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
@@ -385,7 +385,7 @@ class Interaction(object):
         else:
             rv = escape('\n'.join(out) + '\n'.join(err))
             try:
-                _ = dump(rv)
+                dump(rv)
             except Exception:
                 rv = rv.decode('ascii', 'ignore')
 
@@ -516,7 +516,8 @@ class Interaction(object):
 
     def do_complete(self, data):
         try:
-            script = Interpreter(data, [self.current_locals, self.get_globals()])
+            script = Interpreter(data, [
+                self.current_locals, self.get_globals()])
             with timeout_of(.75):
                 completions = script.completions()
         except Exception:
