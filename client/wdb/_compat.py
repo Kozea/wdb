@@ -106,6 +106,7 @@ def u(s):
 if python_version == 2:
     import struct
     import socket
+    import errno
 
     class Socket(object):
         """A Socket compatible with multiprocessing.connection.Client, that
@@ -137,10 +138,19 @@ if python_version == 2:
             for chunk in chunks:
                 self._handle.sendall(chunk)
 
+        def _safe_recv(self, *args, **kwargs):
+            while True:
+                try:
+                    return self._handle.recv(*args, **kwargs)
+                except socket.error as e:
+                    # Interrupted system call
+                    if e.errno != errno.EINTR:
+                        raise
+
         def recv_bytes(self):
             self._check_closed()
-            size, = struct.unpack("!i", self._handle.recv(4))
-            return self._handle.recv(size)
+            size, = struct.unpack("!i", self._safe_recv(4))
+            return self._safe_recv(size)
 
         def _check_closed(self):
             if self._handle is None:
