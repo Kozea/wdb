@@ -516,7 +516,7 @@ This library is licensed under GPLv3
 wdb - An improbable web debugger through WebSockets
 
 
-    wdb Copyright (C) 2014  Florian Mounier, Kozea
+    wdb Copyright (C) 2015  Florian Mounier, Kozea
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
