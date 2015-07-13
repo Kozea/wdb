@@ -9,7 +9,8 @@ def fun1(a):
 
 
 def fun2(l):
-    import wdb; wdb.set_trace()
+    import wdb
+    wdb.set_trace()
     a = 2
     e = fun1(a)
     return e
@@ -20,5 +21,6 @@ def main():
 
 
 main()
-import wdb; wdb.set_trace()
+import wdb
+wdb.set_trace()
 print('The end')

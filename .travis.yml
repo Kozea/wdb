@@ -1,0 +1,21 @@
+language: python
+python:
+  - 2.6
+  - 2.7
+  - 3.2
+  - 3.3
+  - 3.4
+  - pypy
+
+install:
+  - pip install .
+  - pip install pytest
+  - pip install pytest-flake8
+  - pip install pytest-cov
+  - pip install coveralls
+
+script: py.test server/wdb_server/ client/wdb test --flake8 --cov-report= --cov=client/wdb --cov=test --cov-config=.coveragerc
+
+after_success: coveralls
+
+sudo: false

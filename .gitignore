@@ -7,3 +7,5 @@ server/build/
 junit-py*
 coverage-py*
 .cov-py*
+.cache
+.coverage
