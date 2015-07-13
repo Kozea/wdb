@@ -178,8 +178,8 @@ class Wdb(object):
             self.send('PING')
             self.send('PING')
             log.debug('Dual ping sent')
-        except BrokenPipeError:
-            log.warning('BrokenPipe on ping, connection lost retrying')
+        except socket.error:
+            log.warning('socket error on ping, connection lost retrying')
             self._socket = None
             self.connected = False
             self.begun = False
