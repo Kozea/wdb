@@ -1439,7 +1439,7 @@ Wdb = (function(superClass) {
     if (this.$completions.find('table td').filter('.active').size()) {
       eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
       multiline = this.$prompt.hasClass('multiline');
-      if (!(e.keyCode && e.keyCode < 27 || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || (e.ctrlKey && e.keyCode === 32))) {
+      if (!(e.keyCode && e.keyCode < 27 && e.keyCode !== 8 || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || (e.ctrlKey && e.keyCode === 32))) {
         this.suggest_stop();
       }
       return;

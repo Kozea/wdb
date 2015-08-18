@@ -971,8 +971,9 @@ specify a module like `logging.config`.
       eof = @$eval.get(0).selectionStart is @$eval.val().length
       multiline = @$prompt.hasClass('multiline')
 
-      unless e.keyCode and e.keyCode < 27 or 37 <= e.keyCode <= 40 or (
-        e.ctrlKey and e.keyCode is 32)
+      unless (e.keyCode and e.keyCode < 27 and e.keyCode isnt 8 or
+          37 <= e.keyCode <= 40 or
+          (e.ctrlKey and e.keyCode is 32))
         @suggest_stop()
       return
 

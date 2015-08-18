@@ -75,9 +75,8 @@ class Interaction(object):
 
     def __init__(
             self, db, frame, tb, exception, exception_description,
-            init=None, parent=None, shell=False, shell_vars=None):
+            init=None, shell=False, shell_vars=None, source=None):
         self.db = db
-        self.parent = parent
         self.shell = shell
         self.init_message = init
         self.stack, self.trace, self.index = self.db.get_trace(frame, tb)
@@ -88,6 +87,16 @@ class Interaction(object):
         self.htmldiff = Html5Diff(4)
         if self.shell:
             self.locals[self.index] = shell_vars or {}
+
+        if source:
+            with open(source) as f:
+                compiled_code = compile(f.read(), '<source>', 'exec')
+            # Executing in locals to keep local scope
+            # (http://bugs.python.org/issue16781)
+            execute(
+                compiled_code,
+                self.current_locals,
+                self.current_locals)
 
     def hook(self, kind):
         for hook, events in self.hooks.items():
@@ -281,14 +290,11 @@ class Interaction(object):
 
             self.db.extra_vars['__recursive_exception__'] = value
 
-            interaction = Interaction(
-                self.db, iter_tb.tb_frame, tb,
-                'RECURSIVE %s' % type_.__name__,
-                str(value), parent=self
+            self.db.interaction(
+                iter_tb.tb_frame, tb,
+                type_.__name__,
+                str(value)
             )
-            interaction.init()
-            interaction.loop()
-            self.init()
             return
 
         self.db.send('Dump|%s' % dump({
@@ -318,8 +324,6 @@ class Interaction(object):
         }))
 
     def do_eval(self, data):
-        if data == 'a':
-            self.db.set_trace()
         redir = None
         suggest = None
         raw_data = data.strip()
@@ -351,25 +355,39 @@ class Interaction(object):
         duration = None
         with self.db.capture_output(
                 with_hook=redir is None) as (out, err):
+            compiled_code = None
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
-                self.db.compile_cache[id(compiled_code)] = data
-
-                l = self.current_locals
-                start = time.time()
-                execute(compiled_code, self.get_globals(), l)
-                duration = int((time.time() - start) * 1000 * 1000)
-            except NameError as e:
-                m = re.match("name '(.+)' is not defined", str(e))
+            except SyntaxError as e:
+                m = re.match(
+                    "multiple statements found while "
+                    "compiling a single statement", str(e))
                 if m:
-                    name = m.groups()[0]
-                    if importable_module(name):
-                        suggest = 'import %s' % name
+                    try:
+                        compiled_code = compile(data, '<stdin>', 'exec')
+                    except Exception:
+                        self.db.hooked = self.handle_exc()
+                else:
+                    self.db.hooked = self.handle_exc()
 
-                self.db.hooked = self.handle_exc()
-            except Exception:
-                self.db.hooked = self.handle_exc()
+            l = self.current_locals
+            start = time.time()
+            if compiled_code is not None:
+                self.db.compile_cache[id(compiled_code)] = data
+                try:
+                    execute(compiled_code, self.get_globals(), l)
+                except NameError as e:
+                    m = re.match("name '(.+)' is not defined", str(e))
+                    if m:
+                        name = m.groups()[0]
+                        if importable_module(name):
+                            suggest = 'import %s' % name
 
+                    self.db.hooked = self.handle_exc()
+                except Exception:
+                    self.db.hooked = self.handle_exc()
+
+        duration = int((time.time() - start) * 1000 * 1000)
         if redir and not self.db.hooked:
             try:
                 with open(redir, 'a' if append else 'w') as f:
@@ -389,12 +407,12 @@ class Interaction(object):
             except Exception:
                 rv = rv.decode('ascii', 'ignore')
 
-            if rv and self.db.last_obj is None or not self.db.hooked:
-                result = rv
-            elif not rv:
-                result = self.db.hooked
-            else:
+            if rv and self.db.hooked:
                 result = self.db.hooked + '\n' + rv
+            elif rv:
+                result = rv
+            else:
+                result = self.db.hooked
 
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
