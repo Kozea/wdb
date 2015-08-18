@@ -118,6 +118,7 @@ class Wdb(object):
         self.under = None
         self.server = server
         self.port = port
+        self.interaction_stack = []
         self._socket = None
         self.connect()
         self.get_breakpoints()
@@ -664,37 +665,30 @@ class Wdb(object):
             self.connected = True
 
     def shell(self, source=None, vars=None):
-        interaction = self.interaction(
+        self.interaction(
             sys._getframe(), exception_description='Shell',
-            shell=True, shell_vars=vars)
-
-        if source:
-            with open(source) as f:
-                compiled_code = compile(f.read(), '<source>', 'exec')
-            # Executing in locals to keep local scope
-            # (http://bugs.python.org/issue16781)
-            execute(
-                compiled_code,
-                interaction.current_locals,
-                interaction.current_locals)
-
-        interaction.loop()
+            shell=True, shell_vars=vars, source=source)
 
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
-            init=None, shell=False, shell_vars=None):
+            init=None, shell=False, shell_vars=None, source=None):
         """User interaction handling blocking on socket receive"""
         log.info('Interaction %r %r %r %r' % (
             frame, tb, exception, exception_description))
         self.reconnect_if_needed()
-        self.stepping = True
+        self.stepping = not shell
 
         self.open_browser()
 
+        if len(self.interaction_stack):
+            exception = 'Recursive ' * len(self.interaction_stack) + exception
+
         interaction = Interaction(
             self, frame, tb, exception, exception_description,
-            init=init, shell=shell, shell_vars=shell_vars)
+            init=init, shell=shell, shell_vars=shell_vars, source=source)
+
+        self.interaction_stack.append(interaction)
 
         # For meta debugging purpose
         self._ui = interaction
@@ -704,10 +698,11 @@ class Wdb(object):
             interaction.init()
         else:
             self.begun = True
-        if not shell:
-            interaction.loop()
 
-        return interaction
+        interaction.loop()
+        self.interaction_stack.pop()
+        if len(self.interaction_stack):
+            self.interaction_stack[-1].init()
 
     def handle_call(self, frame, argument_list):
         """This method is called when there is the remote possibility
@@ -823,9 +818,8 @@ def start_trace(full=False, frame=None, below=0, under=None,
 
 
 def stop_trace(frame=None, close_on_exit=False):
-    """Start tracing program at callee level
-       breaking on exception/breakpoints"""
-    log.info('Stopping trace?')
+    """Stop tracing"""
+    log.info('Stopping trace')
     wdb = Wdb.get(True)  # Do not create an istance if there's None
     if wdb and (not wdb.stepping or close_on_exit):
         log.info('Stopping trace')
