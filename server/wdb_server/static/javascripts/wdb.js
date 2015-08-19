@@ -1015,7 +1015,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.suggest = function(data) {
-    var $appender, $comp, $tbody, $td, added, base_len, cols, completion, height, index, j, k, len, len1, max_width, param, ref, ref1, ref2, startPos, txtarea;
+    var $appender, $comp, $tbody, $td, added, base_len, cols, completion, height, index, j, k, len, len1, max_width, param, ref, ref1, ref2, txtarea;
     if (data) {
       $comp = this.$completions.find('table').empty();
       height = this.$completions.height();
@@ -1029,11 +1029,7 @@ Wdb = (function(superClass) {
           $tbody = $('<tbody>');
           base_len = data.completions[0].base.length;
           txtarea = this.$eval.get(0);
-          startPos = txtarea.selectionStart;
-          this.$eval.data({
-            start: this.$eval.val().substr(0, startPos - base_len),
-            end: this.$eval.val().substr(startPos)
-          });
+          this.$eval.data(data.data);
           ref = data.completions;
           for (index = j = 0, len = ref.length; j < len; index = ++j) {
             completion = ref[index];
@@ -1074,10 +1070,19 @@ Wdb = (function(superClass) {
     }
   };
 
-  Wdb.prototype.suggest_stop = function() {
+  Wdb.prototype.suggest_stop = function(reset) {
+    var root;
+    if (reset == null) {
+      reset = false;
+    }
     this.$completions.attr('style', null);
     if (this.$completions.find('table td,table tr').size()) {
       this.$completions.find('table').empty();
+      if (reset) {
+        root = this.$eval.data().start + this.$eval.data().like;
+        this.$eval.val(root + this.$eval.data().end);
+        this.$eval.get(0).setSelectionRange(root.length, root.length);
+      }
       return true;
     } else {
       return false;
@@ -1251,7 +1256,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.eval_key = function(e) {
-    var $table, eof, multiline;
+    var $table, bol, eof, multiline, pos, txt;
     if (e.altKey && e.keyCode === 82 && this.backsearch) {
       this.backsearch = Math.max(this.backsearch - 1, 1);
       this.searchback();
@@ -1309,25 +1314,27 @@ Wdb = (function(superClass) {
         }
         break;
       case 27:
-        this.searchback_stop() || this.suggest_stop() || this.multiline_stop();
+        this.searchback_stop() || this.suggest_stop(true) || this.multiline_stop();
         return false;
       case 9:
-      case 39:
-        eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
+        pos = this.$eval.get(0).selectionStart;
+        txt = this.$eval.val();
         multiline = this.$prompt.hasClass('multiline');
-        if (e.keyCode === 9 && multiline) {
+        bol = txt[pos - 1] === '\n' || pos === 0;
+        if (multiline && bol) {
           this.eval_insert('  ');
           return false;
         }
-        if (!(e.keyCode === 39 && !eof && !multiline)) {
-          if (this.backsearch) {
-            return false;
-          }
-          if (this.eval_move_suggest((!e.shiftKey ? 1 : -1), !multiline)) {
-            return false;
-          }
+        this.eval_move_suggest((!e.shiftKey ? 1 : -1), true);
+        return false;
+      case 39:
+        pos = this.$eval.get(0).selectionStart;
+        txt = this.$eval.val();
+        eof = pos === txt.length;
+        if (this.eval_move_suggest(1, eof)) {
+          return false;
         }
-        return e.keyCode === 39;
+        return true;
       case 37:
         if (this.eval_move_suggest(-1)) {
           return false;
@@ -1355,11 +1362,13 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.eval_insert = function(char) {
-    var endPos, startPos, txtarea;
+    var end, endPos, start, startPos, txtarea;
     txtarea = this.$eval.get(0);
     startPos = txtarea.selectionStart;
     endPos = txtarea.selectionEnd;
-    this.$eval.val(this.$eval.val().substring(0, startPos) + char + this.$eval.val().substring(endPos, this.$eval.val().length));
+    start = this.$eval.val().substring(0, startPos);
+    end = this.$eval.val().substring(endPos, this.$eval.val().length);
+    this.$eval.val(start + char + end);
     txtarea.setSelectionRange(startPos + char.length, startPos + char.length);
     return this.$eval.trigger('autosize.resize');
   };
@@ -1376,6 +1385,12 @@ Wdb = (function(superClass) {
     }
     if (!$active.length) {
       if (!trigger) {
+        return false;
+      }
+      if (this.to_complete === false) {
+        return false;
+      }
+      if (this.$completions.find('.completion').text() === '') {
         return false;
       }
       $active = $tds.first().addClass('active');
@@ -1424,15 +1439,8 @@ Wdb = (function(superClass) {
     }
   };
 
-  Wdb.prototype.eval_before_cursor = function() {
-    var startPos, txtarea;
-    txtarea = this.$eval.get(0);
-    startPos = txtarea.selectionStart;
-    return this.$eval.val().substring(0, startPos);
-  };
-
   Wdb.prototype.eval_carret_change = function(e) {
-    var eof, multiline, ref, ref1, txt;
+    var column, comp, eof, line, lines, multiline, ref, ref1, startPos, txt, txtarea;
     if (e.keyCode && (16 <= (ref = e.keyCode) && ref <= 18)) {
       return true;
     }
@@ -1444,7 +1452,9 @@ Wdb = (function(superClass) {
       }
       return;
     }
-    txt = this.eval_before_cursor();
+    txtarea = this.$eval.get(0);
+    startPos = txtarea.selectionStart;
+    txt = this.$eval.val();
     if (this.backsearch) {
       if (e.keyCode && e.keyCode === 82 && (e.ctrlKey || e.altKey)) {
         return;
@@ -1458,11 +1468,20 @@ Wdb = (function(superClass) {
       return;
     }
     if (txt && txt[0] !== '.') {
+      lines = txt.substr(0, startPos).split("\n");
+      line = lines.length;
+      column = lines.slice(-1)[0].length;
+      comp = {
+        source: txt,
+        line: line,
+        column: column,
+        pos: startPos
+      };
       if (this.to_complete === null) {
-        this.ws.send('Complete', txt);
+        this.ws.send('Complete', comp);
         this.to_complete = false;
       } else {
-        this.to_complete = txt;
+        this.to_complete = comp;
       }
     } else {
       this.suggest_stop();

@@ -533,9 +533,12 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
+        comp = loads(data)
+        source = comp.pop('source')
+        pos = comp.pop('pos')
         try:
-            script = Interpreter(data, [
-                self.current_locals, self.get_globals()])
+            script = Interpreter(source, [
+                self.current_locals, self.get_globals()], **comp)
             with timeout_of(.75):
                 completions = script.completions()
         except Exception:
@@ -551,8 +554,23 @@ class Interaction(object):
             self.notify_exc('Completion of function failed for %s' % data)
             return
 
+        before = source[:pos]
+        after = source[pos:]
+        like = ''
+        if len(completions):
+            comp = completions[0]
+            base = comp.name[:len(comp.name) - len(comp.complete)]
+            if len(base):
+                like = before[-len(base):]
+                if len(like):
+                    before = before[:-len(like)]
         try:
             suggest_obj = {
+                'data': {
+                    'start': before,
+                    'end': after,
+                    'like': like
+                },
                 'params': [{
                     'params': [p.description.replace('\n', '')
                                for p in fun.params],
