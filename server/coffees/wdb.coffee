@@ -649,10 +649,9 @@ specify a module like `logging.config`.
           $tbody = $('<tbody>')
           base_len = data.completions[0].base.length
           txtarea = @$eval.get(0)
-          startPos = txtarea.selectionStart
-          @$eval.data
-            start: @$eval.val().substr(0, startPos - base_len)
-            end: @$eval.val().substr(startPos)
+
+          @$eval.data data.data
+
           for completion, index in data.completions
             if (completion.base + completion.complete) in added
               continue
@@ -690,10 +689,14 @@ specify a module like `logging.config`.
       # Making completion available
       @to_complete = null
 
-  suggest_stop: ->
+  suggest_stop: (reset=false) ->
     @$completions.attr('style', null)
     if @$completions.find('table td,table tr').size()
       @$completions.find('table').empty()
+      if reset
+        root = @$eval.data().start + @$eval.data().like
+        @$eval.val root + @$eval.data().end
+        @$eval.get(0).setSelectionRange(root.length, root.length)
       true
     else
       false
@@ -867,21 +870,29 @@ specify a module like `logging.config`.
           return false
 
       when 27 # Escape
-        @searchback_stop() or @suggest_stop() or @multiline_stop()
+        @searchback_stop() or @suggest_stop(true) or @multiline_stop()
         return false
 
-      when 9, 39 # Tab, Right
-        eof = @$eval.get(0).selectionStart is @$eval.val().length
+      when 9 # Tab
+        pos = @$eval.get(0).selectionStart
+        txt = @$eval.val()
         multiline = @$prompt.hasClass('multiline')
-        if e.keyCode is 9 and multiline
+        bol = txt[pos - 1] is '\n' or pos is 0
+        # If beginning of line and multiline : indent
+        if multiline and bol
           @eval_insert('  ')
           return false
-        unless e.keyCode is 39 and not eof and not multiline
-          return false if @backsearch
-          if @eval_move_suggest (
-            unless e.shiftKey then 1 else -1), not multiline
-            return false
-        return e.keyCode is 39
+        @eval_move_suggest (unless e.shiftKey then 1 else -1), true
+        return false # Never lose focus
+
+      when 39 # Right
+        pos = @$eval.get(0).selectionStart
+        txt = @$eval.val()
+        # eol = txt[pos] is '\n' or
+        eof = pos is txt.length
+        if @eval_move_suggest 1, eof # Trigqer completion at end
+          return false
+        return true
 
       when 37  # Left
         if @eval_move_suggest -1
@@ -906,11 +917,9 @@ specify a module like `logging.config`.
     txtarea = @$eval.get(0)
     startPos = txtarea.selectionStart
     endPos = txtarea.selectionEnd
-    @$eval.val(
-      @$eval.val().substring(0, startPos) +
-      char +
-      @$eval.val().substring(endPos, @$eval.val().length)
-    )
+    start = @$eval.val().substring(0, startPos)
+    end =  @$eval.val().substring(endPos, @$eval.val().length)
+    @$eval.val(start + char + end)
     txtarea.setSelectionRange(startPos + char.length, startPos + char.length)
     @$eval.trigger('autosize.resize')
 
@@ -920,6 +929,8 @@ specify a module like `logging.config`.
     return false unless $tds.length
     unless $active.length
       return false unless trigger
+      return false if @to_complete is false
+      return false if @$completions.find('.completion').text() is ''
       $active = $tds.first().addClass('active')
     else
       index = $tds.index($active)
@@ -960,11 +971,6 @@ specify a module like `logging.config`.
       @suggest_stop()
       @termscroll()
 
-  eval_before_cursor: ->
-    txtarea = @$eval.get(0)
-    startPos = txtarea.selectionStart
-    @$eval.val().substring(0, startPos)
-
   eval_carret_change: (e) ->
     return true if e.keyCode and 16 <= e.keyCode <= 18
     if @$completions.find('table td').filter('.active').size()
@@ -977,7 +983,11 @@ specify a module like `logging.config`.
         @suggest_stop()
       return
 
-    txt = @eval_before_cursor()
+    txtarea = @$eval.get(0)
+    startPos = txtarea.selectionStart
+
+    txt = @$eval.val()
+
     if @backsearch
       return if e.keyCode and e.keyCode is 82 and (e.ctrlKey or e.altKey)
       if not txt
@@ -988,14 +998,24 @@ specify a module like `logging.config`.
       return
 
     if txt and txt[0] != '.'
-      # Completion available, complet
+      lines = txt.substr(0, startPos).split("\n")
+      line = lines.length
+      column = lines.slice(-1)[0].length
+
+      comp =
+        source: txt
+        line: line
+        column: column
+        pos: startPos
+
+      # Completion available, complete
       if @to_complete == null
-        @ws.send 'Complete', txt
+        @ws.send 'Complete', comp
         # Marking it with false -> waiting for suggest
         @to_complete = false
       else
         # Queuing completion for next suggest
-        @to_complete = txt
+        @to_complete = comp
     else
       @suggest_stop()
     return
