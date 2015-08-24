@@ -558,8 +558,9 @@ class Interaction(object):
         after = source[pos:]
         like = ''
         if len(completions):
-            comp = completions[0]
-            base = comp.name[:len(comp.name) - len(comp.complete)]
+            completion = completions[0]
+            base = completion.name[
+                :len(completion.name) - len(completion.complete)]
             if len(base):
                 like = before[-len(base):]
                 if len(like):
