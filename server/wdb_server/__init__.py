@@ -19,17 +19,17 @@ import tornado.options
 import tornado.process
 import tornado.web
 import tornado.websocket
+import tornado.httpclient
 import os
 import sys
 import logging
 import json
 from wdb_server.state import (
     sockets, websockets, syncwebsockets, breakpoints)
-
 from multiprocessing import Process
 from uuid import uuid4
 
-__version__ = '2.1.3'
+__version__ = '2.1.4'
 
 log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")
@@ -87,7 +87,7 @@ class DebugHandler(tornado.web.RequestHandler):
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self, uuid):
-        self.render('wdb.html', uuid=uuid)
+        self.render('wdb.html', uuid=uuid, new_version=server.new_version)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -279,3 +279,20 @@ server = tornado.web.Application(
     static_path=static_path,
     template_path=os.path.join(os.path.dirname(__file__), "templates")
 )
+
+
+http = tornado.httpclient.AsyncHTTPClient()
+server.new_version = None
+
+
+def callback(response):
+    log.debug('Parsing pypi page')
+    info = json.loads(response.buffer.read().decode('utf-8'))
+    version = info['info']['version']
+    if version != __version__:
+        server.new_version = version
+
+log.debug('Feching wdb_server simple pypi page')
+http.fetch(
+    'https://pypi.python.org/pypi/wdb.server/json',
+    callback, raise_error=False)

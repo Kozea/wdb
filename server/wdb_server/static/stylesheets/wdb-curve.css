@@ -253,6 +253,13 @@ body, html {
           -ms-flex-item-align: end;
               align-self: flex-end;
       margin: 0 5px; }
+    #wdb > footer #update {
+      -webkit-align-self: flex-end;
+          -ms-flex-item-align: end;
+              align-self: flex-end;
+      margin: 0 5px; }
+      #wdb > footer #update i:before {
+        color: orangered; }
 
 a {
   color: #ccc; }
@@ -347,6 +354,7 @@ code {
 
 #source-editor:focus {
   outline: none; }
+
 #source-editor > .CodeMirror {
   font: 12px/1.5 "Source Code Pro", monospace;
   box-shadow: inset -8px 0 20px black; }
@@ -359,7 +367,7 @@ code {
     color: #777;
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
-    padding: .2em 2em;
+    padding: 0.2em 2em;
     -webkit-transform: rotate(45deg);
         -ms-transform: rotate(45deg);
             transform: rotate(45deg); }
@@ -388,10 +396,12 @@ code {
   background-color: white;
   border: 1px solid black;
   resize: both; }
+
 #scrollback .duration {
   float: right;
   padding: 0.5em 0 0 0;
   opacity: .333; }
+
 #scrollback iframe.display {
   width: 100%;
   min-height: 300px; }
@@ -424,8 +434,10 @@ code {
 
 #completions .base {
   color: #ccc; }
+
 #completions .completion {
   color: #777; }
+
 #completions td {
   padding: 0.25em; }
   #completions td.active .base {
@@ -925,22 +937,27 @@ code, code span {
 /* - Table Object - */
 table.object tbody td, table.object thead td {
   border-width: 1px; }
+
 table.object thead {
   text-shadow: none !important; }
+
 table.object a.inspect {
   box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.05) inset;
   padding: 0.1em 5px;
   margin: 1px 0; }
+
 table.object .attr a.inspect {
   background-color: #0b0b0b;
   border-color: black; }
   table.object .attr a.inspect:hover, table.object .attr a.inspect:focus {
     background-color: #181818; }
+
 table.object .method a.inspect {
   background-color: #070707;
   border-color: black; }
   table.object .method a.inspect:hover, table.object .method a.inspect:focus {
     background-color: #141414; }
+
 table.object .core a.inspect {
   background-color: #010101;
   border-color: black; }
@@ -1001,12 +1018,10 @@ a.inspect {
     -webkit-transform: rotate(145deg);
             transform: rotate(145deg);
     opacity: 1; }
-
   50% {
     -webkit-transform: rotate(-120deg);
             transform: rotate(-120deg);
     opacity: 0; }
-
   100% {
     -webkit-transform: rotate(160deg);
             transform: rotate(160deg);
@@ -1018,12 +1033,10 @@ a.inspect {
     -webkit-transform: rotate(145deg);
             transform: rotate(145deg);
     opacity: 1; }
-
   50% {
     -webkit-transform: rotate(-120deg);
             transform: rotate(-120deg);
     opacity: 0; }
-
   100% {
     -webkit-transform: rotate(160deg);
             transform: rotate(160deg);
@@ -1034,7 +1047,6 @@ a.inspect {
   0% {
     -webkit-transform: rotate(0deg);
             transform: rotate(0deg); }
-
   100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg); } }
@@ -1043,7 +1055,6 @@ a.inspect {
   0% {
     -webkit-transform: rotate(0deg);
             transform: rotate(0deg); }
-
   100% {
     -webkit-transform: rotate(360deg);
             transform: rotate(360deg); } }

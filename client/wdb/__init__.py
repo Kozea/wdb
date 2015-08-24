@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.1.3'
+__version__ = '2.1.4'
 _initial_globals = dict(globals())
 
 from ._compat import (

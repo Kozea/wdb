@@ -48,7 +48,16 @@
     <div id="watchers">
     </div>
     <div id="home">
-      <a href="/" target="blank"><i class="fa fa-home"></i></a>
+      <a href="/" target="blank">
+        <i class="fa fa-home"></i>
+      </a>
     </div>
+    {% if new_version %}
+      <div id="update">
+        <a href="https://pypi.python.org/pypi/wdb_server" target="blank" title="A new version {{ new_version }} is available.">
+          <i class="fa fa-2x fa-cloud-download"></i>
+        </a>
+      </div>
+    {% end %}
   </footer>
 {% end %}
