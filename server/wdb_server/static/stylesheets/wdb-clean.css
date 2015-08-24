@@ -247,6 +247,13 @@ body, html {
           -ms-flex-item-align: end;
               align-self: flex-end;
       margin: 0 5px; }
+    #wdb > footer #update {
+      -webkit-align-self: flex-end;
+          -ms-flex-item-align: end;
+              align-self: flex-end;
+      margin: 0 5px; }
+      #wdb > footer #update i:before {
+        color: orangered; }
 
 a {
   color: #666; }
@@ -341,6 +348,7 @@ code {
 
 #source-editor:focus {
   outline: none; }
+
 #source-editor > .CodeMirror {
   font: 12px/1.4 Consolas, "Liberation Mono", Menlo, Courier, monospace;
   box-shadow: inset -8px 0 20px none; }
@@ -353,7 +361,7 @@ code {
     color: #666;
     border-top: 1px solid #d01040;
     border-bottom: 1px solid #d01040;
-    padding: .2em 2em;
+    padding: 0.2em 2em;
     -webkit-transform: rotate(45deg);
         -ms-transform: rotate(45deg);
             transform: rotate(45deg); }
@@ -382,10 +390,12 @@ code {
   background-color: white;
   border: 1px solid transparent;
   resize: both; }
+
 #scrollback .duration {
   float: right;
   padding: 0.5em 0 0 0;
   opacity: .333; }
+
 #scrollback iframe.display {
   width: 100%;
   min-height: 300px; }
@@ -418,8 +428,10 @@ code {
 
 #completions .base {
   color: #666; }
+
 #completions .completion {
   color: #666; }
+
 #completions td {
   padding: 0.25em; }
   #completions td.active .base {
@@ -754,6 +766,7 @@ code, code span {
   bottom: 0;
   right: 0;
   background-color: transparent; }
+
 #traceback .traceline .tracefun {
   background-color: transparent; }
   #traceback .traceline .tracefun:before {
