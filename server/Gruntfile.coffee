@@ -125,15 +125,6 @@ module.exports = (grunt) ->
         ]
         tasks: ['sass']
 
-  grunt.loadNpmTasks 'grunt-contrib-coffee'
-  grunt.loadNpmTasks 'grunt-contrib-watch'
-  grunt.loadNpmTasks 'grunt-contrib-uglify'
-  grunt.loadNpmTasks 'grunt-contrib-cssmin'
-  grunt.loadNpmTasks 'grunt-coffeelint'
-  grunt.loadNpmTasks 'grunt-autoprefixer'
-  grunt.loadNpmTasks 'grunt-sass'
-  grunt.loadNpmTasks 'grunt-bower-task'
-
   grunt.registerTask 'dev', ['coffeelint', 'coffee', 'watch']
   grunt.registerTask 'css', ['sass']
   grunt.registerTask 'default', [
