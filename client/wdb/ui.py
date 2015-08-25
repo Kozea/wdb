@@ -533,12 +533,12 @@ class Interaction(object):
         }))
 
     def do_complete(self, data):
-        comp = loads(data)
-        source = comp.pop('source')
-        pos = comp.pop('pos')
+        completion = loads(data)
+        source = completion.pop('source')
+        pos = completion.pop('pos')
         try:
             script = Interpreter(source, [
-                self.current_locals, self.get_globals()], **comp)
+                self.current_locals, self.get_globals()], **completion)
             with timeout_of(.75):
                 completions = script.completions()
         except Exception:
