@@ -107,6 +107,7 @@ class Wdb(object):
         self.tracing = False
         self.begun = False
         self.connected = False
+        self.closed = False
         self.stepping = False
         self.extra_vars = {}
         self.last_obj = None
@@ -326,7 +327,7 @@ class Wdb(object):
         trace_log.info('Setting trace %s (stepping %s) (current_trace: %s)' % (
             pretty_frame(frame or sys._getframe().f_back), self.stepping,
             sys.gettrace()))
-        if self.stepping:
+        if self.stepping or self.closed:
             return
         self.reset()
         trace = (self.trace_dispatch
