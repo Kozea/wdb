@@ -69,8 +69,8 @@ class WdbMiddleware(object):
         if path == '/__wdb/shell':
             def f():
                 # Enable wdb
-                Wdb.enabled = True
                 wdb = Wdb.get()
+                Wdb.enabled = True
                 start_response('200 OK', [
                     ('Content-Type', 'text/html'), ('X-Thing', wdb.uuid)])
                 yield to_bytes(' ' * 4096)
@@ -81,6 +81,8 @@ class WdbMiddleware(object):
 
         if Wdb.enabled:
             def trace_wsgi(environ, start_response):
+                wdb = Wdb.get()
+                wdb.closed = False
                 appiter = None
                 try:
                     with trace(close_on_exit=True, under=self.app):
@@ -93,9 +95,12 @@ class WdbMiddleware(object):
                     yield _handle_off()
                 finally:
                     hasattr(appiter, 'close') and appiter.close()
+                wdb.closed = False
             return trace_wsgi(environ, start_response)
 
         def catch(environ, start_response):
+            wdb = Wdb.get()
+            wdb.closed = False
             appiter = None
             try:
                 appiter = self.app(environ, start_response)
@@ -109,6 +114,7 @@ class WdbMiddleware(object):
                 # Close set_trace debuggers
                 stop_trace(close_on_exit=True)
                 hasattr(appiter, 'close') and appiter.close()
+            wdb.closed = False
 
         return catch(environ, start_response)
 
@@ -136,6 +142,9 @@ def wdb_tornado(application, start_disabled=False):
     @coroutine
     def _wdb_execute(*args, **kwargs):
         from wdb import trace, Wdb
+        wdb = Wdb.get()
+        wdb.closed = False  # Activate request ignores
+
         interesting = True
         if len(args) > 0 and isinstance(args[0], ErrorHandler):
             interesting = False
@@ -150,6 +159,9 @@ def wdb_tornado(application, start_disabled=False):
             old_execute(*args, **kwargs)
             # Close set_trace debuggers
             stop_trace(close_on_exit=True)
+
+        # Reset closed state
+        wdb.closed = False
 
     RequestHandler._execute = _wdb_execute
 
