@@ -262,7 +262,9 @@ class Wdb(object):
         if (self.state.stops(frame, event) or
             (event == 'line' and self.breaks(frame)) or
                 (event == 'exception' and (self.full or below))):
-            fun(frame, arg)
+            if not self.closed:
+                fun(frame, arg)
+
         if event == 'return' and frame == self.state.frame:
             # Upping state
             if self.state.up():
@@ -280,6 +282,10 @@ class Wdb(object):
                 # Thread / Process is dead
                 self.stop_trace()
                 self.die()
+                return
+
+            if below:
+                self.stop_trace()
                 return
 
         if (event == 'call' and not self.stepping and not self.full and
@@ -343,6 +349,7 @@ class Wdb(object):
         """Stop tracing from here"""
         self.tracing = False
         self.full = False
+        self.closed = False
         frame = frame or sys._getframe().f_back
         while frame:
             del frame.f_trace
