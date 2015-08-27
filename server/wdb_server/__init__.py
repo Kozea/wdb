@@ -149,7 +149,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         log.info('Websocket closed for %s' % self.uuid)
         if not tornado.options.options.detached_session:
-            sockets.send(self.uuid, 'Continue')
+            sockets.send(self.uuid, 'Close')
             sockets.close(self.uuid)
 
 
