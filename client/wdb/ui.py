@@ -448,7 +448,6 @@ class Interaction(object):
     def do_close(self, data):
         self.db.stepping = False
         self.db.closed = True
-        self.db.set_continue(self.current_frame)
         return True
 
     def do_break(self, data):
