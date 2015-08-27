@@ -345,7 +345,7 @@ Codemirror = (function(superClass) {
 Wdb = (function(superClass) {
   extend(Wdb, superClass);
 
-  Wdb.prototype.__version__ = '2.1.4';
+  Wdb.prototype.__version__ = '2.1.6';
 
   function Wdb() {
     var e;
