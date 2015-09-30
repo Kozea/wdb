@@ -46,7 +46,7 @@ def _handle_off(silent=False):
                 subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
                 state='',
                 trace_dict=dump({
-                    'trace': stack,
+                    'trace': [tuple(frame_summary) for frame_summary in stack],
                 })
             )
         )
