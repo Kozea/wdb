@@ -339,7 +339,7 @@ Make sure that wdb is installed for the python version running the program too.
 
 ## Importing wdb each time is exhausting
 
-Yes to avoid that, you can add a `w` builtin at the beggining of your application:
+Yes to avoid that, you can add a `w` builtin at the beginning of your application:
 
 
 ```python
