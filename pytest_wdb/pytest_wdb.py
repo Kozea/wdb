@@ -1,6 +1,5 @@
 """Wdb plugin for pytest."""
 import wdb
-import pytest
 
 
 def pytest_addoption(parser):
@@ -15,7 +14,6 @@ def pytest_configure(config):
 
 
 class Trace(object):
-    @pytest.mark.trylast
     def pytest_pyfunc_call(self, __multicall__, pyfuncitem):
         testfunction = pyfuncitem.obj
         if pyfuncitem._isyieldedfunction():
