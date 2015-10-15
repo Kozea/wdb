@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="pytest_wdb",
-    version='0.2',
+    version='0.3.0',
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
     url="http://github.com/Kozea/wdb",
