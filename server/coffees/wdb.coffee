@@ -16,7 +16,7 @@
 
 
 class Wdb extends Log
-  __version__: '2.1.6'
+  __version__: '2.1.7'
 
   constructor: ->
     super
@@ -789,7 +789,7 @@ specify a module like `logging.config`.
 
     if e.altKey and (
       65 <= e.keyCode <= 90 or 37 <= e.keyCode <= 40 or e.keyCode is 13
-      ) or 118 <= e.keyCode <= 122
+    ) or 118 <= e.keyCode <= 122
       char = switch e.keyCode
         when 37, 118 then 'u' # <     / F7
         when 13, 119 then 'c' # Enter / F8
@@ -952,7 +952,7 @@ specify a module like `logging.config`.
 
     unless (0 <
       $active.position().top - @$interpreter.position().top <
-       @$interpreter.height())
+    @$interpreter.height())
       $active.get(0).scrollIntoView?(false)
     true
 
