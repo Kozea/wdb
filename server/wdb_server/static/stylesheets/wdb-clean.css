@@ -361,7 +361,7 @@ code {
     color: #666;
     border-top: 1px solid #d01040;
     border-bottom: 1px solid #d01040;
-    padding: 0.2em 2em;
+    padding: .2em 2em;
     -webkit-transform: rotate(45deg);
         -ms-transform: rotate(45deg);
             transform: rotate(45deg); }

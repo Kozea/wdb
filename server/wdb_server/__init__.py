@@ -29,7 +29,7 @@ from wdb_server.state import (
 from multiprocessing import Process
 from uuid import uuid4
 
-__version__ = '2.1.7'
+__version__ = '2.1.8'
 
 log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")
