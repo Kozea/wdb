@@ -59,7 +59,6 @@ class WdbMiddleware(object):
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
-
         if path == '/__wdb/on':
             # Enable wdb
             Wdb.enabled = True
@@ -78,7 +77,6 @@ class WdbMiddleware(object):
                 wdb.die()
                 yield to_bytes('Exited')
             return f()
-
         if Wdb.enabled:
             def trace_wsgi(environ, start_response):
                 wdb = Wdb.get()
