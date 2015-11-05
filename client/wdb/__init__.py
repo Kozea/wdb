@@ -793,6 +793,7 @@ class Wdb(object):
                 self.send('Die')
             except Exception:
                 pass
+        if self._socket:
             self._socket.close()
         self.pop()
 

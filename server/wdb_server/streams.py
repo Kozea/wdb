@@ -34,9 +34,10 @@ ioloop = IOLoop.instance()
 def on_close(stream, uuid):
     # None if the user closed the window
     log.info('uuid %s closed' % uuid)
-    websockets.send(uuid, 'Die')
-    websockets.close(uuid)
-    websockets.remove(uuid)
+    if websockets.get(uuid):
+        websockets.send(uuid, 'Die')
+        websockets.close(uuid)
+        websockets.remove(uuid)
     sockets.remove(uuid)
 
 
