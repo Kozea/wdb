@@ -341,9 +341,7 @@ you can now use the `w` object any where in your code:
 
 The Theme can be chosen in the server home page, or can be set at start like that:
 ```python
-    wdb.server --theme=light  # and if you disable the debugger
-    WdbMiddleware(app, theme='light') # or
-    wdb_tornado(app, theme='light')
+    wdb.server --theme=light
 ```
 
 If you like writing css feel free to make your own and pull request it to me, css is generated using libsass and grunt and most of the work will be setting variables.
