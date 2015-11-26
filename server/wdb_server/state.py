@@ -28,7 +28,6 @@ class BaseSockets(object):
         self._sockets = {}
 
     def send(self, uuid, data, message=None):
-        print('Got send for uuid %s data %s' % (uuid, data))
         if message:
             data = data + '|' + json.dumps(message)
         if isinstance(data, unicode_type):
