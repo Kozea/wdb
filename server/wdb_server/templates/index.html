@@ -5,16 +5,30 @@
 {% end %}
 
 {% block main %}
-  <header>
-    <h1 id="title">WDB
-      <small>Home</small>
-    </h1>
-  </header>
 
-  <article>
-    <section>
-      <h2>Active sessions</h2>
-        <table class="sessions">
+<!-- Simple header with scrollable tabs. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <!-- Title -->
+      <span class="mdl-layout-title">wdb</span>
+    </div>
+    <!-- Tabs -->
+    <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+      <a href="#scroll-tab-1" class="mdl-layout__tab is-active">Active sessions</a>
+      <a href="#scroll-tab-2" class="mdl-layout__tab">Current global breakpoints</a>
+      <a href="#scroll-tab-3" class="mdl-layout__tab">Running processes</a>
+      <a href="#scroll-tab-4" class="mdl-layout__tab">Trace file</a>
+      <a href="#scroll-tab-5" class="mdl-layout__tab">Styles</a>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title">wdb</span>
+  </div>
+  <main class="mdl-layout__content">
+    <section class="mdl-layout__tab-panel is-active" id="scroll-tab-1">
+      <div class="page-content">
+        <table class="sessions mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
             <tr>
               <th>Session id</th>
@@ -26,59 +40,66 @@
           <tbody>
           </tbody>
         </table>
+      </div>
     </section>
-    <section>
-      <h2>Current global breakpoints</h2>
-      <table class="breakpoints">
-        <thead>
-          <tr>
-            <th>File</th>
-            <th>Line number</th>
-            <th>Condition</th>
-            <th>Function</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+    <section class="mdl-layout__tab-panel" id="scroll-tab-2">
+      <div class="page-content">
+        <table class="breakpoints mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Line number</th>
+              <th>Condition</th>
+              <th>Function</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </section>
-    <section>
-      <h2>Running processes</h2>
-      <table class="processes">
-        <thead>
-          <tr>
-            <th>Pid</th>
-            <th>User</th>
-            <th>Command Line</th>
-            <th>Time</th>
-            <th>Memory</th>
-            <th>Cpu</th>
-            <th>Thread ID</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-      <h3>Run python file with trace</h3>
-      <form class="runfile">
-        <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
-        <input type="submit" value="Debug" />
-      </form>
+    <section class="mdl-layout__tab-panel" id="scroll-tab-3">
+      <div class="page-content">
+        <table class="processes mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <thead>
+            <tr>
+              <th>Pid</th>
+              <th>User</th>
+              <th>Command Line</th>
+              <th>Time</th>
+              <th>Memory</th>
+              <th>Cpu</th>
+              <th>Thread ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
     </section>
-    <section>
-      {% from wdb_server import StyleHandler %}
+    <section class="mdl-layout__tab-panel" id="scroll-tab-4">
+      <div class="page-content">
+        <form class="runfile">
+          <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
+          <input type="submit" value="Debug" />
+        </form>
+      </div>
+    </section>
+    <section class="mdl-layout__tab-panel" id="scroll-tab-5">
+      <div class="page-content">
+        <form method="post">
+          <select name="theme">
+            {% for theme in StyleHandler.themes %}
+              <option value="{{ theme }}"{{ ' selected' if theme == StyleHandler.theme else '' }}>{{ theme.title() }} Theme</option>
+            {% end %}
+          </select>
+          <input type="submit" value="Change" />
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
 
-      <h2>Change theme</h2>
-      <form method="post">
-        <select name="theme">
-          {% for theme in StyleHandler.themes %}
-            <option value="{{ theme }}"{{ ' selected' if theme == StyleHandler.theme else '' }}>{{ theme.title() }} Theme</option>
-          {% end %}
-        </select>
-        <input type="submit" value="Change" />
-      </form>
-    </section>
-  </article>
 {% end %}
