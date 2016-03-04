@@ -78,7 +78,7 @@ To try wdb, first you have to start the wdb server:
     $ wdb.server.py &
 ```
 
-Optionnaly, you can automatically activate daemons with systemd (socket activation):
+Optionally, you can automatically activate daemons with systemd (socket activation):
 
 ```
     $ cd /etc/systemd/system
