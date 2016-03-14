@@ -122,7 +122,7 @@ Codemirror = (function(superClass) {
       };
     })(this), {
       value: 'Waiting for file',
-      theme: 'wdb',
+      theme: 'material',
       keyMap: 'wdb',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
@@ -281,6 +281,7 @@ Codemirror = (function(superClass) {
     var base1, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
     rescope = true;
     if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
+      this.code_mirror.setOption('mode', this.get_mode(new_state.fn));
       this.code_mirror.setValue(new_state.file);
       ref = this.breakpoints[new_state.fn] || [];
       for (j = 0, len = ref.length; j < len; j++) {
@@ -348,7 +349,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.__version__ = '2.1.9';
 
   function Wdb() {
-    var e;
+    var e, error;
     Wdb.__super__.constructor.apply(this, arguments);
     this.started = false;
     this.to_complete = null;
@@ -361,7 +362,6 @@ Wdb = (function(superClass) {
     this.eval_time = null;
     this.waited_for_ws = 0;
     this.$activity = $('#activity');
-    this.$title = $('#title');
     this.$waiter = $('#waiter');
     this.$wdb = $('#wdb');
     this.$source = $('#source');
@@ -375,11 +375,11 @@ Wdb = (function(superClass) {
     this.$watchers = $('#watchers');
     try {
       this.cmd_hist = JSON.parse(localStorage['cmd_hist'] || '[]');
-    } catch (_error) {
-      e = _error;
+    } catch (error) {
+      e = error;
       this.fail(e);
     }
-    this.ws = new Websocket(this, this.$wdb.find('> header').attr('data-uuid'));
+    this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
     this.cm = new Codemirror(this);
     this.$eval.focus();
   }
@@ -388,7 +388,7 @@ Wdb = (function(superClass) {
     if (!this.started) {
       this.$eval.on('keydown', this.eval_key.bind(this)).on('keyup', this.eval_carret_change.bind(this)).on('mouseup', this.eval_carret_change.bind(this)).on('blur', this.searchback_stop.bind(this));
       $(window).on('keydown', this.global_key.bind(this));
-      this.$traceback.on('click', '.traceline', this.select_click.bind(this));
+      this.$traceback.on('click', '.trace-line', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
       this.$source.find('#source-editor').on('mouseup', this.paste_target.bind(this));
@@ -463,18 +463,21 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.title = function(data) {
-    return this.$title.text(data.title).attr('title', data.title).append($('<small>').text(data.subtitle).attr('title', data.subtitle));
+    $('.title').text(data.title).attr('title', data.title);
+    return $('.subtitle').text(data.subtitle).attr('title', data.subtitle);
   };
 
   Wdb.prototype.trace = function(data) {
-    var $tracecode, $tracefile, $tracefilelno, $tracefun, $tracefunfun, $traceline, $tracelno, brk, frame, j, k, len, len1, ref, ref1, results, suffix;
+    var $primary, $traceline, brk, frame, j, k, len, len1, ref, ref1, results;
     this.$traceback.removeClass('hidden');
     this.$traceback.empty();
     ref = data.trace;
     results = [];
     for (j = 0, len = ref.length; j < len; j++) {
       frame = ref[j];
-      $traceline = $('<div>').addClass('traceline').attr('id', 'trace-' + frame.level).attr('data-level', frame.level);
+      $traceline = $('<a>', {
+        "class": 'trace-line mdl-list__item mdl-list__item--two-line'
+      }).attr('id', 'trace-' + frame.level).attr('data-level', frame.level).attr('title', "File \"" + frame.file + "\", line " + frame.lno + ", in " + frame["function"]);
       ref1 = this.cm.breakpoints[frame.file] || [];
       for (k = 0, len1 = ref1.length; k < len1; k++) {
         brk = ref1[k];
@@ -486,37 +489,22 @@ Wdb = (function(superClass) {
       if (frame.current) {
         $traceline.addClass('real-selected');
       }
-      $tracefile = $('<span>').addClass('tracefile').text(frame.file);
-      $tracelno = $('<span>').addClass('tracelno').text(frame.lno);
-      $tracefun = $('<span>').addClass('tracefun').text(frame["function"]);
-      $tracefilelno = $('<div>').addClass('tracefilelno').append($tracefile).append($tracelno);
-      $tracefunfun = $('<div>').addClass('tracefunfun').append($tracefun);
-      if (frame.file.indexOf('site-packages') > 0) {
-        suffix = frame.file.split('site-packages').slice(-1)[0];
-        $tracefile.text(suffix);
-        $tracefile.prepend($('<span>').addClass('tracestar').text('*').attr({
-          title: frame.file
-        }));
-      }
-      if (frame.file.indexOf(this.cwd) === 0) {
-        suffix = frame.file.split(this.cwd).slice(-1)[0];
-        $tracefile.text(suffix);
-        $tracefile.prepend($('<span>').addClass('tracestar').text('.').attr({
-          title: frame.file
-        }));
-      }
-      $tracecode = $('<div>').addClass('tracecode');
-      this.code($tracecode, frame.code);
-      $traceline.append($tracefilelno);
-      $traceline.append($tracecode);
-      $traceline.append($tracefunfun);
+      $primary = $('<span>', {
+        "class": 'mdl-list__item-primary-content'
+      });
+      $primary.append($('<span>').text(frame["function"]));
+      $primary.append($('<span>', {
+        "class": 'mdl-list__item-sub-title'
+      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno));
+      $traceline.append($primary);
       results.push(this.$traceback.prepend($traceline));
     }
     return results;
   };
 
   Wdb.prototype.select_click = function(e) {
-    return this.ws.send('Select', $(e.currentTarget).attr('data-level'));
+    this.ws.send('Select', $(e.currentTarget).attr('data-level'));
+    return false;
   };
 
   Wdb.prototype.selectcheck = function(data) {
@@ -533,7 +521,7 @@ Wdb = (function(superClass) {
     current_frame = data.frame;
     this.$interpreter.show();
     this.$source.find('#source-editor').removeClass('hidden');
-    $('.traceline').removeClass('selected');
+    $('.trace-line').removeClass('selected');
     $('#trace-' + current_frame.level).addClass('selected');
     this.file_cache[data.name] = data.file;
     this.cm.open(data, current_frame);
@@ -810,11 +798,11 @@ Wdb = (function(superClass) {
     this.code(this.$scrollback, data["for"], ['prompted']);
     $container = $('<div>');
     $table = $('<table>', {
-      "class": 'object'
+      "class": 'mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp object'
     }).appendTo($container);
     $core_head = $('<thead>', {
       "class": 'toggle closed'
-    }).append($('<tr>').append($('<td>', {
+    }).append($('<tr>').append($('<th>', {
       "class": 'core',
       colspan: 2
     }).text('Core Members'))).appendTo($table);
@@ -823,7 +811,7 @@ Wdb = (function(superClass) {
     }).appendTo($table);
     $method_head = $('<thead>', {
       "class": 'toggle closed'
-    }).append($('<tr>').append($('<td>', {
+    }).append($('<tr>').append($('<th>', {
       "class": 'method',
       colspan: 2
     }).text('Methods'))).appendTo($table);
@@ -832,7 +820,7 @@ Wdb = (function(superClass) {
     }).appendTo($table);
     $attr_head = $('<thead>', {
       "class": 'toggle closed'
-    }).append($('<tr>').append($('<td>', {
+    }).append($('<tr>').append($('<th>', {
       "class": 'attr',
       colspan: 2
     }).text('Attributes'))).appendTo($table);
@@ -848,7 +836,9 @@ Wdb = (function(superClass) {
       } else if (val.type.indexOf('method') !== -1) {
         $tbody = $method_tbody;
       }
-      $tbody.append($('<tr>').append($('<td>').text(key)).append($('<td>').html(val.val)));
+      $tbody.append($('<tr>').append($('<td>', {
+        "class": 'mdl-data-table__cell--non-numeric'
+      }).text(key)).append($('<td>').html(val.val)));
     }
     if ($core_tbody.find('tr').size() === 0) {
       $core_head.remove();
@@ -865,7 +855,7 @@ Wdb = (function(superClass) {
     if (data.doc) {
       $table.append($('<thead>', {
         "class": 'toggle closed'
-      }).append($('<tr>').append($('<td>', {
+      }).append($('<tr>').append($('<th>', {
         "class": 'doc',
         colspan: 2
       }).text('Documentation'))));
@@ -879,7 +869,7 @@ Wdb = (function(superClass) {
     if (data.source) {
       $table.append($('<thead>', {
         "class": 'toggle closed'
-      }).append($('<tr>').append($('<td>', {
+      }).append($('<tr>').append($('<th>', {
         "class": 'source',
         colspan: 2
       }).text('Source'))));
@@ -898,7 +888,7 @@ Wdb = (function(superClass) {
     var ref;
     this.cm.set_breakpoint(data);
     if (!data.lno && !data.fun && !data.cond) {
-      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').addClass('breakpoint');
+      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.trace-line').addClass('breakpoint');
     }
     if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't')) {
       return this.done();
@@ -911,7 +901,7 @@ Wdb = (function(superClass) {
     var ref;
     this.cm.clear_breakpoint(data);
     if (!data.lno && !data.fun && !data.cond) {
-      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.traceline').removeClass('breakpoint');
+      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.trace-line').removeClass('breakpoint');
     }
     if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't' || ref === 'z')) {
       return this.done();
@@ -1187,10 +1177,7 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.die = function() {
     $('h1').html('Dead<small>Program has exited</small>');
-    this.ws.ws.close();
-    return setTimeout((function() {
-      return window.close();
-    }), 10);
+    return this.ws.ws.close();
   };
 
   Wdb.prototype.multiline_stop = function() {

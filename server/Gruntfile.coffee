@@ -3,7 +3,7 @@ module.exports = (grunt) ->
   require('load-grunt-tasks')(grunt)
   jsdeps = [
     'bower_components/jquery/dist/jquery.min.js'
-    'bower_components/jquery-autosize/jquery.autosize.min.js'
+    # 'bower_components/jquery-autosize/jquery.autosize.min.js'
     'bower_components/codemirror/lib/codemirror.js'
     'bower_components/codemirror/addon/runmode/runmode.js'
     'bower_components/codemirror/addon/dialog/dialog.js'
@@ -12,8 +12,9 @@ module.exports = (grunt) ->
     'bower_components/codemirror/mode/diff/diff.js'
   ]
   cssdeps = [
-    'bower_components/font-awesome/css/font-awesome.min.css'
+    # 'bower_components/font-awesome/css/font-awesome.min.css'
     'bower_components/codemirror/lib/codemirror.css'
+    'bower_components/codemirror/theme/material.css'
     'bower_components/codemirror/addon/dialog/dialog.css'
   ]
 
@@ -22,16 +23,6 @@ module.exports = (grunt) ->
     fileExists:
       jsdeps: jsdeps
       cssdeps: cssdeps
-
-    imageEmbed:
-      options:
-        maxImageSize: 0
-        regexInclude: /^[^#].+$/g
-        regexExclude: /^#.+$/g
-
-      cssdeps:
-        files:
-          'wdb_server/static/stylesheets/deps.embed.css': cssdeps
 
     uglify:
       options:
@@ -57,18 +48,10 @@ module.exports = (grunt) ->
         dest: 'wdb_server/static/stylesheets/'
         ext: '.css'
 
-    autoprefixer:
-      hydra:
-        expand: true
-        cwd: 'wdb_server/static/stylesheets/'
-        src: '*.css'
-        dest: 'wdb_server/static/stylesheets/'
-
     cssmin:
       codemirror:
         files:
-          'wdb_server/static/stylesheets/deps.min.css': (
-            'wdb_server/static/stylesheets/deps.embed.css')
+          'wdb_server/static/stylesheets/deps.min.css': cssdeps
 
     coffee:
       options:
@@ -129,7 +112,6 @@ module.exports = (grunt) ->
   grunt.registerTask 'css', ['sass']
   grunt.registerTask 'default', [
     'coffeelint', 'coffee',
-    'sass', 'autoprefixer',
+    'sass',
     'bower', 'fileExists',
-    'imageEmbed',
     'uglify', 'cssmin']

@@ -34,7 +34,6 @@ class Wdb extends Log
 
     # Page elements
     @$activity = $('#activity')
-    @$title = $('#title')
     @$waiter = $('#waiter')
     @$wdb = $('#wdb')
     @$source = $('#source')
@@ -52,7 +51,7 @@ class Wdb extends Log
     catch e
       @fail e
 
-    @ws = new Websocket(@, @$wdb.find('> header').attr('data-uuid'))
+    @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
     @cm = new Codemirror(@)
     @$eval.focus()
 
@@ -68,7 +67,7 @@ class Wdb extends Log
       $(window)
         .on 'keydown', @global_key.bind @
 
-      @$traceback.on 'click', '.traceline', @select_click.bind @
+      @$traceback.on 'click', '.trace-line', @select_click.bind @
       @$scrollback.add(@$watchers)
         .on 'click', 'a.inspect', @inspect.bind(@)
         .on 'click', '.short.close', @short_open.bind @
@@ -135,22 +134,25 @@ class Wdb extends Log
       @cm.breakpoints[brk.fn].push brk
 
   title: (data) ->
-    @$title
+    $('.title')
       .text(data.title)
       .attr('title', data.title)
-      .append(
-        $('<small>')
-          .text(data.subtitle)
-          .attr('title', data.subtitle))
+
+    $('.subtitle')
+      .text(data.subtitle)
+      .attr('title', data.subtitle)
 
   trace: (data) ->
     @$traceback.removeClass('hidden')
     @$traceback.empty()
     for frame in data.trace
-      $traceline = $('<div>')
-        .addClass('traceline')
+      $traceline = $('<a>',
+        class:'trace-line
+        mdl-list__item mdl-list__item--two-line')
         .attr('id', 'trace-' + frame.level)
         .attr('data-level', frame.level)
+        .attr('title',
+          "File \"#{frame.file}\", line #{frame.lno}, in #{frame.function}")
 
       for brk in @cm.breakpoints[frame.file] or []
         unless brk.cond or brk.fun or brk.lno
@@ -159,47 +161,34 @@ class Wdb extends Log
 
       if frame.current
         $traceline.addClass('real-selected')
-      $tracefile = $('<span>').addClass('tracefile').text(frame.file)
-      $tracelno = $('<span>').addClass('tracelno').text(frame.lno)
-      $tracefun = $('<span>').addClass('tracefun').text(frame.function)
 
-      $tracefilelno = $('<div>')
-        .addClass('tracefilelno')
-        .append($tracefile)
-        .append($tracelno)
+      $primary = $('<span>', class: 'mdl-list__item-primary-content')
+      $primary.append $('<span>').text(frame.function)
+      $primary.append($('<span>', class: 'mdl-list__item-sub-title')
+        .text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno))
+      #
+      # $tracefilelno = $('<span>')
+      #   .addClass('mdl-list__item-primary-content')
+      #   .append $('<span>', title: frame.file).text()
+      #
+      #   .append $('<span>', title: frame.file).text()
+      #   .append($tracefile = $('<span>', title: frame.file)
+      #     .addClass('trace-file')
+      #     .append $('<sup>').addClass('trace-lno').text(frame.lno)
+      #     .text(frame.filename))
+      #   .append $('<span>').addClass('trace-fun').text(frame.function)
 
-      $tracefunfun = $('<div>')
-        .addClass('tracefunfun')
-        .append($tracefun)
+      # $tracecode = $('<span>')
+      #   .addClass('tracecode')
+      #
+      # @code $tracecode, frame.code
 
-      if frame.file.indexOf('site-packages') > 0
-        suffix = frame.file.split('site-packages').slice(-1)[0]
-        $tracefile.text(suffix)
-        $tracefile.prepend(
-          $('<span>')
-            .addClass('tracestar')
-            .text('*')
-            .attr(title: frame.file))
-
-      if frame.file.indexOf(@cwd) == 0
-        suffix = frame.file.split(@cwd).slice(-1)[0]
-        $tracefile.text(suffix)
-        $tracefile.prepend(
-          $('<span>')
-            .addClass('tracestar')
-            .text('.')
-            .attr(title: frame.file))
-
-      $tracecode = $('<div>').addClass('tracecode')
-
-      @code $tracecode, frame.code
-      $traceline.append $tracefilelno
-      $traceline.append $tracecode
-      $traceline.append $tracefunfun
+      $traceline.append $primary
       @$traceback.prepend $traceline
 
   select_click: (e) ->
     @ws.send 'Select', $(e.currentTarget).attr('data-level')
+    false
 
   selectcheck: (data) ->
     if data.name not of @file_cache
@@ -212,7 +201,7 @@ class Wdb extends Log
     current_frame = data.frame
     @$interpreter.show()
     @$source.find('#source-editor').removeClass('hidden')
-    $('.traceline').removeClass('selected')
+    $('.trace-line').removeClass('selected')
     $('#trace-' + current_frame.level).addClass('selected')
     @file_cache[data.name] = data.file
     @cm.open(data, current_frame)
@@ -468,25 +457,27 @@ specify a module like `logging.config`.
   dump: (data) ->
     @code(@$scrollback, data.for, ['prompted'])
     $container = $('<div>')
-    $table = $('<table>', class: 'object').appendTo($container)
+    $table = $('<table>', class: 'mdl-data-table mdl-js-data-table
+      mdl-data-table--selectable mdl-shadow--2dp object')
+      .appendTo($container)
     $core_head =
       $('<thead>', class: 'toggle closed').append(
         $('<tr>')
-          .append($('<td>', class: 'core', colspan: 2)
+          .append($('<th>', class: 'core', colspan: 2)
           .text('Core Members'))).appendTo($table)
     $core_tbody = $('<tbody>', class: 'core closed').appendTo($table)
 
     $method_head =
       $('<thead>', class: 'toggle closed').append(
         $('<tr>')
-          .append($('<td>', class: 'method', colspan: 2)
+          .append($('<th>', class: 'method', colspan: 2)
           .text('Methods'))).appendTo($table)
     $method_tbody = $('<tbody>', class: 'method closed').appendTo($table)
 
     $attr_head =
       $('<thead>', class: 'toggle closed').append(
         $('<tr>').append(
-          $('<td>', class: 'attr', colspan: 2)
+          $('<th>', class: 'attr', colspan: 2)
             .text('Attributes'))).appendTo($table)
     $attr_tbody = $('<tbody>', class: 'attr closed').appendTo($table)
 
@@ -498,7 +489,7 @@ specify a module like `logging.config`.
         $tbody = $method_tbody
 
       $tbody.append($('<tr>')
-        .append($('<td>').text(key))
+        .append($('<td>', class: 'mdl-data-table__cell--non-numeric').text(key))
         .append($('<td>').html(val.val)))
 
     if $core_tbody.find('tr').size() is 0
@@ -517,7 +508,7 @@ specify a module like `logging.config`.
       $table.append(
         $('<thead>', class: 'toggle closed').append(
           $('<tr>').append(
-            $('<td>', class: 'doc', colspan: 2)
+            $('<th>', class: 'doc', colspan: 2)
               .text('Documentation'))))
 
       $('<tbody>', class: 'doc closed').append(
@@ -529,7 +520,7 @@ specify a module like `logging.config`.
       $table.append(
         $('<thead>', class: 'toggle closed').append(
           $('<tr>').append(
-            $('<td>', class: 'source', colspan: 2)
+            $('<th>', class: 'source', colspan: 2)
               .text('Source'))))
 
       $('<tbody>', class: 'source closed').append(
@@ -544,7 +535,7 @@ specify a module like `logging.config`.
     @cm.set_breakpoint data
     if not data.lno and not data.fun and not data.cond
       @$traceback.find("[title=\"#{data.fn}\"]")
-        .closest('.traceline')
+        .closest('.trace-line')
         .addClass('breakpoint')
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't']
@@ -556,7 +547,7 @@ specify a module like `logging.config`.
     @cm.clear_breakpoint data
     if not data.lno and not data.fun and not data.cond
       @$traceback.find("[title=\"#{data.fn}\"]")
-        .closest('.traceline')
+        .closest('.trace-line')
         .removeClass('breakpoint')
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't', 'z']
@@ -775,7 +766,7 @@ specify a module like `logging.config`.
   die: ->
     $('h1').html('Dead<small>Program has exited</small>')
     @ws.ws.close()
-    setTimeout (-> window.close()), 10
+    # setTimeout (-> window.close()), 10
 
   multiline_stop: ->
     if @$prompt.hasClass('multiline')

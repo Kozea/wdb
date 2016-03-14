@@ -6,32 +6,43 @@
 
 
 {% block main %}
-  <header data-uuid="{{ uuid }}">
-    <div id="activity" class="on">
-      <div class="state"></div>
-      <div class="inner state"></div>
-    </div>
-    <h1 id="title">
-      Wdb is tracing your request.
-      <small>
-        It may take some time.
-      </small>
-    </h1>
-    <div id="switch">
-      <a id="deactivate" href=""></a>
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header" data-uuid="{{ uuid }}">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout-title subtitle">
+        May take some time.
+      </span>
+      <div class="mdl-layout-spacer"></div>
+
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+      </div>
     </div>
   </header>
 
-  <article class="split">
-    <div id="source">
-      <div id="source-editor" tabindex="1" class="hidden">
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title title">
+      Tracing
+    </span>
+    <nav id="traceback" class="mdl-navigation">
+    </nav>
+  </div>
+
+  <main class="mdl-layout__content">
+    <div class="page-content">
+      <div id="source">
+        <div id="source-editor" tabindex="1" class="hidden">
+        </div>
       </div>
+
       <div id="interpreter" tabindex="2">
         <div id="scrollback">
         </div>
-        <div id="prompt">
-          <textarea data-index="-1" id="eval" tabindex="3"></textarea>
+
+        <div id="prompt" class="mdl-textfield mdl-js-textfield">
+          <textarea data-index="-1" id="eval" tabindex="3" class="mdl-textfield__input" type="text" rows="1"></textarea>
+          <label class="mdl-textfield__label" for="eval">...</label>
         </div>
+
         <div id="completions">
           <div id="backsearch"></div>
           <table>
@@ -39,25 +50,18 @@
         </div>
       </div>
     </div>
-
-    <div id="traceback" class="hidden">
-    </div>
-  </article>
-
-  <footer>
-    <div id="watchers">
-    </div>
-    <div id="home">
-      <a href="/" target="blank">
-        <i class="fa fa-home"></i>
-      </a>
-    </div>
-    {% if new_version %}
-      <div id="update">
-        <a href="https://pypi.python.org/pypi/wdb_server" target="blank" title="A new version {{ new_version }} is available.">
-          <i class="fa fa-2x fa-cloud-download"></i>
-        </a>
-      </div>
-    {% end %}
-  </footer>
+    <footer class="mdl-mini-footer">
+      <ul class="mdl-mini-footer__link-list">
+        <li><a href="/">wdb</a></li>
+      </ul>
+      {% if new_version %}
+        <div id="update">
+          <a href="https://pypi.python.org/pypi/wdb_server" target="blank" title="A new version {{ new_version }} is available.">
+            <i class="material-icons">file_download</i>
+          </a>
+        </div>
+      {% end %}
+    </footer>
+  </main>
+</div>
 {% end %}
