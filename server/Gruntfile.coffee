@@ -3,19 +3,19 @@ module.exports = (grunt) ->
   require('load-grunt-tasks')(grunt)
   jsdeps = [
     'bower_components/jquery/dist/jquery.min.js'
-    # 'bower_components/jquery-autosize/jquery.autosize.min.js'
     'bower_components/codemirror/lib/codemirror.js'
     'bower_components/codemirror/addon/runmode/runmode.js'
     'bower_components/codemirror/addon/dialog/dialog.js'
+    'bower_components/codemirror/addon/hint/show-hint.js'
     'bower_components/codemirror/mode/python/python.js'
     'bower_components/codemirror/mode/jinja2/jinja2.js'
     'bower_components/codemirror/mode/diff/diff.js'
   ]
   cssdeps = [
-    # 'bower_components/font-awesome/css/font-awesome.min.css'
     'bower_components/codemirror/lib/codemirror.css'
     'bower_components/codemirror/theme/material.css'
     'bower_components/codemirror/addon/dialog/dialog.css'
+    'bower_components/codemirror/addon/hint/show-hint.css'
   ]
 
   grunt.initConfig
@@ -63,6 +63,7 @@ module.exports = (grunt) ->
             'coffees/_base.coffee'
             'coffees/_websocket.coffee'
             'coffees/_codemirror.coffee'
+            'coffees/_prompt.coffee'
             'coffees/wdb.coffee'
           ]
 

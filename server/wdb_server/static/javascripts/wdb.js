@@ -1,4 +1,4 @@
-var Codemirror, Log, Wdb, Websocket,
+var Codemirror, Log, Prompt, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -152,9 +152,9 @@ Codemirror = (function(superClass) {
   };
 
   Codemirror.prototype.clear_breakpoint = function(brk) {
-    var base1, name1;
-    if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
-      base1[name1] = [];
+    var base, name1;
+    if ((base = this.breakpoints)[name1 = brk.fn] == null) {
+      base[name1] = [];
     }
     if (indexOf.call(this.breakpoints[brk.fn], brk) >= 0) {
       this.breakpoints[brk.fn].splice(this.breakpoints[brk.fn].indexOf(brk));
@@ -171,9 +171,9 @@ Codemirror = (function(superClass) {
   };
 
   Codemirror.prototype.set_breakpoint = function(brk) {
-    var base1, name1;
-    if ((base1 = this.breakpoints)[name1 = brk.fn] == null) {
-      base1[name1] = [];
+    var base, name1;
+    if ((base = this.breakpoints)[name1 = brk.fn] == null) {
+      base[name1] = [];
     }
     this.breakpoints[brk.fn].push(brk);
     return this.mark_breakpoint(brk);
@@ -212,9 +212,9 @@ Codemirror = (function(superClass) {
   };
 
   Codemirror.prototype.get_breakpoint = function(n) {
-    var base1, brk, j, len, name1, ref;
-    if ((base1 = this.breakpoints)[name1 = this.state.fn] == null) {
-      base1[name1] = [];
+    var base, brk, j, len, name1, ref;
+    if ((base = this.breakpoints)[name1 = this.state.fn] == null) {
+      base[name1] = [];
     }
     ref = this.breakpoints[this.state.fn];
     for (j = 0, len = ref.length; j < len; j++) {
@@ -278,7 +278,7 @@ Codemirror = (function(superClass) {
   };
 
   Codemirror.prototype.set_state = function(new_state) {
-    var base1, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
+    var base, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
     rescope = true;
     if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
       this.code_mirror.setOption('mode', this.get_mode(new_state.fn));
@@ -316,8 +316,8 @@ Codemirror = (function(superClass) {
     }
     this.add_class(this.state.lno, 'highlighted');
     this.add_mark(this.state.lno, 'highlighted', 'CodeMirror-linenumbers', '➤');
-    if ((base1 = this.footsteps)[name1 = this.state.fn] == null) {
-      base1[name1] = [];
+    if ((base = this.footsteps)[name1 = this.state.fn] == null) {
+      base[name1] = [];
     }
     this.footsteps[this.state.fn].push(this.state.lno);
     return this.code_mirror.scrollIntoView({
@@ -340,6 +340,94 @@ Codemirror = (function(superClass) {
   };
 
   return Codemirror;
+
+})(Log);
+
+Prompt = (function(superClass) {
+  extend(Prompt, superClass);
+
+  function Prompt(wdb) {
+    this.wdb = wdb;
+    Prompt.__super__.constructor.apply(this, arguments);
+    this.$container = $('.prompt');
+    this.code_mirror = CodeMirror((function(_this) {
+      return function(elt) {
+        _this.$code_mirror = $(elt);
+        return _this.$container.prepend(elt);
+      };
+    })(this), {
+      value: '',
+      theme: 'default',
+      language: 'python',
+      viewportMargin: Infinity
+    });
+    CodeMirror.registerHelper("hint", "jedi", (function(_this) {
+      return function(cm, callback, options) {
+        var cur, tok;
+        cur = cm.getCursor();
+        tok = cm.getTokenAt(cur);
+        _this.wdb.ws.send('Complete', {
+          source: cm.getValue(),
+          pos: _this.code_mirror.getRange({
+            line: 0,
+            ch: 0
+          }, cur).length,
+          line: cur.line + 1,
+          column: cur.ch
+        });
+        return _this.completion = {
+          from: CodeMirror.Pos(cur.line, tok.start),
+          to: CodeMirror.Pos(cur.line, tok.end),
+          callback: callback
+        };
+      };
+    })(this));
+    this.code_mirror.addKeyMap({
+      'Enter': (function(_this) {
+        return function(cm) {
+          return _this.wdb.execute(_this.code_mirror.getValue());
+        };
+      })(this),
+      'Ctrl-Enter': 'newlineAndIndent',
+      'Ctrl-Space': function(cm, options) {
+        return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
+          async: true
+        });
+      }
+    });
+  }
+
+  Prompt.prototype.complete = function(data) {
+    var completion;
+    if (!this.completion) {
+      return;
+    }
+    return this.completion.callback({
+      from: this.completion.from,
+      to: this.completion.to,
+      list: (function() {
+        var j, len, ref, results;
+        ref = data.completions;
+        results = [];
+        for (j = 0, len = ref.length; j < len; j++) {
+          completion = ref[j];
+          results.push({
+            text: completion.base + completion.complete,
+            _completion: completion,
+            render: function(elt, data, cur) {
+              var c, item;
+              c = cur._completion;
+              item = "<b>" + c.base + "</b>" + c.complete;
+              return $(elt).html(item);
+            }
+          });
+        }
+        return results;
+      })()
+    });
+  };
+
+  return Prompt;
 
 })(Log);
 
@@ -367,8 +455,6 @@ Wdb = (function(superClass) {
     this.$source = $('#source');
     this.$interpreter = $('#interpreter');
     this.$scrollback = $('#scrollback');
-    this.$prompt = $('#prompt');
-    this.$eval = $('#eval');
     this.$completions = $('#completions');
     this.$backsearch = $('#backsearch');
     this.$traceback = $('#traceback');
@@ -381,12 +467,11 @@ Wdb = (function(superClass) {
     }
     this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
     this.cm = new Codemirror(this);
-    this.$eval.focus();
+    this.prompt = new Prompt(this);
   }
 
   Wdb.prototype.opening = function() {
     if (!this.started) {
-      this.$eval.on('keydown', this.eval_key.bind(this)).on('keyup', this.eval_carret_change.bind(this)).on('mouseup', this.eval_carret_change.bind(this)).on('blur', this.searchback_stop.bind(this));
       $(window).on('keydown', this.global_key.bind(this));
       this.$traceback.on('click', '.trace-line', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
@@ -407,7 +492,6 @@ Wdb = (function(superClass) {
             }, 250);
             return false;
           }
-          return _this.$eval.focus();
         };
       })(this));
       false;
@@ -415,8 +499,7 @@ Wdb = (function(superClass) {
     }
     this.ws.send('Start');
     this.$waiter.remove();
-    this.$wdb.show();
-    return this.$eval.autosize();
+    return this.$wdb.show();
   };
 
   Wdb.prototype.working = function() {
@@ -428,21 +511,16 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.done = function(suggest) {
-    var eval_val;
     if (suggest == null) {
       suggest = null;
     }
     this.termscroll();
-    eval_val = suggest || '';
-    if (this.$eval.val() !== eval_val) {
-      this.$eval.val(eval_val).prop('disabled', false).attr('data-index', -1).trigger('autosize.resize').focus();
-    }
     this.$completions.attr('style', '');
     return this.chilling();
   };
 
   Wdb.prototype.init = function(data) {
-    var base1, brk, brks, j, len, name1, results;
+    var base, brk, brks, j, len, name1, results;
     if (data.version !== this.constructor.prototype.__version__) {
       this.print({
         "for": 'Client Server version mismatch !',
@@ -454,8 +532,8 @@ Wdb = (function(superClass) {
     results = [];
     for (j = 0, len = brks.length; j < len; j++) {
       brk = brks[j];
-      if ((base1 = this.cm.breakpoints)[name1 = brk.fn] == null) {
-        base1[name1] = [];
+      if ((base = this.cm.breakpoints)[name1 = brk.fn] == null) {
+        base[name1] = [];
       }
       results.push(this.cm.breakpoints[brk.fn].push(brk));
     }
@@ -720,7 +798,6 @@ Wdb = (function(superClass) {
     if (snippet) {
       this.working();
       this.ws.send('Eval', snippet);
-      this.$eval.val(this.$eval.val() + '...').trigger('autosize.resize').prop('disabled', true);
       return this.eval_time = typeof performance !== "undefined" && performance !== null ? performance.now() : void 0;
     }
   };
@@ -752,7 +829,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.termscroll = function() {
     var from, to;
     from = this.$interpreter.scrollTop();
-    to = Math.max(0, this.$scrollback.outerHeight() + this.$prompt.outerHeight() - this.$interpreter.height());
+    to = Math.max(0, this.$scrollback.outerHeight() + this.$interpreter.height());
     to += Math.min(this.$completions.outerHeight(), this.$interpreter.height() / 4);
     to = Math.min(this.$scrollback.outerHeight(), to);
     if (to - from === 0) {
@@ -764,13 +841,12 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.print = function(data) {
-    var $group, duration, snippet;
+    var $group, duration;
     if (performance && this.eval_time) {
       duration = parseInt((performance.now() - this.eval_time) * 1000);
       this.eval_time = null;
     }
     this.suggest_stop();
-    snippet = this.$eval.val();
     $group = $('<div>');
     this.$scrollback.append($group);
     if (data.duration) {
@@ -798,7 +874,7 @@ Wdb = (function(superClass) {
     this.code(this.$scrollback, data["for"], ['prompted']);
     $container = $('<div>');
     $table = $('<table>', {
-      "class": 'mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp object'
+      "class": 'mdl-data-table mdl-js-data-table mdl-shadow--2dp object'
     }).appendTo($container);
     $core_head = $('<thead>', {
       "class": 'toggle closed'
@@ -880,6 +956,7 @@ Wdb = (function(superClass) {
         colspan: 2
       }).text(data.source))).appendTo($table);
     }
+    componentHandler.upgradeElement($table.get(0));
     this.code(this.$scrollback, $container.html(), [], true);
     return this.done();
   };
@@ -1005,58 +1082,8 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.suggest = function(data) {
-    var $appender, $comp, $tbody, $td, added, base_len, cols, completion, height, index, j, k, len, len1, max_width, param, ref, ref1, ref2, txtarea;
     if (data) {
-      $comp = this.$completions.find('table').empty();
-      height = this.$completions.height();
-      if (data.completions.length) {
-        max_width = this.$interpreter.width();
-        cols = Math.max(1, ((this.$interpreter.width() / 100) << 0) - 1);
-        while (cols > 0) {
-          $comp = this.$completions.find('table').empty();
-          added = [];
-          $comp.append($('<thead><tr><th id="comp-desc" colspan="' + cols + '">'));
-          $tbody = $('<tbody>');
-          base_len = data.completions[0].base.length;
-          txtarea = this.$eval.get(0);
-          this.$eval.data(data.data);
-          ref = data.completions;
-          for (index = j = 0, len = ref.length; j < len; index = ++j) {
-            completion = ref[index];
-            if (ref1 = completion.base + completion.complete, indexOf.call(added, ref1) >= 0) {
-              continue;
-            }
-            added.push(completion.base + completion.complete);
-            if (index % cols === 0) {
-              $tbody.append($appender = $('<tr>'));
-            }
-            $appender.append($td = $('<td>').attr('title', completion.description).append($('<span>').addClass('base').text(completion.base)).append($('<span>').addClass('completion').text(completion.complete)));
-            if (!completion.complete) {
-              $td.addClass('complete');
-              $('#comp-desc').html($td.attr('title'));
-            }
-          }
-          $comp.append($tbody);
-          if ($comp.width() > max_width) {
-            cols--;
-          } else {
-            break;
-          }
-        }
-      }
-      ref2 = data.params;
-      for (k = 0, len1 = ref2.length; k < len1; k++) {
-        param = ref2[k];
-        $('#comp-desc').append(this.format_fun(param));
-      }
-      this.$completions.height(Math.max(height, $comp.height()));
-      this.termscroll();
-    }
-    if (this.to_complete) {
-      this.ws.send('Complete', this.to_complete);
-      return this.to_complete = false;
-    } else {
-      return this.to_complete = null;
+      return this.prompt.complete(data);
     }
   };
 
@@ -1113,9 +1140,8 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.display = function(data) {
-    var $tag, snippet;
+    var $tag;
     this.suggest_stop();
-    snippet = this.$eval.val();
     this.code(this.$scrollback, data["for"], ['prompted']);
     if (data.type.indexOf('image') >= 0) {
       $tag = $("<img>");
@@ -1180,15 +1206,6 @@ Wdb = (function(superClass) {
     return this.ws.ws.close();
   };
 
-  Wdb.prototype.multiline_stop = function() {
-    if (this.$prompt.hasClass('multiline')) {
-      this.$prompt.removeClass('multiline');
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   Wdb.prototype.global_key = function(e) {
     var char, extra, ref, ref1, ref2, sel;
     if (this.cm.rw) {
@@ -1239,239 +1256,6 @@ Wdb = (function(superClass) {
         this.execute(sel);
       }
       return false;
-    }
-  };
-
-  Wdb.prototype.eval_key = function(e) {
-    var $table, bol, eof, multiline, pos, txt;
-    if (e.altKey && e.keyCode === 82 && this.backsearch) {
-      this.backsearch = Math.max(this.backsearch - 1, 1);
-      this.searchback();
-      return false;
-    }
-    if (e.altKey) {
-      return;
-    }
-    if (e.ctrlKey) {
-      switch (e.keyCode) {
-        case 13:
-          if (this.$prompt.hasClass('multiline')) {
-            this.$prompt.removeClass('multiline');
-            this.execute(this.$eval.val());
-            return false;
-          }
-          this.$prompt.addClass('multiline');
-          this.eval_insert('\n');
-          return true;
-        case 82:
-          if (this.backsearch == null) {
-            this.backsearch = 0;
-          }
-          if (e.shiftKey) {
-            this.backsearch = Math.max(this.backsearch - 1, 1);
-          } else {
-            this.backsearch++;
-          }
-          this.searchback();
-          return false;
-        case 67:
-          this.searchback_stop();
-          return false;
-        case 68:
-          this.ws.send('Quit');
-          return false;
-        case 32:
-          this.eval_move_suggest(1, true);
-      }
-    }
-    switch (e.keyCode) {
-      case 13:
-        if (this.backsearch) {
-          this.searchback_stop(true);
-          return false;
-        }
-        $table = this.$completions.find('table');
-        if ($table.find('td.active').size() && !$table.find('td.complete').size()) {
-          this.suggest_stop();
-          return false;
-        }
-        if (!this.$prompt.hasClass('multiline')) {
-          this.execute(this.$eval.val());
-          return false;
-        }
-        break;
-      case 27:
-        this.searchback_stop() || this.suggest_stop(true) || this.multiline_stop();
-        return false;
-      case 9:
-        pos = this.$eval.get(0).selectionStart;
-        txt = this.$eval.val();
-        multiline = this.$prompt.hasClass('multiline');
-        bol = txt[pos - 1] === '\n' || pos === 0;
-        if (multiline && bol) {
-          this.eval_insert('  ');
-          return false;
-        }
-        this.eval_move_suggest((!e.shiftKey ? 1 : -1), true);
-        return false;
-      case 39:
-        pos = this.$eval.get(0).selectionStart;
-        txt = this.$eval.val();
-        eof = pos === txt.length;
-        if (this.eval_move_suggest(1, eof)) {
-          return false;
-        }
-        return true;
-      case 37:
-        if (this.eval_move_suggest(-1)) {
-          return false;
-        }
-        return true;
-      case 38:
-        if (this.eval_move_suggest(-5)) {
-          return false;
-        }
-        if (this.$prompt.hasClass('multiline')) {
-          return true;
-        }
-        this.eval_move_history(1);
-        return false;
-      case 40:
-        if (this.eval_move_suggest(5)) {
-          return false;
-        }
-        if (this.$prompt.hasClass('multiline')) {
-          return true;
-        }
-        this.eval_move_history(-1);
-        return false;
-    }
-  };
-
-  Wdb.prototype.eval_insert = function(char) {
-    var end, endPos, start, startPos, txtarea;
-    txtarea = this.$eval.get(0);
-    startPos = txtarea.selectionStart;
-    endPos = txtarea.selectionEnd;
-    start = this.$eval.val().substring(0, startPos);
-    end = this.$eval.val().substring(endPos, this.$eval.val().length);
-    this.$eval.val(start + char + end);
-    txtarea.setSelectionRange(startPos + char.length, startPos + char.length);
-    return this.$eval.trigger('autosize.resize');
-  };
-
-  Wdb.prototype.eval_move_suggest = function(shift, trigger) {
-    var $active, $tds, base, base1, completion, index, ref, root;
-    if (trigger == null) {
-      trigger = false;
-    }
-    $tds = this.$completions.find('table td');
-    $active = $tds.filter('.active');
-    if (!$tds.length) {
-      return false;
-    }
-    if (!$active.length) {
-      if (!trigger) {
-        return false;
-      }
-      if (this.to_complete === false) {
-        return false;
-      }
-      if (this.$completions.find('.completion').text() === '') {
-        return false;
-      }
-      $active = $tds.first().addClass('active');
-    } else {
-      index = $tds.index($active);
-      index += shift;
-      if (index < 0) {
-        index = $tds.length - 1;
-      }
-      if (index >= $tds.length) {
-        index = 0;
-      }
-      $active.removeClass('active complete');
-      $active = $tds.eq(index).addClass('active');
-    }
-    base = $active.find('.base').text();
-    completion = $active.find('.completion').text();
-    root = this.$eval.data().start + base + completion;
-    this.$eval.val(root + this.$eval.data().end);
-    this.$eval.get(0).setSelectionRange(root.length, root.length);
-    this.$eval.trigger('autosize.resize');
-    $('#comp-desc').text($active.attr('title'));
-    if (!((0 < (ref = $active.position().top - this.$interpreter.position().top) && ref < this.$interpreter.height()))) {
-      if (typeof (base1 = $active.get(0)).scrollIntoView === "function") {
-        base1.scrollIntoView(false);
-      }
-    }
-    return true;
-  };
-
-  Wdb.prototype.eval_move_history = function(shift) {
-    var index, to_set;
-    index = parseInt(this.$eval.attr('data-index')) + shift;
-    if (index >= -1 && index < this.cmd_hist.length) {
-      if (index === -1) {
-        to_set = this.$eval.attr('data-current');
-      } else {
-        to_set = this.cmd_hist[index];
-      }
-      if (index === 0 && shift === 1) {
-        this.$eval.attr('data-current', this.$eval.val());
-      }
-      this.$eval.val(to_set).attr('data-index', index).trigger('autosize.resize');
-      this.suggest_stop();
-      return this.termscroll();
-    }
-  };
-
-  Wdb.prototype.eval_carret_change = function(e) {
-    var column, comp, eof, line, lines, multiline, ref, ref1, startPos, txt, txtarea;
-    if (e.keyCode && (16 <= (ref = e.keyCode) && ref <= 18)) {
-      return true;
-    }
-    if (this.$completions.find('table td').filter('.active').size()) {
-      eof = this.$eval.get(0).selectionStart === this.$eval.val().length;
-      multiline = this.$prompt.hasClass('multiline');
-      if (!(e.keyCode && e.keyCode < 27 && e.keyCode !== 8 || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || (e.ctrlKey && e.keyCode === 32))) {
-        this.suggest_stop();
-      }
-      return;
-    }
-    txtarea = this.$eval.get(0);
-    startPos = txtarea.selectionStart;
-    txt = this.$eval.val();
-    if (this.backsearch) {
-      if (e.keyCode && e.keyCode === 82 && (e.ctrlKey || e.altKey)) {
-        return;
-      }
-      if (!txt) {
-        this.searchback_stop();
-      } else {
-        this.backsearch = 1;
-        this.searchback();
-      }
-      return;
-    }
-    if (txt && txt[0] !== '.') {
-      lines = txt.substr(0, startPos).split("\n");
-      line = lines.length;
-      column = lines.slice(-1)[0].length;
-      comp = {
-        source: txt,
-        line: line,
-        column: column,
-        pos: startPos
-      };
-      if (this.to_complete === null) {
-        this.ws.send('Complete', comp);
-        this.to_complete = false;
-      } else {
-        this.to_complete = comp;
-      }
-    } else {
-      this.suggest_stop();
     }
   };
 
