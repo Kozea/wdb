@@ -1,5 +1,10 @@
-.CodeMirror {
+#source-editor .CodeMirror {
   height: calc(50vh - 64px); }
+
+.prompt .CodeMirror {
+  background-color: #eee;
+  border: 1px solid #ddd;
+  height: auto; }
 
 #interpreter {
   height: calc(50vh - 32px);
