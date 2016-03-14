@@ -29,7 +29,7 @@ class Codemirror extends Log
       @$container.prepend(elt)
     ,
       value: 'Waiting for file',
-      theme: 'wdb',
+      theme: 'material',
       keyMap: 'wdb',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
@@ -152,6 +152,7 @@ class Codemirror extends Log
     rescope = true
 
     if @state.fn isnt new_state.fn or @state.file isnt new_state.file
+      @code_mirror.setOption('mode', @get_mode(new_state.fn))
       @code_mirror.setValue new_state.file
       for brk in @breakpoints[new_state.fn] or []
         @mark_breakpoint brk

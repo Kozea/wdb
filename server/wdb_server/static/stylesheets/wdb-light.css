@@ -110,37 +110,18 @@ body, html {
 
 #wdb {
   box-sizing: border-box;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  flex-direction: column;
   height: 100%; }
   #wdb > header {
-    -webkit-box-flex: 0;
-    -webkit-flex: 0 0 100px;
-        -ms-flex: 0 0 100px;
-            flex: 0 0 100px;
+    flex: 0 0 100px;
     min-height: 0;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center; }
+    align-items: center; }
     #wdb > header #activity {
       width: 100px; }
     #wdb > header #title {
-      -webkit-box-flex: 1;
-      -webkit-flex: 1;
-          -ms-flex: 1;
-              flex: 1;
+      flex: 1;
       margin: 0;
       font-family: inherit; }
   #wdb > article {
@@ -164,34 +145,15 @@ body, html {
       #wdb > article table a {
         color: #770088; }
     #wdb > article.split {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
       display: flex;
-      -webkit-box-flex: 1;
-      -webkit-flex: 1;
-          -ms-flex: 1;
-              flex: 1; }
+      flex: 1; }
     #wdb > article #source {
-      -webkit-box-flex: 7;
-      -webkit-flex: 7;
-          -ms-flex: 7;
-              flex: 7;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
+      flex: 7;
       display: flex;
-      -webkit-box-orient: vertical;
-      -webkit-box-direction: normal;
-      -webkit-flex-direction: column;
-          -ms-flex-direction: column;
-              flex-direction: column;
+      flex-direction: column;
       margin-left: 5px; }
       #wdb > article #source #source-editor {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1;
+        flex: 1;
         position: relative;
         min-height: 45vh; }
         #wdb > article #source #source-editor .CodeMirror {
@@ -199,64 +161,37 @@ body, html {
           height: 100%;
           width: 100%; }
       #wdb > article #source #interpreter {
-        -webkit-box-flex: 1;
-        -webkit-flex: 1;
-            -ms-flex: 1;
-                flex: 1;
+        flex: 1;
         min-height: 40vh;
         overflow-y: auto;
         padding-bottom: 1em; }
         #wdb > article #source #interpreter:focus {
           outline: none; }
     #wdb > article #traceback {
-      -webkit-box-flex: 3;
-      -webkit-flex: 3;
-          -ms-flex: 3;
-              flex: 3;
+      flex: 3;
       overflow-y: auto;
       overflow-x: hidden; }
   #wdb > footer {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
     min-height: 0; }
     #wdb > footer #watchers {
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
       display: flex;
-      -webkit-flex-flow: row wrap;
-          -ms-flex-flow: row wrap;
-              flex-flow: row wrap;
-      -webkit-box-flex: 1;
-      -webkit-flex: 1;
-          -ms-flex: 1;
-              flex: 1; }
+      flex-flow: row wrap;
+      flex: 1; }
       #wdb > footer #watchers > div {
         margin-left: 5px;
         margin-right: 2em;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex; }
         #wdb > footer #watchers > div .name {
           color: #000;
           cursor: pointer; }
         #wdb > footer #watchers > div .value {
-          -webkit-box-flex: 1;
-          -webkit-flex: 1;
-              -ms-flex: 1;
-                  flex: 1; }
+          flex: 1; }
     #wdb > footer #home {
-      -webkit-align-self: flex-end;
-          -ms-flex-item-align: end;
-              align-self: flex-end;
+      align-self: flex-end;
       margin: 0 5px; }
     #wdb > footer #update {
-      -webkit-align-self: flex-end;
-          -ms-flex-item-align: end;
-              align-self: flex-end;
+      align-self: flex-end;
       margin: 0 5px; }
       #wdb > footer #update i:before {
         color: orangered; }
@@ -368,9 +303,7 @@ code {
     border-top: 1px solid #555;
     border-bottom: 1px solid #555;
     padding: .2em 2em;
-    -webkit-transform: rotate(45deg);
-        -ms-transform: rotate(45deg);
-            transform: rotate(45deg); }
+    transform: rotate(45deg); }
   #source-editor > .CodeMirror .breakpoints {
     width: .6em;
     border: none; }
@@ -378,10 +311,7 @@ code {
 #eval {
   background-color: transparent;
   border: none;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  flex: 1;
   margin: 0;
   outline: none;
   overflow: hidden;
@@ -422,9 +352,6 @@ code {
     left: 0; }
 
 #prompt {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex; }
   #prompt textarea {
     color: gray;
@@ -455,8 +382,7 @@ code {
   font: 12px/1.5 "Source Code Pro", monospace; }
 
 .traceline {
-  -webkit-transition: 750ms;
-          transition: 750ms;
+  transition: 750ms;
   margin: 0 0 1em 1em;
   font: 12px/1.5 "Source Code Pro", monospace;
   clear: both;
@@ -585,11 +511,9 @@ code {
   width: .6em; }
 
 .CodeMirror-linebackground {
-  -webkit-transition: background-color 1s;
-          transition: background-color 1s; }
+  transition: background-color 1s; }
   .CodeMirror-linebackground:hover {
-    -webkit-transition: 1s;
-            transition: 1s;
+    transition: 1s;
     color: blue; }
   .CodeMirror-linebackground.ctx {
     border-left: 1px solid #e4e4e4;
@@ -694,8 +618,7 @@ a.inspect {
   opacity: .4; }
 
 code, code span {
-  -webkit-transition: opacity 50ms;
-          transition: opacity 50ms; }
+  transition: opacity 50ms; }
 
 .trace_500 {
   margin: 0 1em 1em; }
@@ -857,7 +780,6 @@ code, code span {
           position: absolute;
           width: 97%; }
       #wdb article section input[type="submit"] {
-        background: -webkit-linear-gradient(#770088, #4a0055);
         background: linear-gradient(#770088, #4a0055);
         border-color: #4a0055;
         border-radius: 3px;
@@ -995,66 +917,34 @@ footer {
   left: 10px;
   width: 50px;
   height: 50px;
-  -webkit-animation: spinPulse 1s infinite linear;
-          animation: spinPulse 1s infinite linear; }
+  animation: spinPulse 1s infinite linear; }
   .state.inner {
     width: 30px;
     height: 30px;
     top: 30px;
     left: 20px;
-    -webkit-animation: spinoffPulse 1s infinite linear;
-            animation: spinoffPulse 1s infinite linear; }
+    animation: spinoffPulse 1s infinite linear; }
 
 *, *:before, *:after {
-  -webkit-animation-play-state: paused !important;
-          animation-play-state: paused !important; }
+  animation-play-state: paused !important; }
 
 .on, .on *, .on *:before, .on *:after {
-  -webkit-animation-play-state: running !important;
-          animation-play-state: running !important; }
-
-@-webkit-keyframes spinPulse {
-  0% {
-    -webkit-transform: rotate(145deg);
-            transform: rotate(145deg);
-    opacity: 1; }
-  50% {
-    -webkit-transform: rotate(-120deg);
-            transform: rotate(-120deg);
-    opacity: 0; }
-  100% {
-    -webkit-transform: rotate(160deg);
-            transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px rgba(164, 0, 187, 0.7); } }
+  animation-play-state: running !important; }
 
 @keyframes spinPulse {
   0% {
-    -webkit-transform: rotate(145deg);
-            transform: rotate(145deg);
+    transform: rotate(145deg);
     opacity: 1; }
   50% {
-    -webkit-transform: rotate(-120deg);
-            transform: rotate(-120deg);
+    transform: rotate(-120deg);
     opacity: 0; }
   100% {
-    -webkit-transform: rotate(160deg);
-            transform: rotate(160deg);
+    transform: rotate(160deg);
     opacity: 0;
     box-shadow: 0 0 1px rgba(164, 0, 187, 0.7); } }
 
-@-webkit-keyframes spinoffPulse {
-  0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
-  100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
-
 @keyframes spinoffPulse {
   0% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg); }
+    transform: rotate(0deg); }
   100% {
-    -webkit-transform: rotate(360deg);
-            transform: rotate(360deg); } }
+    transform: rotate(360deg); } }
