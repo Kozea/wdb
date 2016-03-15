@@ -37,29 +37,28 @@
       <div id="interpreter" tabindex="2">
         <div id="scrollback">
         </div>
-
-
         <div class="prompt">
-        </div>
-
-        <div id="completions">
-          <div id="backsearch"></div>
-          <table>
-          </table>
         </div>
       </div>
     </div>
     <footer class="mdl-mini-footer">
-      <ul class="mdl-mini-footer__link-list">
-        <li><a href="/">wdb</a></li>
+      <div class="mdl-mini-footer__left-section">
+        <ul class="mdl-mini-footer__link-list">
+          <li>
+            <a href="/">wdb</a>
+          </li>
+        {% if new_version %}
+          <li>
+            <a href="https://pypi.python.org/pypi/wdb_server" target="blank" title="A new version {{ new_version }} is available.">
+              Version {{ new_version }} is available
+            </a>
+          </li>
+        {% end %}
       </ul>
-      {% if new_version %}
-        <div id="update">
-          <a href="https://pypi.python.org/pypi/wdb_server" target="blank" title="A new version {{ new_version }} is available.">
-            <i class="material-icons">file_download</i>
-          </a>
-        </div>
-      {% end %}
+    </div>
+    <div class="mdl-mini-footer__right-section">
+      <div class="activity mdl-spinner mdl-js-spinner is-active"></div>
+    </div>
     </footer>
   </main>
 </div>
