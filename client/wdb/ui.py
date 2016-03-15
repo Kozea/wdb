@@ -353,22 +353,34 @@ class Interaction(object):
         # Compensate prompt for multi line
         raw_data = raw_data.replace('\n', '\n' + u(' ' * 4))
         duration = None
-        with self.db.capture_output(
-                with_hook=redir is None) as (out, err):
+        with self.db.capture_output(with_hook=redir is None) as (out, err):
             compiled_code = None
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
             except SyntaxError as e:
-                m = re.match(
-                    "multiple statements found while "
-                    "compiling a single statement", str(e))
-                if m:
-                    try:
-                        compiled_code = compile(data, '<stdin>', 'exec')
-                    except Exception:
-                        self.db.hooked = self.handle_exc()
-                else:
-                    self.db.hooked = self.handle_exc()
+                try:
+                    compiled_code = compile(data, '<stdin>', 'exec')
+                except Exception:
+                    maybe_hook = self.handle_exc()
+
+                # Hack from codeop
+                e1 = e2 = None
+                try:
+                    compiled_code = compile(data + '\n', '<stdin>', 'exec')
+                except Exception as e:
+                    e1 = e
+                try:
+                    compile(data + '\n\n', '<stdin>', 'exec')
+                except Exception as e:
+                    e2 = e
+
+                if not compiled_code:
+                    if repr(e1) != repr(e2):
+                        # Multiline not terminated
+                        self.db.send('NewLine')
+                        return
+                    else:
+                        self.db.hooked = maybe_hook
 
             l = self.current_locals
             start = time.time()
@@ -420,6 +432,7 @@ class Interaction(object):
                 'suggest': suggest,
                 'duration': duration
             }))
+        self.db.send('NewPrompt')
 
     def do_ping(self, data):
         self.db.send('Pong')

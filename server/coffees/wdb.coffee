@@ -16,7 +16,7 @@
 
 
 class Wdb extends Log
-  __version__: '2.1.9'
+  __version__: '2.9.99'
 
   constructor: ->
     super
@@ -24,8 +24,6 @@ class Wdb extends Log
     @to_complete = null
     @cwd = null
     @backsearch = null
-    @cmd_hist = []
-    @session_cmd_hist = {}
     @file_cache = {}
     @last_cmd = null
     @eval_time = null
@@ -33,38 +31,23 @@ class Wdb extends Log
     @waited_for_ws = 0
 
     # Page elements
-    @$activity = $('#activity')
     @$waiter = $('#waiter')
     @$wdb = $('#wdb')
     @$source = $('#source')
     @$interpreter = $('#interpreter')
     @$scrollback = $('#scrollback')
-    @$completions = $('#completions')
     @$backsearch = $('#backsearch')
     @$traceback = $('#traceback')
     @$watchers = $('#watchers')
 
-    try
-      @cmd_hist = JSON.parse(localStorage['cmd_hist'] or '[]')
-    catch e
-      @fail e
-
     @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
     @cm = new Codemirror(@)
     @prompt = new Prompt(@)
-    # @$eval.focus()
 
   opening: ->
     # Start by getting current trace
     if not @started
-      # @$eval
-      #   .on 'keydown', @eval_key.bind @
-      #   .on 'keyup', @eval_carret_change.bind @
-      #   .on 'mouseup', @eval_carret_change.bind @
-      #   .on 'blur', @searchback_stop.bind @
-
-      $(window)
-        .on 'keydown', @global_key.bind @
+      $(window).on 'keydown', @global_key.bind @
 
       @$traceback.on 'click', '.trace-line', @select_click.bind @
       @$scrollback.add(@$watchers)
@@ -90,7 +73,7 @@ class Wdb extends Log
             .animate((scrollTop: @$interpreter.scrollTop() + way * scroll), 250)
           return false
 
-        # @$eval.focus()
+        @prompt.focus()
 
       false
 
@@ -99,13 +82,12 @@ class Wdb extends Log
     @ws.send 'Start'
     @$waiter.remove()
     @$wdb.show()
-    # @$eval.autosize()
 
   working: ->
-    @$activity.addClass 'on'
+    $('.activity').addClass('is-active')
 
   chilling: ->
-    @$activity.removeClass 'on'
+    $('.activity').removeClass('is-active')
 
   done: (suggest=null)->
     @termscroll()
@@ -116,7 +98,7 @@ class Wdb extends Log
     #     .attr('data-index', -1)
     #     .trigger('autosize.resize')
     #     .focus()
-    @$completions.attr('style', '')
+    @prompt.focus()
     @chilling()
 
   init: (data) ->
@@ -249,22 +231,7 @@ class Wdb extends Log
 
     $code
 
-  historize: (snippet) ->
-    if not (@cm.state.fn of @session_cmd_hist)
-      @session_cmd_hist[@cm.state.fn] = []
-
-    while (index = @cmd_hist.indexOf(snippet)) != -1
-      @cmd_hist.splice(index, 1)
-
-    @cmd_hist.unshift snippet
-    @session_cmd_hist[@cm.state.fn].unshift snippet
-
-    localStorage and localStorage['cmd_hist'] = JSON.stringify @cmd_hist
-
   execute: (snippet) ->
-    snippet = snippet.trim()
-    @historize snippet
-
     cmd = =>
       @ws.send.apply @ws, arguments
       @last_cmd = arguments
@@ -279,7 +246,7 @@ class Wdb extends Log
         key = snippet.substr(1)
         data = ''
       switch key
-        when 'a' then @print_hist @session_cmd_hist[@cm.state.fn]
+        # when 'a' then @print_hist @session_cmd_hist[@cm.state.fn]
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
         when 'd' then cmd 'Dump', data if data
@@ -303,7 +270,6 @@ class Wdb extends Log
 
     else if snippet.indexOf('?') == 0
       cmd 'Dump', snippet.slice(1).trim()
-      @suggest_stop()
       return
 
     else if snippet is '' and @last_cmd
@@ -312,16 +278,11 @@ class Wdb extends Log
     if snippet
       @working()
       @ws.send 'Eval', snippet
-      # @$eval.val(@$eval.val() + '...')
-      #   .trigger('autosize.resize')
-      #   .prop('disabled', true)
       @eval_time = performance?.now()
 
   cls: ->
     @$scrollback.empty()
     @searchback_stop()
-    @suggest_stop()
-    @multiline_stop()
     @done()
 
   print_hist: (hist) ->
@@ -418,7 +379,6 @@ specify a module like `logging.config`.
       @$scrollback.outerHeight() + # -
       #  @$prompt.outerHeight() -
          @$interpreter.height())
-    to += Math.min(@$completions.outerHeight(), @$interpreter.height() / 4)
     to = Math.min(@$scrollback.outerHeight(), to)
     return if to - from is 0
 
@@ -623,77 +583,6 @@ specify a module like `logging.config`.
     tags.push $('<span>', class: 'fun_punct').text(')')
     tags
 
-  suggest: (data) ->
-    if data
-      @prompt.complete data
-    #
-    #   $comp = @$completions.find('table').empty()
-    #   height = @$completions.height()
-    #   if data.completions.length
-    #     max_width = @$interpreter.width()
-    #     cols = Math.max(1, ((@$interpreter.width() / 100) << 0) - 1)
-    #     while cols > 0
-    #       $comp = @$completions.find('table').empty()
-    #       added = []
-    #       $comp.append(
-    #         $('<thead><tr><th id="comp-desc" colspan="' +
-    #           cols +
-    #         '">'))
-    #       $tbody = $('<tbody>')
-    #       base_len = data.completions[0].base.length
-    #       txtarea = @$eval.get(0)
-    #
-    #       @$eval.data data.data
-    #
-    #       for completion, index in data.completions
-    #         if (completion.base + completion.complete) in added
-    #           continue
-    #         added.push(completion.base + completion.complete)
-    #         if index % cols is 0
-    #           $tbody.append($appender = $('<tr>'))
-    #
-    #         $appender.append(
-    #           $td = $('<td>').attr('title', completion.description)
-    #           .append($('<span>')
-    #             .addClass('base').text(completion.base))
-    #           .append($('<span>')
-    #             .addClass('completion').text(completion.complete)))
-    #         if not completion.complete
-    #           $td.addClass('complete')
-    #           $('#comp-desc').html($td.attr('title'))
-    #       $comp.append($tbody)
-    #       if $comp.width() > max_width
-    #         cols--
-    #       else
-    #         break
-    #
-    #   for param in data.params
-    #     $('#comp-desc').append(@format_fun(param))
-    #
-    #   @$completions.height(Math.max(height, $comp.height()))
-    #   @termscroll()
-    #
-    # # Complete queued completion
-    # if @to_complete
-    #   @ws.send 'Complete', @to_complete
-    #   # Marking it with false -> waiting for suggest
-    #   @to_complete = false
-    # else
-    #   # Making completion available
-    #   @to_complete = null
-
-  suggest_stop: (reset=false) ->
-    @$completions.attr('style', null)
-    if @$completions.find('table td,table tr').size()
-      @$completions.find('table').empty()
-      if reset
-        root = @$eval.data().start + @$eval.data().like
-        @$eval.val root + @$eval.data().end
-        @$eval.get(0).setSelectionRange(root.length, root.length)
-      true
-    else
-      false
-
   watched: (data) ->
     for own watcher, value of data
       $watcher = @$watchers
@@ -736,46 +625,13 @@ specify a module like `logging.config`.
     @$scrollback.append($tag)
     @done()
 
-  searchback: ->
-    @suggest_stop()
-    index = @backsearch
-    val = @$eval.val()
-    for h in @cmd_hist
-      re = new RegExp('(' + val + ')', 'gi')
-      if re.test(h)
-        index--
-        if index == 0
-          @$backsearch
-            .html(h.replace(re, '<span class="backsearched">$1</span>'))
-          return
-    if @backsearch == 1
-      @searchback_stop()
-      return
-    @backsearch = Math.max(@backsearch - 1, 1)
-
-  searchback_stop: (validate) ->
-    if @backsearch
-      if validate is true
-        @$eval
-          .val(@$backsearch.text())
-          .trigger('autosize.resize')
-      @$backsearch.html('')
-      @backsearch = null
-      true
-    else
-      false
+  suggest: (data) ->
+    @prompt.complete data if data
 
   die: ->
     $('h1').html('Dead<small>Program has exited</small>')
     @ws.ws.close()
-    # setTimeout (-> window.close()), 10
-
-  # multiline_stop: ->
-  #   if @$prompt.hasClass('multiline')
-  #     @$prompt.removeClass('multiline')
-  #     true
-  #   else
-  #     false
+    setTimeout (-> window.close()), 10
 
   global_key: (e) ->
     return true if @cm.rw
@@ -847,171 +703,12 @@ specify a module like `logging.config`.
   #
   #       when 32 # Space
   #         @eval_move_suggest 1, true
-  #
-  #   switch e.keyCode
-  #     when 13 # Enter
-  #       if @backsearch
-  #         @searchback_stop true
-  #         return false
-  #       $table = @$completions.find('table')
-  #       if $table.find('td.active').size() and
-  #          not $table.find('td.complete').size()
-  #         @suggest_stop()
-  #         return false
-  #       unless @$prompt.hasClass('multiline')
-  #         @execute @$eval.val()
-  #         return false
-  #
-  #     when 27 # Escape
-  #       @searchback_stop() or @suggest_stop(true) or @multiline_stop()
-  #       return false
-  #
-  #     when 9 # Tab
-  #       pos = @$eval.get(0).selectionStart
-  #       txt = @$eval.val()
-  #       multiline = @$prompt.hasClass('multiline')
-  #       bol = txt[pos - 1] is '\n' or pos is 0
-  #       # If beginning of line and multiline : indent
-  #       if multiline and bol
-  #         @eval_insert('  ')
-  #         return false
-  #       @eval_move_suggest (unless e.shiftKey then 1 else -1), true
-  #       return false # Never lose focus
-  #
-  #     when 39 # Right
-  #       pos = @$eval.get(0).selectionStart
-  #       txt = @$eval.val()
-  #       # eol = txt[pos] is '\n' or
-  #       eof = pos is txt.length
-  #       if @eval_move_suggest 1, eof # Trigqer completion at end
-  #         return false
-  #       return true
-  #
-  #     when 37  # Left
-  #       if @eval_move_suggest -1
-  #         return false
-  #       return true
-  #
-  #     when 38  # Up
-  #       if @eval_move_suggest -5
-  #         return false
-  #       return true if @$prompt.hasClass('multiline')
-  #       @eval_move_history 1
-  #       return false
-  #
-  #     when 40  # Down
-  #       if @eval_move_suggest 5
-  #         return false
-  #       return true if @$prompt.hasClass('multiline')
-  #       @eval_move_history -1
-  #       return false
-  #
-  # eval_insert: (char) ->
-  #   txtarea = @$eval.get(0)
-  #   startPos = txtarea.selectionStart
-  #   endPos = txtarea.selectionEnd
-  #   start = @$eval.val().substring(0, startPos)
-  #   end =  @$eval.val().substring(endPos, @$eval.val().length)
-  #   @$eval.val(start + char + end)
-  #   txtarea.setSelectionRange(startPos + char.length, startPos + char.length)
-  #   @$eval.trigger('autosize.resize')
-  #
-  # eval_move_suggest: (shift, trigger=false) ->
-  #   $tds = @$completions.find('table td')
-  #   $active = $tds.filter('.active')
-  #   return false unless $tds.length
-  #   unless $active.length
-  #     return false unless trigger
-  #     return false if @to_complete is false
-  #     return false if @$completions.find('.completion').text() is ''
-  #     $active = $tds.first().addClass('active')
-  #   else
-  #     index = $tds.index($active)
-  #     index += shift
-  #     if index < 0
-  #       index = $tds.length - 1
-  #     if index >= $tds.length
-  #       index = 0
-  #     $active.removeClass('active complete')
-  #     $active = $tds.eq(index).addClass('active')
-  #   base = $active.find('.base').text()
-  #   completion = $active.find('.completion').text()
-  #   root = @$eval.data().start + base + completion
-  #   @$eval
-  #     .val(root + @$eval.data().end)
-  #   @$eval.get(0).setSelectionRange(root.length, root.length)
-  #   @$eval.trigger('autosize.resize')
-  #   $('#comp-desc').text($active.attr('title'))
-  #
-  #   unless (0 <
-  #     $active.position().top - @$interpreter.position().top <
-  #   @$interpreter.height())
-  #     $active.get(0).scrollIntoView?(false)
-  #   true
-  #
-  # eval_move_history: (shift) ->
-  #   index = parseInt(@$eval.attr('data-index')) + shift
-  #   if index >= -1 and index < @cmd_hist.length
-  #     if index is -1
-  #       to_set = @$eval.attr('data-current')
-  #     else
-  #       to_set = @cmd_hist[index]
-  #     if index is 0 and shift is 1
-  #       @$eval.attr('data-current', @$eval.val())
-  #
-  #     @$eval.val(to_set)
-  #       .attr('data-index', index).trigger('autosize.resize')
-  #     @suggest_stop()
-  #     @termscroll()
-  #
-  # eval_carret_change: (e) ->
-  #   return true if e.keyCode and 16 <= e.keyCode <= 18
-  #   if @$completions.find('table td').filter('.active').size()
-  #     eof = @$eval.get(0).selectionStart is @$eval.val().length
-  #     multiline = @$prompt.hasClass('multiline')
-  #
-  #     unless (e.keyCode and e.keyCode < 27 and e.keyCode isnt 8 or
-  #         37 <= e.keyCode <= 40 or
-  #         (e.ctrlKey and e.keyCode is 32))
-  #       @suggest_stop()
-  #     return
-  #
-  #   txtarea = @$eval.get(0)
-  #   startPos = txtarea.selectionStart
-  #
-  #   txt = @$eval.val()
-  #
-  #   if @backsearch
-  #     return if e.keyCode and e.keyCode is 82 and (e.ctrlKey or e.altKey)
-  #     if not txt
-  #       @searchback_stop()
-  #     else
-  #       @backsearch = 1
-  #       @searchback()
-  #     return
-  #
-  #   if txt and txt[0] != '.'
-  #     lines = txt.substr(0, startPos).split("\n")
-  #     line = lines.length
-  #     column = lines.slice(-1)[0].length
-  #
-  #     comp =
-  #       source: txt
-  #       line: line
-  #       column: column
-  #       pos: startPos
-  #
-  #     # Completion available, complete
-  #     if @to_complete == null
-  #       @ws.send 'Complete', comp
-  #       # Marking it with false -> waiting for suggest
-  #       @to_complete = false
-  #     else
-  #       # Queuing completion for next suggest
-  #       @to_complete = comp
-  #   else
-  #     @suggest_stop()
-  #   return
+
+  newline: (e) ->
+    @prompt.newLine()
+
+  newprompt: (e) ->
+    @prompt.newPrompt()
 
   inspect: (e) ->
     @ws.send 'Inspect', $(e.currentTarget).attr('href')
