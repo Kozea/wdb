@@ -17,7 +17,7 @@
 class Codemirror extends Log
   constructor: (@wdb) ->
     super
-    @$container = $('#source-editor')
+    @$container = $('.source-editor')
 
     CodeMirror.commands.save = @save.bind @
     CodeMirror.keyMap.wdb =

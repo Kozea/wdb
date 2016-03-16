@@ -109,7 +109,7 @@ Codemirror = (function(superClass) {
   function Codemirror(wdb) {
     this.wdb = wdb;
     Codemirror.__super__.constructor.apply(this, arguments);
-    this.$container = $('#source-editor');
+    this.$container = $('.source-editor');
     CodeMirror.commands.save = this.save.bind(this);
     CodeMirror.keyMap.wdb = {
       Esc: this.stop_edition.bind(this),
@@ -350,6 +350,9 @@ History = (function(superClass) {
     var e, error;
     this.prompt = prompt;
     History.__super__.constructor.apply(this, arguments);
+    this.index = -1;
+    this.current = '';
+    this.currentPos = null;
     try {
       this.history = JSON.parse(localStorage['history'] || '[]');
     } catch (error) {
@@ -359,20 +362,45 @@ History = (function(superClass) {
   }
 
   History.prototype.up = function() {
-    return this.prompt.set('UP');
+    if (this.index === -1) {
+      this.current = this.prompt.get();
+      this.currentPos = this.prompt.code_mirror.getCursor();
+    }
+    this.index = Math.min(this.history.length - 1, this.index + 1);
+    return this.sync();
   };
 
   History.prototype.down = function() {
-    return this.prompt.set('DOWN');
+    this.index = Math.max(this.index - 1, -1);
+    return this.sync();
+  };
+
+  History.prototype.sync = function() {
+    if (this.index === -1) {
+      this.prompt.set(this.current);
+      return this.prompt.code_mirror.setCursor(this.currentPos);
+    } else {
+      this.prompt.set(this.history[this.index]);
+      return this.prompt.code_mirror.setCursor(this.prompt.code_mirror.lineCount(), 0);
+    }
   };
 
   History.prototype.historize = function(snippet) {
     var index;
+    if (!snippet) {
+      return;
+    }
     while ((index = this.history.indexOf(snippet)) !== -1) {
       this.history.splice(index, 1);
     }
     this.history.unshift(snippet);
     return localStorage && (localStorage['history'] = JSON.stringify(this.history));
+  };
+
+  History.prototype.reset = function() {
+    this.index = -1;
+    this.current = '';
+    return this.currentPos = null;
   };
 
   return History;
@@ -491,12 +519,12 @@ Prompt = (function(superClass) {
     var snippet;
     snippet = cm.getValue().trim();
     this.wdb.execute(snippet);
-    return cm.setOption({
-      readOnly: true
-    });
+    cm.setOption('readOnly', true);
+    return this.$container.addClass('loading');
   };
 
   Prompt.prototype.newLine = function() {
+    this.code_mirror.setOption('readOnly', false);
     return this.code_mirror.execCommand('newlineAndIndent');
   };
 
@@ -505,13 +533,17 @@ Prompt = (function(superClass) {
     snippet = this.code_mirror.getValue().trim();
     this.history.historize(snippet);
     this.code_mirror.setValue('');
-    return cm.setOption({
-      readOnly: false
-    });
+    this.history.reset();
+    this.code_mirror.setOption('readOnly', false);
+    return this.$container.removeClass('loading');
   };
 
   Prompt.prototype.focus = function() {
     return this.code_mirror.focus();
+  };
+
+  Prompt.prototype.get = function() {
+    return this.code_mirror.getValue();
   };
 
   Prompt.prototype.set = function(val) {
@@ -537,14 +569,14 @@ Wdb = (function(superClass) {
     this.last_cmd = null;
     this.eval_time = null;
     this.waited_for_ws = 0;
-    this.$waiter = $('#waiter');
-    this.$wdb = $('#wdb');
-    this.$source = $('#source');
-    this.$interpreter = $('#interpreter');
-    this.$scrollback = $('#scrollback');
-    this.$backsearch = $('#backsearch');
-    this.$traceback = $('#traceback');
-    this.$watchers = $('#watchers');
+    this.$waiter = $('.waiter');
+    this.$wdb = $('.wdb');
+    this.$source = $('.source');
+    this.$interpreter = $('.interpreter');
+    this.$scrollback = $('.scrollback');
+    this.$backsearch = $('.backsearch');
+    this.$traceback = $('.traceback');
+    this.$watchers = $('.watchers');
     this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
     this.cm = new Codemirror(this);
     this.prompt = new Prompt(this);
@@ -556,8 +588,8 @@ Wdb = (function(superClass) {
       this.$traceback.on('click', '.trace-line', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
-      this.$source.find('#source-editor').on('mouseup', this.paste_target.bind(this));
-      $('#deactivate').click(this.disable.bind(this));
+      this.$source.find('.source-editor').on('mouseup', this.paste_target.bind(this));
+      $('.deactivate').click(this.disable.bind(this));
       this.$interpreter.on('keydown', (function(_this) {
         return function(e) {
           var ref, ref1, ref2, scroll, way;
@@ -679,9 +711,9 @@ Wdb = (function(superClass) {
     var current_frame;
     current_frame = data.frame;
     this.$interpreter.show();
-    this.$source.find('#source-editor').removeClass('hidden');
+    this.$source.find('.source-editor').removeClass('hidden');
     $('.trace-line').removeClass('selected');
-    $('#trace-' + current_frame.level).addClass('selected');
+    $('.trace-' + current_frame.level).addClass('selected');
     this.file_cache[data.name] = data.file;
     this.cm.open(data, current_frame);
     return this.done();
@@ -728,7 +760,7 @@ Wdb = (function(superClass) {
         return function(i, elt) {
           var $code, cls, j, len;
           $code = $(elt);
-          $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone');
+          $code.addClass('waiting_for_hl').addClass('cm-s-default');
           for (j = 0, len = classes.length; j < len; j++) {
             cls = classes[j];
             $code.addClass(cls);
@@ -745,7 +777,7 @@ Wdb = (function(superClass) {
       })(this));
     } else {
       $code = $('<code>', {
-        'class': 'CodeMirror-standalone'
+        'class': 'cm-s-default'
       });
       for (j = 0, len = classes.length; j < len; j++) {
         cls = classes[j];
@@ -905,32 +937,47 @@ Wdb = (function(superClass) {
       duration = parseInt((performance.now() - this.eval_time) * 1000);
       this.eval_time = null;
     }
-    this.suggest_stop();
-    $group = $('<div>');
+    $group = $('<div>', {
+      "class": 'printed scroll-line'
+    });
     this.$scrollback.append($group);
     if (data.duration) {
       this.code($group, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)));
     }
-    this.code($group, data["for"], ['prompted']);
-    this.code(this.$scrollback, data.result, [], true);
+    this.code($group, data["for"], ['for prompted']);
+    this.code($group, data.result, ['result'], true);
     return this.done(data.suggest);
   };
 
   Wdb.prototype.echo = function(data) {
-    this.code(this.$scrollback, data["for"], ['prompted']);
-    this.code(this.$scrollback, data.val || '', [], true, null, data.mode);
+    var $group;
+    $group = $('<div>', {
+      "class": 'echoed scroll-line'
+    });
+    this.$scrollback.append($group);
+    this.code($group, data["for"], ['for prompted']);
+    this.code($group, data.val || '', ['val'], true, null, data.mode);
     return this.done();
   };
 
   Wdb.prototype.rawhtml = function(data) {
-    this.code(this.$scrollback, data["for"], ['prompted']);
+    var $group;
+    $group = $('<div>', {
+      "class": 'rawhtml scroll-line'
+    });
+    this.$scrollback.append($group);
+    this.code($group, data["for"], ['for prompted']);
     this.$scrollback.append(data.val);
     return this.done();
   };
 
   Wdb.prototype.dump = function(data) {
-    var $attr_head, $attr_tbody, $container, $core_head, $core_tbody, $method_head, $method_tbody, $table, $tbody, key, ref, val;
-    this.code(this.$scrollback, data["for"], ['prompted']);
+    var $attr_head, $attr_tbody, $container, $core_head, $core_tbody, $group, $method_head, $method_tbody, $table, $tbody, key, ref, val;
+    $group = $('<div>', {
+      "class": 'dump scroll-line'
+    });
+    this.$scrollback.append($group);
+    this.code($group, data["for"], ['for prompted']);
     $container = $('<div>');
     $table = $('<table>', {
       "class": 'mdl-data-table mdl-js-data-table mdl-shadow--2dp object'
@@ -1016,7 +1063,7 @@ Wdb = (function(superClass) {
       }).text(data.source))).appendTo($table);
     }
     componentHandler.upgradeElement($table.get(0));
-    this.code(this.$scrollback, $container.html(), [], true);
+    this.code($group, $container.html(), [], true);
     return this.done();
   };
 
@@ -1174,9 +1221,12 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.display = function(data) {
-    var $tag;
-    this.suggest_stop();
-    this.code(this.$scrollback, data["for"], ['prompted']);
+    var $group, $tag;
+    $group = $('<div>', {
+      "class": 'display scroll-line'
+    });
+    this.$scrollback.append($group);
+    this.code($group, data["for"], ['for prompted']);
     if (data.type.indexOf('image') >= 0) {
       $tag = $("<img>");
     } else if (data.type.indexOf('audio') >= 0) {
@@ -1194,7 +1244,7 @@ Wdb = (function(superClass) {
     }
     $tag.addClass('display');
     $tag.attr('src', "data:" + data.type + ";charset=UTF-8;base64," + data.val);
-    this.$scrollback.append($tag);
+    $group.append($tag);
     return this.done();
   };
 
@@ -1205,7 +1255,10 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.die = function() {
-    $('h1').html('Dead<small>Program has exited</small>');
+    this.title({
+      title: 'Dead',
+      subtitle: 'Program has exited'
+    });
     this.ws.ws.close();
     return setTimeout((function() {
       return window.close();
@@ -1258,7 +1311,7 @@ Wdb = (function(superClass) {
       if (e.shiftKey) {
         this.eval_insert(sel);
       } else {
-        this.historize(sel);
+        this.prompt.history.historize(sel);
         this.execute(sel);
       }
       return false;
@@ -1302,7 +1355,7 @@ Wdb = (function(superClass) {
       return;
     }
     target = $(e.target).text().trim();
-    this.historize(target);
+    this.prompt.history.historize(target);
     this.ws.send('Dump', target);
     this.working();
     return false;
@@ -1314,7 +1367,7 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.shell = function() {
     this.$traceback.addClass('hidden');
-    this.$source.find('#source-editor').addClass('hidden');
+    this.$source.find('.source-editor').addClass('hidden');
     return this.done();
   };
 
