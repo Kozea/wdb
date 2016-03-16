@@ -1,14 +1,21 @@
-#source-editor .CodeMirror {
+.CodeMirror, code {
+  font-family: "Roboto Mono"; }
+
+.source-editor .CodeMirror {
   height: calc(50vh - 64px); }
 
 .prompt .CodeMirror {
-  background-color: #eee;
-  border: 1px solid #ddd;
-  height: auto; }
+  height: auto;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+  .prompt .CodeMirror.CodeMirror-focused {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
 
-#interpreter {
+.interpreter {
   height: calc(50vh - 40px);
   overflow: auto; }
+
+.scrollback .scroll-line {
+  padding: 4px; }
 
 footer.mdl-mini-footer {
   overflow: hidden;
@@ -23,14 +30,24 @@ table {
   table tbody.closed {
     display: none; }
 
-#prompt {
+.prompt {
   width: 100%;
   padding: 0; }
 
-#eval {
-  width: 100%;
-  padding: 0;
-  resize: none; }
-
 .duration {
   float: right; }
+
+.trace-line:hover {
+  background: rgba(0, 0, 0, 0.05); }
+
+.trace-line.selected {
+  background: rgba(255, 255, 255, 0.05); }
+  .trace-line.selected:hover {
+    background: transparent; }
+
+code {
+  white-space: pre-wrap;
+  word-break: break-all; }
+
+a.inspect {
+  display: block; }

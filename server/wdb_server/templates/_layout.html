@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto+Mono">
     <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.indigo-pink.min.css">
     <script defer src="https://code.getmdl.io/1.1.2/material.min.js"></script>
     <script src="{{ static_url('javascripts/wdb/deps.min.js') }}"></script>
@@ -15,7 +16,7 @@
     <link href="{{ static_url('stylesheets/material.css') }}" rel="stylesheet" type="text/css">
   </head>
   <body {% if options.debug %}data-debug="true"{% end %}>
-    <section id="wdb" data-page="{{ handler.__class__.__name__}}">
+    <section class="wdb" data-page="{{ handler.__class__.__name__}}">
       {% block main %}
       {% end %}
     </section>

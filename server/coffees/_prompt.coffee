@@ -71,20 +71,26 @@ class Prompt extends Log
   newLineOrExecute: (cm) ->
     snippet = cm.getValue().trim()
     @wdb.execute snippet
-    cm.setOption readOnly: true
+    cm.setOption 'readOnly', true
+    @$container.addClass 'loading'
 
   newLine: ->
+    @code_mirror.setOption 'readOnly', false
     @code_mirror.execCommand 'newlineAndIndent'
 
   newPrompt: ->
     snippet = @code_mirror.getValue().trim()
-    # TODO: Hist
     @history.historize snippet
     @code_mirror.setValue ''
-    cm.setOption readOnly: false
+    @history.reset()
+    @code_mirror.setOption 'readOnly', false
+    @$container.removeClass 'loading'
 
   focus: ->
     @code_mirror.focus()
+
+  get: ->
+    @code_mirror.getValue()
 
   set: (val) ->
     @code_mirror.setValue(val)

@@ -31,14 +31,14 @@ class Wdb extends Log
     @waited_for_ws = 0
 
     # Page elements
-    @$waiter = $('#waiter')
-    @$wdb = $('#wdb')
-    @$source = $('#source')
-    @$interpreter = $('#interpreter')
-    @$scrollback = $('#scrollback')
-    @$backsearch = $('#backsearch')
-    @$traceback = $('#traceback')
-    @$watchers = $('#watchers')
+    @$waiter = $('.waiter')
+    @$wdb = $('.wdb')
+    @$source = $('.source')
+    @$interpreter = $('.interpreter')
+    @$scrollback = $('.scrollback')
+    @$backsearch = $('.backsearch')
+    @$traceback = $('.traceback')
+    @$watchers = $('.watchers')
 
     @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
     @cm = new Codemirror(@)
@@ -57,8 +57,8 @@ class Wdb extends Log
         .on 'click', '.toggle', @toggle_visibility.bind @
 
       @$watchers.on 'click', '.watching .name', @unwatch.bind @
-      @$source.find('#source-editor').on 'mouseup', @paste_target.bind @
-      $('#deactivate').click @disable.bind @
+      @$source.find('.source-editor').on 'mouseup', @paste_target.bind @
+      $('.deactivate').click @disable.bind @
       @$interpreter.on 'keydown', (e) =>
         if e.ctrlKey and 37 <= e.keyCode <= 40 or
            118 <= e.keyCode <= 122 or e.keyCode is 13
@@ -181,9 +181,9 @@ class Wdb extends Log
   select: (data) ->
     current_frame = data.frame
     @$interpreter.show()
-    @$source.find('#source-editor').removeClass('hidden')
+    @$source.find('.source-editor').removeClass('hidden')
     $('.trace-line').removeClass('selected')
-    $('#trace-' + current_frame.level).addClass('selected')
+    $('.trace-' + current_frame.level).addClass('selected')
     @file_cache[data.name] = data.file
     @cm.open(data, current_frame)
     @done()
@@ -211,7 +211,7 @@ class Wdb extends Log
       .parent()
       .each (i, elt) =>
         $code = $(elt)
-        $code.addClass('waiting_for_hl').addClass('CodeMirror-standalone')
+        $code.addClass('waiting_for_hl').addClass('cm-s-default')
         for cls in classes
           $code.addClass(cls)
         $code.attr('title', title) if title
@@ -221,7 +221,7 @@ class Wdb extends Log
           @ellipsize $code
         ), 50
     else
-      $code = $('<code>', 'class': 'CodeMirror-standalone')
+      $code = $('<code>', 'class': 'cm-s-default')
       for cls in classes
         $code.addClass(cls)
       $code.attr('title', title) if title
@@ -391,30 +391,34 @@ specify a module like `logging.config`.
       duration = parseInt((performance.now() - @eval_time) * 1000)
       @eval_time = null
 
-    @suggest_stop()
-    # snippet = @$eval.val()
-    $group = $('<div>')
+    $group = $('<div>', class: 'printed scroll-line')
     @$scrollback.append($group)
 
     @code($group,
       @pretty_time(data.duration),
       ['duration'], false, "Total #{@pretty_time(duration)}") if data.duration
-    @code($group, data.for, ['prompted'])
-    @code(@$scrollback, data.result, [], true)
+    @code($group, data.for, ['for prompted'])
+    @code($group, data.result, ['result'], true)
     @done(data.suggest)
 
   echo: (data) ->
-    @code(@$scrollback, data.for, ['prompted'])
-    @code(@$scrollback, data.val or '', [], true, null, data.mode)
+    $group = $('<div>', class: 'echoed scroll-line')
+    @$scrollback.append($group)
+    @code($group, data.for, ['for prompted'])
+    @code($group, data.val or '', ['val'], true, null, data.mode)
     @done()
 
   rawhtml: (data) ->
-    @code(@$scrollback, data.for, ['prompted'])
+    $group = $('<div>', class: 'rawhtml scroll-line')
+    @$scrollback.append($group)
+    @code($group, data.for, ['for prompted'])
     @$scrollback.append(data.val)
     @done()
 
   dump: (data) ->
-    @code(@$scrollback, data.for, ['prompted'])
+    $group = $('<div>', class: 'dump scroll-line')
+    @$scrollback.append($group)
+    @code($group, data.for, ['for prompted'])
     $container = $('<div>')
     $table = $('<table>', class: 'mdl-data-table mdl-js-data-table
       mdl-shadow--2dp object')
@@ -488,7 +492,7 @@ specify a module like `logging.config`.
             .text(data.source))).appendTo($table)
 
     componentHandler.upgradeElement($table.get(0))
-    @code(@$scrollback, $container.html(), [], true)
+    @code($group, $container.html(), [], true)
     @done()
 
   breakset: (data) ->
@@ -608,9 +612,9 @@ specify a module like `logging.config`.
     @$eval.val('').trigger('autosize.resize')
 
   display: (data) ->
-    @suggest_stop()
-    # snippet = @$eval.val()
-    @code(@$scrollback, data.for, ['prompted'])
+    $group = $('<div>', class: 'display scroll-line')
+    @$scrollback.append($group)
+    @code($group, data.for, ['for prompted'])
     if data.type.indexOf('image') >= 0
       $tag = $("<img>")
     else if data.type.indexOf('audio') >= 0
@@ -622,14 +626,14 @@ specify a module like `logging.config`.
 
     $tag.addClass('display')
     $tag.attr('src', "data:#{data.type};charset=UTF-8;base64,#{data.val}")
-    @$scrollback.append($tag)
+    $group.append($tag)
     @done()
 
   suggest: (data) ->
     @prompt.complete data if data
 
   die: ->
-    $('h1').html('Dead<small>Program has exited</small>')
+    @title(title: 'Dead', subtitle: 'Program has exited')
     @ws.ws.close()
     setTimeout (-> window.close()), 10
 
@@ -663,7 +667,7 @@ specify a module like `logging.config`.
       if e.shiftKey
         @eval_insert sel
       else
-        @historize sel
+        @prompt.history.historize sel
         @execute sel
       return false
   #
@@ -741,7 +745,7 @@ specify a module like `logging.config`.
   paste_target: (e) ->
     return unless e.which == 2 # Middle
     target = $(e.target).text().trim()
-    @historize target
+    @prompt.history.historize target
     @ws.send 'Dump', target
     @working()
     false
@@ -751,7 +755,7 @@ specify a module like `logging.config`.
 
   shell: ->
     @$traceback.addClass('hidden')
-    @$source.find('#source-editor').addClass('hidden')
+    @$source.find('.source-editor').addClass('hidden')
     @done()
 
 
