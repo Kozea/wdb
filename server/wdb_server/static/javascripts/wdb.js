@@ -1,4 +1,4 @@
-var Codemirror, History, Log, Prompt, Wdb, Websocket,
+var Codemirror, History, Log, Prompt, Traceback, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -289,12 +289,14 @@ Codemirror = (function(superClass) {
         this.mark_breakpoint(brk);
       }
     } else {
-      if (this.state.fun !== new_state.fun && this.state.fun !== '<module>') {
-        this.remove_class(this.state.flno, 'ctx-top');
-        for (lno = k = ref1 = this.state.flno, ref2 = this.state.llno; ref1 <= ref2 ? k <= ref2 : k >= ref2; lno = ref1 <= ref2 ? ++k : --k) {
-          this.remove_class(lno, 'ctx');
+      if (this.state.fun !== new_state.fun) {
+        if (this.state.fun !== '<module>') {
+          this.remove_class(this.state.flno, 'ctx-top');
+          for (lno = k = ref1 = this.state.flno, ref2 = this.state.llno; ref1 <= ref2 ? k <= ref2 : k >= ref2; lno = ref1 <= ref2 ? ++k : --k) {
+            this.remove_class(lno, 'ctx');
+          }
+          this.remove_class(this.state.llno, 'ctx-bottom');
         }
-        this.remove_class(this.state.llno, 'ctx-bottom');
       } else {
         rescope = false;
       }
@@ -407,6 +409,76 @@ History = (function(superClass) {
 
 })(Log);
 
+Traceback = (function(superClass) {
+  extend(Traceback, superClass);
+
+  function Traceback(wdb) {
+    this.wdb = wdb;
+    Traceback.__super__.constructor.apply(this, arguments);
+    this.$traceback = $('.traceback');
+    this.$traceback.on('click', '.trace-line', this.select.bind(this));
+  }
+
+  Traceback.prototype.select = function(e) {
+    var level;
+    level = $(e.currentTarget).attr('data-level');
+    this.wdb.select_trace(level);
+    return false;
+  };
+
+  Traceback.prototype.make_trace = function(trace) {
+    var $primary, $secondary, $traceline, brk, frame, j, k, len, len1, ref, results;
+    this.clear();
+    this.show();
+    results = [];
+    for (j = 0, len = trace.length; j < len; j++) {
+      frame = trace[j];
+      $traceline = $('<a>', {
+        "class": 'trace-line mdl-list__item mdl-list__item--two-line trace-' + frame.level
+      }).attr('data-level', frame.level).attr('title', ("File \"" + frame.file + "\", line " + frame.lno + ", in " + frame["function"] + "\n") + ("    " + frame.code));
+      ref = this.wdb.cm.breakpoints[frame.file] || [];
+      for (k = 0, len1 = ref.length; k < len1; k++) {
+        brk = ref[k];
+        if (!(brk.cond || brk.fun || brk.lno)) {
+          $traceline.addClass('breakpoint');
+          break;
+        }
+      }
+      if (frame.current) {
+        $traceline.addClass('real-selected');
+      }
+      $primary = $('<span>', {
+        "class": 'mdl-list__item-primary-content'
+      }).text(frame["function"]);
+      $primary.append($('<span>', {
+        "class": 'mdl-list__item-sub-title'
+      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno));
+      $secondary = $('<span>', {
+        "class": 'mdl-list__item-secondary-content'
+      });
+      this.wdb.code($secondary, frame.code);
+      $traceline.append($primary).append($secondary);
+      results.push(this.$traceback.prepend($traceline));
+    }
+    return results;
+  };
+
+  Traceback.prototype.hide = function() {
+    return this.$traceback.addClass('hidden');
+  };
+
+  Traceback.prototype.show = function() {
+    return this.$traceback.removeClass('hidden');
+  };
+
+  Traceback.prototype.clear = function() {
+    return this.$traceback.empty();
+  };
+
+  return Traceback;
+
+})(Log);
+
 Prompt = (function(superClass) {
   extend(Prompt, superClass);
 
@@ -464,19 +536,27 @@ Prompt = (function(superClass) {
         return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
           async: true
         });
-      }
+      },
+      'PageUp': 'goLineUp',
+      'PageDown': 'goLineDown'
     });
     this.code_mirror.on('keyup', function(cm, e) {
       var ref;
       if (!cm.getValue()) {
         return;
       }
-      if ((ref = e.keyCode) === 37 || ref === 38 || ref === 39 || ref === 40 || ref === 13 || ref === 27) {
+      if ((10 < (ref = e.keyCode) && ref < 42)) {
         return;
       }
       return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
         async: true,
-        completeSingle: false
+        completeSingle: false,
+        extraKeys: {
+          PageUp: 'goPageUp',
+          PageDown: 'goPageDown',
+          Home: 'goLineStartSmart',
+          End: 'goLineEnd'
+        }
       });
     });
   }
@@ -518,28 +598,37 @@ Prompt = (function(superClass) {
   Prompt.prototype.newLineOrExecute = function(cm) {
     var snippet;
     snippet = cm.getValue().trim();
-    this.wdb.execute(snippet);
+    if (!snippet) {
+      return;
+    }
     cm.setOption('readOnly', true);
-    return this.$container.addClass('loading');
-  };
-
-  Prompt.prototype.newLine = function() {
-    this.code_mirror.setOption('readOnly', false);
-    return this.code_mirror.execCommand('newlineAndIndent');
-  };
-
-  Prompt.prototype.newPrompt = function() {
-    var snippet;
-    snippet = this.code_mirror.getValue().trim();
-    this.history.historize(snippet);
-    this.code_mirror.setValue('');
-    this.history.reset();
-    this.code_mirror.setOption('readOnly', false);
-    return this.$container.removeClass('loading');
+    this.$container.addClass('loading');
+    return this.wdb.execute(snippet);
   };
 
   Prompt.prototype.focus = function() {
     return this.code_mirror.focus();
+  };
+
+  Prompt.prototype.ready = function(suggest, newline) {
+    var snippet;
+    if (suggest == null) {
+      suggest = null;
+    }
+    if (newline == null) {
+      newline = false;
+    }
+    if (newline) {
+      this.code_mirror.execCommand('newlineAndIndent');
+    } else {
+      snippet = this.code_mirror.getValue().trim();
+      this.history.historize(snippet);
+      this.history.reset();
+      this.set(suggest || '');
+    }
+    this.$container.removeClass('loading');
+    this.code_mirror.setOption('readOnly', false);
+    return this.focus();
   };
 
   Prompt.prototype.get = function() {
@@ -575,9 +664,9 @@ Wdb = (function(superClass) {
     this.$interpreter = $('.interpreter');
     this.$scrollback = $('.scrollback');
     this.$backsearch = $('.backsearch');
-    this.$traceback = $('.traceback');
     this.$watchers = $('.watchers');
     this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
+    this.traceback = new Traceback(this);
     this.cm = new Codemirror(this);
     this.prompt = new Prompt(this);
   }
@@ -585,7 +674,6 @@ Wdb = (function(superClass) {
   Wdb.prototype.opening = function() {
     if (!this.started) {
       $(window).on('keydown', this.global_key.bind(this));
-      this.$traceback.on('click', '.trace-line', this.select_click.bind(this));
       this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
       this.$source.find('.source-editor').on('mouseup', this.paste_target.bind(this));
@@ -628,7 +716,7 @@ Wdb = (function(superClass) {
       suggest = null;
     }
     this.termscroll();
-    this.prompt.focus();
+    this.prompt.ready(suggest);
     return this.chilling();
   };
 
@@ -659,43 +747,11 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.trace = function(data) {
-    var $primary, $traceline, brk, frame, j, k, len, len1, ref, ref1, results;
-    this.$traceback.removeClass('hidden');
-    this.$traceback.empty();
-    ref = data.trace;
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      frame = ref[j];
-      $traceline = $('<a>', {
-        "class": 'trace-line mdl-list__item mdl-list__item--two-line'
-      }).attr('id', 'trace-' + frame.level).attr('data-level', frame.level).attr('title', "File \"" + frame.file + "\", line " + frame.lno + ", in " + frame["function"]);
-      ref1 = this.cm.breakpoints[frame.file] || [];
-      for (k = 0, len1 = ref1.length; k < len1; k++) {
-        brk = ref1[k];
-        if (!(brk.cond || brk.fun || brk.lno)) {
-          $traceline.addClass('breakpoint');
-          break;
-        }
-      }
-      if (frame.current) {
-        $traceline.addClass('real-selected');
-      }
-      $primary = $('<span>', {
-        "class": 'mdl-list__item-primary-content'
-      });
-      $primary.append($('<span>').text(frame["function"]));
-      $primary.append($('<span>', {
-        "class": 'mdl-list__item-sub-title'
-      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno));
-      $traceline.append($primary);
-      results.push(this.$traceback.prepend($traceline));
-    }
-    return results;
+    return this.traceback.make_trace(data.trace);
   };
 
-  Wdb.prototype.select_click = function(e) {
-    this.ws.send('Select', $(e.currentTarget).attr('data-level'));
-    return false;
+  Wdb.prototype.select_trace = function(level) {
+    return this.ws.send('Select', level);
   };
 
   Wdb.prototype.selectcheck = function(data) {
@@ -1070,9 +1126,6 @@ Wdb = (function(superClass) {
   Wdb.prototype.breakset = function(data) {
     var ref;
     this.cm.set_breakpoint(data);
-    if (!data.lno && !data.fun && !data.cond) {
-      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.trace-line').addClass('breakpoint');
-    }
     if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't')) {
       return this.done();
     } else {
@@ -1083,9 +1136,6 @@ Wdb = (function(superClass) {
   Wdb.prototype.breakunset = function(data) {
     var ref;
     this.cm.clear_breakpoint(data);
-    if (!data.lno && !data.fun && !data.cond) {
-      this.$traceback.find("[title=\"" + data.fn + "\"]").closest('.trace-line').removeClass('breakpoint');
-    }
     if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't' || ref === 'z')) {
       return this.done();
     } else {
@@ -1318,12 +1368,9 @@ Wdb = (function(superClass) {
     }
   };
 
-  Wdb.prototype.newline = function(e) {
-    return this.prompt.newLine();
-  };
-
-  Wdb.prototype.newprompt = function(e) {
-    return this.prompt.newPrompt();
+  Wdb.prototype.newline = function() {
+    this.prompt.ready('', true);
+    return this.chilling();
   };
 
   Wdb.prototype.inspect = function(e) {
@@ -1366,7 +1413,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.shell = function() {
-    this.$traceback.addClass('hidden');
+    this.traceback.hide();
     this.$source.find('.source-editor').addClass('hidden');
     return this.done();
   };

@@ -37,10 +37,10 @@ class Wdb extends Log
     @$interpreter = $('.interpreter')
     @$scrollback = $('.scrollback')
     @$backsearch = $('.backsearch')
-    @$traceback = $('.traceback')
     @$watchers = $('.watchers')
 
     @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
+    @traceback = new Traceback(@)
     @cm = new Codemirror(@)
     @prompt = new Prompt(@)
 
@@ -49,7 +49,6 @@ class Wdb extends Log
     if not @started
       $(window).on 'keydown', @global_key.bind @
 
-      @$traceback.on 'click', '.trace-line', @select_click.bind @
       @$scrollback.add(@$watchers)
         .on 'click', 'a.inspect', @inspect.bind(@)
         .on 'click', '.short.close', @short_open.bind @
@@ -91,14 +90,7 @@ class Wdb extends Log
 
   done: (suggest=null)->
     @termscroll()
-    # eval_val = suggest or ''
-    # if @$eval.val() isnt eval_val
-    #   @$eval.val(eval_val)
-    #     .prop('disabled', false)
-    #     .attr('data-index', -1)
-    #     .trigger('autosize.resize')
-    #     .focus()
-    @prompt.focus()
+    @prompt.ready suggest
     @chilling()
 
   init: (data) ->
@@ -124,52 +116,10 @@ class Wdb extends Log
       .attr('title', data.subtitle)
 
   trace: (data) ->
-    @$traceback.removeClass('hidden')
-    @$traceback.empty()
-    for frame in data.trace
-      $traceline = $('<a>',
-        class:'trace-line
-        mdl-list__item mdl-list__item--two-line')
-        .attr('id', 'trace-' + frame.level)
-        .attr('data-level', frame.level)
-        .attr('title',
-          "File \"#{frame.file}\", line #{frame.lno}, in #{frame.function}")
+    @traceback.make_trace data.trace
 
-      for brk in @cm.breakpoints[frame.file] or []
-        unless brk.cond or brk.fun or brk.lno
-          $traceline.addClass('breakpoint')
-          break
-
-      if frame.current
-        $traceline.addClass('real-selected')
-
-      $primary = $('<span>', class: 'mdl-list__item-primary-content')
-      $primary.append $('<span>').text(frame.function)
-      $primary.append($('<span>', class: 'mdl-list__item-sub-title')
-        .text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno))
-      #
-      # $tracefilelno = $('<span>')
-      #   .addClass('mdl-list__item-primary-content')
-      #   .append $('<span>', title: frame.file).text()
-      #
-      #   .append $('<span>', title: frame.file).text()
-      #   .append($tracefile = $('<span>', title: frame.file)
-      #     .addClass('trace-file')
-      #     .append $('<sup>').addClass('trace-lno').text(frame.lno)
-      #     .text(frame.filename))
-      #   .append $('<span>').addClass('trace-fun').text(frame.function)
-
-      # $tracecode = $('<span>')
-      #   .addClass('tracecode')
-      #
-      # @code $tracecode, frame.code
-
-      $traceline.append $primary
-      @$traceback.prepend $traceline
-
-  select_click: (e) ->
-    @ws.send 'Select', $(e.currentTarget).attr('data-level')
-    false
+  select_trace: (level) ->
+    @ws.send 'Select', level
 
   selectcheck: (data) ->
     if data.name not of @file_cache
@@ -497,10 +447,6 @@ specify a module like `logging.config`.
 
   breakset: (data) ->
     @cm.set_breakpoint data
-    if not data.lno and not data.fun and not data.cond
-      @$traceback.find("[title=\"#{data.fn}\"]")
-        .closest('.trace-line')
-        .addClass('breakpoint')
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't']
       @done()
@@ -509,10 +455,6 @@ specify a module like `logging.config`.
 
   breakunset: (data) ->
     @cm.clear_breakpoint data
-    if not data.lno and not data.fun and not data.cond
-      @$traceback.find("[title=\"#{data.fn}\"]")
-        .closest('.trace-line')
-        .removeClass('breakpoint')
 
     if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't', 'z']
       @done()
@@ -708,11 +650,9 @@ specify a module like `logging.config`.
   #       when 32 # Space
   #         @eval_move_suggest 1, true
 
-  newline: (e) ->
-    @prompt.newLine()
-
-  newprompt: (e) ->
-    @prompt.newPrompt()
+  newline: ->
+    @prompt.ready('', true)
+    @chilling()
 
   inspect: (e) ->
     @ws.send 'Inspect', $(e.currentTarget).attr('href')
@@ -754,7 +694,7 @@ specify a module like `logging.config`.
     @ws.send 'Disable'
 
   shell: ->
-    @$traceback.addClass('hidden')
+    @traceback.hide()
     @$source.find('.source-editor').addClass('hidden')
     @done()
 

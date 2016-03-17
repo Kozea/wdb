@@ -158,11 +158,12 @@ class Codemirror extends Log
         @mark_breakpoint brk
 
     else
-      if @state.fun isnt new_state.fun and @state.fun isnt '<module>'
-        @remove_class @state.flno, 'ctx-top'
-        for lno in [@state.flno..@state.llno]
-          @remove_class lno, 'ctx'
-        @remove_class @state.llno, 'ctx-bottom'
+      if @state.fun isnt new_state.fun
+        if @state.fun isnt '<module>'
+          @remove_class @state.flno, 'ctx-top'
+          for lno in [@state.flno..@state.llno]
+            @remove_class lno, 'ctx'
+          @remove_class @state.llno, 'ctx-bottom'
       else
         rescope = false
 

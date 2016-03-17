@@ -64,6 +64,7 @@ module.exports = (grunt) ->
             'coffees/_websocket.coffee'
             'coffees/_codemirror.coffee'
             'coffees/_history.coffee'
+            'coffees/_traceback.coffee'
             'coffees/_prompt.coffee'
             'coffees/wdb.coffee'
           ]

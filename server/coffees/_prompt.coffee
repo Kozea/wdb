@@ -42,13 +42,22 @@ class Prompt extends Log
       'Ctrl-Enter': 'newlineAndIndent'
       'Ctrl-Space': (cm, options) ->
         CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, async: true)
+      # Use page up/down for going up/down in multiline
+      'PageUp': 'goLineUp'
+      'PageDown': 'goLineDown'
 
     @code_mirror.on 'keyup', (cm, e) ->
       return unless cm.getValue()
-      return if e.keyCode in [37, 38, 39, 40, 13, 27]
+      return if 10 < e.keyCode < 42
       CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
         async: true
         completeSingle: false
+        # If auto hint restore these defaults
+        extraKeys:
+          PageUp: 'goPageUp'
+          PageDown: 'goPageDown'
+          Home: 'goLineStartSmart'
+          End: 'goLineEnd'
 
   complete: (data) ->
     return unless @completion
@@ -70,24 +79,25 @@ class Prompt extends Log
 
   newLineOrExecute: (cm) ->
     snippet = cm.getValue().trim()
-    @wdb.execute snippet
+    return unless snippet
     cm.setOption 'readOnly', true
     @$container.addClass 'loading'
-
-  newLine: ->
-    @code_mirror.setOption 'readOnly', false
-    @code_mirror.execCommand 'newlineAndIndent'
-
-  newPrompt: ->
-    snippet = @code_mirror.getValue().trim()
-    @history.historize snippet
-    @code_mirror.setValue ''
-    @history.reset()
-    @code_mirror.setOption 'readOnly', false
-    @$container.removeClass 'loading'
+    @wdb.execute snippet
 
   focus: ->
     @code_mirror.focus()
+
+  ready: (suggest=null, newline=false)->
+    if newline
+      @code_mirror.execCommand 'newlineAndIndent'
+    else
+      snippet = @code_mirror.getValue().trim()
+      @history.historize snippet
+      @history.reset()
+      @set suggest or ''
+    @$container.removeClass 'loading'
+    @code_mirror.setOption 'readOnly', false
+    @focus()
 
   get: ->
     @code_mirror.getValue()

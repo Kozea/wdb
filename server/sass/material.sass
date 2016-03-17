@@ -44,15 +44,49 @@ table
   &:hover
     background: rgba(0, 0, 0, .05)
 
-  &.selected
-    background: rgba(255, 255, 255, .05)
+  &.real-selected
+    background: rgba(255, 255, 255, .9)
     &:hover
-      background: rgba(0, 0, 0, 0)
+      background: rgba(0, 0, 0, .1)
 
+  &.selected
+    background: rgba(0, 0, 0, .08)
+    &:hover
+      background: rgba(0, 0, 0, .13)
+
+
+.CodeMirror-linebackground
+  transition: background-color 1s
+  &.ctx
+    background-color: rgba(0, 0, 0, .2)
+    border-left: 1px solid rgba(0, 0, 0, .5)
+    border-right: 1px solid rgba(0, 0, 0, .5)
+    &.ctx-top
+      border-top: 1px solid rgba(0, 0, 0, .5)
+      border-bottom: 1px solid rgba(0, 0, 0, .5)
+    &.ctx-bottom
+
+  &.footstep
+    background-color: rgba(0, 0, 0, .1)
+
+  &.breakpoint
+    background-color: rgba(255, 0, 0, .1)
+
+  &.highlighted
+    background-color: rgba(0, 0, 0, .1)
+
+  &.breakpoint.highlighted
+    background-color: rgba(255, 0, 0, .2)
+
+  &.ask-breakpoint
+    background-color: rgba(255, 0, 0, .05)
 
 code
+  display: block
   white-space: pre-wrap
   word-break: break-all
 
 a.inspect
-  display: block
+  display: inline-block
+  text-decoration: none
+  border-bottom: 1px solid rgba(0, 0, 0, .05)
