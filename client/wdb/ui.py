@@ -357,7 +357,7 @@ class Interaction(object):
             compiled_code = None
             try:
                 compiled_code = compile(data, '<stdin>', 'single')
-            except SyntaxError as e:
+            except Exception:
                 try:
                     compiled_code = compile(data, '<stdin>', 'exec')
                 except Exception:
@@ -432,7 +432,6 @@ class Interaction(object):
                 'suggest': suggest,
                 'duration': duration
             }))
-        self.db.send('NewPrompt')
 
     def do_ping(self, data):
         self.db.send('Pong')

@@ -1,2 +1,4 @@
 class Console extends Log
-  constructor: (@wdbs) ->
+  constructor: (@wdb) ->
+    super
+    

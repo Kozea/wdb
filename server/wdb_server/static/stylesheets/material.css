@@ -40,14 +40,42 @@ table {
 .trace-line:hover {
   background: rgba(0, 0, 0, 0.05); }
 
+.trace-line.real-selected {
+  background: rgba(255, 255, 255, 0.9); }
+  .trace-line.real-selected:hover {
+    background: rgba(0, 0, 0, 0.1); }
+
 .trace-line.selected {
-  background: rgba(255, 255, 255, 0.05); }
+  background: rgba(0, 0, 0, 0.08); }
   .trace-line.selected:hover {
-    background: transparent; }
+    background: rgba(0, 0, 0, 0.13); }
+
+.CodeMirror-linebackground {
+  transition: background-color 1s; }
+  .CodeMirror-linebackground.ctx {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-left: 1px solid rgba(0, 0, 0, 0.5);
+    border-right: 1px solid rgba(0, 0, 0, 0.5); }
+    .CodeMirror-linebackground.ctx.ctx-top {
+      border-top: 1px solid rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.5); }
+  .CodeMirror-linebackground.footstep {
+    background-color: rgba(0, 0, 0, 0.1); }
+  .CodeMirror-linebackground.breakpoint {
+    background-color: rgba(255, 0, 0, 0.1); }
+  .CodeMirror-linebackground.highlighted {
+    background-color: rgba(0, 0, 0, 0.1); }
+  .CodeMirror-linebackground.breakpoint.highlighted {
+    background-color: rgba(255, 0, 0, 0.2); }
+  .CodeMirror-linebackground.ask-breakpoint {
+    background-color: rgba(255, 0, 0, 0.05); }
 
 code {
+  display: block;
   white-space: pre-wrap;
   word-break: break-all; }
 
 a.inspect {
-  display: block; }
+  display: inline-block;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
