@@ -12,9 +12,18 @@
 
 .interpreter {
   height: calc(50vh - 40px);
-  overflow: auto; }
+  overflow: auto;
+  outline: 0; }
   .interpreter.full-height {
     height: calc(100vh - 40px - 64px); }
+  .interpreter table td:first-child code {
+    white-space: nowrap; }
+  .interpreter table td:last-child code {
+    word-break: break-all; }
+  .interpreter a.inspect {
+    display: inline-block;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
 
 .title {
   white-space: pre; }
@@ -80,14 +89,8 @@ table {
     background-color: rgba(255, 0, 0, 0.05); }
 
 code {
-  display: block;
   white-space: pre-wrap;
-  word-break: break-all; }
-
-a.inspect {
-  display: inline-block;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+  word-break: break-word; }
 
 .ellipsis {
   text-overflow: ellipsis;

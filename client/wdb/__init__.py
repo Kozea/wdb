@@ -503,7 +503,7 @@ class Wdb(object):
                 closer = '])'
 
             splitter = ', '
-            if len(obj) > 2:
+            if False and len(obj) > 2:
                 splitter += '\n' + '  ' * level
                 iter_repr += '\n' + '  ' * level
                 closer = '\n' + '  ' * (level - 1) + closer

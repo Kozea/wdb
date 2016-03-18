@@ -12,6 +12,7 @@ class Prompt extends Log
       theme: 'default',
       language: 'python'
       viewportMargin: Infinity
+      lineWrapping: true
       autofocus: true
 
     CodeMirror.registerHelper "hint", "jedi",

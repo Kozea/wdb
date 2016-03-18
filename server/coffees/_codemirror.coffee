@@ -136,7 +136,7 @@ class Codemirror extends Log
       result: "Edit mode #{if was_ro then 'on' else 'off'}"
 
     unless was_ro
-      @code_mirror.setValue @file
+      @code_mirror.setValue @state.file
 
   open: (data, frame) ->
     new_state =
