@@ -4,13 +4,8 @@
 .source-editor .CodeMirror {
   height: calc(50vh - 64px); }
 
-.prompt .CodeMirror {
-  height: auto;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-  .prompt .CodeMirror.CodeMirror-focused {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
-
 .interpreter {
+  position: relative;
   height: calc(50vh - 40px);
   overflow: auto;
   outline: 0; }
@@ -24,6 +19,20 @@
     display: inline-block;
     text-decoration: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+  .interpreter .prompt, .interpreter .for {
+    margin-left: 26px; }
+    .interpreter .prompt::before, .interpreter .for::before {
+      content: '>>>';
+      position: absolute;
+      left: 0; }
+  .interpreter .prompt:before {
+    margin-top: 4px;
+    font-family: "Roboto Mono"; }
+  .interpreter .prompt .CodeMirror {
+    height: auto;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+    .interpreter .prompt .CodeMirror.CodeMirror-focused {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
 
 .title {
   white-space: pre; }
@@ -43,10 +52,6 @@ table {
   width: 95%; }
   table tbody.closed {
     display: none; }
-
-.prompt {
-  width: 100%;
-  padding: 0; }
 
 .duration {
   float: right; }
