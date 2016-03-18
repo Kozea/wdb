@@ -233,7 +233,6 @@ class Wdb extends Log
 
   cls: ->
     @$scrollback.empty()
-    @searchback_stop()
     @done()
 
   print_hist: (hist) ->
