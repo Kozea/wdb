@@ -14,8 +14,8 @@ class Traceback extends Log
     @show()
     for frame in trace
       $traceline = $('<a>',
-        class:'trace-line
-        mdl-list__item mdl-list__item--two-line trace-' + frame.level)
+        class:'trace-line ellipsis
+        mdl-list__item mdl-list__item--three-line trace-' + frame.level)
         .attr('data-level', frame.level)
         .attr('title',
           "File \"#{frame.file}\", line #{frame.lno}, in #{frame.function}\n" +
@@ -29,14 +29,15 @@ class Traceback extends Log
       if frame.current
         $traceline.addClass('real-selected')
 
-      $primary = $('<span>', class: 'mdl-list__item-primary-content')
-        .text(frame.function)
+      $primary = $('<div>', class: 'mdl-list__item-primary-content')
+      $primary.append $('<div>', class: 'ellipsis').text(frame.function)
+      $primary
+        .append($('<div>', class: 'mdl-list__item-text-body')
+          .append $tracebody = $('<div>', class: 'ellipsis')
+          .append $('<div>', class: 'ellipsis').text(
+            frame.file.split('/').slice(-1)[0] + ':' + frame.lno))
 
-      $primary.append($('<span>', class: 'mdl-list__item-sub-title')
-        .text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno))
-
-      $secondary = $('<span>', class: 'mdl-list__item-secondary-content')
-      @wdb.code $secondary, frame.code
+      @wdb.code $tracebody, frame.code, ['ellipsis']
 
       # $tracefilelno = $('<span>')
       #   .addClass('mdl-list__item-primary-content')
@@ -56,7 +57,6 @@ class Traceback extends Log
 
       $traceline
         .append $primary
-        .append $secondary
       @$traceback.prepend $traceline
 
   hide: ->

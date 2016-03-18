@@ -11,8 +11,13 @@
     border-bottom: 1px solid rgba(0, 0, 0, .2)
 
 .interpreter
-    height: calc(50vh - 40px)
-    overflow: auto
+  height: calc(50vh - 40px)
+  overflow: auto
+  &.full-height
+    height: calc(100vh - 40px - 64px)
+
+.title
+  white-space: pre
 
 .scrollback
   .scroll-line
@@ -41,6 +46,10 @@ table
   float: right
 
 .trace-line
+  code
+    font-size: .75em
+    word-break: normal
+
   &:hover
     background: rgba(0, 0, 0, .05)
 
@@ -90,3 +99,11 @@ a.inspect
   display: inline-block
   text-decoration: none
   border-bottom: 1px solid rgba(0, 0, 0, .05)
+
+.ellipsis
+  text-overflow: ellipsis
+  display: block
+  overflow: hidden
+  white-space: nowrap
+  word-wrap: normal
+  width: 100%

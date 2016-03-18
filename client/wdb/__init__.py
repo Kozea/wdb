@@ -684,7 +684,7 @@ class Wdb(object):
         self.open_browser()
 
         if len(self.interaction_stack):
-            exception = 'Recursive ' * len(self.interaction_stack) + exception
+            exception_description += 'Recursive ' * len(self.interaction_stack)
 
         interaction = Interaction(
             self, frame, tb, exception, exception_description,
