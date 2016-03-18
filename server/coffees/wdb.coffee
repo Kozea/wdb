@@ -372,6 +372,7 @@ specify a module like `logging.config`.
     $group = $('<div>', class: 'dump scroll-line')
     @$scrollback.append($group)
     @code($group, data.for, ['for prompted'])
+
     $container = $('<div>')
     $table = $('<table>', class: 'mdl-data-table mdl-js-data-table
       mdl-shadow--2dp object')
@@ -405,8 +406,9 @@ specify a module like `logging.config`.
         $tbody = $method_tbody
 
       $tbody.append($('<tr>')
-        .append($('<td>', class: 'mdl-data-table__cell--non-numeric').text(key))
-        .append($('<td>').html(val.val)))
+        .append(
+          $('<td>', class: 'mdl-data-table__cell--non-numeric key').text(key))
+        .append($('<td>', class: 'val').html(val.val)))
 
     if $core_tbody.find('tr').size() is 0
       $core_head.remove()
@@ -429,7 +431,7 @@ specify a module like `logging.config`.
 
       $('<tbody>', class: 'doc closed').append(
         $('<tr>').append(
-          $('<td>', class: 'doc', colspan: 2)
+          $('<td>', class: 'mdl-data-table__cell--non-numeric doc', colspan: 2)
             .text(data.doc))).appendTo($table)
 
     if data.source
@@ -441,8 +443,10 @@ specify a module like `logging.config`.
 
       $('<tbody>', class: 'source closed').append(
         $('<tr>').append(
-          $('<td>', class: 'source', colspan: 2)
-            .text(data.source))).appendTo($table)
+          $('<td>',
+            class: 'mdl-data-table__cell--non-numeric source',
+            colspan: 2)
+              .text(data.source))).appendTo($table)
 
     componentHandler.upgradeElement($table.get(0))
     @code($group, $container.html(), [], true)
@@ -701,6 +705,24 @@ specify a module like `logging.config`.
     $('.source-editor').addClass('hidden')
     $('.interpreter').addClass('full-height')
     @done()
+
+  dialog: (title, content) ->
+    $('.modals').append $dialog = $("""
+      <dialog class="mdl-dialog">
+        <h3 class="mdl-dialog__title">#{ title }</h3>
+        <div class="mdl-dialog__content">
+          #{ content }
+        </div>
+        <div class="mdl-dialog__actions">
+          <button type="button" class="mdl-button dialog-close">Close</button>
+        </div>
+      </dialog>
+    """)
+    $dialog.find('.dialog-close').on 'click', ->
+      $dialog.get(0).close()
+      $dialog.remove()
+
+    $dialog.get(0).showModal()
 
   pretty_time: (time) ->
     if time < 1000

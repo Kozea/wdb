@@ -539,31 +539,60 @@ Prompt = (function(superClass) {
       'Ctrl-Enter': 'newlineAndIndent',
       'Ctrl-Space': function(cm, options) {
         return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
-          async: true
+          async: true,
+          extraKeys: {
+            Right: function(cm, handle) {
+              return handle.pick();
+            }
+          }
         });
       },
       'PageUp': 'goLineUp',
       'PageDown': 'goLineDown'
     });
-    this.code_mirror.on('keyup', function(cm, e) {
-      var ref;
-      if (!cm.getValue()) {
-        return;
-      }
-      if ((10 < (ref = e.keyCode) && ref < 42)) {
-        return;
-      }
-      return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
-        async: true,
-        completeSingle: false,
-        extraKeys: {
-          PageUp: 'goPageUp',
-          PageDown: 'goPageDown',
-          Home: 'goLineStartSmart',
-          End: 'goLineEnd'
+    this.code_mirror.on('keyup', (function(_this) {
+      return function(cm, e) {
+        var ref;
+        if (!cm.getValue()) {
+          return;
         }
-      });
-    });
+        if ((8 < (ref = e.keyCode) && ref < 42)) {
+          return;
+        }
+        return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
+          async: true,
+          completeSingle: false,
+          extraKeys: {
+            PageUp: 'goPageUp',
+            PageDown: 'goPageDown',
+            Home: 'goLineStartSmart',
+            Up: function(cm, handle) {
+              handle._dirty = true;
+              return handle.moveFocus(-1);
+            },
+            Down: function(cm, handle) {
+              handle._dirty = true;
+              return handle.moveFocus(1);
+            },
+            Enter: function(cm, handle) {
+              if (handle._dirty) {
+                return handle.pick();
+              } else {
+                return _this.newLineOrExecute(cm);
+              }
+            },
+            Right: function(cm, handle) {
+              if (handle._dirty) {
+                return handle.pick();
+              } else {
+                return CodeMirror.commands.goCharRight(cm);
+              }
+            },
+            End: 'goLineEnd'
+          }
+        });
+      };
+    })(this));
   }
 
   Prompt.prototype.complete = function(data) {
@@ -1085,8 +1114,10 @@ Wdb = (function(superClass) {
         $tbody = $method_tbody;
       }
       $tbody.append($('<tr>').append($('<td>', {
-        "class": 'mdl-data-table__cell--non-numeric'
-      }).text(key)).append($('<td>').html(val.val)));
+        "class": 'mdl-data-table__cell--non-numeric key'
+      }).text(key)).append($('<td>', {
+        "class": 'val'
+      }).html(val.val)));
     }
     if ($core_tbody.find('tr').size() === 0) {
       $core_head.remove();
@@ -1110,7 +1141,7 @@ Wdb = (function(superClass) {
       $('<tbody>', {
         "class": 'doc closed'
       }).append($('<tr>').append($('<td>', {
-        "class": 'doc',
+        "class": 'mdl-data-table__cell--non-numeric doc',
         colspan: 2
       }).text(data.doc))).appendTo($table);
     }
@@ -1124,7 +1155,7 @@ Wdb = (function(superClass) {
       $('<tbody>', {
         "class": 'source closed'
       }).append($('<tr>').append($('<td>', {
-        "class": 'source',
+        "class": 'mdl-data-table__cell--non-numeric source',
         colspan: 2
       }).text(data.source))).appendTo($table);
     }
@@ -1427,6 +1458,16 @@ Wdb = (function(superClass) {
     $('.source-editor').addClass('hidden');
     $('.interpreter').addClass('full-height');
     return this.done();
+  };
+
+  Wdb.prototype.dialog = function(title, content) {
+    var $dialog;
+    $('.modals').append($dialog = $("<dialog class=\"mdl-dialog\">\n  <h3 class=\"mdl-dialog__title\">" + title + "</h3>\n  <div class=\"mdl-dialog__content\">\n    " + content + "\n  </div>\n  <div class=\"mdl-dialog__actions\">\n    <button type=\"button\" class=\"mdl-button dialog-close\">Close</button>\n  </div>\n</dialog>"));
+    $dialog.find('.dialog-close').on('click', function() {
+      $dialog.get(0).close();
+      return $dialog.remove();
+    });
+    return $dialog.get(0).showModal();
   };
 
   Wdb.prototype.pretty_time = function(time) {

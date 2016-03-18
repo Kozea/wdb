@@ -16,9 +16,9 @@
   outline: 0; }
   .interpreter.full-height {
     height: calc(100vh - 40px - 64px); }
-  .interpreter table td:first-child code {
+  .interpreter table td.key code {
     white-space: nowrap; }
-  .interpreter table td:last-child code {
+  .interpreter table td.val code {
     word-break: break-all; }
   .interpreter a.inspect {
     display: inline-block;
