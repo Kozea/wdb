@@ -683,8 +683,13 @@ class Wdb(object):
 
         self.open_browser()
 
-        if len(self.interaction_stack):
-            exception_description += 'Recursive ' * len(self.interaction_stack)
+        lvl = len(self.interaction_stack)
+        if lvl:
+            exception_description += ' [recursive%s]' % (
+                '^%d' % lvl
+                if lvl > 1
+                else ''
+            )
 
         interaction = Interaction(
             self, frame, tb, exception, exception_description,
@@ -703,7 +708,7 @@ class Wdb(object):
 
         interaction.loop()
         self.interaction_stack.pop()
-        if len(self.interaction_stack):
+        if lvl:
             self.interaction_stack[-1].init()
 
     def handle_call(self, frame, argument_list):
