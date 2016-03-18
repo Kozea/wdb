@@ -349,7 +349,9 @@ specify a module like `logging.config`.
       @pretty_time(data.duration),
       ['duration'], false, "Total #{@pretty_time(duration)}") if data.duration
     @code($group, data.for, ['for prompted'])
-    @code($group, data.result, ['result'], true)
+    $result = $('<div>', class: 'result')
+    $group.append($result)
+    @code($result, data.result, ['val'], true)
     @done(data.suggest)
 
   echo: (data) ->

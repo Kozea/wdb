@@ -260,7 +260,7 @@ Codemirror = (function(superClass) {
       result: "Edit mode " + (was_ro ? 'on' : 'off')
     });
     if (!was_ro) {
-      return this.code_mirror.setValue(this.file);
+      return this.code_mirror.setValue(this.state.file);
     }
   };
 
@@ -501,6 +501,7 @@ Prompt = (function(superClass) {
       theme: 'default',
       language: 'python',
       viewportMargin: Infinity,
+      lineWrapping: true,
       autofocus: true
     });
     CodeMirror.registerHelper("hint", "jedi", (function(_this) {
@@ -993,7 +994,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.print = function(data) {
-    var $group, duration;
+    var $group, $result, duration;
     if (performance && this.eval_time) {
       duration = parseInt((performance.now() - this.eval_time) * 1000);
       this.eval_time = null;
@@ -1006,7 +1007,11 @@ Wdb = (function(superClass) {
       this.code($group, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)));
     }
     this.code($group, data["for"], ['for prompted']);
-    this.code($group, data.result, ['result'], true);
+    $result = $('<div>', {
+      "class": 'result'
+    });
+    $group.append($result);
+    this.code($result, data.result, ['val'], true);
     return this.done(data.suggest);
   };
 
