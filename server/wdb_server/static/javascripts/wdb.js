@@ -989,7 +989,6 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.cls = function() {
     this.$scrollback.empty();
-    this.searchback_stop();
     return this.done();
   };
 
