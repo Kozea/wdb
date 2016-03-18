@@ -42,14 +42,17 @@ class Prompt extends Log
       'Down': @history.down.bind @history
       'Ctrl-Enter': 'newlineAndIndent'
       'Ctrl-Space': (cm, options) ->
-        CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, async: true)
+        CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
+          async: true
+          extraKeys:
+            Right: (cm, handle) -> handle.pick()
       # Use page up/down for going up/down in multiline
       'PageUp': 'goLineUp'
       'PageDown': 'goLineDown'
 
-    @code_mirror.on 'keyup', (cm, e) ->
+    @code_mirror.on 'keyup', (cm, e) =>
       return unless cm.getValue()
-      return if 10 < e.keyCode < 42
+      return if 8 < e.keyCode < 42
       CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
         async: true
         completeSingle: false
@@ -58,6 +61,23 @@ class Prompt extends Log
           PageUp: 'goPageUp'
           PageDown: 'goPageDown'
           Home: 'goLineStartSmart'
+          Up: (cm, handle) ->
+            handle._dirty = true
+            handle.moveFocus(-1)
+          Down: (cm, handle) ->
+            handle._dirty = true
+            handle.moveFocus(1)
+          Enter: (cm, handle) =>
+            if handle._dirty
+              handle.pick()
+            else
+              @newLineOrExecute cm
+          Right:
+            (cm, handle) ->
+              if handle._dirty
+                handle.pick()
+              else
+                CodeMirror.commands.goCharRight cm
           End: 'goLineEnd'
 
   complete: (data) ->
