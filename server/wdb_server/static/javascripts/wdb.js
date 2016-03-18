@@ -427,14 +427,14 @@ Traceback = (function(superClass) {
   };
 
   Traceback.prototype.make_trace = function(trace) {
-    var $primary, $secondary, $traceline, brk, frame, j, k, len, len1, ref, results;
+    var $primary, $tracebody, $traceline, brk, frame, j, k, len, len1, ref, results;
     this.clear();
     this.show();
     results = [];
     for (j = 0, len = trace.length; j < len; j++) {
       frame = trace[j];
       $traceline = $('<a>', {
-        "class": 'trace-line mdl-list__item mdl-list__item--two-line trace-' + frame.level
+        "class": 'trace-line ellipsis mdl-list__item mdl-list__item--three-line trace-' + frame.level
       }).attr('data-level', frame.level).attr('title', ("File \"" + frame.file + "\", line " + frame.lno + ", in " + frame["function"] + "\n") + ("    " + frame.code));
       ref = this.wdb.cm.breakpoints[frame.file] || [];
       for (k = 0, len1 = ref.length; k < len1; k++) {
@@ -447,17 +447,21 @@ Traceback = (function(superClass) {
       if (frame.current) {
         $traceline.addClass('real-selected');
       }
-      $primary = $('<span>', {
+      $primary = $('<div>', {
         "class": 'mdl-list__item-primary-content'
-      }).text(frame["function"]);
-      $primary.append($('<span>', {
-        "class": 'mdl-list__item-sub-title'
-      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno));
-      $secondary = $('<span>', {
-        "class": 'mdl-list__item-secondary-content'
       });
-      this.wdb.code($secondary, frame.code);
-      $traceline.append($primary).append($secondary);
+      $primary.append($('<div>', {
+        "class": 'ellipsis'
+      }).text(frame["function"]));
+      $primary.append($('<div>', {
+        "class": 'mdl-list__item-text-body'
+      }).append($tracebody = $('<div>', {
+        "class": 'ellipsis'
+      })).append($('<div>', {
+        "class": 'ellipsis'
+      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno)));
+      this.wdb.code($tracebody, frame.code, ['ellipsis']);
+      $traceline.append($primary);
       results.push(this.$traceback.prepend($traceline));
     }
     return results;
@@ -747,6 +751,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.trace = function(data) {
+    $('.trace').addClass('mdl-layout--fixed-drawer');
     return this.traceback.make_trace(data.trace);
   };
 
@@ -766,8 +771,8 @@ Wdb = (function(superClass) {
   Wdb.prototype.select = function(data) {
     var current_frame;
     current_frame = data.frame;
-    this.$interpreter.show();
-    this.$source.find('.source-editor').removeClass('hidden');
+    $('.source-editor').removeClass('hidden');
+    $('.interpreter').removeClass('full-height');
     $('.trace-line').removeClass('selected');
     $('.trace-' + current_frame.level).addClass('selected');
     this.file_cache[data.name] = data.file;
@@ -1413,8 +1418,9 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.shell = function() {
-    this.traceback.hide();
-    this.$source.find('.source-editor').addClass('hidden');
+    $('.trace').removeClass('mdl-layout--fixed-drawer');
+    $('.source-editor').addClass('hidden');
+    $('.interpreter').addClass('full-height');
     return this.done();
   };
 
