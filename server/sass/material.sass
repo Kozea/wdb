@@ -46,6 +46,18 @@
       &.CodeMirror-focused
         border-bottom: 1px solid rgba(0, 0, 0, .2)
 
+        .CodeMirror-cursor
+          background: rgba(0, 0, 0, .5)
+          border: none
+          animation: blink 1s ease-in-out infinite
+
+      .CodeMirror-cursor
+        visibility: visible !important
+        border: none
+        width: .66666667em
+        background: none
+        outline: 1px solid rgba(0, 0, 0, .5)
+
 .title
   white-space: pre
 
@@ -127,3 +139,12 @@ code
   white-space: nowrap
   word-wrap: normal
   width: 100%
+
+
+@keyframes blink
+  0%
+    opacity: 1
+  50%
+    opacity: 0
+  100%
+    opacity: 1
