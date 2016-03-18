@@ -358,7 +358,9 @@ specify a module like `logging.config`.
     $group = $('<div>', class: 'echoed scroll-line')
     @$scrollback.append($group)
     @code($group, data.for, ['for prompted'])
-    @code($group, data.val or '', ['val'], true, null, data.mode)
+    $result = $('<div>', class: 'result')
+    $group.append($result)
+    @code($result, data.val or '', ['val'], true, null, data.mode)
     @done()
 
   rawhtml: (data) ->

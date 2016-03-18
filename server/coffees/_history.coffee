@@ -3,7 +3,7 @@ class History extends Log
     super
     @index = -1
     @current = ''
-    @currentPos = null
+    @currentPos = CodeMirror.Pos(0, 0)
 
     try
       @history = JSON.parse(localStorage['history'] or '[]')
@@ -40,4 +40,4 @@ class History extends Log
   reset: ->
     @index = -1
     @current = ''
-    @currentPos = null
+    @currentPos = CodeMirror.Pos(0, 0)

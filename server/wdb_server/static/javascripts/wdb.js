@@ -354,7 +354,7 @@ History = (function(superClass) {
     History.__super__.constructor.apply(this, arguments);
     this.index = -1;
     this.current = '';
-    this.currentPos = null;
+    this.currentPos = CodeMirror.Pos(0, 0);
     try {
       this.history = JSON.parse(localStorage['history'] || '[]');
     } catch (error) {
@@ -402,7 +402,7 @@ History = (function(superClass) {
   History.prototype.reset = function() {
     this.index = -1;
     this.current = '';
-    return this.currentPos = null;
+    return this.currentPos = CodeMirror.Pos(0, 0);
   };
 
   return History;
@@ -1045,13 +1045,17 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.echo = function(data) {
-    var $group;
+    var $group, $result;
     $group = $('<div>', {
       "class": 'echoed scroll-line'
     });
     this.$scrollback.append($group);
     this.code($group, data["for"], ['for prompted']);
-    this.code($group, data.val || '', ['val'], true, null, data.mode);
+    $result = $('<div>', {
+      "class": 'result'
+    });
+    $group.append($result);
+    this.code($result, data.val || '', ['val'], true, null, data.mode);
     return this.done();
   };
 
