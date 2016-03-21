@@ -40,7 +40,14 @@ class Prompt extends Log
       'Enter': @newLineOrExecute.bind @
       'Up': @history.up.bind @history
       'Down': @history.down.bind @history
+      'Ctrl-C': @abort.bind @
+      'Ctrl-D': =>
+        unless @get()
+          @wdb.die()
+      'Ctrl-F': ->
+      'Ctrl-R': @searchBack.bind @
       'Ctrl-Enter': 'newlineAndIndent'
+      'Alt-Backspace': 'delGroupBefore'
       'Ctrl-Space': (cm, options) ->
         CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
           async: true
@@ -108,6 +115,10 @@ class Prompt extends Log
   focus: ->
     @code_mirror.focus()
 
+  abort: ->
+    @history.reset()
+    @set ''
+
   ready: (suggest=null, newline=false)->
     if newline
       @code_mirror.execCommand 'newlineAndIndent'
@@ -125,3 +136,35 @@ class Prompt extends Log
 
   set: (val) ->
     @code_mirror.setValue(val)
+
+  searchBack: ->
+    @$code_mirror.addClass 'extra-dialog'
+    close = @code_mirror.openDialog(
+      '''
+        Search:
+        <input type="text" style="width: 10em" class="CodeMirror-search-field"/>
+      '''
+      , (val, e) =>
+        console.log('commit')
+        @history.commitSearch()
+      ,
+        bottom: true
+        onInput: (e, val, close) =>
+          return unless val
+          @history.resetSearch()
+          @history.searchNext val
+        onKeyDown: (e, val, close) =>
+          if e.keyCode is 82
+            if e.ctrlKey
+              val and @history.searchNext val
+            if e.altKey
+              val and @history.searchPrev val
+            if e.ctrlKey or e.altKey
+              e.preventDefault()
+              e.stopPropagation()
+          return false
+
+        onClose: (dialog) =>
+          @history.rollbackSearch()
+          @$code_mirror.removeClass 'extra-dialog'
+    )

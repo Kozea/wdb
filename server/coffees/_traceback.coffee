@@ -39,22 +39,6 @@ class Traceback extends Log
 
       @wdb.code $tracebody, frame.code, ['ellipsis']
 
-      # $tracefilelno = $('<span>')
-      #   .addClass('mdl-list__item-primary-content')
-      #   .append $('<span>', title: frame.file).text()
-      #
-      #   .append $('<span>', title: frame.file).text()
-      #   .append($tracefile = $('<span>', title: frame.file)
-      #     .addClass('trace-file')
-      #     .append $('<sup>').addClass('trace-lno').text(frame.lno)
-      #     .text(frame.filename))
-      #   .append $('<span>').addClass('trace-fun').text(frame.function)
-
-      # $tracecode = $('<span>')
-      #   .addClass('tracecode')
-      #
-      # @code $tracecode, frame.code
-
       $traceline
         .append $primary
       @$traceback.prepend $traceline
