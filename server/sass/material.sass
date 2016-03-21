@@ -42,21 +42,20 @@
     .CodeMirror
       height: auto
       border-bottom: 1px solid rgba(0, 0, 0, .1)
-
-      &.CodeMirror-focused
-        border-bottom: 1px solid rgba(0, 0, 0, .2)
-
-        .CodeMirror-cursor
-          background: rgba(0, 0, 0, .5)
-          border: none
-          animation: blink 1s ease-in-out infinite
+      &.extra-dialog
+        padding-bottom: 2em
 
       .CodeMirror-cursor
         visibility: visible !important
+        width: auto
         border: none
-        width: .66666667em
-        background: none
         outline: 1px solid rgba(0, 0, 0, .5)
+
+      &.CodeMirror-focused .CodeMirror-cursor
+        background: rgba(0, 0, 0, .75)
+        animation: blink 1s ease-in-out infinite
+        outline: 0
+
 
 .title
   white-space: pre
@@ -110,8 +109,8 @@ table
     border-right: 1px solid rgba(0, 0, 0, .5)
     &.ctx-top
       border-top: 1px solid rgba(0, 0, 0, .5)
-      border-bottom: 1px solid rgba(0, 0, 0, .5)
     &.ctx-bottom
+      border-bottom: 1px solid rgba(0, 0, 0, .5)
 
   &.footstep
     background-color: rgba(0, 0, 0, .1)

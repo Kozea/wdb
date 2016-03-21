@@ -23,7 +23,6 @@ class Wdb extends Log
     @started = false
     @to_complete = null
     @cwd = null
-    @backsearch = null
     @file_cache = {}
     @last_cmd = null
     @eval_time = null
@@ -33,47 +32,21 @@ class Wdb extends Log
     # Page elements
     @$waiter = $('.waiter')
     @$wdb = $('.wdb')
-    @$source = $('.source')
-    @$interpreter = $('.interpreter')
-    @$scrollback = $('.scrollback')
-    @$backsearch = $('.backsearch')
     @$watchers = $('.watchers')
 
     @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
-    @traceback = new Traceback(@)
-    @cm = new Codemirror(@)
-    @prompt = new Prompt(@)
+    @traceback = new Traceback @
+    @cm = new Codemirror @
+    @interpreter = new Interpreter @
+    @prompt = new Prompt @
 
   opening: ->
     # Start by getting current trace
     if not @started
       $(window).on 'keydown', @global_key.bind @
 
-      @$scrollback.add(@$watchers)
-        .on 'click', 'a.inspect', @inspect.bind(@)
-        .on 'click', '.short.close', @short_open.bind @
-        .on 'click', '.short.open', @short_close.bind @
-        .on 'click', '.toggle', @toggle_visibility.bind @
-
       @$watchers.on 'click', '.watching .name', @unwatch.bind @
-      @$source.find('.source-editor').on 'mouseup', @paste_target.bind @
       $('.deactivate').click @disable.bind @
-      @$interpreter.on 'keydown', (e) =>
-        if e.ctrlKey and 37 <= e.keyCode <= 40 or
-           118 <= e.keyCode <= 122 or e.keyCode is 13
-          return true
-
-        if e.shiftKey and e.keyCode in [33, 34]
-          scroll = @$interpreter.height() * 2 / 3
-          way = if e.keyCode is 33 then -1 else 1
-
-          @$interpreter
-            .stop(true, true)
-            .animate((scrollTop: @$interpreter.scrollTop() + way * scroll), 250)
-          return false
-
-        @prompt.focus()
-
       false
 
       @started = true
@@ -89,7 +62,7 @@ class Wdb extends Log
     $('.activity').removeClass('is-active')
 
   done: (suggest=null)->
-    @termscroll()
+    @interpreter.scroll()
     @prompt.ready suggest
     @chilling()
 
@@ -232,7 +205,7 @@ class Wdb extends Log
       @eval_time = performance?.now()
 
   cls: ->
-    @$scrollback.empty()
+    @interpreter.clear()
     @done()
 
   print_hist: (hist) ->
@@ -323,26 +296,13 @@ File is always current file by default and you can also \
 specify a module like `logging.config`.
 '''
 
-  termscroll: ->
-    from = @$interpreter.scrollTop()
-    to = Math.max 0, (
-      @$scrollback.outerHeight() + # -
-      #  @$prompt.outerHeight() -
-         @$interpreter.height())
-    to = Math.min(@$scrollback.outerHeight(), to)
-    return if to - from is 0
-
-    @$interpreter
-      .stop(true)
-      .animate((scrollTop: to), 250)
-
   print: (data) ->
     if performance and @eval_time
       duration = parseInt((performance.now() - @eval_time) * 1000)
       @eval_time = null
 
     $group = $('<div>', class: 'printed scroll-line')
-    @$scrollback.append($group)
+    @interpreter.write $group
 
     @code($group,
       @pretty_time(data.duration),
@@ -355,7 +315,7 @@ specify a module like `logging.config`.
 
   echo: (data) ->
     $group = $('<div>', class: 'echoed scroll-line')
-    @$scrollback.append($group)
+    @interpreter.write $group
     @code($group, data.for, ['for prompted'])
     $result = $('<div>', class: 'result')
     $group.append($result)
@@ -364,14 +324,14 @@ specify a module like `logging.config`.
 
   rawhtml: (data) ->
     $group = $('<div>', class: 'rawhtml scroll-line')
-    @$scrollback.append($group)
+    @interpreter.write $group
     @code($group, data.for, ['for prompted'])
-    @$scrollback.append(data.val)
+    @interpreter.write data.val
     @done()
 
   dump: (data) ->
     $group = $('<div>', class: 'dump scroll-line')
-    @$scrollback.append($group)
+    @interpreter.write $group
     @code($group, data.for, ['for prompted'])
 
     $container = $('<div>')
@@ -563,7 +523,7 @@ specify a module like `logging.config`.
 
   display: (data) ->
     $group = $('<div>', class: 'display scroll-line')
-    @$scrollback.append($group)
+    @interpreter.write $group
     @code($group, data.for, ['for prompted'])
     if data.type.indexOf('image') >= 0
       $tag = $("<img>")
@@ -620,71 +580,15 @@ specify a module like `logging.config`.
         @prompt.history.historize sel
         @execute sel
       return false
-  #
-  # eval_key: (e) ->
-  #   if e.altKey and e.keyCode is 82 and @backsearch # R
-  #     @backsearch = Math.max(@backsearch - 1, 1)
-  #     @searchback()
-  #     return false
-  #
-  #   return if e.altKey
-  #
-  #   if e.ctrlKey
-  #     switch e.keyCode
-  #       when 13 # Enter
-  #         if @$prompt.hasClass('multiline')
-  #           @$prompt.removeClass('multiline')
-  #           @execute @$eval.val()
-  #           return false
-  #         @$prompt.addClass('multiline')
-  #         @eval_insert('\n')
-  #         return true
-  #
-  #       when 82 # R
-  #         @backsearch ?= 0
-  #         if e.shiftKey
-  #           @backsearch = Math.max(@backsearch - 1, 1)
-  #         else
-  #           @backsearch++
-  #         @searchback()
-  #         return false
-  #       when 67 # C
-  #         @searchback_stop()
-  #         return false
-  #       when 68 # D
-  #         @ws.send 'Quit'
-  #         return false
-  #
-  #       when 32 # Space
-  #         @eval_move_suggest 1, true
 
   newline: ->
     @prompt.ready('', true)
     @chilling()
 
-  inspect: (e) ->
-    @ws.send 'Inspect', $(e.currentTarget).attr('href')
+  inspect: (id) ->
+    @ws.send 'Inspect', id
     @working()
     false
-
-  short_open: (e) ->
-    $(e.currentTarget)
-      .addClass('open')
-      .removeClass('close')
-      .next('.long')
-      .show('fast')
-
-  short_close: (e) ->
-    $(e.currentTarget)
-      .addClass('close')
-      .removeClass('open')
-      .next('.long')
-      .hide('fast')
-
-  toggle_visibility: (e) ->
-    $(e.currentTarget)
-      .add($(e.currentTarget).next())
-      .toggleClass('closed', 'shown')
 
   unwatch: (e) ->
     @ws.send 'Unwatch', $(e.currentTarget).closest('.watching').attr 'data-expr'

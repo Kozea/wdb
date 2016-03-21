@@ -1,4 +1,4 @@
-var Codemirror, History, Log, Prompt, Traceback, Wdb, Websocket,
+var Codemirror, History, Interpreter, Log, Prompt, Traceback, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -109,7 +109,7 @@ Codemirror = (function(superClass) {
   function Codemirror(wdb) {
     this.wdb = wdb;
     Codemirror.__super__.constructor.apply(this, arguments);
-    this.$container = $('.source-editor');
+    this.$container = $('.source-editor').on('mouseup', this.wdb.paste_target.bind(this.wdb));
     CodeMirror.commands.save = this.save.bind(this);
     CodeMirror.keyMap.wdb = {
       Esc: this.stop_edition.bind(this),
@@ -355,6 +355,9 @@ History = (function(superClass) {
     this.index = -1;
     this.current = '';
     this.currentPos = CodeMirror.Pos(0, 0);
+    this.oldIndex = null;
+    this.originalIndex = null;
+    this.overlay = null;
     try {
       this.history = JSON.parse(localStorage['history'] || '[]');
     } catch (error) {
@@ -365,8 +368,7 @@ History = (function(superClass) {
 
   History.prototype.up = function() {
     if (this.index === -1) {
-      this.current = this.prompt.get();
-      this.currentPos = this.prompt.code_mirror.getCursor();
+      this.saveCurrent();
     }
     this.index = Math.min(this.history.length - 1, this.index + 1);
     return this.sync();
@@ -375,6 +377,11 @@ History = (function(superClass) {
   History.prototype.down = function() {
     this.index = Math.max(this.index - 1, -1);
     return this.sync();
+  };
+
+  History.prototype.saveCurrent = function() {
+    this.current = this.prompt.get();
+    return this.currentPos = this.prompt.code_mirror.getCursor();
   };
 
   History.prototype.sync = function() {
@@ -403,6 +410,81 @@ History = (function(superClass) {
     this.index = -1;
     this.current = '';
     return this.currentPos = CodeMirror.Pos(0, 0);
+  };
+
+  History.prototype.getOverlay = function(re) {
+    return {
+      token: function(stream) {
+        var match;
+        re.lastIndex = stream.pos;
+        match = re.exec(stream.string);
+        if (match && match.index === stream.pos) {
+          stream.pos += match[0].length || 1;
+          return "searching";
+        } else if (match) {
+          stream.pos = match.index;
+        } else {
+          stream.skipToEnd();
+        }
+      }
+    };
+  };
+
+  History.prototype.searchPrev = function(val) {
+    return this.searchNext(val, -1);
+  };
+
+  History.prototype.searchNext = function(val, step) {
+    var re, ref;
+    if (step == null) {
+      step = 1;
+    }
+    if (this.oldIndex == null) {
+      this.oldIndex = this.index;
+    }
+    if (this.originalIndex == null) {
+      this.originalIndex = this.index;
+      if (this.index === -1) {
+        this.saveCurrent();
+      }
+    }
+    while ((-2 < (ref = this.index) && ref < this.history.length)) {
+      this.index += step;
+      re = new RegExp("(" + (val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")) + ")", 'gi');
+      if (re.test(this.history[this.index])) {
+        this.lastResult = this.index;
+        this.sync();
+        (this.overlay != null) && this.prompt.code_mirror.removeOverlay(this.overlay, true);
+        this.overlay = this.getOverlay(re);
+        this.prompt.code_mirror.addOverlay(this.overlay);
+        return;
+      }
+    }
+  };
+
+  History.prototype.commitSearch = function() {
+    this.oldIndex = null;
+    this.originalIndex = null;
+    this.index = this.lastResult;
+    return this.sync();
+  };
+
+  History.prototype.rollbackSearch = function() {
+    this.oldIndex = null;
+    if (this.originalIndex != null) {
+      this.index = this.originalIndex;
+    }
+    this.originalIndex = null;
+    (this.overlay != null) && this.prompt.code_mirror.removeOverlay(this.overlay, true);
+    this.overlay = null;
+    return this.sync();
+  };
+
+  History.prototype.resetSearch = function() {
+    if (this.oldIndex != null) {
+      this.index = this.oldIndex;
+    }
+    return this.oldIndex = null;
   };
 
   return History;
@@ -483,6 +565,58 @@ Traceback = (function(superClass) {
 
 })(Log);
 
+Interpreter = (function(superClass) {
+  extend(Interpreter, superClass);
+
+  function Interpreter(wdb) {
+    this.wdb = wdb;
+    Interpreter.__super__.constructor.apply(this, arguments);
+    this.$interpreter = $('.interpreter').on('click', this.focus.bind(this));
+    this.$scrollback = $('.scrollback').on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
+  }
+
+  Interpreter.prototype.scroll = function() {
+    return this.$interpreter.get(0).scrollIntoView({
+      block: "end",
+      behavior: "smooth"
+    });
+  };
+
+  Interpreter.prototype.clear = function() {
+    return this.$scrollback.empty();
+  };
+
+  Interpreter.prototype.write = function(elt) {
+    return this.$scrollback.append(elt);
+  };
+
+  Interpreter.prototype.inspect = function(e) {
+    return this.wdb.inspect($(e.currentTarget).attr('href'));
+  };
+
+  Interpreter.prototype.short_open = function(e) {
+    return $(e.currentTarget).addClass('open').removeClass('close').next('.long').show('fast');
+  };
+
+  Interpreter.prototype.short_close = function(e) {
+    return $(e.currentTarget).addClass('close').removeClass('open').next('.long').hide('fast');
+  };
+
+  Interpreter.prototype.toggle_visibility = function(e) {
+    return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('closed', 'shown');
+  };
+
+  Interpreter.prototype.focus = function() {
+    var scroll;
+    scroll = this.$interpreter.scrollTop();
+    this.wdb.prompt.focus();
+    return this.$interpreter.scrollTop(scroll);
+  };
+
+  return Interpreter;
+
+})(Log);
+
 Prompt = (function(superClass) {
   extend(Prompt, superClass);
 
@@ -536,7 +670,18 @@ Prompt = (function(superClass) {
       'Enter': this.newLineOrExecute.bind(this),
       'Up': this.history.up.bind(this.history),
       'Down': this.history.down.bind(this.history),
+      'Ctrl-C': this.abort.bind(this),
+      'Ctrl-D': (function(_this) {
+        return function() {
+          if (!_this.get()) {
+            return _this.wdb.die();
+          }
+        };
+      })(this),
+      'Ctrl-F': function() {},
+      'Ctrl-R': this.searchBack.bind(this),
       'Ctrl-Enter': 'newlineAndIndent',
+      'Alt-Backspace': 'delGroupBefore',
       'Ctrl-Space': function(cm, options) {
         return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
           async: true,
@@ -644,6 +789,11 @@ Prompt = (function(superClass) {
     return this.code_mirror.focus();
   };
 
+  Prompt.prototype.abort = function() {
+    this.history.reset();
+    return this.set('');
+  };
+
   Prompt.prototype.ready = function(suggest, newline) {
     var snippet;
     if (suggest == null) {
@@ -673,6 +823,51 @@ Prompt = (function(superClass) {
     return this.code_mirror.setValue(val);
   };
 
+  Prompt.prototype.searchBack = function() {
+    var close;
+    this.$code_mirror.addClass('extra-dialog');
+    return close = this.code_mirror.openDialog('Search:\n<input type="text" style="width: 10em" class="CodeMirror-search-field"/>', (function(_this) {
+      return function(val, e) {
+        console.log('commit');
+        return _this.history.commitSearch();
+      };
+    })(this), {
+      bottom: true,
+      onInput: (function(_this) {
+        return function(e, val, close) {
+          if (!val) {
+            return;
+          }
+          _this.history.resetSearch();
+          return _this.history.searchNext(val);
+        };
+      })(this),
+      onKeyDown: (function(_this) {
+        return function(e, val, close) {
+          if (e.keyCode === 82) {
+            if (e.ctrlKey) {
+              val && _this.history.searchNext(val);
+            }
+            if (e.altKey) {
+              val && _this.history.searchPrev(val);
+            }
+            if (e.ctrlKey || e.altKey) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }
+          return false;
+        };
+      })(this),
+      onClose: (function(_this) {
+        return function(dialog) {
+          _this.history.rollbackSearch();
+          return _this.$code_mirror.removeClass('extra-dialog');
+        };
+      })(this)
+    });
+  };
+
   return Prompt;
 
 })(Log);
@@ -687,48 +882,25 @@ Wdb = (function(superClass) {
     this.started = false;
     this.to_complete = null;
     this.cwd = null;
-    this.backsearch = null;
     this.file_cache = {};
     this.last_cmd = null;
     this.eval_time = null;
     this.waited_for_ws = 0;
     this.$waiter = $('.waiter');
     this.$wdb = $('.wdb');
-    this.$source = $('.source');
-    this.$interpreter = $('.interpreter');
-    this.$scrollback = $('.scrollback');
-    this.$backsearch = $('.backsearch');
     this.$watchers = $('.watchers');
     this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
     this.traceback = new Traceback(this);
     this.cm = new Codemirror(this);
+    this.interpreter = new Interpreter(this);
     this.prompt = new Prompt(this);
   }
 
   Wdb.prototype.opening = function() {
     if (!this.started) {
       $(window).on('keydown', this.global_key.bind(this));
-      this.$scrollback.add(this.$watchers).on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
-      this.$source.find('.source-editor').on('mouseup', this.paste_target.bind(this));
       $('.deactivate').click(this.disable.bind(this));
-      this.$interpreter.on('keydown', (function(_this) {
-        return function(e) {
-          var ref, ref1, ref2, scroll, way;
-          if (e.ctrlKey && (37 <= (ref = e.keyCode) && ref <= 40) || (118 <= (ref1 = e.keyCode) && ref1 <= 122) || e.keyCode === 13) {
-            return true;
-          }
-          if (e.shiftKey && ((ref2 = e.keyCode) === 33 || ref2 === 34)) {
-            scroll = _this.$interpreter.height() * 2 / 3;
-            way = e.keyCode === 33 ? -1 : 1;
-            _this.$interpreter.stop(true, true).animate({
-              scrollTop: _this.$interpreter.scrollTop() + way * scroll
-            }, 250);
-            return false;
-          }
-          return _this.prompt.focus();
-        };
-      })(this));
       false;
       this.started = true;
     }
@@ -749,7 +921,7 @@ Wdb = (function(superClass) {
     if (suggest == null) {
       suggest = null;
     }
-    this.termscroll();
+    this.interpreter.scroll();
     this.prompt.ready(suggest);
     return this.chilling();
   };
@@ -988,7 +1160,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.cls = function() {
-    this.$scrollback.empty();
+    this.interpreter.clear();
     return this.done();
   };
 
@@ -1008,19 +1180,6 @@ Wdb = (function(superClass) {
     });
   };
 
-  Wdb.prototype.termscroll = function() {
-    var from, to;
-    from = this.$interpreter.scrollTop();
-    to = Math.max(0, this.$scrollback.outerHeight() + this.$interpreter.height());
-    to = Math.min(this.$scrollback.outerHeight(), to);
-    if (to - from === 0) {
-      return;
-    }
-    return this.$interpreter.stop(true).animate({
-      scrollTop: to
-    }, 250);
-  };
-
   Wdb.prototype.print = function(data) {
     var $group, $result, duration;
     if (performance && this.eval_time) {
@@ -1030,7 +1189,7 @@ Wdb = (function(superClass) {
     $group = $('<div>', {
       "class": 'printed scroll-line'
     });
-    this.$scrollback.append($group);
+    this.interpreter.write($group);
     if (data.duration) {
       this.code($group, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)));
     }
@@ -1048,7 +1207,7 @@ Wdb = (function(superClass) {
     $group = $('<div>', {
       "class": 'echoed scroll-line'
     });
-    this.$scrollback.append($group);
+    this.interpreter.write($group);
     this.code($group, data["for"], ['for prompted']);
     $result = $('<div>', {
       "class": 'result'
@@ -1063,9 +1222,9 @@ Wdb = (function(superClass) {
     $group = $('<div>', {
       "class": 'rawhtml scroll-line'
     });
-    this.$scrollback.append($group);
+    this.interpreter.write($group);
     this.code($group, data["for"], ['for prompted']);
-    this.$scrollback.append(data.val);
+    this.interpreter.write(data.val);
     return this.done();
   };
 
@@ -1074,7 +1233,7 @@ Wdb = (function(superClass) {
     $group = $('<div>', {
       "class": 'dump scroll-line'
     });
-    this.$scrollback.append($group);
+    this.interpreter.write($group);
     this.code($group, data["for"], ['for prompted']);
     $container = $('<div>');
     $table = $('<table>', {
@@ -1319,7 +1478,7 @@ Wdb = (function(superClass) {
     $group = $('<div>', {
       "class": 'display scroll-line'
     });
-    this.$scrollback.append($group);
+    this.interpreter.write($group);
     this.code($group, data["for"], ['for prompted']);
     if (data.type.indexOf('image') >= 0) {
       $tag = $("<img>");
@@ -1417,22 +1576,10 @@ Wdb = (function(superClass) {
     return this.chilling();
   };
 
-  Wdb.prototype.inspect = function(e) {
-    this.ws.send('Inspect', $(e.currentTarget).attr('href'));
+  Wdb.prototype.inspect = function(id) {
+    this.ws.send('Inspect', id);
     this.working();
     return false;
-  };
-
-  Wdb.prototype.short_open = function(e) {
-    return $(e.currentTarget).addClass('open').removeClass('close').next('.long').show('fast');
-  };
-
-  Wdb.prototype.short_close = function(e) {
-    return $(e.currentTarget).addClass('close').removeClass('open').next('.long').hide('fast');
-  };
-
-  Wdb.prototype.toggle_visibility = function(e) {
-    return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('closed', 'shown');
   };
 
   Wdb.prototype.unwatch = function(e) {

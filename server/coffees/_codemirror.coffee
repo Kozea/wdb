@@ -18,6 +18,7 @@ class Codemirror extends Log
   constructor: (@wdb) ->
     super
     @$container = $('.source-editor')
+      .on 'mouseup', @wdb.paste_target.bind @wdb
 
     CodeMirror.commands.save = @save.bind @
     CodeMirror.keyMap.wdb =
