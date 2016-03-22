@@ -110,11 +110,6 @@ Codemirror = (function(superClass) {
     this.wdb = wdb;
     Codemirror.__super__.constructor.apply(this, arguments);
     this.$container = $('.source-editor').on('mouseup', this.wdb.paste_target.bind(this.wdb));
-    CodeMirror.commands.save = this.save.bind(this);
-    CodeMirror.keyMap.wdb = {
-      Esc: this.stop_edition.bind(this),
-      fallthrough: ["default"]
-    };
     this.code_mirror = CodeMirror((function(_this) {
       return function(elt) {
         _this.$code_mirror = $(elt);
@@ -123,10 +118,13 @@ Codemirror = (function(superClass) {
     })(this), {
       value: 'Waiting for file',
       theme: 'material',
-      keyMap: 'wdb',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
-      lineNumbers: true
+      lineNumbers: true,
+      extraKeys: {
+        Esc: this.stop_edition.bind(this),
+        'Ctrl-S': this.save.bind(this)
+      }
     });
     this.code_mirror.on('gutterClick', this.gutter_click.bind(this));
     this.state = {
@@ -142,6 +140,9 @@ Codemirror = (function(superClass) {
 
   Codemirror.prototype.save = function() {
     var new_file;
+    if (this.code_mirror.getOption('readOnly')) {
+      return;
+    }
     new_file = this.code_mirror.getValue();
     this.wdb.ws.send('Save', this.state.fn + "|" + new_file);
     return this.state.file = new_file;
@@ -435,7 +436,7 @@ History = (function(superClass) {
   };
 
   History.prototype.searchNext = function(val, step) {
-    var re, ref;
+    var re;
     if (step == null) {
       step = 1;
     }
@@ -448,7 +449,7 @@ History = (function(superClass) {
         this.saveCurrent();
       }
     }
-    while ((-2 < (ref = this.index) && ref < this.history.length)) {
+    while (step === 1 && this.index < this.history.length || step === -1 && this.index > -1) {
       this.index += step;
       re = new RegExp("(" + (val.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")) + ")", 'gi');
       if (re.test(this.history[this.index])) {
@@ -457,9 +458,10 @@ History = (function(superClass) {
         (this.overlay != null) && this.prompt.code_mirror.removeOverlay(this.overlay, true);
         this.overlay = this.getOverlay(re);
         this.prompt.code_mirror.addOverlay(this.overlay);
-        return;
+        return true;
       }
     }
+    return false;
   };
 
   History.prototype.commitSearch = function() {
@@ -679,7 +681,16 @@ Prompt = (function(superClass) {
         };
       })(this),
       'Ctrl-F': function() {},
-      'Ctrl-R': this.searchBack.bind(this),
+      'Ctrl-R': (function(_this) {
+        return function() {
+          return _this.searchBack();
+        };
+      })(this),
+      'Ctrl-S': (function(_this) {
+        return function() {
+          return _this.searchBack(false);
+        };
+      })(this),
       'Ctrl-Enter': 'newlineAndIndent',
       'Alt-Backspace': 'delGroupBefore',
       'Ctrl-Space': function(cm, options) {
@@ -823,10 +834,13 @@ Prompt = (function(superClass) {
     return this.code_mirror.setValue(val);
   };
 
-  Prompt.prototype.searchBack = function() {
+  Prompt.prototype.searchBack = function(back) {
     var close;
+    if (back == null) {
+      back = true;
+    }
     this.$code_mirror.addClass('extra-dialog');
-    return close = this.code_mirror.openDialog('Search:\n<input type="text" style="width: 10em" class="CodeMirror-search-field"/>', (function(_this) {
+    close = this.code_mirror.openDialog("<span class=\"search-dialog-title\">\n  Search " + (back ? 'backward' : 'forward') + ":\n</span>\n<input type=\"text\" style=\"width: 10em\" class=\"CodeMirror-search-field\"/>", (function(_this) {
       return function(val, e) {
         console.log('commit');
         return _this.history.commitSearch();
@@ -838,24 +852,34 @@ Prompt = (function(superClass) {
           if (!val) {
             return;
           }
+          console.log('1', _this.history.index);
           _this.history.resetSearch();
-          return _this.history.searchNext(val);
+          console.log('2', _this.history.index);
+          $('.CodeMirror-search-field').toggleClass('not-found', val && !_this.history[close.back ? 'searchNext' : 'searchPrev'](val));
+          return console.log('3', _this.history.index);
         };
       })(this),
       onKeyDown: (function(_this) {
         return function(e, val, close) {
-          if (e.keyCode === 82) {
-            if (e.ctrlKey) {
-              val && _this.history.searchNext(val);
-            }
-            if (e.altKey) {
-              val && _this.history.searchPrev(val);
-            }
-            if (e.ctrlKey || e.altKey) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
+          console.log('4', _this.history.index);
+          if (e.keyCode === 82 && e.ctrlKey || e.keyCode === 83 && e.altKey) {
+            close.back = true;
+            $('.search-dialog-title').text('Search backward:');
+            $('.CodeMirror-search-field').toggleClass('not-found', val && !_this.history.searchNext(val));
+            e.preventDefault();
+            e.stopPropagation();
           }
+          if (e.keyCode === 83 && e.ctrlKey || e.keyCode === 82 && e.altKey) {
+            close.back = false;
+            $('.search-dialog-title').text('Search forward:');
+            $('.CodeMirror-search-field').toggleClass('not-found', val && !_this.history.searchPrev(val));
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          if (e.keyCode === 67 && e.ctrlKey) {
+            close();
+          }
+          console.log('5', _this.history.index);
           return false;
         };
       })(this),
@@ -866,6 +890,7 @@ Prompt = (function(superClass) {
         };
       })(this)
     });
+    return close.back = back;
   };
 
   return Prompt;

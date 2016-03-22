@@ -72,7 +72,7 @@ class History extends Log
       if @index is -1
         @saveCurrent()
 
-    while -2 < @index < @history.length
+    while step is 1 and @index < @history.length or step is -1 and @index > -1
       @index += step
       re = new RegExp "(#{ val.replace(
         /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") })", 'gi'
@@ -82,7 +82,8 @@ class History extends Log
         @overlay? and @prompt.code_mirror.removeOverlay @overlay, true
         @overlay = @getOverlay re
         @prompt.code_mirror.addOverlay @overlay
-        return
+        return true
+    return false
 
   commitSearch: ->
     @oldIndex = null
