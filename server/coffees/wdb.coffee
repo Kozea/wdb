@@ -297,20 +297,26 @@ specify a module like `logging.config`.
 '''
 
   print: (data) ->
-    if performance and @eval_time
+    if @eval_time
       duration = parseInt((performance.now() - @eval_time) * 1000)
+      print_start = performance.now()
       @eval_time = null
 
     $group = $('<div>', class: 'printed scroll-line')
     @interpreter.write $group
 
-    @code($group,
-      @pretty_time(data.duration),
-      ['duration'], false, "Total #{@pretty_time(duration)}") if data.duration
+    $group.append($timeholder = $('<div>'))
     @code($group, data.for, ['for prompted'])
     $result = $('<div>', class: 'result')
     $group.append($result)
     @code($result, data.result, ['val'], true)
+
+    print_duration = parseInt((performance.now() - print_start) * 1000)
+    @code($timeholder,
+      @pretty_time(data.duration),
+      ['duration'], false, "Total #{@pretty_time(duration)} + #{
+        @pretty_time(print_duration)} of rendering") if data.duration
+
     @done(data.suggest)
 
   echo: (data) ->
