@@ -1206,24 +1206,27 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.print = function(data) {
-    var $group, $result, duration;
-    if (performance && this.eval_time) {
+    var $group, $result, $timeholder, duration, print_duration, print_start;
+    if (this.eval_time) {
       duration = parseInt((performance.now() - this.eval_time) * 1000);
+      print_start = performance.now();
       this.eval_time = null;
     }
     $group = $('<div>', {
       "class": 'printed scroll-line'
     });
     this.interpreter.write($group);
-    if (data.duration) {
-      this.code($group, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)));
-    }
+    $group.append($timeholder = $('<div>'));
     this.code($group, data["for"], ['for prompted']);
     $result = $('<div>', {
       "class": 'result'
     });
     $group.append($result);
     this.code($result, data.result, ['val'], true);
+    print_duration = parseInt((performance.now() - print_start) * 1000);
+    if (data.duration) {
+      this.code($timeholder, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)) + " + " + (this.pretty_time(print_duration)) + " of rendering");
+    }
     return this.done(data.suggest);
   };
 
