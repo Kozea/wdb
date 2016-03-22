@@ -45,7 +45,8 @@ class Prompt extends Log
         unless @get()
           @wdb.die()
       'Ctrl-F': ->
-      'Ctrl-R': @searchBack.bind @
+      'Ctrl-R': => @searchBack()
+      'Ctrl-S': => @searchBack false
       'Ctrl-Enter': 'newlineAndIndent'
       'Alt-Backspace': 'delGroupBefore'
       'Ctrl-Space': (cm, options) ->
@@ -137,13 +138,15 @@ class Prompt extends Log
   set: (val) ->
     @code_mirror.setValue(val)
 
-  searchBack: ->
+  searchBack: (back=true)->
     @$code_mirror.addClass 'extra-dialog'
     close = @code_mirror.openDialog(
-      '''
-        Search:
+      """
+        <span class="search-dialog-title">
+          Search #{if back then 'backward' else 'forward'}:
+        </span>
         <input type="text" style="width: 10em" class="CodeMirror-search-field"/>
-      '''
+      """
       , (val, e) =>
         console.log('commit')
         @history.commitSearch()
@@ -151,20 +154,37 @@ class Prompt extends Log
         bottom: true
         onInput: (e, val, close) =>
           return unless val
+          console.log('1', @history.index)
           @history.resetSearch()
-          @history.searchNext val
+          console.log('2', @history.index)
+          $('.CodeMirror-search-field').toggleClass(
+            'not-found',
+            val and not
+            @history[if close.back then 'searchNext' else 'searchPrev'](val))
+          console.log('3', @history.index)
         onKeyDown: (e, val, close) =>
-          if e.keyCode is 82
-            if e.ctrlKey
-              val and @history.searchNext val
-            if e.altKey
-              val and @history.searchPrev val
-            if e.ctrlKey or e.altKey
-              e.preventDefault()
-              e.stopPropagation()
+          console.log('4', @history.index)
+          if e.keyCode is 82 and e.ctrlKey or e.keyCode is 83 and e.altKey
+            close.back = true
+            $('.search-dialog-title').text('Search backward:')
+            $('.CodeMirror-search-field').toggleClass(
+              'not-found', val and not @history.searchNext(val))
+            e.preventDefault()
+            e.stopPropagation()
+          if e.keyCode is 83 and e.ctrlKey or e.keyCode is 82 and e.altKey
+            close.back = false
+            $('.search-dialog-title').text('Search forward:')
+            $('.CodeMirror-search-field').toggleClass(
+              'not-found', val and not @history.searchPrev(val))
+            e.preventDefault()
+            e.stopPropagation()
+          if e.keyCode is 67 and e.ctrlKey
+            close()
+          console.log('5', @history.index)
           return false
 
         onClose: (dialog) =>
           @history.rollbackSearch()
           @$code_mirror.removeClass 'extra-dialog'
     )
+    close.back = back

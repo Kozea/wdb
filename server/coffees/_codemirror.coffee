@@ -20,21 +20,18 @@ class Codemirror extends Log
     @$container = $('.source-editor')
       .on 'mouseup', @wdb.paste_target.bind @wdb
 
-    CodeMirror.commands.save = @save.bind @
-    CodeMirror.keyMap.wdb =
-      Esc: @stop_edition.bind @
-      fallthrough: ["default"]
-
     @code_mirror = CodeMirror (elt) =>
       @$code_mirror = $ elt
       @$container.prepend(elt)
     ,
       value: 'Waiting for file',
       theme: 'material',
-      keyMap: 'wdb',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
       lineNumbers: true
+      extraKeys:
+        Esc: @stop_edition.bind @
+        'Ctrl-S': @save.bind @
 
     @code_mirror.on 'gutterClick', @gutter_click.bind(@)
     @state =
@@ -49,6 +46,7 @@ class Codemirror extends Log
     @breakpoints = {}
 
   save: ->
+    return if @code_mirror.getOption 'readOnly'
     new_file = @code_mirror.getValue()
     @wdb.ws.send 'Save', "#{@state.fn}|#{new_file}"
     @state.file = new_file
