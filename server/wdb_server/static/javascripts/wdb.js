@@ -1243,7 +1243,7 @@ Wdb = (function(superClass) {
       "class": 'result'
     });
     $group.append($result);
-    this.code($result, data.result, ['val'], true);
+    this.code($result, data.result || ' ', ['val'], true);
     print_duration = parseInt((performance.now() - print_start) * 1000);
     if (data.duration) {
       this.code($timeholder, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)) + " + " + (this.pretty_time(print_duration)) + " of rendering");

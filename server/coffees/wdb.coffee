@@ -309,7 +309,7 @@ specify a module like `logging.config`.
     @code($group, data.for, ['for prompted'])
     $result = $('<div>', class: 'result')
     $group.append($result)
-    @code($result, data.result, ['val'], true)
+    @code($result, data.result or ' ', ['val'], true)
 
     print_duration = parseInt((performance.now() - print_start) * 1000)
     @code($timeholder,
