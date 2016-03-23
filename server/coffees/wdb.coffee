@@ -39,6 +39,7 @@ class Wdb extends Log
     @cm = new Codemirror @
     @interpreter = new Interpreter @
     @prompt = new Prompt @
+    @switch = new Switch @
 
   opening: ->
     # Start by getting current trace
@@ -46,7 +47,6 @@ class Wdb extends Log
       $(window).on 'keydown', @global_key.bind @
 
       @$watchers.on 'click', '.watching .name', @unwatch.bind @
-      $('.deactivate').click @disable.bind @
       false
 
       @started = true

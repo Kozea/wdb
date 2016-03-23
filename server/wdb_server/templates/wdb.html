@@ -4,9 +4,16 @@
   <script src="{{ static_url('javascripts/wdb' + ('.js' if options.unminified else '/wdb.min.js')) }}"></script>
 {% end %}
 
+{% block material_css %}
+  {% if post_mortem %}
+    <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.red-indigo.min.css">
+  {% else %}
+    <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.indigo-red.min.css">
+  {% end %}
+{% end %}
 
 {% block main %}
-<div class="trace mdl-layout mdl-js-layout mdl-layout--fixed-header" data-uuid="{{ uuid }}">
+<div class="trace mdl-layout mdl-js-layout mdl-layout--fixed-header" data-uuid="{{ uuid }}" {% if post_mortem %}data-post-mortem{% end %}>
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
       <span class="mdl-layout-title subtitle">
@@ -14,8 +21,15 @@
       </span>
       <div class="mdl-layout-spacer"></div>
 
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
-      </div>
+      <button class="mdl-button mdl-js-button mdl-button--icon switch">
+        <i class="material-icons">
+          {% if post_mortem %}
+            power_settings_new
+          {% else %}
+            close
+          {% end %}
+        </i>
+      </button>
     </div>
   </header>
 

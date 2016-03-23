@@ -74,14 +74,15 @@ class Wdb(object):
     watchers = defaultdict(set)
 
     @staticmethod
-    def get(no_create=False, server=SOCKET_SERVER, port=SOCKET_PORT):
+    def get(no_create=False, server=SOCKET_SERVER, port=SOCKET_PORT,
+            force_uuid=None):
         """Get the thread local singleton"""
         pid = os.getpid()
         thread = threading.current_thread()
         wdb = Wdb._instances.get((pid, thread))
         if not wdb and not no_create:
             wdb = object.__new__(Wdb)
-            Wdb.__init__(wdb, server, port)
+            Wdb.__init__(wdb, server, port, force_uuid)
             wdb.pid = pid
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
@@ -100,7 +101,8 @@ class Wdb(object):
     def __new__(cls, server=SOCKET_SERVER, port=SOCKET_PORT):
         return cls.get(server=server, port=port)
 
-    def __init__(self, server=SOCKET_SERVER, port=SOCKET_PORT):
+    def __init__(
+            self, server=SOCKET_SERVER, port=SOCKET_PORT, force_uuid=None):
         log.debug('New wdb instance %r' % self)
         self.obj_cache = {}
         self.compile_cache = {}
@@ -112,7 +114,7 @@ class Wdb(object):
         self.extra_vars = {}
         self.last_obj = None
         self.reset()
-        self.uuid = str(uuid4())
+        self.uuid = force_uuid or str(uuid4())
         self.state = Running(None)
         self.full = False
         self.below = 0
@@ -503,7 +505,7 @@ class Wdb(object):
                 closer = '])'
 
             splitter = ', '
-            if False and len(obj) > 2:
+            if len(obj) > 2:
                 splitter += '\n' + '  ' * level
                 iter_repr += '\n' + '  ' * level
                 closer = '\n' + '  ' * (level - 1) + closer
@@ -674,14 +676,16 @@ class Wdb(object):
     def interaction(
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
-            init=None, shell=False, shell_vars=None, source=None):
+            init=None, shell=False, shell_vars=None, source=None,
+            iframe_mode=False):
         """User interaction handling blocking on socket receive"""
         log.info('Interaction %r %r %r %r' % (
             frame, tb, exception, exception_description))
         self.reconnect_if_needed()
         self.stepping = not shell
 
-        self.open_browser()
+        if not iframe_mode:
+            self.open_browser()
 
         lvl = len(self.interaction_stack)
         if lvl:

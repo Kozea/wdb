@@ -171,7 +171,7 @@ def init():
 
 def run():
     init()
-    app.wsgi_app = WdbMiddleware(app.wsgi_app)
+    app.wsgi_app = WdbMiddleware(app.wsgi_app, start_disabled=True)
     app.run(
         debug=True, host='0.0.0.0', port=1985, use_debugger=False,
         use_reloader=True)

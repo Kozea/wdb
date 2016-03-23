@@ -87,7 +87,16 @@ class DebugHandler(tornado.web.RequestHandler):
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self, uuid):
-        self.render('wdb.html', uuid=uuid, new_version=server.new_version)
+        self.render(
+            'wdb.html', uuid=uuid, new_version=server.new_version,
+            post_mortem=False)
+
+
+class PostMortemHandler(tornado.web.RequestHandler):
+    def get(self, uuid):
+        self.render(
+            'wdb.html', uuid=uuid, new_version=server.new_version,
+            post_mortem=True)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -271,6 +280,7 @@ server = tornado.web.Application(
         (r"/", IndexHandler),
         (r"/style.css", StyleHandler),
         (r"/debug/session/(.+)", MainHandler),
+        (r"/pm/session/(.+)", PostMortemHandler),
         (r"/debug/file/(.*)", DebugHandler),
         (r"/websocket/(.+)", WebSocketHandler),
         (r"/status", SyncWebSocketHandler)

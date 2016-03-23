@@ -1,4 +1,4 @@
-var Codemirror, History, Interpreter, Log, Prompt, Traceback, Wdb, Websocket,
+var Codemirror, History, Interpreter, Log, Prompt, Switch, Traceback, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -897,6 +897,27 @@ Prompt = (function(superClass) {
 
 })(Log);
 
+Switch = (function(superClass) {
+  extend(Switch, superClass);
+
+  function Switch(wdb) {
+    this.wdb = wdb;
+    Switch.__super__.constructor.apply(this, arguments);
+    this.$switch = $('.switch').click(this["switch"].bind(this));
+  }
+
+  Switch.prototype["switch"] = function() {
+    if (this.$switch.find('i').text().trim() === 'close') {
+      return this.wdb.disable();
+    } else {
+      return parent.postMessage('activate', '*');
+    }
+  };
+
+  return Switch;
+
+})(Log);
+
 Wdb = (function(superClass) {
   extend(Wdb, superClass);
 
@@ -919,13 +940,13 @@ Wdb = (function(superClass) {
     this.cm = new Codemirror(this);
     this.interpreter = new Interpreter(this);
     this.prompt = new Prompt(this);
+    this["switch"] = new Switch(this);
   }
 
   Wdb.prototype.opening = function() {
     if (!this.started) {
       $(window).on('keydown', this.global_key.bind(this));
       this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
-      $('.deactivate').click(this.disable.bind(this));
       false;
       this.started = true;
     }
