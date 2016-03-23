@@ -30,35 +30,3 @@ Log = (function() {
   return Log;
 
 })();
-
-$(function() {
-  var $code, $trace, code, file, fun, i, len, lno, ref, ref1, results;
-  $('#activate').click(function() {
-    $.get('/__wdb/on').done(function() {
-      return location.reload(true);
-    });
-    return false;
-  });
-  $('#title').text(_title).append($('<small>').text(_subtitle));
-  if (trace.trace) {
-    $('#wdb').append($trace = $('<article>', {
-      "class": 'trace_500'
-    }));
-    ref = trace.trace;
-    results = [];
-    for (i = 0, len = ref.length; i < len; i++) {
-      ref1 = ref[i], file = ref1[0], lno = ref1[1], fun = ref1[2], code = ref1[3];
-      $trace.append($('<div>', {
-        "class": 'traceline'
-      }).append($('<div>', {
-        "class": 'flno'
-      }).text('File ' + file + ':' + lno), $('<div>', {
-        "class": 'fun'
-      }).text(fun), $code = $('<code>', {
-        "class": 'cm'
-      })));
-      results.push(CodeMirror.runMode(code || ' ', "python", $code.get(0)));
-    }
-    return results;
-  }
-});

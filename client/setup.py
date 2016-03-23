@@ -33,11 +33,6 @@ options = dict(
     entry_points={'console_scripts': [
         'wdb=wdb.__main__:main',
         'wdb-%s=wdb.__main__:main' % sys.version[:3]]},
-    package_data={
-        'wdb': [
-            'res/*'
-        ]
-    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

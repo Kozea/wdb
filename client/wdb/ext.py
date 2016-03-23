@@ -15,41 +15,90 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from wdb import trace, start_trace, stop_trace, set_trace, Wdb
+from wdb import (trace, start_trace, stop_trace, set_trace, Wdb,
+                 WEB_SERVER, WEB_PORT)
 from wdb.ui import dump
-from wdb._compat import to_bytes
+from wdb._compat import to_bytes, escape
 from log_colorizer import get_color_logger
-import os
-import traceback
+
+from threading import Thread
+from uuid import uuid4
 import sys
 
 
 log = get_color_logger('wdb.ext')
 
 
+def post_mortem_interaction(uuid, exc_info):
+    wdb = Wdb.get(force_uuid=uuid)
+    type_, value, tb = exc_info
+    frame = None
+    _value = value
+    if not isinstance(_value, BaseException):
+        _value = type_(value)
+
+    wdb.obj_cache[id(exc_info)] = exc_info
+    wdb.extra_vars['__exception__'] = exc_info
+    exception = type_.__name__
+    exception_description = str(value) + ' [POST MORTEM]'
+    init = 'Echo|%s' % dump({
+        'for': '__exception__',
+        'val': escape('%s: %s') % (
+            exception, exception_description)})
+
+    wdb.interaction(
+        frame, tb, exception, exception_description,
+        init=init, iframe_mode=True)
+
+
 def _handle_off(silent=False):
     if not silent:
         log.exception('Exception with wdb off')
-    type_, value, tb = sys.exc_info()
-    stack = traceback.extract_tb(tb)
-    stack.reverse()
 
-    with open(
-            os.path.join(
-                os.path.abspath(os.path.dirname(__file__)),
-                'res',
-                '500.html')) as f:
-        return to_bytes(
-            f.read() % dict(
-                trace=traceback.format_exc(),
-                title=type_.__name__.replace("'", "\\'").replace('\n', ' '),
-                subtitle=str(value).replace("'", "\\'").replace('\n', ' '),
-                state='',
-                trace_dict=dump({
-                    'trace': [tuple(frame_summary) for frame_summary in stack],
-                })
-            )
-        )
+    uuid = str(uuid4())
+    Thread(target=post_mortem_interaction, args=(uuid, sys.exc_info())).start()
+
+    web_url = 'http://%s:%d/pm/session/%s' % (
+        WEB_SERVER or 'localhost',
+        WEB_PORT or 1984,
+        uuid)
+    return to_bytes('''
+        <html>
+            <head>
+                <title>WDB Post Mortem</title>
+                <style>
+                  html, body {
+                    margin: 0;
+                    padding: 0;
+                  }
+                </style>
+                <script>
+                    addEventListener("message", function (e) {
+                        if (e.data == 'activate') {
+                            var request = new XMLHttpRequest();
+                            request.open('GET', '/__wdb/on', true);
+                            request.onload = function() {
+                                location.reload(true);
+                            }
+                            request.send();
+                        }
+                    }, false);
+                </script>
+            </head>
+            <body>
+                <iframe
+                    src="%s"
+                    marginheight="0"
+                    marginwidth="0"
+                    frameborder="0"
+                    scrolling="no"
+                    width="100%%"
+                    height="100%%"
+                    id="wdbframe">
+                </iframe>
+            </body>
+        </html>
+    ''' % web_url)
 
 
 class WdbMiddleware(object):
@@ -112,6 +161,7 @@ class WdbMiddleware(object):
                 # Close set_trace debuggers
                 stop_trace(close_on_exit=True)
                 hasattr(appiter, 'close') and appiter.close()
+
             wdb.closed = False
 
         return catch(environ, start_response)

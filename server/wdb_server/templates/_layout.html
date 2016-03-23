@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Roboto+Mono">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.indigo-pink.min.css">
+    {% block material_css %}
+      <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.indigo-red.min.css">
+    {% end %}
+
     <script defer src="https://code.getmdl.io/1.1.2/material.min.js"></script>
     <script src="{{ static_url('javascripts/wdb/deps.min.js') }}"></script>
     <link href="{{ static_url('stylesheets/deps.min.css') }}" rel="stylesheet" type="text/css">
