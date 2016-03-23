@@ -9,7 +9,7 @@ module.exports = (grunt) ->
     'bower_components/codemirror/addon/search/searchcursor.js'
     'bower_components/codemirror/addon/search/jump-to-line.js'
     'bower_components/codemirror/addon/search/search.js'
-    # 'bower_components/codemirror/addon/hint/show-hint.js'
+    'bower_components/codemirror/addon/hint/show-hint.js'
     'bower_components/codemirror/addon/edit/matchbrackets.js'
     'bower_components/codemirror/mode/python/python.js'
     'bower_components/codemirror/mode/jinja2/jinja2.js'
