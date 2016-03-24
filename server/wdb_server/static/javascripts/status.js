@@ -39,7 +39,7 @@ wait = 25;
 make_uuid_line = function(uuid, socket) {
   var $line;
   if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
-    $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"close\"> <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a> </td>");
+    $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid\"><a href=\"/debug/session/" + uuid + "\">" + uuid + "</a></td> <td class=\"socket\">No</td> <td class=\"websocket\">No</td> <td class=\"action\"> <button class=\"mdl-button mdl-js-button mdl-button--icon close mdl-button--colored\" title=\"Force close\"> <i class=\"material-icons\">close</i> </button> </td>");
     $('.sessions tbody').append($line);
   }
   return $line.find("." + socket).text('Yes');
@@ -65,7 +65,7 @@ make_brk_line = function(brk) {
     elt = ref[i];
     line += "<td class=\"" + elt + "\">" + (brk[elt] || '∅') + "</td>";
   }
-  line += "<td class=\"action\"> <a class=\"fa fa-folder-open open\" title=\"Open\"></a> <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a> </td>";
+  line += "<td class=\"action\"> <button class=\"mdl-button mdl-js-button mdl-button--icon open mdl-button--colored\" title=\"Open\"> <i class=\"material-icons\">open_in_new</i> </button> <button class=\"mdl-button mdl-js-button mdl-button--icon delete mdl-button--colored\" title=\"Remove\"> <i class=\"material-icons\">delete</i> </button> </td>";
   line += '</tr>';
   return $('.breakpoints tbody').append($(line));
 };
@@ -162,11 +162,7 @@ make_process_line = function(proc) {
       elt = ref1[j];
       line += "<td class=\"rowspan " + elt + "\"> " + (get_proc_thread_val(proc, elt)) + "</td>";
     }
-    line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\" title=\"Toggle threads\"></a></td>";
-    line += "<td class=\"action\">";
-    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
-    line += "</td>";
-    line += '</tr>';
+    line += "  <td class=\"action\">\n    <button class=\"mdl-button mdl-js-button mdl-button--icon minus mdl-button--colored\" title=\"Toggle threads\">\n      <i class=\"material-icons\">remove</i>\n    </button>\n  </td>\n  <td class=\"action\">\n    <button class=\"mdl-button mdl-js-button mdl-button--icon pause mdl-button--colored\" title=\"Pause\">\n      <i class=\"material-icons\">pause</i>\n    </button>\n  </td>\n</tr>";
     return $('.processes tbody').append($(line));
   }
 };
@@ -186,12 +182,7 @@ make_thread_line = function(thread) {
     }
     return results;
   } else {
-    line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\">";
-    line += "<td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>";
-    line += "<td class=\"action\">";
-    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> ";
-    line += "</td>";
-    line += '</tr>';
+    line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\">\n  <td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>\n  <td class=\"action\">\n    <button class=\"mdl-button mdl-js-button mdl-button--icon pause mdl-button--colored\" title=\"Pause\">\n      <i class=\"material-icons\">pause</i>\n    </button>\n  </td>\n</tr>";
     $next = $proc.nextAll('[data-pid]');
     if ($next.size()) {
       $next.before(line);
@@ -300,7 +291,7 @@ null_if_void = function(s) {
 
 $(function() {
   create_socket();
-  $('.sessions tbody').on('click', '.remove', function(e) {
+  $('.sessions tbody').on('click', '.close', function(e) {
     ws.send('RemoveUUID|' + $(this).closest('tr').attr('data-uuid'));
     return false;
   });
@@ -310,7 +301,7 @@ $(function() {
     ws.send('RunFile|' + $tr.find('.fn').text());
     return false;
   });
-  $('.breakpoints tbody').on('click', '.remove', function(e) {
+  $('.breakpoints tbody').on('click', '.delete', function(e) {
     var $tr, brk;
     $tr = $(this).closest('tr');
     brk = {
@@ -328,20 +319,20 @@ $(function() {
     ws.send('Pause|' + ($tr.attr('data-pid') || $tr.attr('data-tid')));
     return false;
   }).on('click', '.minus', function(e) {
-    var $a, $tr;
-    $a = $(this);
-    $tr = $a.closest('tr');
+    var $button, $tr;
+    $button = $(this);
+    $tr = $button.closest('tr');
     $("[data-of=" + ($tr.attr('data-pid')) + "]").hide();
     $tr.find('.rowspan').attr('rowspan', 1);
-    $a.attr('class', $a.attr('class').replace(/minus/g, 'plus'));
+    $button.removeClass('minus').addClass('plus').find('i').text('add');
     return false;
   }).on('click', '.plus', function(e) {
-    var $a, $tr, rowspan;
-    $a = $(this);
-    $tr = $a.closest('tr');
+    var $button, $tr, rowspan;
+    $button = $(this);
+    $tr = $button.closest('tr');
     rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().size();
     $tr.find('.rowspan').attr('rowspan', rowspan + 1);
-    $a.attr('class', $a.attr('class').replace(/plus/g, 'minus'));
+    $button.removeClass('plus').addClass('minus').find('i').text('remove');
     return false;
   });
   return $('.runfile').on('submit', function() {

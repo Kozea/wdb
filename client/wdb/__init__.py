@@ -613,7 +613,7 @@ class Wdb(object):
             if frame == stack_frame:
                 current = i
             frames.append({
-                'file': filename,
+                'file': os.path.abspath(filename),
                 'function': code.co_name,
                 'flno': code.co_firstlineno,
                 'llno': lastlineno,

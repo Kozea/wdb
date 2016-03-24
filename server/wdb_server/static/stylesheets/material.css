@@ -84,6 +84,11 @@ table {
   font-size: .75em;
   word-break: normal; }
 
+.trace-line .material-icons {
+  font-size: .8em;
+  margin-right: .5em;
+  vertical-align: middle; }
+
 .trace-line:hover {
   background: rgba(0, 0, 0, 0.05); }
 
@@ -140,3 +145,7 @@ code {
     opacity: 0; }
   100% {
     opacity: 1; } }
+
+@media screen and (min-width: 1025px) {
+  .mdl-layout--fixed-drawer > .mdl-layout__header .mdl-layout__header-row {
+    padding-right: 20px; } }
