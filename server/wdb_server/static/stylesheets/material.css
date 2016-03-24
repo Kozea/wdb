@@ -5,10 +5,24 @@
   height: calc(50vh - 64px); }
 
 .interpreter {
-  position: relative;
   height: calc(50vh - 40px);
-  overflow: auto;
-  outline: 0; }
+  outline: 0;
+  display: flex;
+  flex-direction: column; }
+  .interpreter .watchers .watching, .interpreter .watchers a.inspect, .interpreter .watchers code, .interpreter .watchers div.value {
+    display: inline-block; }
+  .interpreter .watchers .watching {
+    margin-right: 1em; }
+    .interpreter .watchers .watching:not(:last-child)::after {
+      content: ', '; }
+    .interpreter .watchers .watching .name {
+      cursor: not-allowed; }
+  .interpreter .terminal {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative; }
   .interpreter.full-height {
     height: calc(100vh - 40px - 64px); }
   .interpreter table td.key code {
@@ -18,7 +32,8 @@
   .interpreter a.inspect {
     display: inline-block;
     text-decoration: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: help; }
   .interpreter .prompt, .interpreter .for {
     margin-left: 26px; }
     .interpreter .prompt::before, .interpreter .for::before {

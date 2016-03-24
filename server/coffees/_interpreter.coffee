@@ -3,15 +3,15 @@ class Interpreter extends Log
     super
     @$interpreter = $('.interpreter')
       .on 'click', @focus.bind @
-    @$scrollback = $('.scrollback')
       .on 'click', 'a.inspect', @inspect.bind @
+    @$scrollback = $('.scrollback')
       .on 'click', '.short.close', @short_open.bind @
       .on 'click', '.short.open', @short_close.bind @
       .on 'click', '.toggle', @toggle_visibility.bind @
 
 
   scroll: ->
-    @$interpreter.get(0).scrollIntoView
+    @wdb.prompt.$container.get(0).scrollIntoView
       block: "end"
       behavior: "smooth"
 
