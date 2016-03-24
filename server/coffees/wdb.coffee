@@ -409,7 +409,7 @@ specify a module like `logging.config`.
   breakset: (data) ->
     @cm.set_breakpoint data
 
-    if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't']
+    if @prompt.get()[0] is '.' and @prompt.get()[1] in ['b', 't']
       @done()
     else
       @chilling()
@@ -417,7 +417,7 @@ specify a module like `logging.config`.
   breakunset: (data) ->
     @cm.clear_breakpoint data
 
-    if @$eval.val()[0] is '.' and @$eval.val()[1] in ['b', 't', 'z']
+    if @prompt.get()[0] is '.' and @prompt.get()[1] in ['b', 't', 'z']
       @done()
     else
       @chilling()

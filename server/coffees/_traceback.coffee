@@ -31,11 +31,14 @@ class Traceback extends Log
 
       $primary = $('<div>', class: 'mdl-list__item-primary-content')
       $primary.append $('<div>', class: 'ellipsis').text(frame.function)
+
       $primary
         .append($('<div>', class: 'mdl-list__item-text-body')
           .append $tracebody = $('<div>', class: 'ellipsis')
           .append $('<div>', class: 'ellipsis').text(
-            frame.file.split('/').slice(-1)[0] + ':' + frame.lno))
+            frame.file.split('/').slice(-1)[0] + ':' + frame.lno).prepend(
+              $('<i>', class: 'material-icons').text(@get_fn_icon(frame.file)))
+      )
 
       @wdb.code $tracebody, frame.code, ['ellipsis']
 
@@ -50,3 +53,16 @@ class Traceback extends Log
 
   clear: ->
     @$traceback.empty()
+
+  get_fn_icon: (fn) ->
+    # TODO: other platforms
+    if !!~ fn.indexOf('site-packages')
+      'library_books'
+    else if fn.startsWith(@wdb.cwd) or fn[0] isnt '/'
+      'star'
+    else if fn.startsWith '/home/'
+      'home'
+    else if fn.startsWith('/usr/lib') and !!~ fn.indexOf('/python')
+      'lock'
+    else
+      'cloud'

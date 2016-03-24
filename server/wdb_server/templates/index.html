@@ -19,12 +19,12 @@
       <a href="#scroll-tab-2" class="mdl-layout__tab">Current global breakpoints</a>
       <a href="#scroll-tab-3" class="mdl-layout__tab">Running processes</a>
       <a href="#scroll-tab-4" class="mdl-layout__tab">Trace file</a>
-      <a href="#scroll-tab-5" class="mdl-layout__tab">Styles</a>
+
+      {% if StyleHandler.themes %}
+        <a href="#scroll-tab-5" class="mdl-layout__tab">Styles</a>
+      {% end %}
     </div>
   </header>
-  <div class="mdl-layout__drawer">
-    <span class="mdl-layout-title">wdb</span>
-  </div>
   <main class="mdl-layout__content">
     <section class="mdl-layout__tab-panel is-active" id="scroll-tab-1">
       <div class="page-content">
@@ -81,24 +81,37 @@
     </section>
     <section class="mdl-layout__tab-panel" id="scroll-tab-4">
       <div class="page-content">
-        <form class="runfile">
-          <input type="text" placeholder="/home/wdb/my_file_to_debug.py" name="debug_file" />
-          <input type="submit" value="Debug" />
-        </form>
+        <div class="mdl-grid">
+           <div class="mdl-layout-spacer"></div>
+           <div class="mdl-cell mdl-cell--4-col">
+             <form class="runfile">
+               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                 <input class="mdl-textfield__input" type="text" name="debug_file" id="debug_file" />
+                 <label class="mdl-textfield__label" for="debug_file">File to run</label>
+               </div>
+               <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit">
+                 Debug
+               </button>
+             </form>
+           </div>
+           <div class="mdl-layout-spacer"></div>
+        </div>
       </div>
     </section>
-    <section class="mdl-layout__tab-panel" id="scroll-tab-5">
-      <div class="page-content">
-        <form method="post">
-          <select name="theme">
-            {% for theme in StyleHandler.themes %}
-              <option value="{{ theme }}"{{ ' selected' if theme == StyleHandler.theme else '' }}>{{ theme.title() }} Theme</option>
-            {% end %}
-          </select>
-          <input type="submit" value="Change" />
-        </form>
-      </div>
-    </section>
+    {% if StyleHandler.themes %}
+      <section class="mdl-layout__tab-panel" id="scroll-tab-5">
+        <div class="page-content">
+          <form method="post">
+            <select name="theme">
+              {% for theme in StyleHandler.themes %}
+                <option value="{{ theme }}"{{ ' selected' if theme == StyleHandler.theme else '' }}>{{ theme.title() }} Theme</option>
+              {% end %}
+            </select>
+            <input type="submit" value="Change" />
+          </form>
+        </div>
+      </section>
+    {% end %}
   </main>
 </div>
 

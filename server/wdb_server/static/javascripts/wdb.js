@@ -543,7 +543,9 @@ Traceback = (function(superClass) {
         "class": 'ellipsis'
       })).append($('<div>', {
         "class": 'ellipsis'
-      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno)));
+      }).text(frame.file.split('/').slice(-1)[0] + ':' + frame.lno).prepend($('<i>', {
+        "class": 'material-icons'
+      }).text(this.get_fn_icon(frame.file)))));
       this.wdb.code($tracebody, frame.code, ['ellipsis']);
       $traceline.append($primary);
       results.push(this.$traceback.prepend($traceline));
@@ -561,6 +563,20 @@ Traceback = (function(superClass) {
 
   Traceback.prototype.clear = function() {
     return this.$traceback.empty();
+  };
+
+  Traceback.prototype.get_fn_icon = function(fn) {
+    if (!!~fn.indexOf('site-packages')) {
+      return 'library_books';
+    } else if (fn.startsWith(this.wdb.cwd) || fn[0] !== '/') {
+      return 'star';
+    } else if (fn.startsWith('/home/')) {
+      return 'home';
+    } else if (fn.startsWith('/usr/lib') && !!~fn.indexOf('/python')) {
+      return 'lock';
+    } else {
+      return 'cloud';
+    }
   };
 
   return Traceback;
@@ -1481,7 +1497,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.breakset = function(data) {
     var ref;
     this.cm.set_breakpoint(data);
-    if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't')) {
+    if (this.prompt.get()[0] === '.' && ((ref = this.prompt.get()[1]) === 'b' || ref === 't')) {
       return this.done();
     } else {
       return this.chilling();
@@ -1491,7 +1507,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.breakunset = function(data) {
     var ref;
     this.cm.clear_breakpoint(data);
-    if (this.$eval.val()[0] === '.' && ((ref = this.$eval.val()[1]) === 'b' || ref === 't' || ref === 'z')) {
+    if (this.prompt.get()[0] === '.' && ((ref = this.prompt.get()[1]) === 'b' || ref === 't' || ref === 'z')) {
       return this.done();
     } else {
       return this.chilling();

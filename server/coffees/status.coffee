@@ -7,8 +7,11 @@ make_uuid_line = (uuid, socket) ->
       <td class=\"uuid\"><a href=\"/debug/session/#{uuid}\">#{uuid}</a></td>
       <td class=\"socket\">No</td>
       <td class=\"websocket\">No</td>
-      <td class=\"close\">
-        <a class=\"fa fa-times-circle remove\" title=\"Force close\"></a>
+      <td class=\"action\">
+        <button class=\"mdl-button mdl-js-button mdl-button--icon close \
+            mdl-button--colored\" title=\"Force close\">
+          <i class=\"material-icons\">close</i>
+        </button>
       </td>
     ")
     $('.sessions tbody').append $line
@@ -28,9 +31,15 @@ make_brk_line = (brk) ->
   for elt in ['fn', 'lno', 'cond', 'fun']
     line += "<td class=\"#{elt}\">#{brk[elt] or '∅'}</td>"
   line += "<td class=\"action\">
-        <a class=\"fa fa-folder-open open\" title=\"Open\"></a>
-        <a class=\"fa fa-minus-circle remove\" title=\"Remove\"></a>
-      </td>"
+      <button class=\"mdl-button mdl-js-button mdl-button--icon open \
+          mdl-button--colored\" title=\"Open\">
+        <i class=\"material-icons\">open_in_new</i>
+      </button>
+      <button class=\"mdl-button mdl-js-button mdl-button--icon delete \
+          mdl-button--colored\" title=\"Remove\">
+        <i class=\"material-icons\">delete</i>
+      </button>
+    </td>"
 
   line += '</tr>'
   $('.breakpoints tbody').append $ line
@@ -89,12 +98,21 @@ make_process_line = (proc) ->
     for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
       line += "<td class=\"rowspan #{elt}\">
         #{get_proc_thread_val proc, elt}</td>"
-    line += "<td class=\"action\"><a href=\"\" class=\"fa fa-minus minus\"
-        title=\"Toggle threads\"></a></td>"
-    line += "<td class=\"action\">"
-    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> "
-    line += "</td>"
-    line += '</tr>'
+    line += """
+      <td class=\"action\">
+        <button class=\"mdl-button mdl-js-button mdl-button--icon minus \
+          mdl-button--colored\" title=\"Toggle threads\">
+          <i class=\"material-icons\">remove</i>
+        </button>
+      </td>
+      <td class=\"action\">
+        <button class=\"mdl-button mdl-js-button mdl-button--icon pause \
+          mdl-button--colored\" title=\"Pause\">
+          <i class=\"material-icons\">pause</i>
+        </button>
+      </td>
+    </tr>
+    """
     $('.processes tbody').append $ line
 
 make_thread_line = (thread) ->
@@ -105,14 +123,17 @@ make_thread_line = (thread) ->
     for elt in ['id', 'of']
       $tr.find(".#{elt}").text(get_proc_thread_val thread, elt)
   else
-    line = "<tr data-tid=\"#{thread.id}\" data-of=\"#{thread.of}\">"
-
-    line += "<td class=\"id\">#{get_proc_thread_val thread, 'id'}</td>"
-    line += "<td class=\"action\">"
-    line += "<a href=\"\" class=\"fa fa-pause pause\" title=\"Pause\"></a> "
-    line += "</td>"
-
-    line += '</tr>'
+    line = """
+      <tr data-tid=\"#{thread.id}\" data-of=\"#{thread.of}\">
+        <td class=\"id\">#{get_proc_thread_val thread, 'id'}</td>
+        <td class=\"action\">
+          <button class=\"mdl-button mdl-js-button mdl-button--icon pause \
+            mdl-button--colored\" title=\"Pause\">
+            <i class=\"material-icons\">pause</i>
+          </button>
+        </td>
+      </tr>
+    """
     $next = $proc.nextAll('[data-pid]')
     if $next.size()
       $next.before line
@@ -198,7 +219,7 @@ null_if_void = (s) ->
 
 $ ->
   create_socket()
-  $('.sessions tbody').on 'click', '.remove', (e) ->
+  $('.sessions tbody').on 'click', '.close', (e) ->
     ws.send('RemoveUUID|' + $(this).closest('tr').attr('data-uuid'))
     false
 
@@ -207,7 +228,7 @@ $ ->
     ws.send('RunFile|' + $tr.find('.fn').text())
     false
 
-  $('.breakpoints tbody').on 'click', '.remove', (e) ->
+  $('.breakpoints tbody').on 'click', '.delete', (e) ->
     $tr = $(this).closest('tr')
     brk =
       fn: $tr.find('.fn').text()
@@ -224,18 +245,18 @@ $ ->
       ws.send('Pause|' + ($tr.attr('data-pid') or $tr.attr('data-tid')))
       false)
     .on('click', '.minus', (e) ->
-      $a = $(this)
-      $tr = $a.closest('tr')
+      $button = $(this)
+      $tr = $button.closest('tr')
       $("[data-of=#{$tr.attr('data-pid')}]").hide()
       $tr.find('.rowspan').attr 'rowspan', 1
-      $a.attr 'class', $a.attr('class').replace(/minus/g, 'plus')
+      $button.removeClass('minus').addClass('plus').find('i').text 'add'
       false)
     .on('click', '.plus', (e) ->
-      $a = $(this)
-      $tr = $a.closest('tr')
+      $button = $(this)
+      $tr = $button.closest('tr')
       rowspan = $("[data-of=#{$tr.attr('data-pid')}]").show().size()
       $tr.find('.rowspan').attr 'rowspan', rowspan + 1
-      $a.attr 'class', $a.attr('class').replace(/plus/g, 'minus')
+      $button.removeClass('plus').addClass('minus').find('i').text 'remove'
       false)
 
   $('.runfile').on 'submit', ->
