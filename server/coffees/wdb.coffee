@@ -21,39 +21,26 @@ class Wdb extends Log
   constructor: ->
     super
     @started = false
-    @to_complete = null
     @cwd = null
     @file_cache = {}
     @last_cmd = null
     @eval_time = null
 
-    @waited_for_ws = 0
-
-    # Page elements
-    @$waiter = $('.waiter')
-    @$wdb = $('.wdb')
-    @$watchers = $('.watchers')
-
-    @ws = new Websocket(@, @$wdb.find('[data-uuid]').attr('data-uuid'))
+    @ws = new Websocket(@, $('[data-uuid]').attr('data-uuid'))
     @traceback = new Traceback @
     @cm = new Codemirror @
     @interpreter = new Interpreter @
     @prompt = new Prompt @
     @switch = new Switch @
+    @watchers = new Watchers @
 
   opening: ->
     # Start by getting current trace
     if not @started
       $(window).on 'keydown', @global_key.bind @
-
-      @$watchers.on 'click', '.watching .name', @unwatch.bind @
-      false
-
       @started = true
 
     @ws.send 'Start'
-    @$waiter.remove()
-    @$wdb.show()
 
   working: ->
     $('.activity').addClass('is-active')
@@ -488,44 +475,12 @@ specify a module like `logging.config`.
     @ws.send cmd, brk
     @working()
 
-  format_fun: (p) ->
-    tags = [
-      $('<span>', class: 'fun_name', title: p.module).text(p.call_name),
-      $('<span>', class: 'fun_punct').text('(')]
-    for param, i in p.params
-      cls = 'fun_param'
-      if i == p.index or (i == p.params.length - 1 and p.index > i)
-        cls = 'fun_param active'
-      tags.push $('<span>', class: cls).text(param)
-      if i != p.params.length - 1
-        tags.push $('<span>', class: 'fun_punct').text(', ')
-
-    tags.push $('<span>', class: 'fun_punct').text(')')
-    tags
-
   watched: (data) ->
-    for own watcher, value of data
-      $watcher = @$watchers
-        .find(".watching")
-        .filter((e) -> $(e).attr('data-expr') == watcher)
-      if not $watcher.size()
-        $name = $('<code>', class: "name")
-        $value = $('<div>', class: "value")
-        @$watchers.append(
-          $watcher = $('<div>', class: "watching")
-            .attr('data-expr', watcher)
-            .append($name.text(watcher), $('<code>').text(': '), $value))
-        @code($value, value.toString(), [], true)
-      else
-        $watcher.find('.value code').remove()
-        @code($watcher.find('.value'), value.toString(), [], true)
-      $watcher.addClass('updated')
-    @$watchers.find('.watching:not(.updated)').remove()
-    @$watchers.find('.watching').removeClass('updated')
+    @watchers.updateAll data
     # No @done() here
 
   ack: ->
-    @$eval.val('').trigger('autosize.resize')
+    @done()
 
   display: (data) ->
     $group = $('<div>', class: 'display scroll-line')
@@ -596,8 +551,8 @@ specify a module like `logging.config`.
     @working()
     false
 
-  unwatch: (e) ->
-    @ws.send 'Unwatch', $(e.currentTarget).closest('.watching').attr 'data-expr'
+  unwatch: (expr) ->
+    @ws.send 'Unwatch', expr
     @working()
 
   paste_target: (e) ->

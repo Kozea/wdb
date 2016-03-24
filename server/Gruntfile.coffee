@@ -33,7 +33,7 @@ module.exports = (grunt) ->
         banner: '/*! <%= pkg.name %>
            <%= grunt.template.today("yyyy-mm-dd") %> */\n'
 
-      wdb:
+      # wdb:
         expand: true
         cwd: 'wdb_server/static/javascripts'
         src: '*.js'
@@ -71,6 +71,7 @@ module.exports = (grunt) ->
             'coffees/_traceback.coffee'
             'coffees/_interpreter.coffee'
             'coffees/_prompt.coffee'
+            'coffees/_watchers.coffee'
             'coffees/_switch.coffee'
             'coffees/wdb.coffee'
           ]

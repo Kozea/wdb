@@ -39,8 +39,7 @@ class Traceback extends Log
 
       @wdb.code $tracebody, frame.code, ['ellipsis']
 
-      $traceline
-        .append $primary
+      $traceline.append $primary
       @$traceback.prepend $traceline
 
   hide: ->

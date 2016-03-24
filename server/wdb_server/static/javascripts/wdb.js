@@ -1,4 +1,4 @@
-var Codemirror, History, Interpreter, Log, Prompt, Switch, Traceback, Wdb, Websocket,
+var Codemirror, History, Interpreter, Log, Prompt, Switch, Traceback, Watchers, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -573,12 +573,12 @@ Interpreter = (function(superClass) {
   function Interpreter(wdb) {
     this.wdb = wdb;
     Interpreter.__super__.constructor.apply(this, arguments);
-    this.$interpreter = $('.interpreter').on('click', this.focus.bind(this));
-    this.$scrollback = $('.scrollback').on('click', 'a.inspect', this.inspect.bind(this)).on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
+    this.$interpreter = $('.interpreter').on('click', this.focus.bind(this)).on('click', 'a.inspect', this.inspect.bind(this));
+    this.$scrollback = $('.scrollback').on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
   }
 
   Interpreter.prototype.scroll = function() {
-    return this.$interpreter.get(0).scrollIntoView({
+    return this.wdb.prompt.$container.get(0).scrollIntoView({
       block: "end",
       behavior: "smooth"
     });
@@ -642,9 +642,55 @@ Prompt = (function(superClass) {
     });
     CodeMirror.registerHelper("hint", "jedi", (function(_this) {
       return function(cm, callback, options) {
-        var cur, tok;
+        var cur, from, help, key, to, tok;
         cur = cm.getCursor();
         tok = cm.getTokenAt(cur);
+        from = CodeMirror.Pos(cur.line, tok.start);
+        to = CodeMirror.Pos(cur.line, tok.end);
+        if (cm.getValue() === '.') {
+          callback({
+            from: from,
+            to: to,
+            list: (function() {
+              var ref, results;
+              ref = {
+                b: 'Break',
+                c: 'Continue',
+                d: 'Dump',
+                e: 'Edition',
+                f: 'Find',
+                g: 'Clear',
+                h: 'Help',
+                i: 'Display',
+                j: 'Jump',
+                l: 'Breakpoints',
+                n: 'Next',
+                q: 'Quit',
+                r: 'Return',
+                s: 'Step',
+                t: 'Tbreak',
+                u: 'Until',
+                w: 'Watch',
+                x: 'Diff',
+                z: 'Unbreak'
+              };
+              results = [];
+              for (key in ref) {
+                if (!hasProp.call(ref, key)) continue;
+                help = ref[key];
+                results.push({
+                  text: '.' + key,
+                  displayText: "." + key + " <i>" + (this.leftpad("(" + help + ")", 14)) + "</i>  ",
+                  render: function(elt, data, cur) {
+                    return $(elt).html(cur.displayText);
+                  }
+                });
+              }
+              return results;
+            }).call(_this)
+          });
+          return;
+        }
         if (!options.completeSingle) {
           if (!tok.string.match(/[\w\.\(\[\{]/)) {
             return;
@@ -662,8 +708,8 @@ Prompt = (function(superClass) {
         return _this.completion = {
           cur: cur,
           tok: tok,
-          from: CodeMirror.Pos(cur.line, tok.start),
-          to: CodeMirror.Pos(cur.line, tok.end),
+          from: from,
+          to: to,
           callback: callback
         };
       };
@@ -834,6 +880,18 @@ Prompt = (function(superClass) {
     return this.code_mirror.setValue(val);
   };
 
+  Prompt.prototype.leftpad = function(str, n, c) {
+    var i, j, p, ref;
+    if (c == null) {
+      c = ' ';
+    }
+    p = n - str.length;
+    for (i = j = 0, ref = p; 0 <= ref ? j <= ref : j >= ref; i = 0 <= ref ? ++j : --j) {
+      str = c + str;
+    }
+    return str;
+  };
+
   Prompt.prototype.searchBack = function(back) {
     var close;
     if (back == null) {
@@ -897,6 +955,59 @@ Prompt = (function(superClass) {
 
 })(Log);
 
+Watchers = (function(superClass) {
+  extend(Watchers, superClass);
+
+  function Watchers(wdb) {
+    this.wdb = wdb;
+    Watchers.__super__.constructor.apply(this, arguments);
+    this.$watchers = $('.watchers').on('click', '.watching .name', this.unwatch.bind(this));
+  }
+
+  Watchers.prototype.unwatch = function(e) {
+    var expr;
+    expr = $(e.currentTarget).closest('.watching').attr('data-expr');
+    return this.wdb.unwatch(expr);
+  };
+
+  Watchers.prototype.updateAll = function(watchers) {
+    var value, watcher;
+    for (watcher in watchers) {
+      if (!hasProp.call(watchers, watcher)) continue;
+      value = watchers[watcher];
+      this.update(watcher, value);
+    }
+    this.$watchers.find('.watching:not(.updated)').remove();
+    return this.$watchers.find('.watching').removeClass('updated');
+  };
+
+  Watchers.prototype.update = function(watcher, value) {
+    var $name, $value, $watcher;
+    $watcher = this.$watchers.find(".watching").filter(function(e) {
+      return $(e).attr('data-expr') === watcher;
+    });
+    if (!$watcher.length) {
+      $name = $('<code>', {
+        "class": "name"
+      });
+      $value = $('<div>', {
+        "class": "value"
+      });
+      this.$watchers.append($watcher = $('<div>', {
+        "class": "watching"
+      }).attr('data-expr', watcher).append($name.text(watcher), $('<code>').text(': '), $value));
+      this.wdb.code($value, value.toString(), [], true);
+    } else {
+      $watcher.find('.value code').remove();
+      this.wdb.code($watcher.find('.value'), value.toString(), [], true);
+    }
+    return $watcher.addClass('updated');
+  };
+
+  return Watchers;
+
+})(Log);
+
 Switch = (function(superClass) {
   extend(Switch, superClass);
 
@@ -926,33 +1037,25 @@ Wdb = (function(superClass) {
   function Wdb() {
     Wdb.__super__.constructor.apply(this, arguments);
     this.started = false;
-    this.to_complete = null;
     this.cwd = null;
     this.file_cache = {};
     this.last_cmd = null;
     this.eval_time = null;
-    this.waited_for_ws = 0;
-    this.$waiter = $('.waiter');
-    this.$wdb = $('.wdb');
-    this.$watchers = $('.watchers');
-    this.ws = new Websocket(this, this.$wdb.find('[data-uuid]').attr('data-uuid'));
+    this.ws = new Websocket(this, $('[data-uuid]').attr('data-uuid'));
     this.traceback = new Traceback(this);
     this.cm = new Codemirror(this);
     this.interpreter = new Interpreter(this);
     this.prompt = new Prompt(this);
     this["switch"] = new Switch(this);
+    this.watchers = new Watchers(this);
   }
 
   Wdb.prototype.opening = function() {
     if (!this.started) {
       $(window).on('keydown', this.global_key.bind(this));
-      this.$watchers.on('click', '.watching .name', this.unwatch.bind(this));
-      false;
       this.started = true;
     }
-    this.ws.send('Start');
-    this.$waiter.remove();
-    return this.$wdb.show();
+    return this.ws.send('Start');
   };
 
   Wdb.prototype.working = function() {
@@ -1457,69 +1560,12 @@ Wdb = (function(superClass) {
     return this.working();
   };
 
-  Wdb.prototype.format_fun = function(p) {
-    var cls, i, j, len, param, ref, tags;
-    tags = [
-      $('<span>', {
-        "class": 'fun_name',
-        title: p.module
-      }).text(p.call_name), $('<span>', {
-        "class": 'fun_punct'
-      }).text('(')
-    ];
-    ref = p.params;
-    for (i = j = 0, len = ref.length; j < len; i = ++j) {
-      param = ref[i];
-      cls = 'fun_param';
-      if (i === p.index || (i === p.params.length - 1 && p.index > i)) {
-        cls = 'fun_param active';
-      }
-      tags.push($('<span>', {
-        "class": cls
-      }).text(param));
-      if (i !== p.params.length - 1) {
-        tags.push($('<span>', {
-          "class": 'fun_punct'
-        }).text(', '));
-      }
-    }
-    tags.push($('<span>', {
-      "class": 'fun_punct'
-    }).text(')'));
-    return tags;
-  };
-
   Wdb.prototype.watched = function(data) {
-    var $name, $value, $watcher, value, watcher;
-    for (watcher in data) {
-      if (!hasProp.call(data, watcher)) continue;
-      value = data[watcher];
-      $watcher = this.$watchers.find(".watching").filter(function(e) {
-        return $(e).attr('data-expr') === watcher;
-      });
-      if (!$watcher.size()) {
-        $name = $('<code>', {
-          "class": "name"
-        });
-        $value = $('<div>', {
-          "class": "value"
-        });
-        this.$watchers.append($watcher = $('<div>', {
-          "class": "watching"
-        }).attr('data-expr', watcher).append($name.text(watcher), $('<code>').text(': '), $value));
-        this.code($value, value.toString(), [], true);
-      } else {
-        $watcher.find('.value code').remove();
-        this.code($watcher.find('.value'), value.toString(), [], true);
-      }
-      $watcher.addClass('updated');
-    }
-    this.$watchers.find('.watching:not(.updated)').remove();
-    return this.$watchers.find('.watching').removeClass('updated');
+    return this.watchers.updateAll(data);
   };
 
   Wdb.prototype.ack = function() {
-    return this.$eval.val('').trigger('autosize.resize');
+    return this.done();
   };
 
   Wdb.prototype.display = function(data) {
@@ -1631,8 +1677,8 @@ Wdb = (function(superClass) {
     return false;
   };
 
-  Wdb.prototype.unwatch = function(e) {
-    this.ws.send('Unwatch', $(e.currentTarget).closest('.watching').attr('data-expr'));
+  Wdb.prototype.unwatch = function(expr) {
+    this.ws.send('Unwatch', expr);
     return this.working();
   };
 
