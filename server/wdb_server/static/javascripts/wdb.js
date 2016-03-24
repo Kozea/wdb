@@ -680,7 +680,7 @@ Prompt = (function(superClass) {
                 help = ref[key];
                 results.push({
                   text: '.' + key,
-                  displayText: "." + key + " <i>" + (this.leftpad("(" + help + ")", 14)) + "</i>  ",
+                  displayText: "." + key + " <i>" + (this.leftpad('(' + help + ')', 14)) + "</i>  ",
                   render: function(elt, data, cur) {
                     return $(elt).html(cur.displayText);
                   }

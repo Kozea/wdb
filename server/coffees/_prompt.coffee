@@ -19,6 +19,40 @@ class Prompt extends Log
       (cm, callback, options) =>
         cur = cm.getCursor()
         tok = cm.getTokenAt(cur)
+        from = CodeMirror.Pos(cur.line, tok.start)
+        to = CodeMirror.Pos(cur.line, tok.end)
+        if cm.getValue() is '.'
+          callback
+            from: from
+            to: to
+            list: (
+              (text: '.' + key,
+              displayText: ".#{key} <i>#{@leftpad('(' + help + ')', 14)}</i>  ",
+              render: (elt, data, cur) ->
+                $(elt).html cur.displayText
+              ) for own key, help of {
+                b: 'Break'
+                c: 'Continue'
+                d: 'Dump'
+                e: 'Edition'
+                f: 'Find'
+                g: 'Clear'
+                h: 'Help'
+                i: 'Display'
+                j: 'Jump'
+                l: 'Breakpoints'
+                n: 'Next'
+                q: 'Quit'
+                r: 'Return'
+                s: 'Step'
+                t: 'Tbreak'
+                u: 'Until'
+                w: 'Watch'
+                x: 'Diff'
+                z: 'Unbreak'
+            })
+          return
+
         unless options.completeSingle
           # Auto triggered
           return unless tok.string.match /[\w\.\(\[\{]/
@@ -32,8 +66,8 @@ class Prompt extends Log
         @completion =
           cur: cur
           tok: tok
-          from: CodeMirror.Pos(cur.line, tok.start)
-          to: CodeMirror.Pos(cur.line, tok.end)
+          from: from
+          to: to
           callback: callback
 
     @code_mirror.addKeyMap
@@ -137,6 +171,12 @@ class Prompt extends Log
 
   set: (val) ->
     @code_mirror.setValue(val)
+
+  leftpad: (str, n, c=' ') ->
+    p = n - str.length
+    for i in [0..p]
+      str = c + str
+    str
 
   searchBack: (back=true)->
     @$code_mirror.addClass 'extra-dialog'
