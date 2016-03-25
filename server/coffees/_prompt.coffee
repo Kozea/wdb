@@ -15,6 +15,8 @@ class Prompt extends Log
       lineWrapping: true
       autofocus: true
 
+    @code_mirror.on 'changes', @changes.bind @
+
     CodeMirror.registerHelper "hint", "jedi",
       (cm, callback, options) =>
         cur = cm.getCursor()
@@ -228,3 +230,7 @@ class Prompt extends Log
           @$code_mirror.removeClass 'extra-dialog'
     )
     close.back = back
+
+  changes: ->
+    console.log 'changes', arguments
+    @wdb.interpreter.scroll()
