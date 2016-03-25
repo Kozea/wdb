@@ -165,3 +165,38 @@ main {
   position: fixed;
   bottom: 2em;
   right: 2em; }
+
+.diff td {
+  width: 49%;
+  border-top: none;
+  border-bottom: none;
+  padding-top: 0;
+  padding-bottom: 0; }
+
+.diff .diff_lno {
+  min-width: 50px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 1%; }
+
+.diff .diff_line {
+  white-space: pre-wrap;
+  word-break: break-word; }
+
+.diff .diff_sub {
+  background-color: #f8cbcb; }
+
+.diff .diff_line_sub {
+  background-color: #ffecec; }
+
+.diff .diff_add {
+  background-color: #a6f3a6; }
+
+.diff .diff_line_add {
+  background-color: #eaffea; }
+
+.diff .diff_chg {
+  background-color: #f2f1a1; }
+
+.diff .diff_line_chg {
+  background-color: #fffeeb; }
