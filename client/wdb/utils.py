@@ -47,9 +47,9 @@ def get_source(obj):
         code = get_code(obj)
         if code:
             source = get_source_from_byte_code(code)
-        if source:
-            source = '# The following source has been decompilated:\n' + source
-            return source
+            if source:
+                return (
+                    '# The following source has been decompilated:\n' + source)
 
         old_stdout = sys.stdout
         sys.stdout = StringIO()
@@ -397,3 +397,21 @@ class timeout_of(object):
 
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
+
+
+_cut_ = ('cut', object())
+
+
+def cut_if_too_long(iterable, level):
+    max_ = 100
+    for i in range(1, min(level, 4)):
+        max_ /= 2
+    start = 10
+    end = 5
+    max_ = max(start + end, int(max_))
+
+    if len(iterable) > max_:
+        return list(iterable[:start]) + [
+            _cut_] + list(iterable[-end:])
+    else:
+        return iterable

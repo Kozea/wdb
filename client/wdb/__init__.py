@@ -28,7 +28,8 @@ from .breakpoint import (
 from collections import defaultdict
 from .ui import Interaction, dump
 from .utils import (
-    pretty_frame, executable_line, get_args, get_source_from_byte_code)
+    pretty_frame, executable_line, get_args, get_source_from_byte_code,
+    cut_if_too_long, _cut_)
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
@@ -425,14 +426,15 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self, obj, context=None, html=True, level=0):
+    def safe_better_repr(self,
+                         obj, context=None, html=True, level=0, full=False):
         """Repr with inspect links on objects"""
         context = context and dict(context) or {}
         recursion = id(obj) in context
         if not recursion:
             context[id(obj)] = obj
             try:
-                rv = self.better_repr(obj, context, html, level + 1)
+                rv = self.better_repr(obj, context, html, level + 1, full)
             except Exception:
                 rv = None
             if rv:
@@ -448,8 +450,16 @@ class Wdb(object):
             'Recursion of ' if recursion else '',
             self.safe_repr(obj))
 
-    def better_repr(self, obj, context=None, html=True, level=1):
+    def better_repr(self, obj, context=None, html=True, level=1, full=False):
         """Repr with html decorations or indentation"""
+        abbreviate = (lambda x, level: x) if full else cut_if_too_long
+
+        def get_too_long_repr():
+            if html:
+                self.obj_cache[id(obj)] = obj
+                return '<a href="dump/%d" class="inspect">…</a>' % id(obj)
+            return '…'
+
         if isinstance(obj, dict):
             dict_repr = '  ' * (level - 1)
             if type(obj) != dict:
@@ -463,26 +473,33 @@ class Wdb(object):
                 if html:
                     dict_repr += '<table>'
                     dict_repr += ''.join([
-                        '<tr><td>' + self.safe_repr(key) + '</td><td>:</td>'
-                        '<td>' + self.safe_better_repr(
-                            val, context, html, level) +
-                        '</td></tr>'
-                        for key, val in sorted(
+                        (
+                            '<tr><td>' + self.safe_repr(key) +
+                            '</td><td>:</td>'
+                            '<td>' + self.safe_better_repr(
+                                val, context, html, level, full) +
+                            '</td></tr>'
+                        ) if val is not _cut_[1] else (
+                            '<tr><td colspan="2">' +
+                            get_too_long_repr() + '</td></tr>'
+                        )
+                        for key, val in abbreviate(sorted(
                             obj.items(),
-                            key=lambda x: x[0])])
+                            key=lambda x: x[0]), level)])
                     dict_repr += '</table>'
                 else:
                     dict_repr += ('\n' + '  ' * level).join([
                         self.safe_repr(key) + ': ' + self.safe_better_repr(
-                            val, context, html, level)
-                        for key, val in sorted(
+                            val, context, html, level, full
+                        ) if val is not _cut_ else get_too_long_repr()
+                        for key, val in abbreviate(sorted(
                             obj.items(),
-                            key=lambda x: x[0])])
+                            key=lambda x: x[0]))])
                 closer = '\n' + '  ' * (level - 1) + closer
             else:
                 dict_repr += ', '.join([
                     self.safe_repr(key) + ': ' + self.safe_better_repr(
-                        val, context, html, level)
+                        val, context, html, level, full)
                     for key, val in sorted(obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
@@ -506,15 +523,16 @@ class Wdb(object):
                 closer = '])'
 
             splitter = ', '
-            if len(obj) > 2:
+            if len(obj) > 2 and html:
                 splitter += '\n' + '  ' * level
                 iter_repr += '\n' + '  ' * level
                 closer = '\n' + '  ' * (level - 1) + closer
 
             iter_repr += splitter.join(
                 [self.safe_better_repr(
-                    val, context, html, level)
-                 for val in obj])
+                    val, context, html, level, full
+                 ) if val is not _cut_ else get_too_long_repr()
+                 for val in abbreviate(obj, level)])
 
             iter_repr += closer
             return iter_repr
