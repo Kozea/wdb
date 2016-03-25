@@ -269,7 +269,7 @@ Codemirror = (function(superClass) {
     var new_state;
     new_state = {
       fn: data.name,
-      file: data.file,
+      file: data.file || frame.code,
       fun: frame["function"],
       lno: frame.lno,
       flno: frame.flno,
@@ -323,10 +323,11 @@ Codemirror = (function(superClass) {
       base[name1] = [];
     }
     this.footsteps[this.state.fn].push(this.state.lno);
-    return this.code_mirror.scrollIntoView({
+    this.code_mirror.scrollIntoView({
       line: this.state.lno,
       ch: 1
     }, this.$code_mirror.height() / 2);
+    return this.code_mirror.refresh();
   };
 
   Codemirror.prototype.get_mode = function(fn) {
@@ -589,7 +590,7 @@ Interpreter = (function(superClass) {
   function Interpreter(wdb) {
     this.wdb = wdb;
     Interpreter.__super__.constructor.apply(this, arguments);
-    this.$interpreter = $('.interpreter').on('click', this.focus.bind(this)).on('click', 'a.inspect', this.inspect.bind(this));
+    this.$terminal = $('.terminal').on('click', this.focus.bind(this)).on('click', 'a.inspect', this.inspect.bind(this));
     this.$scrollback = $('.scrollback').on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
   }
 
@@ -624,11 +625,11 @@ Interpreter = (function(superClass) {
     return $(e.currentTarget).add($(e.currentTarget).next()).toggleClass('closed', 'shown');
   };
 
-  Interpreter.prototype.focus = function() {
+  Interpreter.prototype.focus = function(e) {
     var scroll;
-    scroll = this.$interpreter.scrollTop();
+    scroll = this.$terminal.scrollTop();
     this.wdb.prompt.focus();
-    return this.$interpreter.scrollTop(scroll);
+    return this.$terminal.scrollTop(scroll);
   };
 
   return Interpreter;
@@ -1761,6 +1762,6 @@ Wdb = (function(superClass) {
 
 $((function(_this) {
   return function() {
-    return _this.wdb = new Wdb();
+    return window.wdb = new Wdb();
   };
 })(this));

@@ -1,7 +1,7 @@
 class Interpreter extends Log
   constructor: (@wdb) ->
     super
-    @$interpreter = $('.interpreter')
+    @$terminal = $('.terminal')
       .on 'click', @focus.bind @
       .on 'click', 'a.inspect', @inspect.bind @
     @$scrollback = $('.scrollback')
@@ -43,7 +43,7 @@ class Interpreter extends Log
       .add($(e.currentTarget).next())
       .toggleClass('closed', 'shown')
 
-  focus: ->
-    scroll = @$interpreter.scrollTop()
+  focus: (e) ->
+    scroll = @$terminal.scrollTop()
     @wdb.prompt.focus()
-    @$interpreter.scrollTop scroll
+    @$terminal.scrollTop scroll

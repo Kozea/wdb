@@ -175,6 +175,26 @@ code
   100%
     opacity: 1
 
-@media screen and (min-width: 1025px)
-  .mdl-layout--fixed-drawer>.mdl-layout__header .mdl-layout__header-row
-    padding-right: 20px
+.mdl-layout__header-row
+  padding-right: 20px
+
+
+.cover
+  // background: url('../hipster.jpg') center / cover
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)), url("../hipster.jpg") center/cover
+
+  .mdl-layout__header-row
+    height: 15vh
+  .mdl-layout__tab-bar, .mdl-layout__tab-bar-button
+    background: transparent
+  .mdl-layout-title
+    font-size: 4em
+
+
+main
+  background: white
+
+.open-shell
+  position: fixed
+  bottom: 2em
+  right: 2em

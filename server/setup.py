@@ -41,6 +41,9 @@ options = dict(
             'templates/*.html'
         ],
     },
+    extras_require={
+        'uncompyle6': ['uncompyle6']  # For code source from disassembly
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

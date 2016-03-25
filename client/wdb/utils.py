@@ -17,10 +17,40 @@ def pretty_frame(frame):
         return 'None'
 
 
+def get_code(obj):
+    if hasattr(obj, '__func__'):
+        return obj.__func__
+    if hasattr(obj, '__code__'):
+        return obj.__code__
+    if hasattr(obj, 'gi_code'):
+        return obj.gi_code
+    if hasattr(obj, 'co_code'):
+        return obj
+
+
+def get_source_from_byte_code(code):
+    try:
+        import uncompyle6
+    except ImportError:
+        return
+    version = sys.version_info.major + (sys.version_info.minor / 10.0)
+    try:
+        return uncompyle6.deparse_code(version, code).text
+    except Exception:
+        return
+
+
 def get_source(obj):
     try:
         return inspect.getsource(obj)
     except Exception:
+        code = get_code(obj)
+        if code:
+            source = get_source_from_byte_code(code)
+        if source:
+            source = '# The following source has been decompilated:\n' + source
+            return source
+
         old_stdout = sys.stdout
         sys.stdout = StringIO()
         try:
