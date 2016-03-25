@@ -238,6 +238,13 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
                 Wdb.get().run_file(file_name)
 
             Process(target=run).start()
+        elif cmd == 'RunShell':
+
+            def run():
+                from wdb import Wdb
+                Wdb.get().shell()
+
+            Process(target=run).start()
 
     def on_close(self):
         syncwebsockets.remove(self.uuid)

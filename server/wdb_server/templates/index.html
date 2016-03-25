@@ -8,7 +8,7 @@
 
 <!-- Simple header with scrollable tabs. -->
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-  <header class="mdl-layout__header">
+  <header class="mdl-layout__header cover">
     <div class="mdl-layout__header-row">
       <!-- Title -->
       <span class="mdl-layout-title">wdb</span>
@@ -31,9 +31,9 @@
         <table class="sessions mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
             <tr>
-              <th>Session id</th>
-              <th>Socket open</th>
-              <th>Websocket open</th>
+              <th class="mdl-data-table__cell--non-numeric">Session id</th>
+              <th class="mdl-data-table__cell--non-numeric">Socket open</th>
+              <th class="mdl-data-table__cell--non-numeric">Websocket open</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -112,6 +112,11 @@
         </div>
       </section>
     {% end %}
+    <div class="open-shell">
+      <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">
+        <i class="material-icons">computer</i>
+      </button>
+    </div>
   </main>
 </div>
 

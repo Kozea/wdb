@@ -140,7 +140,7 @@ class Codemirror extends Log
   open: (data, frame) ->
     new_state =
       fn: data.name
-      file: data.file
+      file: data.file or frame.code
       fun: frame.function
       lno: frame.lno
       flno: frame.flno
@@ -188,6 +188,7 @@ class Codemirror extends Log
       line: @state.lno
       ch: 1,
       @$code_mirror.height() / 2
+    @code_mirror.refresh()
 
   get_mode: (fn) ->
     switch fn.split('.').splice(-1)[0]

@@ -4,9 +4,11 @@ wait = 25
 make_uuid_line = (uuid, socket) ->
   unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).size()
     $line = $("<tr data-uuid=\"#{uuid}\">
-      <td class=\"uuid\"><a href=\"/debug/session/#{uuid}\">#{uuid}</a></td>
-      <td class=\"socket\">No</td>
-      <td class=\"websocket\">No</td>
+      <td class=\"uuid mdl-data-table__cell--non-numeric\">
+        <a href=\"/debug/session/#{uuid}\">#{uuid}</a>
+      </td>
+      <td class=\"socket mdl-data-table__cell--non-numeric\">No</td>
+      <td class=\"websocket mdl-data-table__cell--non-numeric\">No</td>
       <td class=\"action\">
         <button class=\"mdl-button mdl-js-button mdl-button--icon close \
             mdl-button--colored\" title=\"Force close\">
@@ -100,9 +102,9 @@ make_process_line = (proc) ->
         #{get_proc_thread_val proc, elt}</td>"
     line += """
       <td class=\"action\">
-        <button class=\"mdl-button mdl-js-button mdl-button--icon minus \
+        <button class=\"mdl-button mdl-js-button mdl-button--icon plus \
           mdl-button--colored\" title=\"Toggle threads\">
-          <i class=\"material-icons\">remove</i>
+          <i class=\"material-icons\">add</i>
         </button>
       </td>
       <td class=\"action\">
@@ -124,7 +126,8 @@ make_thread_line = (thread) ->
       $tr.find(".#{elt}").text(get_proc_thread_val thread, elt)
   else
     line = """
-      <tr data-tid=\"#{thread.id}\" data-of=\"#{thread.of}\">
+      <tr data-tid=\"#{thread.id}\" data-of=\"#{thread.of}\"
+        style="display: none">
         <td class=\"id\">#{get_proc_thread_val thread, 'id'}</td>
         <td class=\"action\">
           <button class=\"mdl-button mdl-js-button mdl-button--icon pause \
@@ -139,8 +142,8 @@ make_thread_line = (thread) ->
       $next.before line
     else
       $(".processes tbody").append line
-    $proc.find('.rowspan').attr('rowspan',
-      (+$proc.find('.rowspan').attr('rowspan') or 1) + 1)
+    # $proc.find('.rowspan').attr('rowspan',
+    #   (+$proc.find('.rowspan').attr('rowspan') or 1) + 1)
 
 
 ws_message = (event) ->
@@ -262,3 +265,6 @@ $ ->
   $('.runfile').on 'submit', ->
     ws.send('RunFile|' + $(this).find('[type=text]').val())
     false
+
+  $('.open-shell button').on 'click', (e) ->
+    ws.send 'RunShell'

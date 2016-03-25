@@ -27,7 +27,8 @@ from .breakpoint import (
 
 from collections import defaultdict
 from .ui import Interaction, dump
-from .utils import pretty_frame, executable_line, get_args
+from .utils import (
+    pretty_frame, executable_line, get_args, get_source_from_byte_code)
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
@@ -602,18 +603,25 @@ class Wdb(object):
         for i, (stack_frame, lno) in enumerate(stack):
             code = stack_frame.f_code
             filename = code.co_filename
-            linecache.checkcache(filename)
-            line = linecache.getline(filename, lno, stack_frame.f_globals)
+            line = None
+            if filename[0] == '<' and filename[-1] == '>':
+                line = get_source_from_byte_code(code)
+                fn = filename
+            else:
+                fn = os.path.abspath(filename)
             if not line:
-                line = self.compile_cache.get(id(code), '')
-            line = to_unicode_string(line, filename)
-            line = line and line.strip()
+                linecache.checkcache(filename)
+                line = linecache.getline(filename, lno, stack_frame.f_globals)
+                if not line:
+                    line = self.compile_cache.get(id(code), '')
+                line = to_unicode_string(line, filename)
+                line = line and line.strip()
             startlnos = dis.findlinestarts(code)
             lastlineno = list(startlnos)[-1][1]
             if frame == stack_frame:
                 current = i
             frames.append({
-                'file': os.path.abspath(filename),
+                'file': fn,
                 'function': code.co_name,
                 'flno': code.co_firstlineno,
                 'llno': lastlineno,
