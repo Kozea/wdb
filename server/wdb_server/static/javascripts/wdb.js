@@ -657,6 +657,7 @@ Prompt = (function(superClass) {
       lineWrapping: true,
       autofocus: true
     });
+    this.code_mirror.on('changes', this.changes.bind(this));
     CodeMirror.registerHelper("hint", "jedi", (function(_this) {
       return function(cm, callback, options) {
         var cur, from, help, key, to, tok;
@@ -966,6 +967,11 @@ Prompt = (function(superClass) {
       })(this)
     });
     return close.back = back;
+  };
+
+  Prompt.prototype.changes = function() {
+    console.log('changes', arguments);
+    return this.wdb.interpreter.scroll();
   };
 
   return Prompt;
@@ -1760,8 +1766,6 @@ Wdb = (function(superClass) {
 
 })(Log);
 
-$((function(_this) {
-  return function() {
-    return window.wdb = new Wdb();
-  };
-})(this));
+$(function() {
+  return window.wdb = new Wdb();
+});

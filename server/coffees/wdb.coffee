@@ -611,4 +611,4 @@ specify a module like `logging.config`.
     "#{time.toFixed(0)}s"
 
 
-$ => window.wdb = new Wdb()
+$ -> window.wdb = new Wdb()
