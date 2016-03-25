@@ -33,7 +33,7 @@
     display: inline-block;
     text-decoration: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    cursor: help; }
+    cursor: pointer; }
   .interpreter .prompt, .interpreter .for {
     margin-left: 26px; }
     .interpreter .prompt::before, .interpreter .for::before {

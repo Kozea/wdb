@@ -276,10 +276,23 @@ class Interaction(object):
         }))
 
     def do_inspect(self, data):
+        if '/' in data:
+            mode, data = data.split('/', 1)
+        else:
+            mode = 'inspect'
+
         try:
             thing = self.db.obj_cache.get(int(data))
         except Exception:
             self.fail('Inspect')
+            return
+        if mode == 'dump':
+            self.db.send('Print|%s' % dump({
+                'for': self.db.safe_better_repr(
+                    thing, html=False),
+                'result': self.db.safe_better_repr(
+                    thing, full=True)
+            }))
             return
 
         if (isinstance(thing, tuple) and len(thing) == 3):
