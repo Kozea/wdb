@@ -76,7 +76,7 @@ class Wdb(object):
     watchers = defaultdict(set)
 
     @staticmethod
-    def get(no_create=False, server=SOCKET_SERVER, port=SOCKET_PORT,
+    def get(no_create=False, server=None, port=None,
             force_uuid=None):
         """Get the thread local singleton"""
         pid = os.getpid()
@@ -89,7 +89,9 @@ class Wdb(object):
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
         else:
-            if wdb and (wdb.server != server or wdb.port != port):
+            if wdb and (
+                    server is not None and wdb.server != server or
+                    port is not None and wdb.port != port):
                 log.warn('Different server/port set, ignoring')
         return wdb
 
@@ -100,11 +102,10 @@ class Wdb(object):
         thread = threading.current_thread()
         Wdb._instances.pop((pid, thread))
 
-    def __new__(cls, server=SOCKET_SERVER, port=SOCKET_PORT):
+    def __new__(cls, server=None, port=None):
         return cls.get(server=server, port=port)
 
-    def __init__(
-            self, server=SOCKET_SERVER, port=SOCKET_PORT, force_uuid=None):
+    def __init__(self, server=None, port=None, force_uuid=None):
         log.debug('New wdb instance %r' % self)
         self.obj_cache = {}
         self.compile_cache = {}
@@ -121,8 +122,8 @@ class Wdb(object):
         self.full = False
         self.below = 0
         self.under = None
-        self.server = server
-        self.port = port
+        self.server = server or SOCKET_SERVER
+        self.port = port or SOCKET_PORT
         self.interaction_stack = []
         self._socket = None
         self.connect()
@@ -833,20 +834,20 @@ class Wdb(object):
         self.pop()
 
 
-def set_trace(frame=None, skip=0, server=SOCKET_SERVER, port=SOCKET_PORT):
+def set_trace(frame=None, skip=0, server=None, port=None):
     """Set trace on current line, or on given frame"""
     frame = frame or sys._getframe().f_back
     for i in range(skip):
         if not frame.f_back:
             break
         frame = frame.f_back
-    wdb = Wdb.get()
+    wdb = Wdb.get(server=server, port=port)
     wdb.set_trace(frame)
     return wdb
 
 
 def start_trace(full=False, frame=None, below=0, under=None,
-                server=SOCKET_SERVER, port=SOCKET_PORT):
+                server=None, port=None):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     wdb = Wdb.get(server=server, port=port)
@@ -894,14 +895,14 @@ def cleanup():
         sck.close()
 
 
-def shell(source=None, vars=None):
+def shell(source=None, vars=None, server=None, port=None):
     """Start a shell sourcing source or using vars as locals"""
-    Wdb.get().shell(source=source, vars=vars)
+    Wdb.get(server=server, port=port).shell(source=source, vars=vars)
 
 
 # Pdb compatibility
 
-def post_mortem(t=None, server=SOCKET_SERVER, port=SOCKET_PORT):
+def post_mortem(t=None, server=None, port=None):
     if t is None:
         t = sys.exc_info()[2]
         if t is None:
@@ -914,5 +915,5 @@ def post_mortem(t=None, server=SOCKET_SERVER, port=SOCKET_PORT):
     wdb.interaction(None, t)
 
 
-def pm(server=SOCKET_SERVER, port=SOCKET_PORT):
+def pm(server=None, port=None):
     post_mortem(sys.last_traceback, server=server, port=port)
