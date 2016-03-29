@@ -10,7 +10,12 @@ class Interpreter extends Log
       .on 'click', '.toggle', @toggle_visibility.bind @
 
 
-  scroll: ->
+  scroll: (direction=null)->
+    if direction
+      @$terminal.scrollTop(
+        @$terminal.scrollTop() + direction * @$terminal.height())
+      return
+
     @wdb.prompt.$container.get(0).scrollIntoView
       block: "end"
       behavior: "smooth"

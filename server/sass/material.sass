@@ -45,6 +45,9 @@
 
     &.object
       margin: 2em auto
+      thead tr th
+        text-align: center
+
       tbody tr:not(:hover)
         background: rgba(0, 0, 0, .025)
 
@@ -52,9 +55,12 @@
       &.closed
         display: none
 
-      td.key
-        code
-          white-space: nowrap
+      td
+        &.key
+          code
+            white-space: nowrap
+        &.ellipse
+          text-align: center
 
       td.val
         code
