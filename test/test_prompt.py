@@ -80,7 +80,7 @@ def test_eval_new_line(socket):
     socket.send('Eval', 'if l:\n  l')
     print_msg = socket.receive()
     assert print_msg.command == 'Print'
-    assert print_msg.data['for'] == 'if l:\n      l'
+    assert print_msg.data['for'] == u('if l:\n      l')
     assert 'class="inspect">3</a>]' in print_msg.data.result
 
     socket.send('Continue')
