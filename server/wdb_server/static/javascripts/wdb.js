@@ -1451,9 +1451,9 @@ Wdb = (function(superClass) {
         $tbody = $method_tbody;
       }
       $tbody.append($('<tr>').append($('<td>', {
-        "class": 'mdl-data-table__cell--non-numeric key'
+        "class": 'key'
       }).text(key)).append($('<td>', {
-        "class": 'val'
+        "class": 'mdl-data-table__cell--non-numeric val'
       }).html(val.val)));
     }
     if ($core_tbody.find('tr').size() === 0) {

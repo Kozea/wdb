@@ -30,14 +30,35 @@
   &.full-height
     height: calc(100vh - 40px - 64px)
 
-  table
-    td.key
-      code
-        white-space: nowrap
+  .long
+    display: none
 
-    td.val
-      code
-        word-break: break-all
+  .short.close:after
+    content: '…"'
+
+  table
+    margin: 0 auto
+    width: 90%
+
+    table
+      width: 100%
+
+    &.object
+      margin: 2em auto
+      tbody tr:not(:hover)
+        background: rgba(0, 0, 0, .025)
+
+    tbody
+      &.closed
+        display: none
+
+      td.key
+        code
+          white-space: nowrap
+
+      td.val
+        code
+          word-break: break-all
 
   a.inspect
     display: inline-block
@@ -91,12 +112,6 @@ footer.mdl-mini-footer
   .mdl-spinner
     margin: 2px 0
 
-table
-  margin: 2em auto
-  width: 95%
-
-  tbody.closed
-    display: none
 
 .duration
   float: right
@@ -153,7 +168,7 @@ table
 
 code
   white-space: pre-wrap
-  word-break: break-word
+  word-break: break-all
 
 .ellipsis
   text-overflow: ellipsis

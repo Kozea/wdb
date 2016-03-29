@@ -475,9 +475,9 @@ class Wdb(object):
                     dict_repr += '<table>'
                     dict_repr += ''.join([
                         (
-                            '<tr><td>' + self.safe_repr(key) +
-                            '</td><td>:</td>'
-                            '<td>' + self.safe_better_repr(
+                            '<tr><td class="key">' + self.safe_repr(key) +
+                            ':</td>'
+                            '<td class="val">' + self.safe_better_repr(
                                 val, context, html, level, full) +
                             '</td></tr>'
                         ) if val is not _cut_[1] else (
