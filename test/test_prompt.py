@@ -43,7 +43,7 @@ def test_eval(socket):
 
 
 @use('movement.py')
-def test_eval_2(socket):
+def test_eval_dump(socket):
     socket.start()
     socket.assert_init()
     socket.send('Next')
@@ -56,6 +56,32 @@ def test_eval_2(socket):
     assert print_msg.command == 'Dump'
     assert print_msg.data['for'] == u('l ⟶ [3] ')
     assert print_msg.data.val
+
+    socket.send('Continue')
+    socket.join()
+
+
+@use('movement.py')
+def test_eval_new_line(socket):
+    socket.start()
+    socket.assert_init()
+    socket.send('Next')
+    socket.assert_position(line=12)
+    socket.send('Next')
+    socket.assert_position(line=13)
+
+    socket.send('Eval', 'if l:')
+    print_msg = socket.receive()
+    assert print_msg.command == 'NewLine'
+
+    watched_msg = socket.receive()
+    assert watched_msg.command == 'Watched'
+
+    socket.send('Eval', 'if l:\n  l')
+    print_msg = socket.receive()
+    assert print_msg.command == 'Print'
+    assert print_msg.data['for'] == 'if l:\n      l'
+    assert 'class="inspect">3</a>]' in print_msg.data.result
 
     socket.send('Continue')
     socket.join()

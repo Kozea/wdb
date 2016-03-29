@@ -42,10 +42,10 @@ class Slave(Process):
         super(Slave, self).__init__()
 
     def run(self):
-        import os
-        os.environ['WDB_SOCKET_SERVER'] = self.host
-        os.environ['WDB_SOCKET_PORT'] = str(self.port)
-        os.environ['WDB_NO_BROWSER_AUTO_OPEN'] = 'Yes'
+        import wdb
+        wdb.SOCKET_SERVER = self.host
+        wdb.SOCKET_PORT = self.port
+        wdb.WDB_NO_BROWSER_AUTO_OPEN = True
         sys.argv = self.argv
 
         with open(self.file, 'rb') as file:
