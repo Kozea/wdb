@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 from multiprocessing import Process, Lock
 from multiprocessing.connection import Listener
 import wdb
