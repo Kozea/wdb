@@ -361,8 +361,9 @@ specify a module like `logging.config`.
 
       $tbody.append($('<tr>')
         .append(
-          $('<td>', class: 'mdl-data-table__cell--non-numeric key').text(key))
-        .append($('<td>', class: 'val').html(val.val)))
+          $('<td>', class: 'key').text(key))
+        .append($('<td>', class:
+          'mdl-data-table__cell--non-numeric val').html(val.val)))
 
     if $core_tbody.find('tr').size() is 0
       $core_head.remove()
