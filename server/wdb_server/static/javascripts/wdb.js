@@ -594,7 +594,14 @@ Interpreter = (function(superClass) {
     this.$scrollback = $('.scrollback').on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
   }
 
-  Interpreter.prototype.scroll = function() {
+  Interpreter.prototype.scroll = function(direction) {
+    if (direction == null) {
+      direction = null;
+    }
+    if (direction) {
+      this.$terminal.scrollTop(this.$terminal.scrollTop() + direction * this.$terminal.height());
+      return;
+    }
     return this.wdb.prompt.$container.get(0).scrollIntoView({
       block: "end",
       behavior: "smooth"
@@ -768,7 +775,17 @@ Prompt = (function(superClass) {
         });
       },
       'PageUp': 'goLineUp',
-      'PageDown': 'goLineDown'
+      'PageDown': 'goLineDown',
+      'Shift-PageUp': (function(_this) {
+        return function() {
+          return _this.wdb.interpreter.scroll(-1);
+        };
+      })(this),
+      'Shift-PageDown': (function(_this) {
+        return function() {
+          return _this.wdb.interpreter.scroll(1);
+        };
+      })(this)
     });
     this.code_mirror.on('keyup', (function(_this) {
       return function(cm, e) {

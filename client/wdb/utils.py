@@ -399,19 +399,23 @@ class timeout_of(object):
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
 
 
-_cut_ = ('cut', object())
+class IterableEllipsis(object):
+    def __init__(self, size):
+        self.size = size
 
 
-def cut_if_too_long(iterable, level):
+def cut_if_too_long(iterable, level, tuple_=False):
     max_ = 100
     for i in range(1, min(level, 4)):
         max_ /= 2
     start = 10
     end = 5
     max_ = max(start + end, int(max_))
-
-    if len(iterable) > max_:
-        return list(iterable[:start]) + [
-            _cut_] + list(iterable[-end:])
+    size = len(iterable)
+    if size > max_:
+        ie = IterableEllipsis(size - start - end)
+        if tuple_:
+            ie = (ie, ie)
+        return list(iterable[:start]) + [ie] + list(iterable[-end:])
     else:
         return iterable

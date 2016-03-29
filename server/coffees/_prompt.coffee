@@ -93,6 +93,10 @@ class Prompt extends Log
       # Use page up/down for going up/down in multiline
       'PageUp': 'goLineUp'
       'PageDown': 'goLineDown'
+      'Shift-PageUp': =>
+        @wdb.interpreter.scroll(-1)
+      'Shift-PageDown': =>
+        @wdb.interpreter.scroll(1)
 
     @code_mirror.on 'keyup', (cm, e) =>
       return unless cm.getValue()

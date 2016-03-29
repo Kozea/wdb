@@ -29,7 +29,7 @@ from collections import defaultdict
 from .ui import Interaction, dump
 from .utils import (
     pretty_frame, executable_line, get_args, get_source_from_byte_code,
-    cut_if_too_long, _cut_)
+    cut_if_too_long, IterableEllipsis)
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from log_colorizer import get_color_logger
@@ -453,13 +453,15 @@ class Wdb(object):
 
     def better_repr(self, obj, context=None, html=True, level=1, full=False):
         """Repr with html decorations or indentation"""
-        abbreviate = (lambda x, level: x) if full else cut_if_too_long
+        abbreviate = (lambda x, level, **kw: x) if full else cut_if_too_long
 
-        def get_too_long_repr():
+        def get_too_long_repr(ie):
+            r = '[%d more…]' % ie.size
             if html:
                 self.obj_cache[id(obj)] = obj
-                return '<a href="dump/%d" class="inspect">…</a>' % id(obj)
-            return '…'
+                return '<a href="dump/%d" class="inspect">%s</a>' % (
+                    id(obj), r)
+            return r
 
         if isinstance(obj, dict):
             dict_repr = '  ' * (level - 1)
@@ -472,30 +474,32 @@ class Wdb(object):
             if len(obj) > 2:
                 dict_repr += '\n' + '  ' * level
                 if html:
-                    dict_repr += '<table>'
-                    dict_repr += ''.join([
-                        (
-                            '<tr><td class="key">' + self.safe_repr(key) +
-                            ':</td>'
-                            '<td class="val">' + self.safe_better_repr(
-                                val, context, html, level, full) +
-                            '</td></tr>'
-                        ) if val is not _cut_[1] else (
-                            '<tr><td colspan="2">' +
-                            get_too_long_repr() + '</td></tr>'
+                    dict_repr += '''<table class="
+                        mdl-data-table mdl-js-data-table
+                        mdl-data-table--selectable mdl-shadow--2dp">'''
+                    dict_repr += ''.join([(
+                        '<tr><td class="key">' + self.safe_repr(key) + ':</td>'
+                        '<td class="val mdl-data-table__cell--non-numeric">' +
+                        self.safe_better_repr(
+                            val, context, html, level, full) +
+                        '</td></tr>'
+                        ) if not isinstance(key, IterableEllipsis) else (
+                            '<tr><td colspan="2" class="ellipse">' +
+                            get_too_long_repr(key) + '</td></tr>'
                         )
                         for key, val in abbreviate(sorted(
                             obj.items(),
-                            key=lambda x: x[0]), level)])
+                            key=lambda x: x[0]), level, tuple_=True)])
                     dict_repr += '</table>'
                 else:
                     dict_repr += ('\n' + '  ' * level).join([
                         self.safe_repr(key) + ': ' + self.safe_better_repr(
                             val, context, html, level, full
-                        ) if val is not _cut_ else get_too_long_repr()
+                        ) if not isinstance(key, IterableEllipsis)
+                        else get_too_long_repr(key)
                         for key, val in abbreviate(sorted(
                             obj.items(),
-                            key=lambda x: x[0]))])
+                            key=lambda x: x[0]), level, tuple_=True)])
                 closer = '\n' + '  ' * (level - 1) + closer
             else:
                 dict_repr += ', '.join([
@@ -532,7 +536,8 @@ class Wdb(object):
             iter_repr += splitter.join(
                 [self.safe_better_repr(
                     val, context, html, level, full
-                 ) if val is not _cut_ else get_too_long_repr()
+                 ) if not isinstance(val, IterableEllipsis)
+                 else get_too_long_repr(val)
                  for val in abbreviate(obj, level)])
 
             iter_repr += closer
