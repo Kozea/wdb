@@ -33,7 +33,7 @@ module.exports = (grunt) ->
         banner: '/*! <%= pkg.name %>
            <%= grunt.template.today("yyyy-mm-dd") %> */\n'
 
-      # wdb:
+      wdb:
         expand: true
         cwd: 'wdb_server/static/javascripts'
         src: '*.js'
