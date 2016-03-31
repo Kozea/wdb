@@ -21,6 +21,7 @@ class Prompt extends Log
       (cm, callback, options) =>
         cur = cm.getCursor()
         tok = cm.getTokenAt(cur)
+        return if cm.getValue().startsWith('.') and cm.getValue().length is 2
         from = CodeMirror.Pos(cur.line, tok.start)
         to = CodeMirror.Pos(cur.line, tok.end)
         if cm.getValue() is '.'
@@ -132,7 +133,7 @@ class Prompt extends Log
     return unless @completion
     cur = @completion.cur
     tok = @completion.tok
-    @completion.callback
+    hints =
       from: CodeMirror.Pos(cur.line, tok.start)
       to: CodeMirror.Pos(cur.line, tok.end)
       list: (
@@ -145,6 +146,14 @@ class Prompt extends Log
           item = "<b>#{c.base}</b>#{c.complete}"
           $(elt).html item
       ) for completion in data.completions
+    CodeMirror.on hints, 'shown', =>
+      if @code_mirror.state.completionActive.options.completeSingle
+        cls = 'triggered'
+      else
+        cls = 'auto'
+      $(@code_mirror.state.completionActive.widget.hints).addClass cls
+
+    @completion.callback hints
 
   newLineOrExecute: (cm) ->
     snippet = cm.getValue().trim()
@@ -194,22 +203,17 @@ class Prompt extends Log
         <input type="text" style="width: 10em" class="CodeMirror-search-field"/>
       """
       , (val, e) =>
-        console.log('commit')
         @history.commitSearch()
       ,
         bottom: true
         onInput: (e, val, close) =>
           return unless val
-          console.log('1', @history.index)
           @history.resetSearch()
-          console.log('2', @history.index)
           $('.CodeMirror-search-field').toggleClass(
             'not-found',
             val and not
             @history[if close.back then 'searchNext' else 'searchPrev'](val))
-          console.log('3', @history.index)
         onKeyDown: (e, val, close) =>
-          console.log('4', @history.index)
           if e.keyCode is 82 and e.ctrlKey or e.keyCode is 83 and e.altKey
             close.back = true
             $('.search-dialog-title').text('Search backward:')
@@ -226,7 +230,6 @@ class Prompt extends Log
             e.stopPropagation()
           if e.keyCode is 67 and e.ctrlKey
             close()
-          console.log('5', @history.index)
           return false
 
         onClose: (dialog) =>
@@ -236,5 +239,4 @@ class Prompt extends Log
     close.back = back
 
   changes: ->
-    console.log 'changes', arguments
     @wdb.interpreter.scroll()

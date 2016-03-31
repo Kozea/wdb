@@ -23,6 +23,15 @@ Log = (function() {
     }
   };
 
+  Log.prototype.dbg = function() {
+    var log_args, name;
+    if (this.debug) {
+      name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
+      log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+      return console.debug.apply(console, log_args);
+    }
+  };
+
   Log.prototype.fail = function() {
     var log_args, name;
     name = this.constructor.name;
@@ -73,7 +82,7 @@ Websocket = (function(superClass) {
     } else {
       cmd = message;
     }
-    this.log(this.time(), '<-', message);
+    this.dbg(this.time(), '<-', message);
     cmd = cmd.toLowerCase();
     if (cmd in this.wdb) {
       return this.wdb[cmd.toLowerCase()](data);
@@ -95,7 +104,7 @@ Websocket = (function(superClass) {
     } else {
       msg = cmd;
     }
-    this.log('->', msg);
+    this.dbg('->', msg);
     return this.ws.send(msg);
   };
 
@@ -676,6 +685,9 @@ Prompt = (function(superClass) {
         var cur, from, help, key, to, tok;
         cur = cm.getCursor();
         tok = cm.getTokenAt(cur);
+        if (cm.getValue().startsWith('.') && cm.getValue().length === 2) {
+          return;
+        }
         from = CodeMirror.Pos(cur.line, tok.start);
         to = CodeMirror.Pos(cur.line, tok.end);
         if (cm.getValue() === '.') {
@@ -839,13 +851,13 @@ Prompt = (function(superClass) {
   }
 
   Prompt.prototype.complete = function(data) {
-    var completion, cur, tok;
+    var completion, cur, hints, tok;
     if (!this.completion) {
       return;
     }
     cur = this.completion.cur;
     tok = this.completion.tok;
-    return this.completion.callback({
+    hints = {
       from: CodeMirror.Pos(cur.line, tok.start),
       to: CodeMirror.Pos(cur.line, tok.end),
       list: (function() {
@@ -869,7 +881,19 @@ Prompt = (function(superClass) {
         }
         return results;
       })()
-    });
+    };
+    CodeMirror.on(hints, 'shown', (function(_this) {
+      return function() {
+        var cls;
+        if (_this.code_mirror.state.completionActive.options.completeSingle) {
+          cls = 'triggered';
+        } else {
+          cls = 'auto';
+        }
+        return $(_this.code_mirror.state.completionActive.widget.hints).addClass(cls);
+      };
+    })(this));
+    return this.completion.callback(hints);
   };
 
   Prompt.prototype.newLineOrExecute = function(cm) {
@@ -941,7 +965,6 @@ Prompt = (function(superClass) {
     this.$code_mirror.addClass('extra-dialog');
     close = this.code_mirror.openDialog("<span class=\"search-dialog-title\">\n  Search " + (back ? 'backward' : 'forward') + ":\n</span>\n<input type=\"text\" style=\"width: 10em\" class=\"CodeMirror-search-field\"/>", (function(_this) {
       return function(val, e) {
-        console.log('commit');
         return _this.history.commitSearch();
       };
     })(this), {
@@ -951,16 +974,12 @@ Prompt = (function(superClass) {
           if (!val) {
             return;
           }
-          console.log('1', _this.history.index);
           _this.history.resetSearch();
-          console.log('2', _this.history.index);
-          $('.CodeMirror-search-field').toggleClass('not-found', val && !_this.history[close.back ? 'searchNext' : 'searchPrev'](val));
-          return console.log('3', _this.history.index);
+          return $('.CodeMirror-search-field').toggleClass('not-found', val && !_this.history[close.back ? 'searchNext' : 'searchPrev'](val));
         };
       })(this),
       onKeyDown: (function(_this) {
         return function(e, val, close) {
-          console.log('4', _this.history.index);
           if (e.keyCode === 82 && e.ctrlKey || e.keyCode === 83 && e.altKey) {
             close.back = true;
             $('.search-dialog-title').text('Search backward:');
@@ -978,7 +997,6 @@ Prompt = (function(superClass) {
           if (e.keyCode === 67 && e.ctrlKey) {
             close();
           }
-          console.log('5', _this.history.index);
           return false;
         };
       })(this),
@@ -993,7 +1011,6 @@ Prompt = (function(superClass) {
   };
 
   Prompt.prototype.changes = function() {
-    console.log('changes', arguments);
     return this.wdb.interpreter.scroll();
   };
 

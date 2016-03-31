@@ -29,6 +29,12 @@ class Log
       log_args = [name].concat Array.prototype.slice.call(arguments, 0)
       console.log.apply console, log_args
 
+  dbg: ->
+    if @debug
+      name = "[#{@constructor.name}] (#{@time()})"
+      log_args = [name].concat Array.prototype.slice.call(arguments, 0)
+      console.debug.apply console, log_args
+
   fail: ->
     name = @constructor.name
     log_args = [name].concat Array.prototype.slice.call(arguments, 0)

@@ -231,3 +231,6 @@ main {
 
 .diff .diff_line_chg {
   background-color: #fffeeb; }
+
+.CodeMirror-hints.auto {
+  opacity: .5; }

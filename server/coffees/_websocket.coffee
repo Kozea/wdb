@@ -47,7 +47,7 @@ class Websocket extends Log
       data = JSON.parse message.substr(pipe + 1)
     else
       cmd = message
-    @log @time(), '<-', message
+    @dbg @time(), '<-', message
     cmd = cmd.toLowerCase()
     if cmd of @wdb
       @wdb[cmd.toLowerCase()] data
@@ -61,5 +61,5 @@ class Websocket extends Log
       msg = "#{cmd}|#{data}"
     else
       msg = cmd
-    @log '->', msg
+    @dbg '->', msg
     @ws.send msg
