@@ -21,15 +21,23 @@
       </span>
       <div class="mdl-layout-spacer"></div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon switch">
-        <i class="material-icons">
-          {% if post_mortem %}
-            power_settings_new
-          {% else %}
-            close
-          {% end %}
-        </i>
+      <button class="mdl-button mdl-js-button mdl-button--icon switch code on">
+        <i class="material-icons">code</i>
       </button>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon switch term on">
+        <i class="material-icons">dvr</i>
+      </button>
+
+      {% if post_mortem %}
+        <button class="mdl-button mdl-js-button mdl-button--icon switch power on ">
+          <i class="material-icons">power_settings_new</i>
+        </button>
+      {% else %}
+        <button class="mdl-button mdl-js-button mdl-button--icon switch power off">
+          <i class="material-icons">close</i>
+        </button>
+      {% end %}
     </div>
   </header>
 
@@ -42,13 +50,11 @@
   </div>
 
   <main class="mdl-layout__content">
-    <div class="page-content">
-      <div class="source">
-        <div class="source-editor hidden">
-        </div>
+    <div class="page-content split">
+      <div class="source flex">
       </div>
 
-      <div class="interpreter full-height" tabindex="1">
+      <div class="interpreter flex" tabindex="1">
         <div class="watchers">
         </div>
         <div class="terminal">

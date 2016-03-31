@@ -17,7 +17,7 @@
 class Codemirror extends Log
   constructor: (@wdb) ->
     super
-    @$container = $('.source-editor')
+    @$container = $('.source')
       .on 'mouseup', @wdb.paste_target.bind @wdb
 
     @code_mirror = CodeMirror (elt) =>
@@ -200,3 +200,8 @@ class Codemirror extends Log
         'diff'
       else
         'python'
+
+  size: ->
+    @$code_mirror.height 0
+    @$code_mirror.height @$container.height()
+    @code_mirror.refresh()
