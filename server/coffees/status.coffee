@@ -198,7 +198,6 @@ ws_message = (event) ->
 create_socket = ->
   ws = new WebSocket "ws://#{location.host}/status"
   ws.onopen = ->
-    console.log "WebSocket open", arguments
     $("tbody tr").remove()
     ws.send('ListSockets')
     ws.send('ListWebSockets')
@@ -206,11 +205,9 @@ create_socket = ->
     ws.send('ListProcesses')
 
   ws.onerror = ->
-    console.log "WebSocket error", arguments
 
   ws.onmessage = ws_message
   ws.onclose = ->
-    console.log "WebSocket closed", arguments
     wait *= 2
     setTimeout(create_socket, wait)
 

@@ -21,6 +21,15 @@ Log = (function() {
     }
   };
 
+  Log.prototype.dbg = function() {
+    var log_args, name;
+    if (this.debug) {
+      name = "[" + this.constructor.name + "] (" + (this.time()) + ")";
+      log_args = [name].concat(Array.prototype.slice.call(arguments, 0));
+      return console.debug.apply(console, log_args);
+    }
+  };
+
   Log.prototype.fail = function() {
     var log_args, name;
     name = this.constructor.name;
@@ -262,19 +271,15 @@ ws_message = function(event) {
 create_socket = function() {
   ws = new WebSocket("ws://" + location.host + "/status");
   ws.onopen = function() {
-    console.log("WebSocket open", arguments);
     $("tbody tr").remove();
     ws.send('ListSockets');
     ws.send('ListWebSockets');
     ws.send('ListBreaks');
     return ws.send('ListProcesses');
   };
-  ws.onerror = function() {
-    return console.log("WebSocket error", arguments);
-  };
+  ws.onerror = function() {};
   ws.onmessage = ws_message;
   return ws.onclose = function() {
-    console.log("WebSocket closed", arguments);
     wait *= 2;
     return setTimeout(create_socket, wait);
   };
