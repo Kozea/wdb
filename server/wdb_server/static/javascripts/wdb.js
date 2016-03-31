@@ -109,7 +109,7 @@ Codemirror = (function(superClass) {
   function Codemirror(wdb) {
     this.wdb = wdb;
     Codemirror.__super__.constructor.apply(this, arguments);
-    this.$container = $('.source-editor').on('mouseup', this.wdb.paste_target.bind(this.wdb));
+    this.$container = $('.source').on('mouseup', this.wdb.paste_target.bind(this.wdb));
     this.code_mirror = CodeMirror((function(_this) {
       return function(elt) {
         _this.$code_mirror = $(elt);
@@ -341,6 +341,12 @@ Codemirror = (function(superClass) {
       default:
         return 'python';
     }
+  };
+
+  Codemirror.prototype.size = function() {
+    this.$code_mirror.height(0);
+    this.$code_mirror.height(this.$container.height());
+    return this.code_mirror.refresh();
   };
 
   return Codemirror;
@@ -1054,15 +1060,68 @@ Switch = (function(superClass) {
   function Switch(wdb) {
     this.wdb = wdb;
     Switch.__super__.constructor.apply(this, arguments);
-    this.$switch = $('.switch').click(this["switch"].bind(this));
+    this.$trace = $('.trace');
+    this.$switches = $('.switch').click((function(_this) {
+      return function(e) {
+        return _this["switch"]($(e.currentTarget));
+      };
+    })(this));
+    this.$source = $('.source');
+    this.$interpreter = $('.interpreter');
   }
 
-  Switch.prototype["switch"] = function() {
-    if (this.$switch.find('i').text().trim() === 'close') {
-      return this.wdb.disable();
-    } else {
-      return parent.postMessage('activate', '*');
+  Switch.prototype["switch"] = function($switch) {
+    if ($switch.is('.power')) {
+      if ($switch.is('.off')) {
+        return this.wdb.disable();
+      } else if ($switch.is('.on')) {
+        return parent.postMessage('activate', '*');
+      }
+    } else if ($switch.is('.code')) {
+      if ($switch.is('.off')) {
+        return this.open_code();
+      } else if ($switch.is('.on')) {
+        return this.close_code();
+      }
+    } else if ($switch.is('.term')) {
+      if ($switch.is('.off')) {
+        return this.open_term();
+      } else if ($switch.is('.on')) {
+        return this.close_term();
+      }
     }
+  };
+
+  Switch.prototype.open_trace = function() {
+    return this.$trace.addClass('mdl-layout--fixed-drawer');
+  };
+
+  Switch.prototype.close_trace = function() {
+    return this.$trace.removeClass('mdl-layout--fixed-drawer');
+  };
+
+  Switch.prototype.open_code = function() {
+    this.$switches.filter('.code').removeClass('off').addClass('on').removeClass('mdl-button--accent');
+    this.$source.removeClass('hidden');
+    return this.wdb.cm.size();
+  };
+
+  Switch.prototype.close_code = function() {
+    this.$switches.filter('.code').removeClass('on').addClass('off').addClass('mdl-button--accent');
+    this.$source.addClass('hidden');
+    return this.wdb.cm.size();
+  };
+
+  Switch.prototype.open_term = function() {
+    this.$switches.filter('.term').removeClass('off').addClass('on').removeClass('mdl-button--accent');
+    this.$interpreter.removeClass('hidden');
+    return this.wdb.cm.size();
+  };
+
+  Switch.prototype.close_term = function() {
+    this.$switches.filter('.term').removeClass('on').addClass('off').addClass('mdl-button--accent');
+    this.$interpreter.addClass('hidden');
+    return this.wdb.cm.size();
   };
 
   return Switch;
@@ -1142,7 +1201,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.trace = function(data) {
-    $('.trace').addClass('mdl-layout--fixed-drawer');
+    this["switch"].open_trace();
     return this.traceback.make_trace(data.trace);
   };
 
@@ -1162,8 +1221,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.select = function(data) {
     var current_frame;
     current_frame = data.frame;
-    $('.source-editor').removeClass('hidden');
-    $('.interpreter').removeClass('full-height');
+    this["switch"].open_code();
     $('.trace-line').removeClass('selected');
     $('.trace-' + current_frame.level).addClass('selected');
     this.file_cache[data.name] = data.file;
@@ -1739,9 +1797,9 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.shell = function() {
-    $('.trace').removeClass('mdl-layout--fixed-drawer');
-    $('.source-editor').addClass('hidden');
-    $('.interpreter').addClass('full-height');
+    this["switch"].close_trace();
+    this["switch"].close_code();
+    this["switch"].open_term();
     return this.done();
   };
 

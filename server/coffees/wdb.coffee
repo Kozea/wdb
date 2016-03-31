@@ -76,7 +76,7 @@ class Wdb extends Log
       .attr('title', data.subtitle)
 
   trace: (data) ->
-    $('.trace').addClass('mdl-layout--fixed-drawer')
+    @switch.open_trace()
     @traceback.make_trace data.trace
 
   select_trace: (level) ->
@@ -91,8 +91,7 @@ class Wdb extends Log
 
   select: (data) ->
     current_frame = data.frame
-    $('.source-editor').removeClass('hidden')
-    $('.interpreter').removeClass('full-height')
+    @switch.open_code()
     $('.trace-line').removeClass('selected')
     $('.trace-' + current_frame.level).addClass('selected')
     @file_cache[data.name] = data.file
@@ -568,9 +567,9 @@ specify a module like `logging.config`.
     @ws.send 'Disable'
 
   shell: ->
-    $('.trace').removeClass('mdl-layout--fixed-drawer')
-    $('.source-editor').addClass('hidden')
-    $('.interpreter').addClass('full-height')
+    @switch.close_trace()
+    @switch.close_code()
+    @switch.open_term()
     @done()
 
   dialog: (title, content) ->
