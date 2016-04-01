@@ -1,0 +1,55 @@
+/* This file is part of wdb
+/*
+/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea
+/* This program is free software: you can redistribute it and/or modify
+/* it under the terms of the GNU General Public License as published by
+/* the Free Software Foundation, either version 3 of the License, or
+/* (at your option) any later version.
+/*
+/* This program is distributed in the hope that it will be useful,
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/* GNU General Public License for more details.
+/*
+/* You should have received a copy of the GNU General Public License
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+.interpreter .prompt
+  &:before
+    margin-top: 4px
+    font-family: "Roboto Mono"
+
+  .CodeMirror
+    height: auto
+    border-bottom: 1px solid rgba(0, 0, 0, .1)
+    &.extra-dialog
+      padding-bottom: 2em
+
+    .CodeMirror-cursor
+      visibility: visible !important
+      width: auto
+      border: none
+      outline: 1px solid rgba(0, 0, 0, .5)
+
+    &.CodeMirror-focused .CodeMirror-cursor
+      background: rgba(0, 0, 0, .75)
+      animation: blink 1s ease-in-out infinite
+      outline: 0
+
+  .CodeMirror-dialog
+    .not-found
+      color: orangered
+
+.CodeMirror-hints
+  &.auto
+    opacity: .9
+    box-shadow: -2px -3px 5px rgba(0,0,0,.2) inset
+
+@keyframes blink
+  0%
+    opacity: 1
+  50%
+    opacity: 0
+  100%
+    opacity: 1

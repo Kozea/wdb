@@ -1,7 +1,7 @@
 # *-* coding: utf-8 *-*
 # This file is part of wdb
 #
-# wdb Copyright (C) 2012-2015  Florian Mounier, Kozea
+# wdb Copyright (c) 2012-2016  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -35,9 +35,9 @@ log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")
 
 
-class IndexHandler(tornado.web.RequestHandler):
+class HomeHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('index.html')
+        self.render('home.html')
 
     def post(self):
         theme = self.request.arguments.get('theme')
@@ -284,7 +284,7 @@ if LibPythonWatcher:
 
 server = tornado.web.Application(
     [
-        (r"/", IndexHandler),
+        (r"/", HomeHandler),
         (r"/style.css", StyleHandler),
         (r"/debug/session/(.+)", MainHandler),
         (r"/pm/session/(.+)", PostMortemHandler),

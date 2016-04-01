@@ -12,6 +12,10 @@
   {% end %}
 {% end %}
 
+{% block css %}
+  <link href="{{ static_url('stylesheets/wdb.css') }}" rel="stylesheet" type="text/css">
+{% end %}
+
 {% block main %}
 <div class="trace mdl-layout mdl-js-layout mdl-layout--fixed-header" data-uuid="{{ uuid }}" {% if post_mortem %}data-post-mortem{% end %}>
   <header class="mdl-layout__header">

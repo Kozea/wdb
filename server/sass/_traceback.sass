@@ -1,0 +1,43 @@
+/* This file is part of wdb
+/*
+/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea
+/* This program is free software: you can redistribute it and/or modify
+/* it under the terms of the GNU General Public License as published by
+/* the Free Software Foundation, either version 3 of the License, or
+/* (at your option) any later version.
+/*
+/* This program is distributed in the hope that it will be useful,
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/* GNU General Public License for more details.
+/*
+/* You should have received a copy of the GNU General Public License
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+.mdl-layout__drawer
+  .traceback
+    padding-top: 0
+
+    .trace-line
+      code
+        font-size: .75em
+        word-break: normal
+
+      .material-icons
+        font-size: .8em
+        margin-right: .5em
+        vertical-align: middle
+
+      &:hover
+        background: rgba(0, 0, 0, .05)
+
+      &.real-selected
+        background: rgba(255, 255, 255, .9)
+        &:hover
+          background: rgba(0, 0, 0, .1)
+
+      &.selected
+        background: rgba(0, 0, 0, .08)
+        &:hover
+          background: rgba(0, 0, 0, .13)
