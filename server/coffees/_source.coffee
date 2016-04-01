@@ -24,7 +24,7 @@ class Source extends Log
       @$code_mirror = $ elt
       @$container.prepend(elt)
     ,
-      value: 'Waiting for file',
+      value: 'No active file',
       theme: 'material',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
