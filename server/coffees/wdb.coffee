@@ -209,12 +209,12 @@ class Wdb extends Log
  Step into
 .n or [Alt] + [→] or [F10]     : \
  Step over (Next)
+.u or [Alt] + [←] or [F7]     : \
+  Until (Next over loops)
 .r or [Alt] + [↑] or [F9]      : \
  Step out (Return)
 .c or [Alt] + [Enter] or [F8]  : \
  Continue
-.u or [Alt] + [←] or [F7]     : \
- Until (Next over loops)
 .j lineno                      : \
  Jump to lineno (Must be at bottom frame and in the same function)
 .b arg                         : \

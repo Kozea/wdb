@@ -25,22 +25,65 @@
       </span>
       <div class="mdl-layout-spacer"></div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon switch code on">
+      {% if not post_mortem %}
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="s" id="command-s">
+        <i class="material-icons">subdirectory_arrow_right</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-s">Step into</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="n" id="command-n">
+        <i class="material-icons">redo</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-n">Next</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="u" id="command-u">
+        <i class="material-icons">keyboard_tab</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-u">Until</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="r" id="command-r">
+        <i class="material-icons">call_missed_outgoing</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-r">Return</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="c" id="command-c">
+        <i class="material-icons">play_arrow</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-c">Continue</div>
+
+      <div class="separator"></div>
+      {% end %}
+
+      <a class="mdl-button mdl-js-button mdl-button--icon command" href="/" target="_blank" id="home-link">
+        <i class="material-icons">home</i>
+      </a>
+      <div class="mdl-tooltip mdl-tooltip--large" for="home-link">Open wdb home in a new window</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon switch code on" id="switch-code">
         <i class="material-icons">code</i>
       </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="switch-code">Toggle code view</div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon switch term on">
+      <button class="mdl-button mdl-js-button mdl-button--icon switch term on" id="switch-term">
         <i class="material-icons">dvr</i>
       </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="switch-term">Toggle prompt view</div>
+
+      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="h" id="command-h">
+        <i class="material-icons">help</i>
+      </button>
+      <div class="mdl-tooltip mdl-tooltip--large" for="command-h">Help</div>
 
       {% if post_mortem %}
-        <button class="mdl-button mdl-js-button mdl-button--icon switch power on ">
+        <button class="mdl-button mdl-js-button mdl-button--icon switch power on" id="switch-power-on">
           <i class="material-icons">power_settings_new</i>
         </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="switch-power-on">Refresh request with tracing enabled</div>
       {% else %}
-        <button class="mdl-button mdl-js-button mdl-button--icon switch power off">
+        <button class="mdl-button mdl-js-button mdl-button--icon switch power off" id="switch-power-off">
           <i class="material-icons">close</i>
         </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="switch-power-off">Stop tracing</div>
       {% end %}
     </div>
   </header>
