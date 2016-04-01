@@ -29,9 +29,14 @@
   right: 2em;
   z-index: 1337; }
 
-.page-content table, .page-content form {
+.page-content table, .page-content form, .page-content aside {
   margin: auto; }
 
-.page-content form {
+.page-content form, .page-content aside {
   /* Oh yeah! */
   width: fit-content; }
+
+.page-content aside.note {
+  margin-top: 1em;
+  padding: .5em;
+  opacity: .8; }

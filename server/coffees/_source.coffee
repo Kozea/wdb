@@ -34,6 +34,7 @@ class Source extends Log
         'Ctrl-S': @save.bind @
 
     @code_mirror.on 'gutterClick', @gutter_click.bind(@)
+    $(window).on 'resize', @size.bind @
     @state =
       fn: null
       file: null
@@ -44,6 +45,7 @@ class Source extends Log
     # File -> footsteps
     @footsteps = {}
     @breakpoints = {}
+
 
   save: ->
     return if @code_mirror.getOption 'readOnly'

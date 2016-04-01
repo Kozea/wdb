@@ -19,8 +19,8 @@
     <!-- Tabs -->
     <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
       <a href="#sessions" class="mdl-layout__tab is-active">Active sessions</a>
-      <a href="#breaks" class="mdl-layout__tab">Current global breakpoints</a>
-      <a href="#processes" class="mdl-layout__tab">Running processes</a>
+      <a href="#breaks" class="mdl-layout__tab">Breakpoints</a>
+      <a href="#processes" class="mdl-layout__tab">Processes</a>
       <a href="#trace" class="mdl-layout__tab">Trace file</a>
 
       {% if StyleHandler.themes %}
@@ -80,6 +80,13 @@
           <tbody>
           </tbody>
         </table>
+        <aside class="note">
+          Pausing a running process requires gdb and a ptrace enabled kernel.
+          You might enable it with:
+          <code>
+            $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+          </code>
+        </aside>
       </div>
     </section>
     <section class="mdl-layout__tab-panel" id="trace">

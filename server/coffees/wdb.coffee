@@ -204,83 +204,7 @@ class Wdb extends Log
         .join('\n')
 
   print_help: ->
-    @print for: 'Supported commands', result: '''
-.s or [Alt] + [↓] or [F11]     : \
- Step into
-.n or [Alt] + [→] or [F10]     : \
- Step over (Next)
-.u or [Alt] + [←] or [F7]     : \
-  Until (Next over loops)
-.r or [Alt] + [↑] or [F9]      : \
- Step out (Return)
-.c or [Alt] + [Enter] or [F8]  : \
- Continue
-.j lineno                      : \
- Jump to lineno (Must be at bottom frame and in the same function)
-.b arg                         : \
- Set a session breakpoint  see below for what arg can be*
-.t arg                         : \
- Set a temporary breakpoint, arg follow the same syntax as .b
-.z arg                         : \
- Delete existing breakpoint
-.l                             : \
- List active breakpoints
-.a                             : \
- Echo all typed commands in the current debugging session
-.d expression                  : \
- Dump the result of expression in a table
-.w expression                  : \
- Watch expression in curent file (Click on the name to remove)
-.q                             : \
- Quit
-.h                             : \
- Get some help
-.e                             : \
- Toggle file edition mode
-.g                             : \
- Clear prompt
-.i [mime/type;]expression      : \
- Display the result in an embed, mime type defaults to "text/html"
-.x left ? right                : \
- Display the difference between the pretty print of 'left' and 'right'
-.x left <> right               : \
- Display the difference between the repr of 'left' and 'right'
-.f key in expression           : \
- Search recursively the presence of key in expression object tree
-.f test of expression          : \
- Search recursively values that match test in expression inner tree.
- i.e.: .f type(x) == int of sys
-
-All the upper commands are prefixed with a dot and can be \
-executed with [Alt] + [the command letter], i.e.: [Alt] + [h]
-
-iterable!sthg                  : \
- If cutter is installed, executes cut(iterable).sthg
-expr >! file                   : \
- Write the result of expr in file
-!< file                        : \
- Eval the content of file
-[Enter]                        : \
- Eval the current selected text in page, useful to eval code in the source
-[Shift] + [Enter]              : \
- Insert the current selected text in page in the prompt
-[Ctrl] + [Enter]               : \
- Multiline prompt or execute if already in multiline mode.
-
-* arg is using the following syntax:
-    [file/module][:lineno][#function][,condition]
-which means:
-    - [file]                    : \
- Break if any line of `file` is executed
-    - [file]:lineno             : \
- Break on `file` at `lineno`
-    - [file][:lineno],condition : \
- Break on `file` at `lineno` if `condition` is True (ie: i == 10)
-    - [file]#function           : \
- Break when inside `function` function
-File is always current file by default and you can also \
-specify a module like `logging.config`.
-'''
+    @dialog 'Help', help
 
   print: (data) ->
     if @eval_time
@@ -588,6 +512,8 @@ specify a module like `logging.config`.
       $dialog.get(0).close()
       $dialog.remove()
 
+    $dialog.find('.mdl-tabs,.mdl-data-table').each ->
+      componentHandler.upgradeElement @
     $dialog.get(0).showModal()
 
   pretty_time: (time) ->
