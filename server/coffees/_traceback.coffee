@@ -23,6 +23,9 @@ class Traceback extends Log
   select: (e) ->
     level = $(e.currentTarget).attr('data-level')
     @wdb.select_trace level
+    # Yeah...
+    if $('.mdl-layout__obfuscator').is '.is-visible'
+      $('.mdl-layout').get(0).MaterialLayout.toggleDrawer()
     false
 
   make_trace: (trace) ->

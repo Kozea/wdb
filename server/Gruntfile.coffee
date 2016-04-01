@@ -73,6 +73,7 @@ module.exports = (grunt) ->
             'coffees/_prompt.coffee'
             'coffees/_watchers.coffee'
             'coffees/_switch.coffee'
+            'coffees/_help.coffee'
             'coffees/wdb.coffee'
           ]
 
