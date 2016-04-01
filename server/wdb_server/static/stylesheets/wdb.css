@@ -233,11 +233,15 @@
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .mdl-layout__header-row {
   padding-right: 20px; }
-  .mdl-layout__header-row .switch {
+  .mdl-layout__header-row .switch, .mdl-layout__header-row .command {
     opacity: .75;
     margin: 8px; }
-    .mdl-layout__header-row .switch:hover {
+    .mdl-layout__header-row .switch:hover, .mdl-layout__header-row .command:hover {
       opacity: 1; }
+  .mdl-layout__header-row .separator {
+    border-right: 1px solid rgba(255, 255, 255, 0.7);
+    height: 29px;
+    margin: 0 22px; }
 
 /* This file is part of wdb */
 /* */

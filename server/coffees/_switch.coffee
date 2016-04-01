@@ -19,6 +19,7 @@ class Switch extends Log
     super
     @$trace = $('.trace')
     @$switches = $('.switch').click (e) => @switch $(e.currentTarget)
+    @$command = $('.command').click (e) => @command $(e.currentTarget)
     @$source = $('.source')
     @$interpreter = $('.interpreter')
 
@@ -68,3 +69,6 @@ class Switch extends Log
       .addClass('mdl-button--accent')
     @$interpreter.addClass('hidden')
     @wdb.source.size()
+
+  command: ($command)->
+    @wdb.execute '.' + $command.attr('data-command')
