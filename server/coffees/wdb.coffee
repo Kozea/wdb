@@ -1,6 +1,6 @@
 # This file is part of wdb
 #
-# wdb Copyright (C) 2012-2015 Florian Mounier, Kozea
+# wdb Copyright (C) 2012-2016 Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -28,7 +28,7 @@ class Wdb extends Log
 
     @ws = new Websocket(@, $('[data-uuid]').attr('data-uuid'))
     @traceback = new Traceback @
-    @cm = new Codemirror @
+    @source = new Source @
     @interpreter = new Interpreter @
     @prompt = new Prompt @
     @switch = new Switch @
@@ -63,8 +63,8 @@ class Wdb extends Log
     @cwd = data.cwd
     brks = data.breaks
     for brk in brks
-      @cm.breakpoints[brk.fn] ?= []
-      @cm.breakpoints[brk.fn].push brk
+      @source.breakpoints[brk.fn] ?= []
+      @source.breakpoints[brk.fn].push brk
 
   title: (data) ->
     $('.title')
@@ -95,7 +95,7 @@ class Wdb extends Log
     $('.trace-line').removeClass('selected')
     $('.trace-' + current_frame.level).addClass('selected')
     @file_cache[data.name] = data.file
-    @cm.open(data, current_frame)
+    @source.open(data, current_frame)
     @done()
 
   ellipsize: ($code) ->
@@ -156,11 +156,11 @@ class Wdb extends Log
         key = snippet.substr(1)
         data = ''
       switch key
-        # when 'a' then @print_hist @session_cmd_hist[@cm.state.fn]
+        # when 'a' then @print_hist @session_cmd_hist[@source.state.fn]
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
         when 'd' then cmd 'Dump', data if data
-        when 'e' then @cm.toggle_edition()
+        when 'e' then @source.toggle_edition()
         when 'f' then cmd 'Find', data if data
         when 'g' then @cls()
         when 'h' then @print_help()
@@ -407,7 +407,7 @@ specify a module like `logging.config`.
     @done()
 
   breakset: (data) ->
-    @cm.set_breakpoint data
+    @source.set_breakpoint data
 
     if @prompt.get()[0] is '.' and @prompt.get()[1] in ['b', 't']
       @done()
@@ -415,7 +415,7 @@ specify a module like `logging.config`.
       @chilling()
 
   breakunset: (data) ->
-    @cm.clear_breakpoint data
+    @source.clear_breakpoint data
 
     if @prompt.get()[0] is '.' and @prompt.get()[1] in ['b', 't', 'z']
       @done()
@@ -443,11 +443,11 @@ specify a module like `logging.config`.
     [remaining, brk.cond] = @split remaining, ','
     [remaining, brk.fun] = @split remaining, '#'
     [remaining, brk.lno] = @split remaining, ':'
-    brk.fn = remaining or @cm.state.fn
+    brk.fn = remaining or @source.state.fn
     brk.lno = parseInt(brk.lno) or null
 
     exist = false
-    for ebrk in @cm.breakpoints[brk.fn] or []
+    for ebrk in @source.breakpoints[brk.fn] or []
       if (ebrk.fn is brk.fn and
          ebrk.lno is brk.lno and
          ebrk.cond is brk.cond and
@@ -459,7 +459,7 @@ specify a module like `logging.config`.
         break
 
     if exist or remove_only
-      @cm.clear_breakpoint(brk)
+      @source.clear_breakpoint(brk)
       cmd = 'Unbreak'
       unless brk.temporary
         cmd = 'Broadcast|' + cmd
@@ -468,7 +468,7 @@ specify a module like `logging.config`.
       return
 
     if brk.lno
-      @cm.ask_breakpoint(brk.lno)
+      @source.ask_breakpoint(brk.lno)
     cmd = 'Break'
     unless temporary
       cmd = 'Broadcast|' + cmd
@@ -509,7 +509,7 @@ specify a module like `logging.config`.
     setTimeout (-> window.close()), 10
 
   global_key: (e) ->
-    return true if @cm.rw
+    return true if @source.rw
 
     if e.altKey and (
       65 <= e.keyCode <= 90 or 37 <= e.keyCode <= 40 or e.keyCode is 13
@@ -525,7 +525,7 @@ specify a module like `logging.config`.
       extra = ''
       # Break on current line
       if char in ['b', 't', 'z']
-        extra += ' :' + @cm.state.lno
+        extra += ' :' + @source.state.lno
       if char is 'i'
         extra = getSelection().toString()
 

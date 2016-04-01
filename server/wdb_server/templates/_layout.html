@@ -16,7 +16,8 @@
     <link href="{{ static_url('stylesheets/deps.min.css') }}" rel="stylesheet" type="text/css">
 
     {% from wdb_server import StyleHandler %}
-    <link href="{{ static_url('stylesheets/material.css') }}" rel="stylesheet" type="text/css">
+    {% block css %}
+    {% end %}
   </head>
   <body {% if options.debug %}data-debug="true"{% end %}>
     <section class="wdb" data-page="{{ handler.__class__.__name__}}">

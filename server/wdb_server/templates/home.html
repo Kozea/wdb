@@ -1,11 +1,14 @@
 {% extends _layout.html %}
 
 {% block script %}
-  <script src="{{ static_url('javascripts/' + ('status.js' if options.unminified else 'wdb/status.min.js')) }}"></script>
+  <script src="{{ static_url('javascripts/' + ('home.js' if options.unminified else 'wdb/home.min.js')) }}"></script>
+{% end %}
+
+{% block css %}
+  <link href="{{ static_url('stylesheets/home.css') }}" rel="stylesheet" type="text/css">
 {% end %}
 
 {% block main %}
-
 <!-- Simple header with scrollable tabs. -->
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
   <header class="mdl-layout__header cover">

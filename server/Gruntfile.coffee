@@ -66,7 +66,7 @@ module.exports = (grunt) ->
           'wdb_server/static/javascripts/wdb.js': [
             'coffees/_base.coffee'
             'coffees/_websocket.coffee'
-            'coffees/_codemirror.coffee'
+            'coffees/_source.coffee'
             'coffees/_history.coffee'
             'coffees/_traceback.coffee'
             'coffees/_interpreter.coffee'
@@ -78,9 +78,9 @@ module.exports = (grunt) ->
 
       status:
         files:
-          'wdb_server/static/javascripts/status.js': [
+          'wdb_server/static/javascripts/home.js': [
             'coffees/_base.coffee'
-            'coffees/status.coffee'
+            'coffees/home.coffee'
           ]
 
 

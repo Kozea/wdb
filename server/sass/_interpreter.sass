@@ -1,0 +1,127 @@
+/* This file is part of wdb
+/*
+/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea
+/* This program is free software: you can redistribute it and/or modify
+/* it under the terms of the GNU General Public License as published by
+/* the Free Software Foundation, either version 3 of the License, or
+/* (at your option) any later version.
+/*
+/* This program is distributed in the hope that it will be useful,
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/* GNU General Public License for more details.
+/*
+/* You should have received a copy of the GNU General Public License
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+@import prompt
+@import watchers
+
+.interpreter
+  outline: 0
+  display: flex
+  flex-direction: column
+
+  .terminal
+    flex: 1
+    overflow: auto
+    display: flex
+    flex-direction: column
+    position: relative
+
+    .scrollback
+      .scroll-line
+        padding: 4px
+
+      .duration
+        float: right
+
+  &.full-height
+    height: calc(100vh - 40px - 64px)
+
+  .long
+    display: none
+
+  .short.close:after
+    content: '…"'
+
+  table
+    margin: 0 auto
+    width: 90%
+
+    table
+      width: 100%
+
+    &.object
+      margin: 2em auto
+      thead tr th
+        text-align: center
+
+      tbody tr:not(:hover)
+        background: rgba(0, 0, 0, .025)
+
+    tbody
+      &.closed
+        display: none
+
+      td
+        &.key
+          code
+            white-space: nowrap
+        &.ellipse
+          text-align: center
+
+      td.val
+        code
+          word-break: break-all
+
+  a.inspect
+    display: inline-block
+    text-decoration: none
+    border-bottom: 1px solid rgba(0, 0, 0, .05)
+    cursor: pointer
+
+  .prompt, .for
+    margin-left: 26px
+
+    &::before
+      content: '>>>'
+      position: absolute
+      left: 0
+
+  .diff
+    td
+      width: 49%
+      border-top: none
+      border-bottom: none
+      padding-top: 0
+      padding-bottom: 0
+
+    .diff_lno
+      min-width: 50px
+      padding-left: 10px
+      padding-right: 10px
+      width: 1%
+
+    .diff_line
+      white-space: pre-wrap
+      word-break: break-word
+
+    .diff_sub
+      background-color: #f8cbcb
+
+    .diff_line_sub
+      background-color: #ffecec
+
+    .diff_add
+      background-color: #a6f3a6
+
+    .diff_line_add
+      background-color: #eaffea
+
+    .diff_chg
+      background-color: #f2f1a1
+
+    .diff_line_chg
+      background-color: #fffeeb

@@ -1,7 +1,7 @@
 # *-* coding: utf-8 *-*
 # This file is part of wdb
 #
-# wdb Copyright (C) 2012-2015  Florian Mounier, Kozea
+# wdb Copyright (c) 2012-2016  Florian Mounier, Kozea
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or

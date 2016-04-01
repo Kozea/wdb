@@ -1,4 +1,4 @@
-var Codemirror, History, Interpreter, Log, Prompt, Switch, Traceback, Watchers, Wdb, Websocket,
+var History, Interpreter, Log, Prompt, Source, Switch, Traceback, Watchers, Wdb, Websocket,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -112,12 +112,12 @@ Websocket = (function(superClass) {
 
 })(Log);
 
-Codemirror = (function(superClass) {
-  extend(Codemirror, superClass);
+Source = (function(superClass) {
+  extend(Source, superClass);
 
-  function Codemirror(wdb) {
+  function Source(wdb) {
     this.wdb = wdb;
-    Codemirror.__super__.constructor.apply(this, arguments);
+    Source.__super__.constructor.apply(this, arguments);
     this.$container = $('.source').on('mouseup', this.wdb.paste_target.bind(this.wdb));
     this.code_mirror = CodeMirror((function(_this) {
       return function(elt) {
@@ -147,7 +147,7 @@ Codemirror = (function(superClass) {
     this.breakpoints = {};
   }
 
-  Codemirror.prototype.save = function() {
+  Source.prototype.save = function() {
     var new_file;
     if (this.code_mirror.getOption('readOnly')) {
       return;
@@ -157,11 +157,11 @@ Codemirror = (function(superClass) {
     return this.state.file = new_file;
   };
 
-  Codemirror.prototype.gutter_click = function(_, n) {
+  Source.prototype.gutter_click = function(_, n) {
     return this.wdb.toggle_break(":" + (n + 1));
   };
 
-  Codemirror.prototype.clear_breakpoint = function(brk) {
+  Source.prototype.clear_breakpoint = function(brk) {
     var base, name1;
     if ((base = this.breakpoints)[name1 = brk.fn] == null) {
       base[name1] = [];
@@ -176,11 +176,11 @@ Codemirror = (function(superClass) {
     }
   };
 
-  Codemirror.prototype.ask_breakpoint = function(lno) {
+  Source.prototype.ask_breakpoint = function(lno) {
     return this.add_class(lno, 'ask-breakpoint');
   };
 
-  Codemirror.prototype.set_breakpoint = function(brk) {
+  Source.prototype.set_breakpoint = function(brk) {
     var base, name1;
     if ((base = this.breakpoints)[name1 = brk.fn] == null) {
       base[name1] = [];
@@ -189,7 +189,7 @@ Codemirror = (function(superClass) {
     return this.mark_breakpoint(brk);
   };
 
-  Codemirror.prototype.mark_breakpoint = function(brk) {
+  Source.prototype.mark_breakpoint = function(brk) {
     if (brk.lno) {
       this.remove_class(brk.lno, 'ask-breakpoint');
       this.add_class(brk.lno, 'breakpoint');
@@ -197,7 +197,7 @@ Codemirror = (function(superClass) {
     }
   };
 
-  Codemirror.prototype.brk_to_str = function(brk) {
+  Source.prototype.brk_to_str = function(brk) {
     var str;
     if (brk.temporary) {
       str = 'Temporary ';
@@ -217,11 +217,11 @@ Codemirror = (function(superClass) {
     return str;
   };
 
-  Codemirror.prototype.get_selection = function() {
+  Source.prototype.get_selection = function() {
     return this.code_mirror.getSelection().trim();
   };
 
-  Codemirror.prototype.get_breakpoint = function(n) {
+  Source.prototype.get_breakpoint = function(n) {
     var base, brk, j, len, name1, ref;
     if ((base = this.breakpoints)[name1 = this.state.fn] == null) {
       base[name1] = [];
@@ -235,32 +235,32 @@ Codemirror = (function(superClass) {
     }
   };
 
-  Codemirror.prototype.add_class = function(lno, cls) {
+  Source.prototype.add_class = function(lno, cls) {
     return this.code_mirror.addLineClass(lno - 1, 'background', cls);
   };
 
-  Codemirror.prototype.remove_class = function(lno, cls) {
+  Source.prototype.remove_class = function(lno, cls) {
     return this.code_mirror.removeLineClass(lno - 1, 'background', cls);
   };
 
-  Codemirror.prototype.add_mark = function(lno, cls, id, char, title) {
+  Source.prototype.add_mark = function(lno, cls, id, char, title) {
     return this.code_mirror.setGutterMarker(lno - 1, id, $('<div>', {
       "class": cls,
       title: title
     }).html(char).get(0));
   };
 
-  Codemirror.prototype.remove_mark = function(lno) {
+  Source.prototype.remove_mark = function(lno) {
     return this.code_mirror.setGutterMarker(lno - 1, 'breaks', null);
   };
 
-  Codemirror.prototype.stop_edition = function() {
+  Source.prototype.stop_edition = function() {
     if (!this.code_mirror.getOption('readOnly')) {
       return this.toggle_edition();
     }
   };
 
-  Codemirror.prototype.toggle_edition = function() {
+  Source.prototype.toggle_edition = function() {
     var was_ro;
     was_ro = this.code_mirror.getOption('readOnly');
     this.code_mirror.setOption('readOnly', !was_ro);
@@ -274,7 +274,7 @@ Codemirror = (function(superClass) {
     }
   };
 
-  Codemirror.prototype.open = function(data, frame) {
+  Source.prototype.open = function(data, frame) {
     var new_state;
     new_state = {
       fn: data.name,
@@ -287,7 +287,7 @@ Codemirror = (function(superClass) {
     return this.set_state(new_state);
   };
 
-  Codemirror.prototype.set_state = function(new_state) {
+  Source.prototype.set_state = function(new_state) {
     var base, brk, j, k, l, len, len1, lno, name1, o, ref, ref1, ref2, ref3, ref4, ref5, rescope, step;
     rescope = true;
     if (this.state.fn !== new_state.fn || this.state.file !== new_state.file) {
@@ -339,7 +339,7 @@ Codemirror = (function(superClass) {
     return this.code_mirror.refresh();
   };
 
-  Codemirror.prototype.get_mode = function(fn) {
+  Source.prototype.get_mode = function(fn) {
     switch (fn.split('.').splice(-1)[0]) {
       case 'py':
         return 'python';
@@ -352,13 +352,13 @@ Codemirror = (function(superClass) {
     }
   };
 
-  Codemirror.prototype.size = function() {
+  Source.prototype.size = function() {
     this.$code_mirror.height(0);
     this.$code_mirror.height(this.$container.height());
     return this.code_mirror.refresh();
   };
 
-  return Codemirror;
+  return Source;
 
 })(Log);
 
@@ -536,7 +536,7 @@ Traceback = (function(superClass) {
       $traceline = $('<a>', {
         "class": 'trace-line ellipsis mdl-list__item mdl-list__item--three-line trace-' + frame.level
       }).attr('data-level', frame.level).attr('title', ("File \"" + frame.file + "\", line " + frame.lno + ", in " + frame["function"] + "\n") + ("    " + frame.code));
-      ref = this.wdb.cm.breakpoints[frame.file] || [];
+      ref = this.wdb.source.breakpoints[frame.file] || [];
       for (k = 0, len1 = ref.length; k < len1; k++) {
         brk = ref[k];
         if (!(brk.cond || brk.fun || brk.lno)) {
@@ -1120,25 +1120,25 @@ Switch = (function(superClass) {
   Switch.prototype.open_code = function() {
     this.$switches.filter('.code').removeClass('off').addClass('on').removeClass('mdl-button--accent');
     this.$source.removeClass('hidden');
-    return this.wdb.cm.size();
+    return this.wdb.source.size();
   };
 
   Switch.prototype.close_code = function() {
     this.$switches.filter('.code').removeClass('on').addClass('off').addClass('mdl-button--accent');
     this.$source.addClass('hidden');
-    return this.wdb.cm.size();
+    return this.wdb.source.size();
   };
 
   Switch.prototype.open_term = function() {
     this.$switches.filter('.term').removeClass('off').addClass('on').removeClass('mdl-button--accent');
     this.$interpreter.removeClass('hidden');
-    return this.wdb.cm.size();
+    return this.wdb.source.size();
   };
 
   Switch.prototype.close_term = function() {
     this.$switches.filter('.term').removeClass('on').addClass('off').addClass('mdl-button--accent');
     this.$interpreter.addClass('hidden');
-    return this.wdb.cm.size();
+    return this.wdb.source.size();
   };
 
   return Switch;
@@ -1159,7 +1159,7 @@ Wdb = (function(superClass) {
     this.eval_time = null;
     this.ws = new Websocket(this, $('[data-uuid]').attr('data-uuid'));
     this.traceback = new Traceback(this);
-    this.cm = new Codemirror(this);
+    this.source = new Source(this);
     this.interpreter = new Interpreter(this);
     this.prompt = new Prompt(this);
     this["switch"] = new Switch(this);
@@ -1204,10 +1204,10 @@ Wdb = (function(superClass) {
     results = [];
     for (j = 0, len = brks.length; j < len; j++) {
       brk = brks[j];
-      if ((base = this.cm.breakpoints)[name1 = brk.fn] == null) {
+      if ((base = this.source.breakpoints)[name1 = brk.fn] == null) {
         base[name1] = [];
       }
-      results.push(this.cm.breakpoints[brk.fn].push(brk));
+      results.push(this.source.breakpoints[brk.fn].push(brk));
     }
     return results;
   };
@@ -1242,7 +1242,7 @@ Wdb = (function(superClass) {
     $('.trace-line').removeClass('selected');
     $('.trace-' + current_frame.level).addClass('selected');
     this.file_cache[data.name] = data.file;
-    this.cm.open(data, current_frame);
+    this.source.open(data, current_frame);
     return this.done();
   };
 
@@ -1351,7 +1351,7 @@ Wdb = (function(superClass) {
           }
           break;
         case 'e':
-          this.cm.toggle_edition();
+          this.source.toggle_edition();
           break;
         case 'f':
           if (data) {
@@ -1595,7 +1595,7 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.breakset = function(data) {
     var ref;
-    this.cm.set_breakpoint(data);
+    this.source.set_breakpoint(data);
     if (this.prompt.get()[0] === '.' && ((ref = this.prompt.get()[1]) === 'b' || ref === 't')) {
       return this.done();
     } else {
@@ -1605,7 +1605,7 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.breakunset = function(data) {
     var ref;
-    this.cm.clear_breakpoint(data);
+    this.source.clear_breakpoint(data);
     if (this.prompt.get()[0] === '.' && ((ref = this.prompt.get()[1]) === 'b' || ref === 't' || ref === 'z')) {
       return this.done();
     } else {
@@ -1642,10 +1642,10 @@ Wdb = (function(superClass) {
     ref = this.split(remaining, ','), remaining = ref[0], brk.cond = ref[1];
     ref1 = this.split(remaining, '#'), remaining = ref1[0], brk.fun = ref1[1];
     ref2 = this.split(remaining, ':'), remaining = ref2[0], brk.lno = ref2[1];
-    brk.fn = remaining || this.cm.state.fn;
+    brk.fn = remaining || this.source.state.fn;
     brk.lno = parseInt(brk.lno) || null;
     exist = false;
-    ref3 = this.cm.breakpoints[brk.fn] || [];
+    ref3 = this.source.breakpoints[brk.fn] || [];
     for (j = 0, len = ref3.length; j < len; j++) {
       ebrk = ref3[j];
       if (ebrk.fn === brk.fn && ebrk.lno === brk.lno && ebrk.cond === brk.cond && ebrk.fun === brk.fun && (ebrk.temporary === brk.temporary || remove_only)) {
@@ -1655,7 +1655,7 @@ Wdb = (function(superClass) {
       }
     }
     if (exist || remove_only) {
-      this.cm.clear_breakpoint(brk);
+      this.source.clear_breakpoint(brk);
       cmd = 'Unbreak';
       if (!brk.temporary) {
         cmd = 'Broadcast|' + cmd;
@@ -1665,7 +1665,7 @@ Wdb = (function(superClass) {
       return;
     }
     if (brk.lno) {
-      this.cm.ask_breakpoint(brk.lno);
+      this.source.ask_breakpoint(brk.lno);
     }
     cmd = 'Break';
     if (!temporary) {
@@ -1730,7 +1730,7 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.global_key = function(e) {
     var char, extra, ref, ref1, ref2, sel;
-    if (this.cm.rw) {
+    if (this.source.rw) {
       return true;
     }
     if (e.altKey && ((65 <= (ref = e.keyCode) && ref <= 90) || (37 <= (ref1 = e.keyCode) && ref1 <= 40) || e.keyCode === 13) || (118 <= (ref2 = e.keyCode) && ref2 <= 122)) {
@@ -1758,7 +1758,7 @@ Wdb = (function(superClass) {
       char = char.toLowerCase();
       extra = '';
       if (char === 'b' || char === 't' || char === 'z') {
-        extra += ' :' + this.cm.state.lno;
+        extra += ' :' + this.source.state.lno;
       }
       if (char === 'i') {
         extra = getSelection().toString();
