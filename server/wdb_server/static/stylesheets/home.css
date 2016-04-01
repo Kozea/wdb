@@ -26,7 +26,8 @@
 .open-shell {
   position: fixed;
   bottom: 2em;
-  right: 2em; }
+  right: 2em;
+  z-index: 1337; }
 
 .page-content table, .page-content form {
   margin: auto; }

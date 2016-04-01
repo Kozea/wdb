@@ -125,7 +125,7 @@ Source = (function(superClass) {
         return _this.$container.prepend(elt);
       };
     })(this), {
-      value: 'Waiting for file',
+      value: 'No active file',
       theme: 'material',
       readOnly: true,
       gutters: ['breaks', 'CodeMirror-linenumbers'],
