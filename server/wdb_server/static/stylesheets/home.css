@@ -26,3 +26,10 @@
   position: fixed;
   bottom: 2em;
   right: 2em; }
+
+.page-content table, .page-content form {
+  margin: auto; }
+
+.page-content form {
+  /* Oh yeah! */
+  width: fit-content; }

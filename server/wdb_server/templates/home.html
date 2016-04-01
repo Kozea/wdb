@@ -18,10 +18,10 @@
     </div>
     <!-- Tabs -->
     <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-      <a href="#scroll-tab-1" class="mdl-layout__tab is-active">Active sessions</a>
-      <a href="#scroll-tab-2" class="mdl-layout__tab">Current global breakpoints</a>
-      <a href="#scroll-tab-3" class="mdl-layout__tab">Running processes</a>
-      <a href="#scroll-tab-4" class="mdl-layout__tab">Trace file</a>
+      <a href="#sessions" class="mdl-layout__tab is-active">Active sessions</a>
+      <a href="#breaks" class="mdl-layout__tab">Current global breakpoints</a>
+      <a href="#processes" class="mdl-layout__tab">Running processes</a>
+      <a href="#trace" class="mdl-layout__tab">Trace file</a>
 
       {% if StyleHandler.themes %}
         <a href="#scroll-tab-5" class="mdl-layout__tab">Styles</a>
@@ -29,7 +29,7 @@
     </div>
   </header>
   <main class="mdl-layout__content">
-    <section class="mdl-layout__tab-panel is-active" id="scroll-tab-1">
+    <section class="mdl-layout__tab-panel is-active" id="sessions">
       <div class="page-content">
         <table class="sessions mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
@@ -45,7 +45,7 @@
         </table>
       </div>
     </section>
-    <section class="mdl-layout__tab-panel" id="scroll-tab-2">
+    <section class="mdl-layout__tab-panel" id="breaks">
       <div class="page-content">
         <table class="breakpoints mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
@@ -62,7 +62,7 @@
         </table>
       </div>
     </section>
-    <section class="mdl-layout__tab-panel" id="scroll-tab-3">
+    <section class="mdl-layout__tab-panel" id="processes">
       <div class="page-content">
         <table class="processes mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
@@ -82,22 +82,17 @@
         </table>
       </div>
     </section>
-    <section class="mdl-layout__tab-panel" id="scroll-tab-4">
+    <section class="mdl-layout__tab-panel" id="trace">
       <div class="page-content">
-        <div class="mdl-grid">
-           <div class="mdl-layout-spacer"></div>
-           <div class="mdl-cell mdl-cell--4-col">
-             <form class="runfile">
-               <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                 <input class="mdl-textfield__input" type="text" name="debug_file" id="debug_file" />
-                 <label class="mdl-textfield__label" for="debug_file">File to run</label>
-               </div>
-               <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit">
-                 Debug
-               </button>
-             </form>
-           </div>
-           <div class="mdl-layout-spacer"></div>
+        <form class="runfile">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" name="debug_file" id="debug_file" />
+            <label class="mdl-textfield__label" for="debug_file">File to run</label>
+            </div>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" type="submit">
+              Debug
+            </button>
+          </form>
         </div>
       </div>
     </section>
