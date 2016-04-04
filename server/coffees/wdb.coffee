@@ -205,6 +205,7 @@ class Wdb extends Log
 
   print_help: ->
     @dialog 'Help', help
+    @done()
 
   print: (data) ->
     if @eval_time
