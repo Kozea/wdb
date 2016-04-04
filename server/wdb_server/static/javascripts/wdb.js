@@ -1453,7 +1453,8 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.print_help = function() {
-    return this.dialog('Help', help);
+    this.dialog('Help', help);
+    return this.done();
   };
 
   Wdb.prototype.print = function(data) {
