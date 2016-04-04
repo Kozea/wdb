@@ -674,12 +674,13 @@ class Wdb(object):
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 
-    def open_browser(self):
+    def open_browser(self, type_='debug'):
         if not self.connected:
             log.debug('Launching browser and wait for connection')
-            web_url = 'http://%s:%d/debug/session/%s' % (
+            web_url = 'http://%s:%d/%s/session/%s' % (
                 WEB_SERVER or 'localhost',
                 WEB_PORT or 1984,
+                type_,
                 self.uuid)
 
             server = WEB_SERVER or '[wdb.server]'
@@ -688,14 +689,16 @@ class Wdb(object):
 
             if WDB_NO_BROWSER_AUTO_OPEN:
                 log.warning('You can now launch your browser at '
-                            'http://%s/debug/session/%s' % (
+                            'http://%s/%s/session/%s' % (
                                 server,
+                                type_,
                                 self.uuid))
 
             elif not webbrowser.open(web_url):
                 log.warning('Unable to open browser, '
-                            'please go to http://%s/debug/session/%s' % (
+                            'please go to http://%s/%s/session/%s' % (
                                 server,
+                                type_,
                                 self.uuid))
 
             self.connected = True
@@ -717,7 +720,10 @@ class Wdb(object):
         self.stepping = not shell
 
         if not iframe_mode:
-            self.open_browser()
+            opts = {}
+            if shell:
+                opts['type_'] = 'shell'
+            self.open_browser(**opts)
 
         lvl = len(self.interaction_stack)
         if lvl:

@@ -4,20 +4,12 @@
   <script src="{{ static_url('javascripts/wdb' + ('.js' if options.unminified else '/wdb.min.js')) }}"></script>
 {% end %}
 
-{% block material_css %}
-  {% if post_mortem %}
-    <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.red-indigo.min.css">
-  {% else %}
-    <link rel="stylesheet" href="https://code.getmdl.io/1.1.2/material.indigo-red.min.css">
-  {% end %}
-{% end %}
-
 {% block css %}
   <link href="{{ static_url('stylesheets/wdb.css') }}" rel="stylesheet" type="text/css">
 {% end %}
 
 {% block main %}
-<div class="trace mdl-layout mdl-js-layout mdl-layout--fixed-header" data-uuid="{{ uuid }}" {% if post_mortem %}data-post-mortem{% end %}>
+<div class="trace mdl-layout mdl-js-layout mdl-layout--fixed-header" data-uuid="{{ uuid }}">
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
       <span class="mdl-layout-title subtitle">
@@ -25,33 +17,33 @@
       </span>
       <div class="mdl-layout-spacer"></div>
 
-      {% if not post_mortem %}
-      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="s" id="command-s">
-        <i class="material-icons">subdirectory_arrow_right</i>
-      </button>
-      <div class="mdl-tooltip mdl-tooltip--large" for="command-s">Step into</div>
+      {% if type_ != 'pm' %}
+        <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="s" id="command-s">
+          <i class="material-icons">subdirectory_arrow_right</i>
+        </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="command-s">Step into</div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="n" id="command-n">
-        <i class="material-icons">redo</i>
-      </button>
-      <div class="mdl-tooltip mdl-tooltip--large" for="command-n">Next</div>
+        <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="n" id="command-n">
+          <i class="material-icons">redo</i>
+        </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="command-n">Next</div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="u" id="command-u">
-        <i class="material-icons">keyboard_tab</i>
-      </button>
-      <div class="mdl-tooltip mdl-tooltip--large" for="command-u">Until</div>
+        <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="u" id="command-u">
+          <i class="material-icons">keyboard_tab</i>
+        </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="command-u">Until</div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="r" id="command-r">
-        <i class="material-icons">call_missed_outgoing</i>
-      </button>
-      <div class="mdl-tooltip mdl-tooltip--large" for="command-r">Return</div>
+        <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="r" id="command-r">
+          <i class="material-icons">call_missed_outgoing</i>
+        </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="command-r">Return</div>
 
-      <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="c" id="command-c">
-        <i class="material-icons">play_arrow</i>
-      </button>
-      <div class="mdl-tooltip mdl-tooltip--large" for="command-c">Continue</div>
+        <button class="mdl-button mdl-js-button mdl-button--icon command" data-command="c" id="command-c">
+          <i class="material-icons">play_arrow</i>
+        </button>
+        <div class="mdl-tooltip mdl-tooltip--large" for="command-c">Continue</div>
 
-      <div class="separator"></div>
+        <div class="separator"></div>
       {% end %}
 
       <a class="mdl-button mdl-js-button mdl-button--icon command" href="/" target="_blank" id="home-link">
@@ -74,7 +66,7 @@
       </button>
       <div class="mdl-tooltip mdl-tooltip--large" for="command-h">Help</div>
 
-      {% if post_mortem %}
+      {% if type_ == 'pm' %}
         <button class="mdl-button mdl-js-button mdl-button--icon switch power on" id="switch-power-on">
           <i class="material-icons">power_settings_new</i>
         </button>

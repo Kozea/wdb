@@ -328,6 +328,8 @@ code {
     .modals .mdl-dialog .mdl-dialog__content table, .modals .mdl-dialog .mdl-dialog__content aside {
       margin: auto;
       width: fit-content; }
+    .modals .mdl-dialog .mdl-dialog__content table {
+      margin-bottom: 1em; }
 
 aside.note {
   margin-top: 1em;
