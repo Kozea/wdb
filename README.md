@@ -2,15 +2,17 @@
 [![Build Status](https://travis-ci.org/Kozea/wdb.svg?branch=master)](https://travis-ci.org/Kozea/wdb)
 [![Coverage Status](https://coveralls.io/repos/Kozea/wdb/badge.svg?branch=master&service=github)](https://coveralls.io/github/Kozea/wdb?branch=master)
 
-![](https://raw.github.com/Kozea/wdb/master/wdb.gif)
-
-*Colors are bad due to gif compression.*
+![](https://raw.github.com/Kozea/wdb/master/wdb.png)
 
 
 - [wdb - Web Debugger](#wdb---web-debugger)
     - [Description](#description)
     - [Installation:](#installation)
     - [Quick test](#quick-test)
+- [curl -O https://raw.githubusercontent.com/Kozea/wdb/master/server/wdb.server.service](#curl--o-httpsrawgithubusercontentcomkozeawdbmasterserverwdbserverservice)
+- [curl -O https://raw.githubusercontent.com/Kozea/wdb/master/server/wdb.server.socket](#curl--o-httpsrawgithubusercontentcomkozeawdbmasterserverwdbserversocket)
+- [systemctl enable wdb.server.socket](#systemctl-enable-wdbserversocket)
+- [systemctl start wdb.server.socket](#systemctl-start-wdbserversocket)
     - [Usage](#usage)
         - [Setting trace](#setting-trace)
         - [Tracing code](#tracing-code)
@@ -349,7 +351,7 @@ Make sure that wdb is installed for the python version running the program too.
 
 ## Importing wdb each time is exhausting
 
-Yes to avoid that, you can add a `w` builtin at the beginning of your application:
+Yes to avoid that, you can add a `w` builtin at the beggining of your application:
 
 
 ```python
