@@ -381,7 +381,11 @@ History = (function(superClass) {
     } catch (error) {
       e = error;
       this.fail(e);
+      this.history = [];
     }
+    this.sessionIndexStart = this.history.filter(function(e) {
+      return e.indexOf('.') !== 0;
+    }).length;
   }
 
   History.prototype.up = function() {
@@ -428,6 +432,12 @@ History = (function(superClass) {
     this.index = -1;
     this.current = '';
     return this.currentPos = CodeMirror.Pos(0, 0);
+  };
+
+  History.prototype.clear = function() {
+    this.history = [];
+    this.sessionIndexStart = 0;
+    return this.reset();
   };
 
   History.prototype.getOverlay = function(re) {
@@ -504,6 +514,10 @@ History = (function(superClass) {
       this.index = this.oldIndex;
     }
     return this.oldIndex = null;
+  };
+
+  History.prototype.getSessionHistory = function() {
+    return this.history.slice(0, this.history.length - this.sessionIndexStart);
   };
 
   return History;
@@ -936,6 +950,10 @@ Prompt = (function(superClass) {
       this.history.reset();
       this.set(suggest || '');
     }
+    return this.unlock();
+  };
+
+  Prompt.prototype.unlock = function() {
     this.$container.removeClass('loading');
     this.code_mirror.setOption('readOnly', false);
     return this.focus();
@@ -1336,7 +1354,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.execute = function(snippet) {
-    var cmd, data, key, space;
+    var cmd, data, key, sent, space;
     cmd = (function(_this) {
       return function() {
         _this.ws.send.apply(_this.ws, arguments);
@@ -1353,75 +1371,72 @@ Wdb = (function(superClass) {
         key = snippet.substr(1);
         data = '';
       }
-      switch (key) {
-        case 'b':
-          this.toggle_break(data);
-          break;
-        case 'c':
-          cmd('Continue');
-          break;
-        case 'd':
-          if (data) {
-            cmd('Dump', data);
-          }
-          break;
-        case 'e':
-          this.source.toggle_edition();
-          break;
-        case 'f':
-          if (data) {
-            cmd('Find', data);
-          }
-          break;
-        case 'g':
-          this.cls();
-          break;
-        case 'h':
-          this.print_help();
-          break;
-        case 'i':
-          if (data) {
-            cmd('Display', data);
-          }
-          break;
-        case 'j':
-          if (data) {
-            cmd('Jump', data);
-          }
-          break;
-        case 'l':
-          cmd('Breakpoints');
-          break;
-        case 'n':
-          cmd('Next');
-          break;
-        case 'q':
-          cmd('Quit');
-          break;
-        case 'r':
-          cmd('Return');
-          break;
-        case 's':
-          cmd('Step');
-          break;
-        case 't':
-          this.toggle_break(data, true);
-          break;
-        case 'u':
-          cmd('Until');
-          break;
-        case 'w':
-          if (data) {
-            cmd('Watch', data);
-          }
-          break;
-        case 'x':
-          if (data) {
-            cmd('Diff', data);
-          }
-          break;
-        case 'z':
-          this.toggle_break(data, false, true);
+      sent = (function() {
+        switch (key) {
+          case 'a':
+            return this.printHistory();
+          case 'b':
+            return this.toggle_break(data);
+          case 'c':
+            return cmd('Continue');
+          case 'd':
+            if (data) {
+              return cmd('Dump', data);
+            }
+            break;
+          case 'e':
+            return this.source.toggle_edition();
+          case 'f':
+            if (data) {
+              return cmd('Find', data);
+            }
+            break;
+          case 'g':
+            return this.cls();
+          case 'h':
+            return this.printHelp();
+          case 'i':
+            if (data) {
+              return cmd('Display', data);
+            }
+            break;
+          case 'j':
+            if (data) {
+              return cmd('Jump', data);
+            }
+            break;
+          case 'k':
+            return this.clearHistory();
+          case 'l':
+            return cmd('Breakpoints');
+          case 'n':
+            return cmd('Next');
+          case 'q':
+            return cmd('Quit');
+          case 'r':
+            return cmd('Return');
+          case 's':
+            return cmd('Step');
+          case 't':
+            return this.toggle_break(data, true);
+          case 'u':
+            return cmd('Until');
+          case 'w':
+            if (data) {
+              return cmd('Watch', data);
+            }
+            break;
+          case 'x':
+            if (data) {
+              return cmd('Diff', data);
+            }
+            break;
+          case 'z':
+            return this.toggle_break(data, false, true);
+        }
+      }).call(this);
+      if (!sent) {
+        this.prompt.unlock();
       }
       return;
     } else if (snippet.indexOf('?') === 0) {
@@ -1443,16 +1458,20 @@ Wdb = (function(superClass) {
     return this.done();
   };
 
-  Wdb.prototype.print_hist = function(hist) {
+  Wdb.prototype.printHistory = function(hist) {
     return this.print({
       "for": 'History',
-      result: hist.slice(0).reverse().filter(function(e) {
+      result: this.prompt.history.getSessionHistory().reverse().filter(function(e) {
         return e.indexOf('.') !== 0;
       }).join('\n')
     });
   };
 
-  Wdb.prototype.print_help = function() {
+  Wdb.prototype.clearHistory = function() {
+    return this.prompt.history.clear();
+  };
+
+  Wdb.prototype.printHelp = function() {
     this.dialog('Help', help);
     return this.done();
   };
@@ -1843,6 +1862,11 @@ Wdb = (function(superClass) {
     $dialog.find('.mdl-tabs,.mdl-data-table').each(function() {
       return componentHandler.upgradeElement(this);
     });
+    $dialog.on('close', (function(_this) {
+      return function() {
+        return _this.prompt.ready();
+      };
+    })(this));
     return $dialog.get(0).showModal();
   };
 

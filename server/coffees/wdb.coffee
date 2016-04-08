@@ -155,17 +155,18 @@ class Wdb extends Log
       else
         key = snippet.substr(1)
         data = ''
-      switch key
-        # when 'a' then @print_hist @session_cmd_hist[@source.state.fn]
+      sent = switch key
+        when 'a' then @printHistory()
         when 'b' then @toggle_break data
         when 'c' then cmd 'Continue'
         when 'd' then cmd 'Dump', data if data
         when 'e' then @source.toggle_edition()
         when 'f' then cmd 'Find', data if data
         when 'g' then @cls()
-        when 'h' then @print_help()
+        when 'h' then @printHelp()
         when 'i' then cmd 'Display', data if data
         when 'j' then cmd 'Jump', data if data
+        when 'k' then @clearHistory()
         when 'l' then cmd 'Breakpoints'
         when 'n' then cmd 'Next'
         when 'q' then cmd 'Quit'
@@ -176,6 +177,8 @@ class Wdb extends Log
         when 'w' then cmd 'Watch', data if data
         when 'x' then cmd 'Diff', data if data
         when 'z' then @toggle_break data, false, true
+
+      @prompt.unlock() unless sent
       return
 
     else if snippet.indexOf('?') == 0
@@ -194,16 +197,18 @@ class Wdb extends Log
     @interpreter.clear()
     @done()
 
-  print_hist: (hist) ->
+  printHistory: (hist) ->
     @print
       for: 'History'
-      result: hist
-        .slice(0)
+      result: @prompt.history.getSessionHistory()
         .reverse()
         .filter((e) -> e.indexOf('.') != 0)
         .join('\n')
 
-  print_help: ->
+  clearHistory: ->
+    @prompt.history.clear()
+
+  printHelp: ->
     @dialog 'Help', help
     @done()
 
@@ -515,6 +520,9 @@ class Wdb extends Log
 
     $dialog.find('.mdl-tabs,.mdl-data-table').each ->
       componentHandler.upgradeElement @
+    $dialog.on 'close', =>
+      @prompt.ready()
+
     $dialog.get(0).showModal()
 
   pretty_time: (time) ->

@@ -29,6 +29,9 @@ class History extends Log
       @history = JSON.parse(localStorage['history'] or '[]')
     catch e
       @fail e
+      @history = []
+
+    @sessionIndexStart = @history.filter((e) -> e.indexOf('.') != 0).length
 
   up: ->
     @saveCurrent() if @index is -1
@@ -63,6 +66,11 @@ class History extends Log
     @index = -1
     @current = ''
     @currentPos = CodeMirror.Pos(0, 0)
+
+  clear: ->
+    @history = []
+    @sessionIndexStart = 0
+    @reset()
 
   getOverlay: (re) ->
     token: (stream) ->
@@ -120,3 +128,6 @@ class History extends Log
     if @oldIndex?
       @index = @oldIndex
     @oldIndex = null
+
+  getSessionHistory: ->
+    @history.slice 0, @history.length - @sessionIndexStart
