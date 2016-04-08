@@ -15,7 +15,7 @@ The wdb clients allow step by step debugging, in-program python code execution, 
 
 Due to this architecture, all of this is fully compatible with **multithread** and **multiprocess** programs.
 
-**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4) and pypy.
+**wdb** works with python 2 (2.6, 2.7), python 3 (3.2, 3.3, 3.4, 3.5) and pypy.
 Even better, it is possible to debug a python 2 program with a wdb server running on python 3 and vice-versa or debug a program running on a computer with a debugging server running on another computer inside a web page on a third computer!
 
 Even betterer, it is now possible to pause a currently running python process/thread using code injection from the web interface. (This requires gdb and ptrace enabled)
@@ -341,32 +341,9 @@ you can now use the `w` object any where in your code:
         doubtful_code()
 ```
 
-
-## Theming
-
-The Theme can be chosen in the server home page, or can be set at start like that:
-```python
-    wdb.server --theme=light
-```
-
-If you like writing css feel free to make your own and pull request it to me, css is generated using libsass and grunt and most of the work will be setting variables.
-
-
 ## Code completion
 
 Wdb has dynamic code completion in eval prompt thanks to [jedi](https://github.com/davidhalter/jedi).
-
-
-## Browser Support
-
-wdb is based on websockets and since 3812417 its layout relies on flexbox, browser requirements are now :
-
-- Chrome >= 29
-- Firefox >= 22
-- IE >= 11
-
-Better update you browser in any case.
-If it doesn't work with one of these versions please report it.
 
 
 ## FAQ
