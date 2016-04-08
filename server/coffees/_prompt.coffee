@@ -193,6 +193,9 @@ class Prompt extends Log
       @history.historize snippet
       @history.reset()
       @set suggest or ''
+    @unlock()
+
+  unlock: ->
     @$container.removeClass 'loading'
     @code_mirror.setOption 'readOnly', false
     @focus()
