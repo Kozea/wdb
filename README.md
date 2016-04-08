@@ -5,39 +5,6 @@
 ![](https://raw.github.com/Kozea/wdb/master/wdb.png)
 
 
-- [wdb - Web Debugger](#wdb---web-debugger)
-    - [Description](#description)
-    - [Installation:](#installation)
-    - [Quick test](#quick-test)
-- [curl -O https://raw.githubusercontent.com/Kozea/wdb/master/server/wdb.server.service](#curl--o-httpsrawgithubusercontentcomkozeawdbmasterserverwdbserverservice)
-- [curl -O https://raw.githubusercontent.com/Kozea/wdb/master/server/wdb.server.socket](#curl--o-httpsrawgithubusercontentcomkozeawdbmasterserverwdbserversocket)
-- [systemctl enable wdb.server.socket](#systemctl-enable-wdbserversocket)
-- [systemctl start wdb.server.socket](#systemctl-start-wdbserversocket)
-    - [Usage](#usage)
-        - [Setting trace](#setting-trace)
-        - [Tracing code](#tracing-code)
-        - [Debugging web servers](#debugging-web-servers)
-            - [Wsgi servers](#wsgi-servers)
-                - [Flask](#flask)
-                - [Django](#django)
-                - [CherryPy](#cherrypy)
-            - [Tornado](#tornado)
-            - [Page loading time become slow](#page-loading-time-become-slow)
-    - [Remote debugging](#remote-debugging)
-    - [In browser usage](#in-browser-usage)
-    - [Wdb Server](#wdb-server)
-    - [Importing wdb each time is exhausting](#importing-wdb-each-time-is-exhausting)
-    - [Theming](#theming)
-    - [Code completion](#code-completion)
-    - [Browser Support](#browser-support)
-    - [FAQ](#faq)
-        - [In Firefox opened debugging pages are not closed when done](#in-firefox-opened-debugging-pages-are-not-closed-when-done)
-    - [Contribute](#contribute)
-    - [Test](#test)
-    - [Author](#author)
-    - [Licence](#licence)
-
-
 ## Description
 
 
