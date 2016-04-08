@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/Kozea/wdb.svg?branch=master)](https://travis-ci.org/Kozea/wdb)
 [![Coverage Status](https://coveralls.io/repos/Kozea/wdb/badge.svg?branch=master&service=github)](https://coveralls.io/github/Kozea/wdb?branch=master)
 
-![](https://raw.github.com/Kozea/wdb/master/wdb.png)
+[![](https://raw.github.com/Kozea/wdb/master/wdb.png)](https://raw.github.com/Kozea/wdb/master/wdb-lg.png)
 
 
 ## Description
