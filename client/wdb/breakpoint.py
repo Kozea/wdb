@@ -1,9 +1,8 @@
 import os.path
-from log_colorizer import get_color_logger
 from hashlib import sha1
 from wdb._compat import import_module
 
-log = get_color_logger('wdb.bp')
+log = logger('wdb.bp')
 
 
 def canonic(filename):

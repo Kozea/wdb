@@ -41,6 +41,7 @@ class Wdb extends Log
       @started = true
 
     @ws.send 'Start'
+    @switch.open_term()
 
   working: ->
     $('.activity').addClass('is-active')
