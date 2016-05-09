@@ -1,7 +1,8 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape,
-    to_unicode_string, from_bytes, force_bytes, is_str)
+    to_unicode_string, from_bytes, force_bytes, is_str,
+    write_file_with_encoding)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
     search_key_in_obj, search_value_in_obj, timeout_of)
@@ -636,9 +637,14 @@ class Interaction(object):
                         gettempdir(),
                         dn.replace(os.path.sep, '!') + bn +
                         '-wdb-back-%d' % time.time()))
-                with open(fn, 'w') as f:
-                    f.write(to_unicode_string(src, fn))
-            except OSError as e:
+                write_file_with_encoding(src, fn)
+            except Exception as e:
+                # Restore file on crash
+                move(
+                    os.path.join(
+                        gettempdir(),
+                        dn.replace(os.path.sep, '!') + bn +
+                        '-wdb-back-%d' % time.time()), fn)
                 self.db.send('Echo|%s' % dump({
                     'for': 'Error during save',
                     'val': str(e)
