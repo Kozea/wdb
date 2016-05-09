@@ -1,4 +1,6 @@
 import sys
+import codecs
+import re
 
 python_version = sys.version_info[0]
 
@@ -30,32 +32,45 @@ else:
     def execute(cmd, globals_, locals_):
         exec(cmd, globals_, locals_)
 
+_cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
+
+
+def _detect_encoding(filename):
+    import linecache
+    lines = linecache.getlines(filename)
+    return _detect_lines_encoding(lines)
+
+
+def _detect_lines_encoding(lines):
+    if not lines or lines[0].startswith(u("\xef\xbb\xbf")):
+        return "utf-8"
+    magic = _cookie_search("".join(lines[:2]))
+    if magic is None:
+        return 'utf-8'
+    encoding = magic.group(1)
+    try:
+        codecs.lookup(encoding)
+    except LookupError:
+        return 'utf-8'
+    return encoding
+
+
+def write_file_with_encoding(src, fn):
+    encoding = _detect_lines_encoding(src.splitlines())
+    with codecs.open(fn, mode='w', encoding=encoding) as f:
+        f.write(src)
+
+
 if python_version == 2:
     basestr = basestring
-    import codecs
-    import re
-    _cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
-
-    def _detect_encoding(filename):
-        import linecache
-        lines = linecache.getlines(filename)
-
-        if not lines or lines[0].startswith("\xef\xbb\xbf"):
-            return "utf-8"
-        magic = _cookie_search("".join(lines[:2]))
-        if magic is None:
-            return 'utf-8'
-        encoding = magic.group(1)
-        try:
-            codecs.lookup(encoding)
-        except LookupError:
-            return 'utf-8'
-        return encoding
 
     def to_unicode(string):
         return string.decode('utf-8')
 
     def to_unicode_string(string, filename):
+        if isinstance(string, unicode):
+            return string
+
         encoding = _detect_encoding(filename)
         if encoding != 'utf-8' and string:
             return string.decode(encoding).encode('utf-8')
@@ -91,7 +106,6 @@ else:
         if isinstance(bytes_, str):
             return bytes_.encode('utf-8')
         return bytes_
-
 
 def is_str(string):
     return isinstance(string, basestr)
