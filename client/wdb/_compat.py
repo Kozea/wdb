@@ -107,6 +107,7 @@ else:
             return bytes_.encode('utf-8')
         return bytes_
 
+
 def is_str(string):
     return isinstance(string, basestr)
 
@@ -199,6 +200,7 @@ except ImportError:
         if module not in sys.modules:
             raise ImportError(module)
         return sys.modules[module]
+
 
 # Not really compat but convenient
 try:

@@ -1,8 +1,8 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape,
-    to_unicode_string, from_bytes, force_bytes, is_str,
-    write_file_with_encoding)
+    from_bytes, force_bytes, is_str,
+    write_file_with_encoding, logger)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
     search_key_in_obj, search_value_in_obj, timeout_of)
