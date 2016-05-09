@@ -33,7 +33,7 @@ def get_source_from_byte_code(code):
         import uncompyle6
     except ImportError:
         return
-    version = sys.version_info.major + (sys.version_info.minor / 10.0)
+    version = sys.version_info[0] + (sys.version_info[1] / 10.0)
     try:
         return uncompyle6.deparse_code(version, code).text
     except Exception:
