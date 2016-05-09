@@ -695,7 +695,8 @@ Prompt = (function(superClass) {
       language: 'python',
       viewportMargin: Infinity,
       lineWrapping: true,
-      autofocus: true
+      autofocus: true,
+      specialChars: /[\u0000-\u0019\u00a0\u00ad\u200b-\u200f\u2028\u2029\ufeff]/
     });
     this.code_mirror.on('changes', this.changes.bind(this));
     CodeMirror.registerHelper("hint", "jedi", (function(_this) {
@@ -798,6 +799,7 @@ Prompt = (function(superClass) {
           return _this.searchBack(false);
         };
       })(this),
+      'Ctrl-K': 'killLine',
       'Ctrl-Enter': 'newlineAndIndent',
       'Alt-Backspace': 'delGroupBefore',
       'Ctrl-Space': function(cm, options) {
@@ -1204,7 +1206,8 @@ Wdb = (function(superClass) {
       $(window).on('keydown', this.global_key.bind(this));
       this.started = true;
     }
-    return this.ws.send('Start');
+    this.ws.send('Start');
+    return this["switch"].open_term();
   };
 
   Wdb.prototype.working = function() {

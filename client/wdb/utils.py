@@ -376,7 +376,7 @@ class timeout_of(object):
         try:
             # Ignoring when not active + disabling if no alarm signal (Windows)
             signal.signal(signal.SIGALRM, signal.SIG_IGN)
-        except:
+        except Exception:
             self.active = False
         else:
             self.active = True

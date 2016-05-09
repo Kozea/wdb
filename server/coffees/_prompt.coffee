@@ -30,6 +30,8 @@ class Prompt extends Log
       viewportMargin: Infinity
       lineWrapping: true
       autofocus: true
+      # Add nbsp
+      specialChars: /[\u0000-\u0019\u00a0\u00ad\u200b-\u200f\u2028\u2029\ufeff]/
 
     @code_mirror.on 'changes', @changes.bind @
 
@@ -100,6 +102,7 @@ class Prompt extends Log
       'Ctrl-F': ->
       'Ctrl-R': => @searchBack()
       'Ctrl-S': => @searchBack false
+      'Ctrl-K': 'killLine'
       'Ctrl-Enter': 'newlineAndIndent'
       'Alt-Backspace': 'delGroupBefore'
       'Ctrl-Space': (cm, options) ->

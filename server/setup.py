@@ -14,8 +14,8 @@ with open(os.path.join(ROOT, 'wdb_server', '__init__.py')) as fd:
     __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
 
 requires = [
-    "wdb==%s" % __version__, "tornado>=4.2", "log_colorizer>=1.6",
-    "jedi>=0.9.0", "filemagic>=1.6", "psutil>=2.1", 'tornado_systemd']
+    "wdb==%s" % __version__, "tornado>=4.2",
+    "filemagic>=1.6", "psutil>=2.1", 'tornado_systemd']
 if sys.platform == 'linux':
     requires.append('pyinotify')
 
@@ -40,9 +40,6 @@ options = dict(
             'static/javascripts/wdb/*.min.js',
             'templates/*.html'
         ],
-    },
-    extras_require={
-        'uncompyle6': ['uncompyle6']  # For code source from disassembly
     },
     classifiers=[
         "Development Status :: 4 - Beta",

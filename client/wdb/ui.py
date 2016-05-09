@@ -9,8 +9,6 @@ from .utils import (
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
-from jedi import Interpreter
-from logging import getLogger
 from shutil import move
 from tempfile import gettempdir
 from base64 import b64encode
@@ -26,12 +24,20 @@ try:
 except ImportError:
     magic = None
 
+try:
+    from jedi import Interpreter
+except ImportError:
+    Interpreter = None
+
+
 import os
 import re
+import signal
 import sys
 import time
 import traceback
-log = getLogger('wdb.ui')
+
+log = logger('wdb.ui')
 
 
 def eval_(src, *args, **kwargs):
@@ -76,7 +82,8 @@ class Interaction(object):
 
     def __init__(
             self, db, frame, tb, exception, exception_description,
-            init=None, shell=False, shell_vars=None, source=None):
+            init=None, shell=False, shell_vars=None, source=None,
+            timeout=None):
         self.db = db
         self.shell = shell
         self.init_message = init
@@ -86,6 +93,13 @@ class Interaction(object):
         # Copy locals to avoid strange cpython behaviour
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
         self.htmldiff = Html5Diff(4)
+        self.timeout = timeout
+        if self.timeout:
+            def handler(*args):
+                raise KeyboardInterrupt()
+            signal.signal(signal.SIGALRM, handler)
+            signal.alarm(self.timeout)
+
         if self.shell:
             self.locals[self.index] = shell_vars or {}
 
@@ -230,6 +244,9 @@ class Interaction(object):
         }))
 
     def do_start(self, data):
+        self.started = True
+        if self.timeout:
+            signal.alarm(0)
         # Getting breakpoints
         log.debug('Getting breakpoints')
 
@@ -406,7 +423,17 @@ class Interaction(object):
                     m = re.match("name '(.+)' is not defined", str(e))
                     if m:
                         name = m.groups()[0]
-                        if importable_module(name):
+                        if self.db._importmagic_index:
+                            scores = self.db._importmagic_index.symbol_scores(
+                                name)
+                            if scores:
+                                _, module, variable = scores[0]
+                                if variable is None:
+                                    suggest = 'import %s' % module
+                                else:
+                                    suggest = 'from %s import %s' % (
+                                        module, variable)
+                        elif importable_module(name):
                             suggest = 'import %s' % name
 
                     self.db.hooked = self.handle_exc()
@@ -571,6 +598,9 @@ class Interaction(object):
         completion = loads(data)
         source = completion.pop('source')
         pos = completion.pop('pos')
+        if not Interpreter:
+            self.db.send('Suggest')
+            return
         try:
             script = Interpreter(source, [
                 self.current_locals, self.get_globals()], **completion)
@@ -689,7 +719,7 @@ class Interaction(object):
     def do_quit(self, data):
         self.db.stepping = False
         self.db.stop_trace()
-        sys.exit(1)
+        return True
 
     def do_diff(self, data):
         if '?' not in data and '<>' not in data:
@@ -743,7 +773,7 @@ class Interaction(object):
         try:
             value = eval_(
                 expr, self.get_globals(), self.current_locals)
-        except:
+        except Exception:
             self.fail('Find')
             return
         if ' in ' in data:

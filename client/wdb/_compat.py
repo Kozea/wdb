@@ -199,3 +199,11 @@ except ImportError:
         if module not in sys.modules:
             raise ImportError(module)
         return sys.modules[module]
+
+# Not really compat but convenient
+try:
+    from log_colorizer import get_color_logger
+except ImportError:
+    logger = logging.getLogger
+else:
+    logger = get_color_logger

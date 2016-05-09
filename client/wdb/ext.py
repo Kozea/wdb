@@ -19,17 +19,18 @@ from wdb import (trace, start_trace, stop_trace, set_trace, Wdb,
                  WEB_SERVER, WEB_PORT)
 from wdb.ui import dump
 from wdb._compat import to_bytes, escape
-from log_colorizer import get_color_logger
 
-from threading import Thread
+import traceback
+# from threading import Thread
+from multiprocessing import Process
 from uuid import uuid4
 import sys
 
-
-log = get_color_logger('wdb.ext')
+log = logger('wdb.ext')
 
 
 def post_mortem_interaction(uuid, exc_info):
+    log.error('CREATING thread %s' % uuid)
     wdb = Wdb.get(force_uuid=uuid)
     type_, value, tb = exc_info
     frame = None
@@ -48,7 +49,8 @@ def post_mortem_interaction(uuid, exc_info):
 
     wdb.interaction(
         frame, tb, exception, exception_description,
-        init=init, iframe_mode=True)
+        init=init, iframe_mode=True, timeout=1)
+    log.error('JOINING thread %s' % uuid)
 
 
 def _handle_off(silent=False):
@@ -56,7 +58,12 @@ def _handle_off(silent=False):
         log.exception('Exception with wdb off')
 
     uuid = str(uuid4())
-    Thread(target=post_mortem_interaction, args=(uuid, sys.exc_info())).start()
+    process = Process(
+        target=post_mortem_interaction,
+        args=(uuid, sys.exc_info())
+    )
+    process.daemon = True
+    process.start()
 
     web_url = 'http://%s:%d/pm/session/%s' % (
         WEB_SERVER or 'localhost',
@@ -137,32 +144,49 @@ class WdbMiddleware(object):
                         for item in appiter:
                             yield item
                 except Exception:
-                    start_response('500 INTERNAL SERVER ERROR', [
-                        ('Content-Type', 'text/html')])
-                    yield _handle_off()
+                    exc_info = sys.exc_info()
+                    try:
+                        start_response('500 INTERNAL SERVER ERROR', [
+                            ('Content-Type', 'text/html')])
+                    except AssertionError:
+                        log.exception(
+                            'Exception with wdb off and headers already set',
+                            exc_info=exc_info)
+                        yield '\n'.join(
+                            traceback.format_exception(*exc_info)
+                            ).replace('\n', '\n<br>\n').encode('utf-8')
+                    else:
+                        yield _handle_off()
                 finally:
                     hasattr(appiter, 'close') and appiter.close()
                 wdb.closed = False
             return trace_wsgi(environ, start_response)
 
         def catch(environ, start_response):
-            wdb = Wdb.get()
-            wdb.closed = False
             appiter = None
+
             try:
                 appiter = self.app(environ, start_response)
                 for item in appiter:
                     yield item
             except Exception:
-                start_response('500 INTERNAL SERVER ERROR', [
-                    ('Content-Type', 'text/html')])
-                yield _handle_off()
+                exc_info = sys.exc_info()
+                try:
+                    start_response('500 INTERNAL SERVER ERROR', [
+                        ('Content-Type', 'text/html')])
+                except AssertionError:
+                    log.exception(
+                        'Exception with wdb off and headers already set',
+                        exc_info=exc_info)
+                    yield '\n'.join(
+                        traceback.format_exception(*exc_info)
+                        ).replace('\n', '\n<br>\n').encode('utf-8')
+                else:
+                    yield _handle_off()
             finally:
                 # Close set_trace debuggers
                 stop_trace(close_on_exit=True)
                 hasattr(appiter, 'close') and appiter.close()
-
-            wdb.closed = False
 
         return catch(environ, start_response)
 

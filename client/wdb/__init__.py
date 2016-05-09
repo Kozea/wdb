@@ -19,7 +19,7 @@ __version__ = '2.9.99'
 _initial_globals = dict(globals())
 
 from ._compat import (
-    execute, StringIO, to_unicode_string, escape, loads, Socket)
+    execute, StringIO, to_unicode_string, escape, loads, Socket, logger)
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -32,8 +32,8 @@ from .utils import (
     cut_if_too_long, IterableEllipsis)
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
-from log_colorizer import get_color_logger
 from uuid import uuid4
+from threading import Thread
 import dis
 import os
 import logging
@@ -43,6 +43,11 @@ import socket
 import webbrowser
 import atexit
 import time
+
+try:
+    import importmagic
+except ImportError:
+    importmagic = None
 
 # Get wdb server host
 SOCKET_SERVER = os.getenv('WDB_SOCKET_SERVER', 'localhost')
@@ -56,15 +61,15 @@ WEB_PORT = int(os.getenv('WDB_WEB_PORT', 0))
 
 WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
 
-log = get_color_logger('wdb')
-trace_log = logging.getLogger('wdb.trace')
+log = logger('wdb')
+trace_log = logger('wdb.trace')
 
 for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
-    logger = 'wdb.%s' % log_name if log_name != 'main' else 'wdb'
+    logger_name = 'wdb.%s' % log_name if log_name != 'main' else 'wdb'
     level = os.getenv(
         'WDB_%s_LOG' % log_name.upper(),
         os.getenv('WDB_LOG', 'WARNING')).upper()
-    logging.getLogger(logger).setLevel(getattr(logging, level, 'WARNING'))
+    logger(logger_name).setLevel(getattr(logging, level, 'WARNING'))
 
 
 class Wdb(object):
@@ -125,6 +130,8 @@ class Wdb(object):
         self.server = server or SOCKET_SERVER
         self.port = port or SOCKET_PORT
         self.interaction_stack = []
+        self._importmagic_index = None
+        self.index_imports()
         self._socket = None
         self.connect()
         self.get_breakpoints()
@@ -210,7 +217,7 @@ class Wdb(object):
 
         if not self._socket:
             log.error('Could not connect to server')
-            sys.exit(2)
+            return
 
         Wdb._sockets.append(self._socket)
         self._socket.send_bytes(self.uuid.encode('utf-8'))
@@ -228,6 +235,19 @@ class Wdb(object):
                 brk['cond'], brk['fun'])
 
         log.info('Server breakpoints added')
+
+    def index_imports(self):
+        if not importmagic or self._importmagic_index:
+            return
+
+        def index(self):
+            self._importmagic_index = importmagic.SymbolIndex()
+            # Prevent stdout pollution
+            old_stdout, sys.stdout = sys.stdout, StringIO()
+            self._importmagic_index.build_index(sys.path)
+            sys.stdout = old_stdout
+
+        Thread(target=index, args=(self,)).start()
 
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
@@ -670,7 +690,7 @@ class Wdb(object):
             data = self._socket.recv_bytes()
         except EOFError:
             log.error('Connection lost')
-            sys.exit(1)
+            return
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 
@@ -712,7 +732,7 @@ class Wdb(object):
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
             init=None, shell=False, shell_vars=None, source=None,
-            iframe_mode=False):
+            iframe_mode=False, timeout=None):
         """User interaction handling blocking on socket receive"""
         log.info('Interaction %r %r %r %r' % (
             frame, tb, exception, exception_description))
@@ -735,7 +755,8 @@ class Wdb(object):
 
         interaction = Interaction(
             self, frame, tb, exception, exception_description,
-            init=init, shell=shell, shell_vars=shell_vars, source=source)
+            init=init, shell=shell, shell_vars=shell_vars, source=source,
+            timeout=timeout)
 
         self.interaction_stack.append(interaction)
 
@@ -902,8 +923,11 @@ class trace(object):
 @atexit.register
 def cleanup():
     """Close all sockets at exit"""
-    for sck in Wdb._sockets:
-        sck.close()
+    for sck in list(Wdb._sockets):
+        try:
+            sck.close()
+        except Exception:
+            log.warn('Error in cleanup', exc_info=True)
 
 
 def shell(source=None, vars=None, server=None, port=None):
