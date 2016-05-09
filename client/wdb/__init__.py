@@ -242,10 +242,7 @@ class Wdb(object):
 
         def index(self):
             self._importmagic_index = importmagic.SymbolIndex()
-            # Prevent stdout pollution
-            old_stdout, sys.stdout = sys.stdout, StringIO()
             self._importmagic_index.build_index(sys.path)
-            sys.stdout = old_stdout
 
         Thread(target=index, args=(self,)).start()
 
