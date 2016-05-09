@@ -15,10 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from wdb import (trace, start_trace, stop_trace, set_trace, Wdb,
-                 WEB_SERVER, WEB_PORT)
-from wdb.ui import dump
-from wdb._compat import to_bytes, escape
+from . import (
+    trace, start_trace, stop_trace, set_trace, Wdb, WEB_SERVER, WEB_PORT)
+from .ui import dump
+from ._compat import to_bytes, escape, logger
 
 import traceback
 # from threading import Thread
