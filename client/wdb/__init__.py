@@ -93,11 +93,12 @@ class Wdb(object):
             wdb.pid = pid
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
-        else:
-            if wdb and (
-                    server is not None and wdb.server != server or
+        elif wdb:
+            if (server is not None and wdb.server != server or
                     port is not None and wdb.port != port):
                 log.warn('Different server/port set, ignoring')
+            else:
+                wdb.reconnect_if_needed()
         return wdb
 
     @staticmethod
