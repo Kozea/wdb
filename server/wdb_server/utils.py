@@ -75,9 +75,14 @@ def refresh_process(uuid=None):
     remaining_pids = []
     remaining_tids = []
     for proc in psutil.process_iter():
-        cl = proc.cmdline()
-        if len(cl) == 0:
+        try:
+            cl = proc.cmdline()
+        except (psutil.ZombieProcess, psutil.AccessDenied):
             continue
+        else:
+            if len(cl) == 0:
+                continue
+
         binary = cl[0].split('/')[-1]
         if (
                 ('python' in binary or 'pypy' in binary) and
@@ -107,5 +112,6 @@ def refresh_process(uuid=None):
             except Exception:
                 log.warn('', exc_info=True)
                 continue
+
     send('KeepProcess', remaining_pids)
     send('KeepThreads', remaining_tids)
