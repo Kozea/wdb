@@ -206,6 +206,7 @@ except ImportError:
 try:
     from log_colorizer import get_color_logger
 except ImportError:
+    import logging
     logger = logging.getLogger
 else:
     logger = get_color_logger
