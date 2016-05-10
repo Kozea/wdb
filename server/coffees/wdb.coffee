@@ -464,7 +464,11 @@ class Wdb extends Log
       return false
 
     if e.keyCode is 13
+      return if @prompt.focused()
+
       sel = getSelection().toString()
+      if not sel
+        sel = @source.code_mirror.getSelection()
       return unless sel
       if e.shiftKey
         @eval_insert sel
