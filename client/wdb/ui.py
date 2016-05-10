@@ -2,10 +2,10 @@
 from ._compat import (
     loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape,
     from_bytes, force_bytes, is_str,
-    write_file_with_encoding, logger)
+    _detect_lines_encoding, logger)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
-    search_key_in_obj, search_value_in_obj, timeout_of)
+    search_key_in_obj, search_value_in_obj, timeout_of, inplace)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
@@ -658,32 +658,22 @@ class Interaction(object):
 
     def do_save(self, data):
         fn, src = data.split('|', 1)
-        if os.path.exists(fn):
-            dn = os.path.dirname(fn)
-            bn = os.path.basename(fn)
-            try:
-                move(
-                    fn, os.path.join(
-                        gettempdir(),
-                        dn.replace(os.path.sep, '!') + bn +
-                        '-wdb-back-%d' % time.time()))
-                write_file_with_encoding(src, fn)
-            except Exception as e:
-                # Restore file on crash
-                move(
-                    os.path.join(
-                        gettempdir(),
-                        dn.replace(os.path.sep, '!') + bn +
-                        '-wdb-back-%d' % time.time()), fn)
-                self.db.send('Echo|%s' % dump({
-                    'for': 'Error during save',
-                    'val': str(e)
-                }))
-            else:
-                self.db.send('Echo|%s' % dump({
-                    'for': 'Save succesful',
-                    'val': 'Wrote %s' % fn
-                }))
+        if not os.path.exists(fn):
+            return
+        try:
+            encoding = _detect_lines_encoding(src.splitlines())
+            with inplace(fn, encoding=encoding) as (_, w):
+                w.write(src)
+        except Exception as e:
+            self.db.send('Echo|%s' % dump({
+                'for': 'Error during save',
+                'val': str(e)
+            }))
+        else:
+            self.db.send('Echo|%s' % dump({
+                'for': 'Save succesful',
+                'val': 'Wrote %s' % fn
+            }))
 
     def do_display(self, data):
         if ';' in data:
