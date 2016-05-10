@@ -458,16 +458,18 @@ def inplace(filename, mode='r', buffering=-1, encoding=None, errors=None,
     try:
         perm = os.fstat(readable.fileno()).st_mode
     except OSError:
-        writable = io.open(filename, 'w' + mode.replace('r', ''),
-                        buffering=buffering, encoding=encoding, errors=errors,
-                        newline=newline)
+        writable = io.open(
+            filename, 'w' + mode.replace('r', ''),
+            buffering=buffering, encoding=encoding, errors=errors,
+            newline=newline)
     else:
         os_mode = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
         if hasattr(os, 'O_BINARY'):
             os_mode |= os.O_BINARY
         fd = os.open(filename, os_mode, perm)
-        writable = io.open(fd, "w" + mode.replace('r', ''), buffering=buffering,
-                           encoding=encoding, errors=errors, newline=newline)
+        writable = io.open(
+            fd, "w" + mode.replace('r', ''), buffering=buffering,
+            encoding=encoding, errors=errors, newline=newline)
         try:
             if hasattr(os, 'chmod'):
                 os.chmod(filename, perm)

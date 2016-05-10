@@ -9,8 +9,6 @@ from .utils import (
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 import token as tokens
-from shutil import move
-from tempfile import gettempdir
 from base64 import b64encode
 
 try:
