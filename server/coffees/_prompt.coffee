@@ -184,6 +184,9 @@ class Prompt extends Log
   focus: ->
     @code_mirror.focus()
 
+  focused: ->
+    @$code_mirror.hasClass 'CodeMirror-focused'
+
   abort: ->
     @history.reset()
     @set ''

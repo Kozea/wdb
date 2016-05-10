@@ -49,7 +49,7 @@ def post_mortem_interaction(uuid, exc_info):
 
     wdb.interaction(
         frame, tb, exception, exception_description,
-        init=init, iframe_mode=True, timeout=1)
+        init=init, iframe_mode=True, timeout=3)
     log.error('JOINING thread %s' % uuid)
 
 

@@ -931,6 +931,10 @@ Prompt = (function(superClass) {
     return this.code_mirror.focus();
   };
 
+  Prompt.prototype.focused = function() {
+    return this.$code_mirror.hasClass('CodeMirror-focused');
+  };
+
   Prompt.prototype.abort = function() {
     this.history.reset();
     return this.set('');
@@ -1802,7 +1806,13 @@ Wdb = (function(superClass) {
       return false;
     }
     if (e.keyCode === 13) {
+      if (this.prompt.focused()) {
+        return;
+      }
       sel = getSelection().toString();
+      if (!sel) {
+        sel = this.source.code_mirror.getSelection();
+      }
       if (!sel) {
         return;
       }
