@@ -55,12 +55,6 @@ def _detect_lines_encoding(lines):
     return encoding
 
 
-def write_file_with_encoding(src, fn):
-    encoding = _detect_lines_encoding(src.splitlines())
-    with codecs.open(fn, mode='w', encoding=encoding) as f:
-        f.write(src)
-
-
 if python_version == 2:
     basestr = basestring
 
