@@ -14,9 +14,9 @@
       'shell': 'teal-orange',
       'debug': 'indigo-red'
     }[type] %}
-    <link rel="stylesheet" href="https://code.getmdl.io/{{ material_version }}/material.{{ scheme }}.min.css">
+    <link rel="stylesheet" href="{{ static_url('libs/material-design-lite/material.%s.min.css' % scheme) }}">
 
-    <script defer src="https://code.getmdl.io/{{ material_version }}/material.min.js"></script>
+    <script defer src="{{ static_url('libs/material-design-lite/material.min.js') }}"></script>
     <script src="{{ static_url('javascripts/wdb/deps.min.js') }}"></script>
     <link href="{{ static_url('stylesheets/deps.min.css') }}" rel="stylesheet" type="text/css">
 
