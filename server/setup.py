@@ -35,6 +35,7 @@ options = dict(
     package_data={
         'wdb_server': [
             'static/fonts/*',
+            'static/libs/material-design-lite/*',
             'static/stylesheets/*',
             'static/img/*.png',
             'static/javascripts/wdb/*.min.js',
