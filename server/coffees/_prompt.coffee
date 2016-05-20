@@ -103,6 +103,7 @@ class Prompt extends Log
       'Ctrl-R': => @searchBack()
       'Ctrl-S': => @searchBack false
       'Ctrl-K': 'killLine'
+      'Ctrl-L': @wdb.cls.bind @wdb
       'Ctrl-Enter': 'newlineAndIndent'
       'Alt-Backspace': 'delGroupBefore'
       'Ctrl-Space': (cm, options) ->

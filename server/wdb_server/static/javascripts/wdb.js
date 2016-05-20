@@ -800,6 +800,7 @@ Prompt = (function(superClass) {
         };
       })(this),
       'Ctrl-K': 'killLine',
+      'Ctrl-L': this.wdb.cls.bind(this.wdb),
       'Ctrl-Enter': 'newlineAndIndent',
       'Alt-Backspace': 'delGroupBefore',
       'Ctrl-Space': function(cm, options) {

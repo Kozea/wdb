@@ -292,7 +292,9 @@ main {
     .split {
       min-height: calc(100vh - 56px - 40px); } }
   .split .flex {
-    flex: 1 1 calc(50vh - 64px - 40px); }
+    flex: 1 1 calc(50vh - 64px - 40px);
+    /* FF scroll */
+    min-height: 0; }
     @media screen and (max-width: 1024px) {
       .split .flex {
         flex: 1 1 calc(50vh - 56px - 40px); } }
