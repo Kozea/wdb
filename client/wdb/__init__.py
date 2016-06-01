@@ -242,10 +242,15 @@ class Wdb(object):
             return
 
         def index(self):
+            log.info('Indexing imports')
             self._importmagic_index = importmagic.SymbolIndex()
             self._importmagic_index.build_index(sys.path)
+            log.info('Indexing imports done')
 
-        Thread(target=index, args=(self,)).start()
+        index_thread = Thread(target=index, args=(self,))
+        # Don't wait for completion, let it die alone:
+        index_thread.daemon = True
+        index_thread.start()
 
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
@@ -679,11 +684,17 @@ class Wdb(object):
     def send(self, data):
         """Send data through websocket"""
         log.debug('Sending %s' % data)
+        if not self._socket:
+            log.warn('No connection')
+            return
         self._socket.send_bytes(data.encode('utf-8'))
 
     def receive(self):
         """Receive data through websocket"""
         log.debug('Receiving')
+        if not self._socket:
+            log.warn('No connection')
+            return
         try:
             data = self._socket.recv_bytes()
         except EOFError:

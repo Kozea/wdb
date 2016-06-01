@@ -118,7 +118,22 @@ Source = (function(superClass) {
   function Source(wdb) {
     this.wdb = wdb;
     Source.__super__.constructor.apply(this, arguments);
-    this.$container = $('.source').on('mouseup', this.wdb.paste_target.bind(this.wdb));
+    this.$container = $('.source').on('mousedown', (function(_this) {
+      return function(e) {
+        if (!(e.which === 2 && _this.code_mirror.getOption('readOnly'))) {
+          return;
+        }
+        return _this.code_mirror.setOption('readOnly', 'nocursor');
+      };
+    })(this)).on('mouseup', (function(_this) {
+      return function(e) {
+        if (e.which !== 2) {
+          return;
+        }
+        _this.code_mirror.setOption('readOnly', true);
+        return _this.wdb.paste_target(e);
+      };
+    })(this));
     this.code_mirror = CodeMirror((function(_this) {
       return function(elt) {
         _this.$code_mirror = $(elt);
@@ -765,7 +780,8 @@ Prompt = (function(superClass) {
             ch: 0
           }, cur).length,
           line: cur.line + 1,
-          column: cur.ch
+          column: cur.ch,
+          manual: options.completeSingle
         });
         return _this.completion = {
           cur: cur,
@@ -923,7 +939,7 @@ Prompt = (function(superClass) {
     if (!snippet) {
       return;
     }
-    cm.setOption('readOnly', true);
+    cm.setOption('readOnly', 'nocursor');
     this.$container.addClass('loading');
     return this.wdb.execute(snippet);
   };
@@ -1037,6 +1053,10 @@ Prompt = (function(superClass) {
       })(this)
     });
     return close.back = back;
+  };
+
+  Prompt.prototype.insert = function(str) {
+    return this.code_mirror.replaceRange(str, this.code_mirror.getCursor());
   };
 
   Prompt.prototype.changes = function() {
@@ -1818,7 +1838,10 @@ Wdb = (function(superClass) {
         return;
       }
       if (e.shiftKey) {
-        this.eval_insert(sel);
+        this.prompt.insert(sel);
+        this.prompt.focus();
+      } else if (e.ctrlKey) {
+        this.ws.send('Watch', sel);
       } else {
         this.prompt.history.historize(sel);
         this.execute(sel);
@@ -1845,10 +1868,18 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.paste_target = function(e) {
     var target;
-    if (e.which !== 2) {
+    target = $(e.target).text().trim();
+    if (target === '') {
+      return true;
+    }
+    if (e.shiftKey) {
+      this.prompt.insert(target);
       return;
     }
-    target = $(e.target).text().trim();
+    if (e.ctrlKey) {
+      this.ws.send('Watch', target);
+      return;
+    }
     this.prompt.history.historize(target);
     this.ws.send('Dump', target);
     this.working();

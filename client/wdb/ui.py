@@ -94,7 +94,7 @@ class Interaction(object):
         self.timeout = timeout
         if self.timeout:
             def handler(*args):
-                raise KeyboardInterrupt()
+                sys.exit(0)
             signal.signal(signal.SIGALRM, handler)
             signal.alarm(self.timeout)
 
@@ -594,6 +594,11 @@ class Interaction(object):
 
     def do_complete(self, data):
         completion = loads(data)
+        if completion.pop('manual', False):
+            timeout = 5
+        else:
+            timeout = .1
+
         source = completion.pop('source')
         pos = completion.pop('pos')
         if not Interpreter:
@@ -602,7 +607,7 @@ class Interaction(object):
         try:
             script = Interpreter(source, [
                 self.current_locals, self.get_globals()], **completion)
-            with timeout_of(.75):
+            with timeout_of(timeout):
                 completions = script.completions()
         except Exception:
             self.db.send('Suggest')
@@ -610,7 +615,7 @@ class Interaction(object):
             return
 
         try:
-            with timeout_of(.25):
+            with timeout_of(timeout / 2):
                 funs = script.call_signatures() or []
         except Exception:
             self.db.send('Suggest')

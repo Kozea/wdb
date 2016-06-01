@@ -21,7 +21,6 @@ from .ui import dump
 from ._compat import to_bytes, escape, logger
 
 import traceback
-# from threading import Thread
 from multiprocessing import Process
 from uuid import uuid4
 import sys
@@ -30,27 +29,28 @@ log = logger('wdb.ext')
 
 
 def post_mortem_interaction(uuid, exc_info):
-    log.error('CREATING thread %s' % uuid)
-    wdb = Wdb.get(force_uuid=uuid)
-    type_, value, tb = exc_info
-    frame = None
-    _value = value
-    if not isinstance(_value, BaseException):
-        _value = type_(value)
+    try:
+        wdb = Wdb.get(force_uuid=uuid)
+        type_, value, tb = exc_info
+        frame = None
+        _value = value
+        if not isinstance(_value, BaseException):
+            _value = type_(value)
 
-    wdb.obj_cache[id(exc_info)] = exc_info
-    wdb.extra_vars['__exception__'] = exc_info
-    exception = type_.__name__
-    exception_description = str(value) + ' [POST MORTEM]'
-    init = 'Echo|%s' % dump({
-        'for': '__exception__',
-        'val': escape('%s: %s') % (
-            exception, exception_description)})
+        wdb.obj_cache[id(exc_info)] = exc_info
+        wdb.extra_vars['__exception__'] = exc_info
+        exception = type_.__name__
+        exception_description = str(value) + ' [POST MORTEM]'
+        init = 'Echo|%s' % dump({
+            'for': '__exception__',
+            'val': escape('%s: %s') % (
+                exception, exception_description)})
 
-    wdb.interaction(
-        frame, tb, exception, exception_description,
-        init=init, iframe_mode=True, timeout=3)
-    log.error('JOINING thread %s' % uuid)
+        wdb.interaction(
+            frame, tb, exception, exception_description,
+            init=init, iframe_mode=True, timeout=3)
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 
 def _handle_off(silent=False):
@@ -62,7 +62,7 @@ def _handle_off(silent=False):
         target=post_mortem_interaction,
         args=(uuid, sys.exc_info())
     )
-    process.daemon = True
+    process.daemon = False
     process.start()
 
     web_url = 'http://%s:%d/pm/session/%s' % (

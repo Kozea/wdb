@@ -18,7 +18,13 @@ class Source extends Log
   constructor: (@wdb) ->
     super
     @$container = $('.source')
-      .on 'mouseup', @wdb.paste_target.bind @wdb
+      .on 'mousedown', (e) =>
+        return unless e.which == 2 and @code_mirror.getOption 'readOnly'
+        @code_mirror.setOption 'readOnly', 'nocursor'
+      .on 'mouseup', (e) =>
+        return unless e.which == 2 # Middle
+        @code_mirror.setOption 'readOnly', true
+        @wdb.paste_target(e)
 
     @code_mirror = CodeMirror (elt) =>
       @$code_mirror = $ elt

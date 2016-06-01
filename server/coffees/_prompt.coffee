@@ -83,6 +83,7 @@ class Prompt extends Log
           pos: @code_mirror.getRange({line: 0, ch: 0}, cur).length
           line: cur.line + 1
           column: cur.ch
+          manual: options.completeSingle
 
         @completion =
           cur: cur
@@ -178,7 +179,7 @@ class Prompt extends Log
   newLineOrExecute: (cm) ->
     snippet = cm.getValue().trim()
     return unless snippet
-    cm.setOption 'readOnly', true
+    cm.setOption 'readOnly', 'nocursor'
     @$container.addClass 'loading'
     @wdb.execute snippet
 
@@ -263,6 +264,9 @@ class Prompt extends Log
           @$code_mirror.removeClass 'extra-dialog'
     )
     close.back = back
+
+  insert: (str) ->
+    @code_mirror.replaceRange str, @code_mirror.getCursor()
 
   changes: ->
     @wdb.interpreter.scroll()

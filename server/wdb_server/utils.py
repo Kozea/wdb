@@ -77,7 +77,9 @@ def refresh_process(uuid=None):
     for proc in psutil.process_iter():
         try:
             cl = proc.cmdline()
-        except (psutil.ZombieProcess, psutil.AccessDenied):
+        except (psutil.ZombieProcess,
+                psutil.AccessDenied,
+                psutil.NoSuchProcess):
             continue
         else:
             if len(cl) == 0:

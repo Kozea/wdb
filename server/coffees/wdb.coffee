@@ -470,8 +470,12 @@ class Wdb extends Log
       if not sel
         sel = @source.code_mirror.getSelection()
       return unless sel
+
       if e.shiftKey
-        @eval_insert sel
+        @prompt.insert sel
+        @prompt.focus()
+      else if e.ctrlKey
+        @ws.send 'Watch', sel
       else
         @prompt.history.historize sel
         @execute sel
@@ -491,8 +495,14 @@ class Wdb extends Log
     @working()
 
   paste_target: (e) ->
-    return unless e.which == 2 # Middle
     target = $(e.target).text().trim()
+    return true if target is ''
+    if e.shiftKey
+      @prompt.insert target
+      return
+    if e.ctrlKey
+      @ws.send 'Watch', target
+      return
     @prompt.history.historize target
     @ws.send 'Dump', target
     @working()
