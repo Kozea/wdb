@@ -20,6 +20,11 @@ try:
 except ImportError:
     from cgi import escape
 
+try:
+    from socketserver import TCPServer
+except ImportError:
+    from SocketServer import TCPServer
+
 if python_version == 2:
     from StringIO import StringIO
 else:
@@ -116,6 +121,146 @@ if python_version == 2:
     import struct
     import socket
     import errno
+    import time
+    import select
+
+    if sys.platform == 'win32':
+        from _winapi import WAIT_OBJECT_0, WAIT_TIMEOUT, INFINITE
+        import _winapi
+
+        def _exhaustive_wait(handles, timeout):
+            # Return ALL handles which are currently signalled.  (Only
+            # returning the first signalled might create starvation issues.)
+            L = list(handles)
+            ready = []
+            while L:
+                res = _winapi.WaitForMultipleObjects(L, False, timeout)
+                if res == WAIT_TIMEOUT:
+                    break
+                elif WAIT_OBJECT_0 <= res < WAIT_OBJECT_0 + len(L):
+                    res -= WAIT_OBJECT_0
+                elif WAIT_ABANDONED_0 <= res < WAIT_ABANDONED_0 + len(L):
+                    res -= WAIT_ABANDONED_0
+                else:
+                    raise RuntimeError('Should not get here')
+                ready.append(L[res])
+                L = L[res+1:]
+                timeout = 0
+            return ready
+
+        _ready_errors = {
+            _winapi.ERROR_BROKEN_PIPE, _winapi.ERROR_NETNAME_DELETED}
+
+        def wait(object_list, timeout=None):
+            '''
+            Wait till an object in object_list is ready/readable.
+            Returns list of those objects in object_list which are
+            ready/readable.
+            '''
+            if timeout is None:
+                timeout = INFINITE
+            elif timeout < 0:
+                timeout = 0
+            else:
+                timeout = int(timeout * 1000 + 0.5)
+
+            object_list = list(object_list)
+            waithandle_to_obj = {}
+            ov_list = []
+            ready_objects = set()
+            ready_handles = set()
+
+            try:
+                for o in object_list:
+                    try:
+                        fileno = getattr(o, 'fileno')
+                    except AttributeError:
+                        waithandle_to_obj[o.__index__()] = o
+                    else:
+                        # start an overlapped read of length zero
+                        try:
+                            ov, err = _winapi.ReadFile(fileno(), 0, True)
+                        except OSError as e:
+                            err = e.winerror
+                            if err not in _ready_errors:
+                                raise
+                        if err == _winapi.ERROR_IO_PENDING:
+                            ov_list.append(ov)
+                            waithandle_to_obj[ov.event] = o
+                        else:
+                            # If o.fileno() is an overlapped pipe handle and
+                            # err == 0 then there is a zero length message
+                            # in the pipe, but it HAS NOT been consumed.
+                            ready_objects.add(o)
+                            timeout = 0
+
+                ready_handles = _exhaustive_wait(
+                    waithandle_to_obj.keys(), timeout)
+            finally:
+                # request that overlapped reads stop
+                for ov in ov_list:
+                    ov.cancel()
+
+                # wait for all overlapped reads to stop
+                for ov in ov_list:
+                    try:
+                        _, err = ov.GetOverlappedResult(True)
+                    except OSError as e:
+                        err = e.winerror
+                        if err not in _ready_errors:
+                            raise
+                    if err != _winapi.ERROR_OPERATION_ABORTED:
+                        o = waithandle_to_obj[ov.event]
+                        ready_objects.add(o)
+                        if err == 0:
+                            # If o.fileno() is an overlapped pipe handle then
+                            # a zero length message HAS been consumed.
+                            if hasattr(o, '_got_empty_message'):
+                                o._got_empty_message = True
+
+            ready_objects.update(waithandle_to_obj[h] for h in ready_handles)
+            return [o for o in object_list if o in ready_objects]
+    else:
+        if hasattr(select, 'poll'):
+            def _poll(fds, timeout):
+                if timeout is not None:
+                    timeout = int(timeout * 1000)  # timeout is in milliseconds
+                fd_map = {}
+                pollster = select.poll()
+                for fd in fds:
+                    pollster.register(fd, select.POLLIN)
+                    if hasattr(fd, 'fileno'):
+                        fd_map[fd.fileno()] = fd
+                    else:
+                        fd_map[fd] = fd
+                ls = []
+                for fd, event in pollster.poll(timeout):
+                    if event & select.POLLNVAL:
+                        raise ValueError('invalid file descriptor %i' % fd)
+                    ls.append(fd_map[fd])
+                return ls
+        else:
+            def _poll(fds, timeout):
+                return select.select(fds, [], [], timeout)[0]
+
+        def wait(object_list, timeout=None):
+            '''
+            Wait till an object in object_list is ready/readable.
+            Returns list of those objects in object_list which are ready/readable.
+            '''
+            if timeout is not None:
+                if timeout <= 0:
+                    return _poll(object_list, 0)
+                else:
+                    deadline = time.time() + timeout
+            while True:
+                try:
+                    return _poll(object_list, timeout)
+                except OSError as e:
+                    if e.errno != errno.EINTR:
+                        raise
+                if timeout is not None:
+                    timeout = deadline - time.time()
 
     class Socket(object):
         """A Socket compatible with multiprocessing.connection.Client, that
@@ -169,6 +314,16 @@ if python_version == 2:
             self._check_closed()
             self._handle.close()
             self._handle = None
+
+        def poll(self, timeout=0.0):
+            """Whether there is any input available to be read"""
+            self._check_closed()
+            return self._poll(timeout)
+
+        def _poll(self, timeout):
+            r = wait([self._handle], timeout)
+            return bool(r)
+
 else:
     from multiprocessing.connection import Client as Socket
 

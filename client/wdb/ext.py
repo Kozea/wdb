@@ -18,10 +18,9 @@
 from . import (
     trace, start_trace, stop_trace, set_trace, Wdb, WEB_SERVER, WEB_PORT)
 from .ui import dump
-from ._compat import to_bytes, escape, logger
+from ._compat import to_bytes, escape, logger, TCPServer
 
 import traceback
-from socketserver import TCPServer
 from threading import current_thread
 from uuid import uuid4
 import sys
