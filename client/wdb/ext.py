@@ -78,14 +78,19 @@ def _handle_off(silent=False):
         WEB_SERVER or 'localhost',
         WEB_PORT or 1984,
         uuid)
-    return to_bytes('''
+    return to_bytes('''<!DOCTYPE html>
         <html>
             <head>
                 <title>WDB Post Mortem</title>
                 <style>
-                  html, body {
+                  html, body, iframe {
                     margin: 0;
                     padding: 0;
+                    width: 100%%;
+                    height: 100%%;
+                    border: none;
+                    overflow: hidden;
+                    display: block;
                   }
                 </style>
                 <script>
@@ -100,13 +105,10 @@ def _handle_off(silent=False):
                         }
                     }, false);
                 </script>
+            </head>
+            <body>
+                <iframe
                     src="%s"
-                    marginheight="0"
-                    marginwidth="0"
-                    frameborder="0"
-                    scrolling="no"
-                    width="100%%"
-                    height="100%%"
                     id="wdbframe">
                 </iframe>
             </body>
