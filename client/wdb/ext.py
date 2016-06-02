@@ -28,19 +28,21 @@ import sys
 log = logger('wdb.ext')
 _exc_cache = {}
 
-# Patch shutdown request to open blocking interaction after the end of the
-# request
 
-shutdown_request = TCPServer.shutdown_request
+def _patch_tcpserver():
+    """
+    Patch shutdown_request to open blocking interaction after the end of the
+    request
+    """
+    shutdown_request = TCPServer.shutdown_request
 
+    def shutdown_request_patched(*args, **kwargs):
+        thread = current_thread()
+        shutdown_request(*args, **kwargs)
+        if thread in _exc_cache:
+            post_mortem_interaction(*_exc_cache.pop(thread))
 
-def shutdown_request_patched(*args, **kwargs):
-    thread = current_thread()
-    shutdown_request(*args, **kwargs)
-    if thread in _exc_cache:
-        post_mortem_interaction(*_exc_cache.pop(thread))
-
-TCPServer.shutdown_request = shutdown_request_patched
+    TCPServer.shutdown_request = shutdown_request_patched
 
 
 def post_mortem_interaction(uuid, exc_info):
@@ -98,9 +100,6 @@ def _handle_off(silent=False):
                         }
                     }, false);
                 </script>
-            </head>
-            <body>
-                <iframe
                     src="%s"
                     marginheight="0"
                     marginwidth="0"
@@ -117,6 +116,7 @@ def _handle_off(silent=False):
 
 class WdbMiddleware(object):
     def __init__(self, app, start_disabled=False):
+        _patch_tcpserver()
         self.app = app
         Wdb.enabled = not start_disabled
 
@@ -221,8 +221,9 @@ def wdb_tornado(application, start_disabled=False):
     @coroutine
     def _wdb_execute(*args, **kwargs):
         from wdb import trace, Wdb
-        wdb = Wdb.get()
-        wdb.closed = False  # Activate request ignores
+        if Wdb.enabled:
+            wdb = Wdb.get()
+            wdb.closed = False  # Activate request ignores
 
         interesting = True
         if len(args) > 0 and isinstance(args[0], ErrorHandler):
@@ -239,8 +240,9 @@ def wdb_tornado(application, start_disabled=False):
             # Close set_trace debuggers
             stop_trace(close_on_exit=True)
 
-        # Reset closed state
-        wdb.closed = False
+        if Wdb.enabled:
+            # Reset closed state
+            wdb.closed = False
 
     RequestHandler._execute = _wdb_execute
 
@@ -250,6 +252,7 @@ def wdb_tornado(application, start_disabled=False):
         if ex:
             silent = issubclass(ex[0], HTTPError)
         self.finish(_handle_off(silent=silent))
+        post_mortem_interaction(*_exc_cache.pop(current_thread()))
 
     RequestHandler.write_error = _wdb_error_writter
 
