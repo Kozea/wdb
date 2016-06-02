@@ -219,7 +219,7 @@ if python_version == 2:
                                 o._got_empty_message = True
 
             ready_objects.update(waithandle_to_obj[h] for h in ready_handles)
-            return [o for o in object_list if o in ready_objects]
+            return [p for p in object_list if p in ready_objects]
     else:
         if hasattr(select, 'poll'):
             def _poll(fds, timeout):
@@ -246,7 +246,8 @@ if python_version == 2:
         def wait(object_list, timeout=None):
             '''
             Wait till an object in object_list is ready/readable.
-            Returns list of those objects in object_list which are ready/readable.
+            Returns list of those objects in object_list which are
+             ready/readable.
             '''
             if timeout is not None:
                 if timeout <= 0:
