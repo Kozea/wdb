@@ -689,17 +689,23 @@ class Wdb(object):
             return
         self._socket.send_bytes(data.encode('utf-8'))
 
-    def receive(self):
+    def receive(self, timeout=None):
         """Receive data through websocket"""
         log.debug('Receiving')
         if not self._socket:
             log.warn('No connection')
             return
         try:
+            if timeout:
+                rv = self._socket.poll(timeout)
+                if not rv:
+                    log.error('Connection timeouted')
+                    return 'Quit'
+
             data = self._socket.recv_bytes()
         except EOFError:
             log.error('Connection lost')
-            return
+            return 'Quit'
         log.debug('Got %s' % data)
         return data.decode('utf-8')
 

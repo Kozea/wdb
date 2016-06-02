@@ -21,36 +21,49 @@ from .ui import dump
 from ._compat import to_bytes, escape, logger
 
 import traceback
-from multiprocessing import Process
+from socketserver import TCPServer
+from threading import current_thread
 from uuid import uuid4
 import sys
 
 log = logger('wdb.ext')
+_exc_cache = {}
+
+# Patch shutdown request to open blocking interaction after the end of the
+# request
+
+shutdown_request = TCPServer.shutdown_request
+
+
+def shutdown_request_patched(*args, **kwargs):
+    thread = current_thread()
+    shutdown_request(*args, **kwargs)
+    if thread in _exc_cache:
+        post_mortem_interaction(*_exc_cache.pop(thread))
+
+TCPServer.shutdown_request = shutdown_request_patched
 
 
 def post_mortem_interaction(uuid, exc_info):
-    try:
-        wdb = Wdb.get(force_uuid=uuid)
-        type_, value, tb = exc_info
-        frame = None
-        _value = value
-        if not isinstance(_value, BaseException):
-            _value = type_(value)
+    wdb = Wdb.get(force_uuid=uuid)
+    type_, value, tb = exc_info
+    frame = None
+    _value = value
+    if not isinstance(_value, BaseException):
+        _value = type_(value)
 
-        wdb.obj_cache[id(exc_info)] = exc_info
-        wdb.extra_vars['__exception__'] = exc_info
-        exception = type_.__name__
-        exception_description = str(value) + ' [POST MORTEM]'
-        init = 'Echo|%s' % dump({
-            'for': '__exception__',
-            'val': escape('%s: %s') % (
-                exception, exception_description)})
+    wdb.obj_cache[id(exc_info)] = exc_info
+    wdb.extra_vars['__exception__'] = exc_info
+    exception = type_.__name__
+    exception_description = str(value) + ' [POST MORTEM]'
+    init = 'Echo|%s' % dump({
+        'for': '__exception__',
+        'val': escape('%s: %s') % (
+            exception, exception_description)})
 
-        wdb.interaction(
-            frame, tb, exception, exception_description,
-            init=init, iframe_mode=True, timeout=3)
-    except KeyboardInterrupt:
-        sys.exit(0)
+    wdb.interaction(
+        frame, tb, exception, exception_description,
+        init=init, iframe_mode=True, timeout=3)
 
 
 def _handle_off(silent=False):
@@ -58,12 +71,7 @@ def _handle_off(silent=False):
         log.exception('Exception with wdb off')
 
     uuid = str(uuid4())
-    process = Process(
-        target=post_mortem_interaction,
-        args=(uuid, sys.exc_info())
-    )
-    process.daemon = False
-    process.start()
+    _exc_cache[current_thread()] = (uuid, sys.exc_info())
 
     web_url = 'http://%s:%d/pm/session/%s' % (
         WEB_SERVER or 'localhost',

@@ -1224,6 +1224,7 @@ Wdb = (function(superClass) {
     this.prompt = new Prompt(this);
     this["switch"] = new Switch(this);
     this.watchers = new Watchers(this);
+    $(window).on('beforeunload', this.unload.bind(this));
   }
 
   Wdb.prototype.opening = function() {
@@ -1937,6 +1938,10 @@ Wdb = (function(superClass) {
       return (time.toFixed(1)) + "s";
     }
     return (time.toFixed(0)) + "s";
+  };
+
+  Wdb.prototype.unload = function() {
+    return this.ws.ws.close();
   };
 
   return Wdb;

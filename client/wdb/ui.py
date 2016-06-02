@@ -92,11 +92,6 @@ class Interaction(object):
         self.locals = list(map(lambda x: x[0].f_locals, self.stack))
         self.htmldiff = Html5Diff(4)
         self.timeout = timeout
-        if self.timeout:
-            def handler(*args):
-                sys.exit(0)
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(self.timeout)
 
         if self.shell:
             self.locals[self.index] = shell_vars or {}
@@ -208,7 +203,9 @@ class Interaction(object):
 
     def interact(self):
         try:
-            message = self.db.receive()
+            message = self.db.receive(self.timeout)
+            # Only timeout at first request
+            self.timeout = None
         except KeyboardInterrupt:
             # Quit on KeyboardInterrupt
             message = 'Quit'
@@ -243,8 +240,6 @@ class Interaction(object):
 
     def do_start(self, data):
         self.started = True
-        if self.timeout:
-            signal.alarm(0)
         # Getting breakpoints
         log.debug('Getting breakpoints')
 

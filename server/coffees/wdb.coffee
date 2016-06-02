@@ -34,6 +34,9 @@ class Wdb extends Log
     @switch = new Switch @
     @watchers = new Watchers @
 
+    # Prevent locking of monothread
+    $(window).on 'beforeunload', @unload.bind @
+
   opening: ->
     # Start by getting current trace
     if not @started
@@ -560,5 +563,7 @@ class Wdb extends Log
 
     "#{time.toFixed(0)}s"
 
+  unload: ->
+    @ws.ws.close()
 
 $ -> window.wdb = new Wdb()
