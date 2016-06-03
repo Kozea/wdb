@@ -8,7 +8,7 @@ from .utils import (
     search_key_in_obj, search_value_in_obj, timeout_of, inplace)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
-from subprocess import call
+from subprocess import Popen
 import token as tokens
 from base64 import b64encode
 
@@ -685,10 +685,9 @@ class Interaction(object):
         else:
             cmd = []
         try:
-            call(cmd + [data])
+            Popen(cmd + [data])
         except Exception:
             self.fail('External open')
-
 
     def do_display(self, data):
         if ';' in data:
@@ -725,6 +724,15 @@ class Interaction(object):
         self.db.stepping = False
         self.db.stop_trace()
         return True
+
+    def do_restart(self, data):
+        try:
+            # Try re-execing as-is
+            os.execvp(sys.argv[0], sys.argv)
+        except Exception:
+            # Put the python executable in front
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
 
     def do_diff(self, data):
         if '?' not in data and '<>' not in data:

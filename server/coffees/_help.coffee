@@ -234,6 +234,12 @@ help = """
       </td>
     </tr>
     <tr>
+      <td class="cmd"><samp>.m</samp></td>
+      <td class="mdl-data-table__cell--non-numeric dfn">
+        Restart program
+      </td>
+    </tr>
+    <tr>
       <td class="cmd"><samp>.e</samp></td>
       <td class="mdl-data-table__cell--non-numeric dfn">
         Toggle file edition mode
