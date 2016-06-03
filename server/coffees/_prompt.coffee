@@ -107,18 +107,23 @@ class Prompt extends Log
       'Ctrl-L': @wdb.cls.bind @wdb
       'Ctrl-Enter': 'newlineAndIndent'
       'Alt-Backspace': 'delGroupBefore'
-      'Ctrl-Space': (cm, options) ->
-        CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
-          async: true
-          extraKeys:
-            Right: (cm, handle) -> handle.pick()
+      'Ctrl-Space': @triggerAutocomplete.bind @
       # Use page up/down for going up/down in multiline
       'PageUp': 'goLineUp'
+      'PageDown': 'goLineDown'
       'PageDown': 'goLineDown'
       'Shift-PageUp': =>
         @wdb.interpreter.scroll(-1)
       'Shift-PageDown': =>
         @wdb.interpreter.scroll(1)
+      'Tab': (cm, options) =>
+        cur = @code_mirror.getCursor()
+        rng = @code_mirror.getRange (line: cur.line, ch: 0), cur
+        if rng.trim()
+          @triggerAutocomplete cm, options
+        else
+          spaces = Array(@code_mirror.getOption("indentUnit") + 1).join(" ")
+          @code_mirror.replaceSelection spaces
 
     @code_mirror.on 'keyup', (cm, e) =>
       return unless cm.getValue()
@@ -175,6 +180,12 @@ class Prompt extends Log
       $(@code_mirror.state.completionActive.widget.hints).addClass cls
 
     @completion.callback hints
+
+  triggerAutocomplete: (cm, options) ->
+    CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,
+      async: true
+      extraKeys:
+        Right: (cm, handle) -> handle.pick()
 
   newLineOrExecute: (cm) ->
     snippet = cm.getValue().trim()

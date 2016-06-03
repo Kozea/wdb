@@ -825,17 +825,9 @@ Prompt = (function(superClass) {
       'Ctrl-L': this.wdb.cls.bind(this.wdb),
       'Ctrl-Enter': 'newlineAndIndent',
       'Alt-Backspace': 'delGroupBefore',
-      'Ctrl-Space': function(cm, options) {
-        return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
-          async: true,
-          extraKeys: {
-            Right: function(cm, handle) {
-              return handle.pick();
-            }
-          }
-        });
-      },
+      'Ctrl-Space': this.triggerAutocomplete.bind(this),
       'PageUp': 'goLineUp',
+      'PageDown': 'goLineDown',
       'PageDown': 'goLineDown',
       'Shift-PageUp': (function(_this) {
         return function() {
@@ -845,6 +837,22 @@ Prompt = (function(superClass) {
       'Shift-PageDown': (function(_this) {
         return function() {
           return _this.wdb.interpreter.scroll(1);
+        };
+      })(this),
+      'Tab': (function(_this) {
+        return function(cm, options) {
+          var cur, rng, spaces;
+          cur = _this.code_mirror.getCursor();
+          rng = _this.code_mirror.getRange({
+            line: cur.line,
+            ch: 0
+          }, cur);
+          if (rng.trim()) {
+            return _this.triggerAutocomplete(cm, options);
+          } else {
+            spaces = Array(_this.code_mirror.getOption("indentUnit") + 1).join(" ");
+            return _this.code_mirror.replaceSelection(spaces);
+          }
         };
       })(this)
     });
@@ -937,6 +945,17 @@ Prompt = (function(superClass) {
       };
     })(this));
     return this.completion.callback(hints);
+  };
+
+  Prompt.prototype.triggerAutocomplete = function(cm, options) {
+    return CodeMirror.commands.autocomplete(cm, CodeMirror.hint.jedi, {
+      async: true,
+      extraKeys: {
+        Right: function(cm, handle) {
+          return handle.pick();
+        }
+      }
+    });
   };
 
   Prompt.prototype.newLineOrExecute = function(cm) {
