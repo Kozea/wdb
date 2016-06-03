@@ -703,7 +703,7 @@ class Wdb(object):
                     return 'Quit'
 
             data = self._socket.recv_bytes()
-        except EOFError:
+        except Exception:
             log.error('Connection lost')
             return 'Quit'
         log.debug('Got %s' % data)
