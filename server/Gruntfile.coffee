@@ -64,6 +64,7 @@ module.exports = (grunt) ->
       wdb:
         files:
           'wdb_server/static/javascripts/wdb.js': [
+            'coffees/_compat.coffee'
             'coffees/_base.coffee'
             'coffees/_websocket.coffee'
             'coffees/_source.coffee'

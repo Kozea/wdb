@@ -44,6 +44,10 @@ main
     flex: 1 1 calc(50vh - 64px - 40px)
     @media screen and (max-width: 1024px)
       flex: 1 1 calc(50vh - 56px - 40px)
+    /* IE */
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active)
+      height: calc(50vh - 64px - 40px)
+
     /* FF scroll
     min-height: 0
 

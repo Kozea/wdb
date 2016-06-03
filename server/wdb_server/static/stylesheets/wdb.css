@@ -299,11 +299,15 @@ main {
       min-height: calc(100vh - 56px - 40px); } }
   .split .flex {
     flex: 1 1 calc(50vh - 64px - 40px);
+    /* IE */
     /* FF scroll */
     min-height: 0; }
     @media screen and (max-width: 1024px) {
       .split .flex {
         flex: 1 1 calc(50vh - 56px - 40px); } }
+    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+      .split .flex {
+        height: calc(50vh - 64px - 40px); } }
 
 .title {
   white-space: pre; }

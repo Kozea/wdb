@@ -3,6 +3,13 @@ var History, Interpreter, Log, Prompt, Source, Switch, Traceback, Watchers, Wdb,
   hasProp = {}.hasOwnProperty,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(searchString, position) {
+    position = position || 0;
+    return this.substr(position, searchString.length) === searchString;
+  };
+}
+
 Log = (function() {
   function Log() {
     this.debug = $('body').attr('data-debug') || false;
