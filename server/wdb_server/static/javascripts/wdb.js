@@ -1784,6 +1784,7 @@ Wdb = (function(superClass) {
       subtitle: 'Program has exited'
     });
     this.ws.ws.close();
+    $('body').addClass('dead');
     return setTimeout((function() {
       return window.close();
     }), 10);

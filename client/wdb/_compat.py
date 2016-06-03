@@ -127,6 +127,10 @@ if python_version == 2:
     if sys.platform == 'win32':
         from _winapi import WAIT_OBJECT_0, WAIT_TIMEOUT, INFINITE
         import _winapi
+        try:
+            from _winapi import WAIT_ABANDONED_0
+        except ImportError:
+            WAIT_ABANDONED_0 = 128
 
         def _exhaustive_wait(handles, timeout):
             # Return ALL handles which are currently signalled.  (Only
@@ -148,8 +152,8 @@ if python_version == 2:
                 timeout = 0
             return ready
 
-        _ready_errors = {
-            _winapi.ERROR_BROKEN_PIPE, _winapi.ERROR_NETNAME_DELETED}
+        _ready_errors = set((
+            _winapi.ERROR_BROKEN_PIPE, _winapi.ERROR_NETNAME_DELETED))
 
         def wait(object_list, timeout=None):
             '''

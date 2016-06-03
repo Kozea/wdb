@@ -440,6 +440,7 @@ class Wdb extends Log
   die: ->
     @title(title: 'Dead', subtitle: 'Program has exited')
     @ws.ws.close()
+    $('body').addClass 'dead'
     setTimeout (-> window.close()), 10
 
   global_key: (e) ->

@@ -20,6 +20,12 @@
 @import switch
 @import traceback
 
+body
+  transition: -webkit-filter 2s, filter 2s
+
+  &.dead
+    -webkit-filter: grayscale(75%)
+    filter: grayscale(75%)
 
 main
   background: white
