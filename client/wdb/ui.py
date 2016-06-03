@@ -8,6 +8,7 @@ from .utils import (
     search_key_in_obj, search_value_in_obj, timeout_of, inplace)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
+from subprocess import call
 import token as tokens
 from base64 import b64encode
 
@@ -671,6 +672,23 @@ class Interaction(object):
                 'for': 'Save succesful',
                 'val': 'Wrote %s' % fn
             }))
+
+    def do_external(self, data):
+        default = {
+            'linux': 'xdg-open',
+            'win32': '',
+            'darwin': 'open',
+        }.get(sys.platform, 'open')
+        editor = os.getenv('EDITOR', os.getenv('VISUAL', default))
+        if editor:
+            cmd = editor.split(' ')
+        else:
+            cmd = []
+        try:
+            call(cmd + [data])
+        except Exception:
+            self.fail('External open')
+
 
     def do_display(self, data):
         if ';' in data:

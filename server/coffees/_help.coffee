@@ -240,6 +240,12 @@ help = """
       </td>
     </tr>
     <tr>
+      <td class="cmd"><samp>.o</samp></td>
+      <td class="mdl-data-table__cell--non-numeric dfn">
+        Try to open file in external ($EDITOR / $VISUAL / xdg-open) editor.
+      </td>
+    </tr>
+    <tr>
       <td class="cmd"><samp>.g</samp></td>
       <td class="mdl-data-table__cell--non-numeric dfn">
         Clear scrollback

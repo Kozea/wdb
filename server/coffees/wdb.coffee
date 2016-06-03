@@ -173,6 +173,7 @@ class Wdb extends Log
         when 'k' then @clearHistory()
         when 'l' then cmd 'Breakpoints'
         when 'n' then cmd 'Next'
+        when 'o' then @source.external()
         when 'q' then cmd 'Quit'
         when 'r' then cmd 'Return'
         when 's' then cmd 'Step'

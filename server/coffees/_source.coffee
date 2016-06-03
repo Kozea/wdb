@@ -52,6 +52,9 @@ class Source extends Log
     @footsteps = {}
     @breakpoints = {}
 
+  external: ->
+    cursor = @code_mirror.getCursor()
+    @wdb.ws.send 'External', "#{@state.fn}:#{cursor.line+1}:#{cursor.ch+1}"
 
   save: ->
     return if @code_mirror.getOption 'readOnly'
