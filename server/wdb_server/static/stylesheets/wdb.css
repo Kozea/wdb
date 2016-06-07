@@ -44,27 +44,31 @@
 /* */
 /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-.interpreter .prompt:before {
-  margin-top: 4px;
-  font-family: "Roboto Mono"; }
-
-.interpreter .prompt .CodeMirror {
-  height: auto;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-  .interpreter .prompt .CodeMirror.extra-dialog {
-    padding-bottom: 2em; }
-  .interpreter .prompt .CodeMirror .CodeMirror-cursor {
-    visibility: visible !important;
-    width: auto;
-    border: none;
-    outline: 1px solid rgba(0, 0, 0, 0.5); }
-  .interpreter .prompt .CodeMirror.CodeMirror-focused .CodeMirror-cursor {
-    background: rgba(0, 0, 0, 0.75);
-    animation: blink 1s ease-in-out infinite;
-    outline: 0; }
-
-.interpreter .prompt .CodeMirror-dialog .not-found {
-  color: orangered; }
+.interpreter .prompt {
+  display: flex; }
+  .interpreter .prompt:before {
+    margin-top: 4px;
+    font-family: "Roboto Mono"; }
+  .interpreter .prompt .CodeMirror {
+    flex: 1;
+    height: auto;
+    min-height: min-content;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+    .interpreter .prompt .CodeMirror.extra-dialog {
+      padding-bottom: 2em; }
+    .interpreter .prompt .CodeMirror .CodeMirror-cursor {
+      visibility: visible !important;
+      width: auto;
+      border: none;
+      outline: 1px solid rgba(0, 0, 0, 0.5); }
+    .interpreter .prompt .CodeMirror.CodeMirror-focused .CodeMirror-cursor {
+      background: rgba(0, 0, 0, 0.75);
+      animation: blink 1s ease-in-out infinite;
+      outline: 0; }
+  .interpreter .prompt .CodeMirror-dialog .not-found {
+    color: orangered; }
+  .interpreter .prompt .patience {
+    padding: 4px; }
 
 .CodeMirror-hints .CodeMirror-hint {
   max-width: 75vmin; }

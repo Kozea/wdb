@@ -1292,7 +1292,7 @@ Wdb = (function(superClass) {
     this.cwd = null;
     this.file_cache = {};
     this.last_cmd = null;
-    this.eval_time = null;
+    this.evalTime = null;
     this.ws = new Websocket(this, $('[data-uuid]').attr('data-uuid'));
     this.traceback = new Traceback(this);
     this.source = new Source(this);
@@ -1300,6 +1300,7 @@ Wdb = (function(superClass) {
     this.prompt = new Prompt(this);
     this["switch"] = new Switch(this);
     this.watchers = new Watchers(this);
+    this.$patience = $('.patience');
     $(window).on('beforeunload', this.unload.bind(this));
   }
 
@@ -1456,7 +1457,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.execute = function(snippet) {
-    var cmd, data, key, sent, space;
+    var cmd, data, key, raf, sent, space;
     cmd = (function(_this) {
       return function() {
         _this.ws.send.apply(_this.ws, arguments);
@@ -1555,7 +1556,21 @@ Wdb = (function(superClass) {
     if (snippet) {
       this.working();
       this.ws.send('Eval', snippet);
-      return this.eval_time = typeof performance !== "undefined" && performance !== null ? performance.now() : void 0;
+      this.evalTime = typeof performance !== "undefined" && performance !== null ? performance.now() : void 0;
+      this.$patience.text(this.pretty_time(0));
+      raf = (function(_this) {
+        return function() {
+          var duration;
+          if (!_this.evalTime) {
+            _this.$patience.text('');
+            return;
+          }
+          duration = parseInt((performance.now() - _this.evalTime) * 1000);
+          _this.$patience.text(_this.pretty_time(duration));
+          return requestAnimationFrame(raf);
+        };
+      })(this);
+      return requestAnimationFrame(raf);
     }
   };
 
@@ -1584,10 +1599,10 @@ Wdb = (function(superClass) {
 
   Wdb.prototype.print = function(data) {
     var $group, $result, $timeholder, duration, print_duration, print_start;
-    if (this.eval_time) {
-      duration = parseInt((performance.now() - this.eval_time) * 1000);
+    if (this.evalTime) {
+      duration = parseInt((performance.now() - this.evalTime) * 1000);
       print_start = performance.now();
-      this.eval_time = null;
+      this.evalTime = null;
     }
     $group = $('<div>', {
       "class": 'printed scroll-line'
@@ -1999,6 +2014,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.pretty_time = function(time) {
+    var htime, mtime, stime, with_zero;
     if (time < 1000) {
       return time + "μs";
     }
@@ -2016,10 +2032,24 @@ Wdb = (function(superClass) {
     if (time < 10) {
       return (time.toFixed(2)) + "s";
     }
-    if (time < 100) {
+    if (time < 60) {
       return (time.toFixed(1)) + "s";
     }
-    return (time.toFixed(0)) + "s";
+    with_zero = function(s) {
+      s = s.toString();
+      if (s.length === 1) {
+        return "0" + s;
+      }
+      return s;
+    };
+    mtime = Math.floor(time / 60);
+    stime = (time - 60 * mtime).toFixed(0);
+    if (mtime < 60) {
+      return mtime + "m" + (with_zero(stime)) + "s";
+    }
+    htime = Math.floor(mtime / 60);
+    mtime = (mtime - 60 * htime).toFixed(0);
+    return htime + "h" + (with_zero(mtime)) + "m" + (with_zero(stime)) + "s";
   };
 
   Wdb.prototype.unload = function() {

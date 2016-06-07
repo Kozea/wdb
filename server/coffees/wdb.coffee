@@ -23,7 +23,7 @@ class Wdb extends Log
     @cwd = null
     @file_cache = {}
     @last_cmd = null
-    @eval_time = null
+    @evalTime = null
 
     @ws = new Websocket(@, $('[data-uuid]').attr('data-uuid'))
     @traceback = new Traceback @
@@ -33,6 +33,7 @@ class Wdb extends Log
     @switch = new Switch @
     @watchers = new Watchers @
 
+    @$patience = $('.patience')
     # Prevent locking of monothread
     $(window).on 'beforeunload', @unload.bind @
 
@@ -196,7 +197,16 @@ class Wdb extends Log
     if snippet
       @working()
       @ws.send 'Eval', snippet
-      @eval_time = performance?.now()
+      @evalTime = performance?.now()
+      @$patience.text(@pretty_time(0))
+      raf = =>
+        unless @evalTime
+          @$patience.text('')
+          return
+        duration = parseInt((performance.now() - @evalTime) * 1000)
+        @$patience.text(@pretty_time(duration))
+        requestAnimationFrame raf
+      requestAnimationFrame raf
 
   cls: ->
     @interpreter.clear()
@@ -218,10 +228,10 @@ class Wdb extends Log
     @done()
 
   print: (data) ->
-    if @eval_time
-      duration = parseInt((performance.now() - @eval_time) * 1000)
+    if @evalTime
+      duration = parseInt((performance.now() - @evalTime) * 1000)
       print_start = performance.now()
-      @eval_time = null
+      @evalTime = null
 
     $group = $('<div>', class: 'printed scroll-line')
     @interpreter.write $group
@@ -562,10 +572,25 @@ class Wdb extends Log
     time = time / 1000
     if time < 10
       return "#{time.toFixed(2)}s"
-    if time < 100
+    if time < 60
       return "#{time.toFixed(1)}s"
 
-    "#{time.toFixed(0)}s"
+    with_zero = (s) ->
+      s = s.toString()
+      if s.length is 1
+        return "0#{s}"
+      s
+
+    mtime = Math.floor(time / 60)
+    stime = (time - 60 * mtime).toFixed(0)
+
+    if mtime < 60
+      return "#{mtime}m#{with_zero(stime)}s"
+
+    htime = Math.floor(mtime / 60)
+    mtime = (mtime - 60 * htime).toFixed(0)
+    "#{htime}h#{with_zero(mtime)}m#{with_zero(stime)}s"
+
 
   unload: ->
     @ws.ws.close()

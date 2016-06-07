@@ -16,12 +16,17 @@
 
 
 .interpreter .prompt
+  display: flex
+
   &:before
     margin-top: 4px
     font-family: "Roboto Mono"
 
   .CodeMirror
+    flex: 1
     height: auto
+    min-height: min-content
+
     border-bottom: 1px solid rgba(0, 0, 0, .1)
     &.extra-dialog
       padding-bottom: 2em
@@ -40,6 +45,9 @@
   .CodeMirror-dialog
     .not-found
       color: orangered
+
+  .patience
+    padding: 4px
 
 .CodeMirror-hints
   .CodeMirror-hint
