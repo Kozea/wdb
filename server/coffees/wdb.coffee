@@ -52,9 +52,9 @@ class Wdb extends Log
   chilling: ->
     $('.activity').removeClass('is-active')
 
-  done: (suggest=null)->
+  done: ->
     @interpreter.scroll()
-    @prompt.ready suggest
+    @prompt.ready()
     @chilling()
 
   init: (data) ->
@@ -488,7 +488,7 @@ class Wdb extends Log
       return false
 
   newline: ->
-    @prompt.ready('', true)
+    @prompt.ready true
     @chilling()
 
   inspect: (id) ->

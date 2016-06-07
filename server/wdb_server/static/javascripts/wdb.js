@@ -744,6 +744,7 @@ Prompt = (function(superClass) {
             list: (function() {
               var ref, results;
               ref = {
+                a: 'History',
                 b: 'Break',
                 c: 'Continue',
                 d: 'Dump',
@@ -753,8 +754,11 @@ Prompt = (function(superClass) {
                 h: 'Help',
                 i: 'Display',
                 j: 'Jump',
+                k: 'Clear',
                 l: 'Breakpoints',
+                m: 'Restart',
                 n: 'Next',
+                o: 'Open',
                 q: 'Quit',
                 r: 'Return',
                 s: 'Step',
@@ -910,48 +914,79 @@ Prompt = (function(superClass) {
 
   Prompt.prototype.complete = function(data) {
     var completion, cur, hints, tok;
-    if (!this.completion) {
+    if (data.completions && this.completion) {
+      cur = this.completion.cur;
+      tok = this.completion.tok;
+      hints = {
+        from: CodeMirror.Pos(cur.line, tok.start),
+        to: CodeMirror.Pos(cur.line, tok.end),
+        list: (function() {
+          var j, len, ref, results;
+          ref = data.completions;
+          results = [];
+          for (j = 0, len = ref.length; j < len; j++) {
+            completion = ref[j];
+            results.push({
+              text: completion.base + completion.complete,
+              from: CodeMirror.Pos(cur.line, cur.ch - completion.base.length),
+              to: cur,
+              _completion: completion,
+              render: function(elt, data, cur) {
+                var c, item;
+                c = cur._completion;
+                item = "<b>" + c.base + "</b>" + c.complete;
+                return $(elt).html(item);
+              }
+            });
+          }
+          return results;
+        })()
+      };
+      CodeMirror.on(hints, 'shown', (function(_this) {
+        return function() {
+          var cls;
+          if (_this.code_mirror.state.completionActive.options.completeSingle) {
+            cls = 'triggered';
+          } else {
+            cls = 'auto';
+          }
+          return $(_this.code_mirror.state.completionActive.widget.hints).addClass(cls);
+        };
+      })(this));
+      this.completion.callback(hints);
       return;
     }
-    cur = this.completion.cur;
-    tok = this.completion.tok;
-    hints = {
-      from: CodeMirror.Pos(cur.line, tok.start),
-      to: CodeMirror.Pos(cur.line, tok.end),
-      list: (function() {
-        var j, len, ref, results;
-        ref = data.completions;
-        results = [];
-        for (j = 0, len = ref.length; j < len; j++) {
-          completion = ref[j];
-          results.push({
-            text: completion.base + completion.complete,
-            from: CodeMirror.Pos(cur.line, cur.ch - completion.base.length),
-            to: cur,
-            _completion: completion,
-            render: function(elt, data, cur) {
-              var c, item;
-              c = cur._completion;
-              item = "<b>" + c.base + "</b>" + c.complete;
-              return $(elt).html(item);
+    if (data.imports) {
+      return CodeMirror.commands.autocomplete(this.code_mirror, function(cm, options) {
+        var imp;
+        return {
+          from: CodeMirror.Pos(0, 0),
+          to: CodeMirror.Pos(0, 0),
+          list: (function() {
+            var j, len, ref, results;
+            ref = data.imports;
+            results = [];
+            for (j = 0, len = ref.length; j < len; j++) {
+              imp = ref[j];
+              results.push({
+                text: imp,
+                from: CodeMirror.Pos(0, 0),
+                to: CodeMirror.Pos(0, 0),
+                render: function(elt, data, cur) {
+                  var item;
+                  item = "<em>" + cur.text + "</em>";
+                  return $(elt).html(item);
+                }
+              });
             }
-          });
-        }
-        return results;
-      })()
-    };
-    CodeMirror.on(hints, 'shown', (function(_this) {
-      return function() {
-        var cls;
-        if (_this.code_mirror.state.completionActive.options.completeSingle) {
-          cls = 'triggered';
-        } else {
-          cls = 'auto';
-        }
-        return $(_this.code_mirror.state.completionActive.widget.hints).addClass(cls);
-      };
-    })(this));
-    return this.completion.callback(hints);
+            return results;
+          })()
+        };
+      }, {
+        async: false,
+        completeSingle: false
+      });
+    }
   };
 
   Prompt.prototype.triggerAutocomplete = function(cm, options) {
@@ -1276,12 +1311,9 @@ Wdb = (function(superClass) {
     return $('.activity').removeClass('is-active');
   };
 
-  Wdb.prototype.done = function(suggest) {
-    if (suggest == null) {
-      suggest = null;
-    }
+  Wdb.prototype.done = function() {
     this.interpreter.scroll();
-    this.prompt.ready(suggest);
+    this.prompt.ready();
     return this.chilling();
   };
 
@@ -1889,7 +1921,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.newline = function() {
-    this.prompt.ready('', true);
+    this.prompt.ready(true);
     return this.chilling();
   };
 

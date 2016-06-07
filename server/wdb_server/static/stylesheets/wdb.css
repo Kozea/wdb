@@ -66,6 +66,9 @@
 .interpreter .prompt .CodeMirror-dialog .not-found {
   color: orangered; }
 
+.CodeMirror-hints .CodeMirror-hint {
+  max-width: 75vmin; }
+
 .CodeMirror-hints.auto {
   opacity: .9;
   box-shadow: -2px -3px 5px rgba(0, 0, 0, 0.2) inset; }

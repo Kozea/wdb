@@ -52,6 +52,7 @@ class Prompt extends Log
               render: (elt, data, cur) ->
                 $(elt).html cur.displayText
               ) for own key, help of {
+                a: 'History'
                 b: 'Break'
                 c: 'Continue'
                 d: 'Dump'
@@ -61,8 +62,11 @@ class Prompt extends Log
                 h: 'Help'
                 i: 'Display'
                 j: 'Jump'
+                k: 'Clear'
                 l: 'Breakpoints'
+                m: 'Restart'
                 n: 'Next'
+                o: 'Open'
                 q: 'Quit'
                 r: 'Return'
                 s: 'Step'
@@ -156,30 +160,47 @@ class Prompt extends Log
           End: 'goLineEnd'
 
   complete: (data) ->
-    return unless @completion
-    cur = @completion.cur
-    tok = @completion.tok
-    hints =
-      from: CodeMirror.Pos(cur.line, tok.start)
-      to: CodeMirror.Pos(cur.line, tok.end)
-      list: (
-        text: completion.base + completion.complete
-        from: CodeMirror.Pos(cur.line, cur.ch - completion.base.length)
-        to: cur
-        _completion: completion
-        render: (elt, data, cur) ->
-          c = cur._completion
-          item = "<b>#{c.base}</b>#{c.complete}"
-          $(elt).html item
-      ) for completion in data.completions
-    CodeMirror.on hints, 'shown', =>
-      if @code_mirror.state.completionActive.options.completeSingle
-        cls = 'triggered'
-      else
-        cls = 'auto'
-      $(@code_mirror.state.completionActive.widget.hints).addClass cls
+    if data.completions and @completion
+      cur = @completion.cur
+      tok = @completion.tok
+      hints =
+        from: CodeMirror.Pos(cur.line, tok.start)
+        to: CodeMirror.Pos(cur.line, tok.end)
+        list: (
+          text: completion.base + completion.complete
+          from: CodeMirror.Pos(cur.line, cur.ch - completion.base.length)
+          to: cur
+          _completion: completion
+          render: (elt, data, cur) ->
+            c = cur._completion
+            item = "<b>#{c.base}</b>#{c.complete}"
+            $(elt).html item
+        ) for completion in data.completions
+      CodeMirror.on hints, 'shown', =>
+        if @code_mirror.state.completionActive.options.completeSingle
+          cls = 'triggered'
+        else
+          cls = 'auto'
+        $(@code_mirror.state.completionActive.widget.hints).addClass cls
 
-    @completion.callback hints
+      @completion.callback hints
+      return
+
+    if data.imports
+      CodeMirror.commands.autocomplete @code_mirror, (cm, options) ->
+        from: CodeMirror.Pos(0, 0)
+        to: CodeMirror.Pos(0, 0)
+        list: (
+          text: imp
+          from: CodeMirror.Pos(0, 0)
+          to: CodeMirror.Pos(0, 0)
+          render: (elt, data, cur) ->
+            item = "<em>#{cur.text}</em>"
+            $(elt).html item
+        ) for imp in data.imports
+      ,
+        async: false
+        completeSingle: false
 
   triggerAutocomplete: (cm, options) ->
     CodeMirror.commands.autocomplete cm, CodeMirror.hint.jedi,

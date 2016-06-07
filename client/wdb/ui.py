@@ -349,7 +349,7 @@ class Interaction(object):
 
     def do_eval(self, data):
         redir = None
-        suggest = None
+        imports = []
         raw_data = data.strip()
         if raw_data.startswith('!<'):
             filename = raw_data[2:].strip()
@@ -419,15 +419,15 @@ class Interaction(object):
                         if self.db._importmagic_index:
                             scores = self.db._importmagic_index.symbol_scores(
                                 name)
-                            if scores:
-                                _, module, variable = scores[0]
+                            for _, module, variable in scores:
                                 if variable is None:
-                                    suggest = 'import %s' % module
+                                    imports.append('import %s' % module)
                                 else:
-                                    suggest = 'from %s import %s' % (
-                                        module, variable)
+                                    imports.append(
+                                        'from %s import %s' % (
+                                            module, variable))
                         elif importable_module(name):
-                            suggest = 'import %s' % name
+                            imports.append('import %s' % name)
 
                     self.db.hooked = self.handle_exc()
                 except Exception:
@@ -463,9 +463,12 @@ class Interaction(object):
             self.db.send('Print|%s' % dump({
                 'for': raw_data,
                 'result': result,
-                'suggest': suggest,
                 'duration': duration
             }))
+            if imports:
+                self.db.send('Suggest|%s' % dump({
+                    'imports': imports
+                }))
 
     def do_ping(self, data):
         self.db.send('Pong')
