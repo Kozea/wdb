@@ -225,14 +225,14 @@ class Prompt extends Log
     @history.reset()
     @set ''
 
-  ready: (suggest=null, newline=false)->
+  ready: (newline=false)->
     if newline
       @code_mirror.execCommand 'newlineAndIndent'
     else
       snippet = @code_mirror.getValue().trim()
       @history.historize snippet
       @history.reset()
-      @set suggest or ''
+      @set ''
     @unlock()
 
   unlock: ->

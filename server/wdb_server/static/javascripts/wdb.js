@@ -10,6 +10,18 @@ if (!String.prototype.startsWith) {
   };
 }
 
+if (!document.createElement('dialog').showModal) {
+  $(function() {
+    $('head').append($('<script>', {
+      src: 'https://cdnjs.cloudflare.com/' + 'ajax/libs/dialog-polyfill/0.4.3/dialog-polyfill.min.js'
+    }));
+    return $('head').append($('<link>', {
+      rel: 'stylesheet',
+      href: 'https://' + 'cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.3/' + 'dialog-polyfill.min.css'
+    }));
+  });
+}
+
 Log = (function() {
   function Log() {
     this.debug = $('body').attr('data-debug') || false;
@@ -1024,11 +1036,8 @@ Prompt = (function(superClass) {
     return this.set('');
   };
 
-  Prompt.prototype.ready = function(suggest, newline) {
+  Prompt.prototype.ready = function(newline) {
     var snippet;
-    if (suggest == null) {
-      suggest = null;
-    }
     if (newline == null) {
       newline = false;
     }
@@ -1038,7 +1047,7 @@ Prompt = (function(superClass) {
       snippet = this.code_mirror.getValue().trim();
       this.history.historize(snippet);
       this.history.reset();
-      this.set(suggest || '');
+      this.set('');
     }
     return this.unlock();
   };
@@ -1595,7 +1604,7 @@ Wdb = (function(superClass) {
     if (data.duration) {
       this.code($timeholder, this.pretty_time(data.duration), ['duration'], false, "Total " + (this.pretty_time(duration)) + " + " + (this.pretty_time(print_duration)) + " of rendering");
     }
-    return this.done(data.suggest);
+    return this.done();
   };
 
   Wdb.prototype.echo = function(data) {
@@ -1968,7 +1977,7 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.dialog = function(title, content) {
-    var $dialog;
+    var $dialog, dialog;
     $('.modals').append($dialog = $("<dialog class=\"mdl-dialog\">\n  <h3 class=\"mdl-dialog__title\">" + title + "</h3>\n  <div class=\"mdl-dialog__content\">\n    " + content + "\n  </div>\n  <div class=\"mdl-dialog__actions\">\n    <button type=\"button\" class=\"mdl-button dialog-close\">Close</button>\n  </div>\n</dialog>"));
     $dialog.find('.dialog-close').on('click', function() {
       $dialog.get(0).close();
@@ -1982,7 +1991,11 @@ Wdb = (function(superClass) {
         return _this.prompt.ready();
       };
     })(this));
-    return $dialog.get(0).showModal();
+    dialog = $dialog.get(0);
+    if (typeof dialogPolyfill !== "undefined" && dialogPolyfill !== null) {
+      dialogPolyfill.registerDialog(dialog);
+    }
+    return dialog.showModal();
   };
 
   Wdb.prototype.pretty_time = function(time) {

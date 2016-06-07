@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 class Wdb extends Log
   __version__: '2.9.99'
 
@@ -239,7 +238,7 @@ class Wdb extends Log
       ['duration'], false, "Total #{@pretty_time(duration)} + #{
         @pretty_time(print_duration)} of rendering") if data.duration
 
-    @done(data.suggest)
+    @done()
 
   echo: (data) ->
     $group = $('<div>', class: 'echoed scroll-line')
@@ -544,7 +543,9 @@ class Wdb extends Log
     $dialog.on 'close', =>
       @prompt.ready()
 
-    $dialog.get(0).showModal()
+    dialog = $dialog.get(0)
+    dialogPolyfill?.registerDialog(dialog)
+    dialog.showModal()
 
   pretty_time: (time) ->
     if time < 1000
