@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '2.9.99'
+__version__ = '2.9.999'
 _initial_globals = dict(globals())
 
 from ._compat import (
-    execute, StringIO, to_unicode_string, escape, loads, Socket, logger)
+    execute, StringIO, to_unicode_string, escape, loads, Socket, logger,
+    OrderedDict)
 
 from .breakpoint import (
     Breakpoint, LineBreakpoint,
@@ -486,6 +487,11 @@ class Wdb(object):
             return r
 
         if isinstance(obj, dict):
+            if OrderedDict is not None and isinstance(obj, OrderedDict):
+                dict_sorted = lambda it, f: it
+            else:
+                dict_sorted = sorted
+
             dict_repr = '  ' * (level - 1)
             if type(obj) != dict:
                 dict_repr = type(obj).__name__ + '({'
@@ -509,7 +515,7 @@ class Wdb(object):
                             '<tr><td colspan="2" class="ellipse">' +
                             get_too_long_repr(key) + '</td></tr>'
                         )
-                        for key, val in abbreviate(sorted(
+                        for key, val in abbreviate(dict_sorted(
                             obj.items(),
                             key=lambda x: x[0]), level, tuple_=True)])
                     dict_repr += '</table>'
@@ -519,7 +525,7 @@ class Wdb(object):
                             val, context, html, level, full
                         ) if not isinstance(key, IterableEllipsis)
                         else get_too_long_repr(key)
-                        for key, val in abbreviate(sorted(
+                        for key, val in abbreviate(dict_sorted(
                             obj.items(),
                             key=lambda x: x[0]), level, tuple_=True)])
                 closer = '\n' + '  ' * (level - 1) + closer
@@ -527,7 +533,8 @@ class Wdb(object):
                 dict_repr += ', '.join([
                     self.safe_repr(key) + ': ' + self.safe_better_repr(
                         val, context, html, level, full)
-                    for key, val in sorted(obj.items(), key=lambda x: x[0])])
+                    for key, val in dict_sorted(
+                        obj.items(), key=lambda x: x[0])])
             dict_repr += closer
             return dict_repr
 
