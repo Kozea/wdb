@@ -52,9 +52,12 @@ class Source extends Log
     @footsteps = {}
     @breakpoints = {}
 
-  external: ->
+  external: (full=true) ->
     cursor = @code_mirror.getCursor()
-    @wdb.ws.send 'External', "#{@state.fn}:#{cursor.line+1}:#{cursor.ch+1}"
+    fn = "#{@state.fn}"
+    if full
+      fn = "#{fn}:#{cursor.line+1}:#{cursor.ch+1}"
+    @wdb.ws.send 'External', fn
 
   save: ->
     return if @code_mirror.getOption 'readOnly'
@@ -211,6 +214,9 @@ class Source extends Log
         'diff'
       else
         'python'
+
+  focused: ->
+    @$code_mirror.hasClass 'CodeMirror-focused'
 
   size: ->
     @$code_mirror.height 0

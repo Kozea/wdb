@@ -249,6 +249,9 @@ help = """
       <td class="cmd"><samp>.o</samp></td>
       <td class="mdl-data-table__cell--non-numeric dfn">
         Try to open file in external ($EDITOR / $VISUAL / xdg-open) editor.
+        <br>
+        Add an argument (or hold shift with alt+o) if your editor does not
+        support the file:lno:col syntax.
       </td>
     </tr>
     <tr>

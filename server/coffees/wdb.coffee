@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Wdb extends Log
-  __version__: '3.0.0'
+  __version__: '3.0.1'
 
   constructor: ->
     super
@@ -174,7 +174,7 @@ class Wdb extends Log
         when 'l' then cmd 'Breakpoints'
         when 'm' then cmd 'Restart'
         when 'n' then cmd 'Next'
-        when 'o' then @source.external()
+        when 'o' then @source.external(not data)
         when 'q' then cmd 'Quit'
         when 'r' then cmd 'Return'
         when 's' then cmd 'Step'
@@ -456,6 +456,7 @@ class Wdb extends Log
 
   global_key: (e) ->
     return true if @source.rw
+    sel = @source.focused() and @source.code_mirror.getSelection()
 
     if e.altKey and (
       65 <= e.keyCode <= 90 or 37 <= e.keyCode <= 40 or e.keyCode is 13
@@ -473,17 +474,15 @@ class Wdb extends Log
       if char in ['b', 't', 'z']
         extra += ' :' + @source.state.lno
       if char is 'i'
-        extra = getSelection().toString()
+        extra = ' ' + sel
+      if char is 'o' and e.shiftKey
+        extra = ' ' + '!'
 
       @execute '.' + char + extra
       return false
 
     if e.keyCode is 13
       return if @prompt.focused()
-
-      sel = getSelection().toString()
-      if not sel
-        sel = @source.code_mirror.getSelection()
       return unless sel
 
       if e.shiftKey
