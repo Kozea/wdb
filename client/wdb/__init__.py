@@ -60,16 +60,15 @@ WEB_SERVER = os.getenv('WDB_WEB_SERVER')
 WEB_PORT = int(os.getenv('WDB_WEB_PORT', 0))
 
 WDB_NO_BROWSER_AUTO_OPEN = bool(os.getenv('WDB_NO_BROWSER_AUTO_OPEN', False))
-
 log = logger('wdb')
-trace_log = logger('wdb.trace')
+trace_log = logging.getLogger('wdb.trace')
 
 for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
     logger_name = 'wdb.%s' % log_name if log_name != 'main' else 'wdb'
     level = os.getenv(
         'WDB_%s_LOG' % log_name.upper(),
         os.getenv('WDB_LOG', 'WARNING')).upper()
-    logger(logger_name).setLevel(getattr(logging, level, 'WARNING'))
+    logging.getLogger(logger_name).setLevel(getattr(logging, level, 'WARNING'))
 
 
 class Wdb(object):
@@ -217,7 +216,7 @@ class Wdb(object):
                 self._socket = None
 
         if not self._socket:
-            log.error('Could not connect to server')
+            log.warning('Could not connect to server')
             return
 
         Wdb._sockets.append(self._socket)
@@ -699,7 +698,7 @@ class Wdb(object):
             if timeout:
                 rv = self._socket.poll(timeout)
                 if not rv:
-                    log.error('Connection timeouted')
+                    log.info('Connection timeouted')
                     return 'Quit'
 
             data = self._socket.recv_bytes()
