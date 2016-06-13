@@ -1,4 +1,6 @@
-#!/bin/bash -x -e
+#!/bin/bash
+set -x
+set -e
 OLD_VERSION=$1
 OLD_VERSION_RE=$(echo $OLD_VERSION | sed "s/\./\\\./g")
 NEW_VERSION=$2

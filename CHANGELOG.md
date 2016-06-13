@@ -1,13 +1,9 @@
-3.0.3
-=====
-
- * Use release script
-
-3.0.2
+3.0.4
 =====
 
  * Fix long subtitle style (thanks wong2)
  * Fix wdb-lite setup.py
+ * Use release script
 
 3.0.1
 =====
