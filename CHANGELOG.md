@@ -1,3 +1,8 @@
+3.0.2
+=====
+
+ * Fix long subtitle style (thanks wong2)
+
 3.0.1
 =====
 
