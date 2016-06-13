@@ -1,9 +1,10 @@
-#!/bin/bash -x
-OLD_VERSION=$(echo $1 | sed "s/\./\\\./g")
+#!/bin/bash -x -e
+OLD_VERSION=$1
+OLD_VERSION_RE=$(echo $OLD_VERSION | sed "s/\./\\\./g")
 NEW_VERSION=$2
 echo "$OLD_VERSION -> $NEW_VERSION"
 
-git ls-files | grep -E ".+\.coffee|.+\.json|.+\.py" | xargs sed -i -e "s/$OLD_VERSION/$NEW_VERSION/g"
+git ls-files | grep -E ".+\.coffee|.+\.json|.+\.py" | xargs sed -i -e "s/$OLD_VERSION_RE/$NEW_VERSION/g"
 pushd server
 grunt
 python setup.py sdist bdist_wheel upload
@@ -20,4 +21,5 @@ popd
 
 git commit -am "Bump Version $OLD_VERSION -> $NEW_VERSION"
 git tag $NEW_VERSION
+git push
 git push --tags
