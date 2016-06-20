@@ -17,7 +17,8 @@
 ws = null
 wait = 25
 
-make_uuid_line = (uuid, socket) ->
+make_uuid_line = (uuid, socket, filename) ->
+  filename = filename or ''
   unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).size()
     $line = $("<tr data-uuid=\"#{uuid}\">
       <td class=\"uuid mdl-data-table__cell--non-numeric\">
@@ -32,8 +33,16 @@ make_uuid_line = (uuid, socket) ->
         </button>
       </td>
     ")
+    if $('.sessions .filename-head').length
+      $line.prepend("
+        <td class=\"filename mdl-data-table__cell--non-numeric\">
+          <span>#{filename}</span>
+        </td>
+      ")
     $('.sessions tbody').append $line
   $line.find(".#{socket}").text('Yes')
+  if filename
+    $line.find('.filename span').text(filename)
 
 
 rm_uuid_line = (uuid, socket) ->
@@ -177,7 +186,7 @@ ws_message = (event) ->
     when 'AddWebSocket'
       make_uuid_line data, 'websocket'
     when 'AddSocket'
-      make_uuid_line data, 'socket'
+      make_uuid_line data.uuid, 'socket', data.filename
     when 'RemoveWebSocket'
       rm_uuid_line data, 'websocket'
     when 'RemoveSocket'

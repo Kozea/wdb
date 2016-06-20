@@ -179,7 +179,10 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
 
         if cmd == 'ListSockets':
             for uuid in sockets.uuids:
-                syncwebsockets.send(self.uuid, 'AddSocket', uuid)
+                syncwebsockets.send(self.uuid, 'AddSocket', {
+                    'uuid': uuid,
+                    'filename': sockets.get_filename(uuid)
+                })
         elif cmd == 'ListWebsockets':
             for uuid in websockets.uuids:
                 syncwebsockets.send(self.uuid, 'AddWebSocket', uuid)
@@ -257,6 +260,7 @@ tornado.options.define("socket_port", default=19840,
                        help="Port used to communicate with wdb instances")
 tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
+tornado.options.define("show-filename", default=False, help="Whether to show filename in session list")
 tornado.options.define("extra_search_path", default=False, help=(
     "Try harder to find the 'libpython*' shared library "
     "at the cost of a slower server startup."))

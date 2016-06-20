@@ -34,6 +34,9 @@
         <table class="sessions mdl-data-table mdl-js-data-table mdl-shadow--2dp">
           <thead>
             <tr>
+              {% if options.show_filename %}
+                <th class="mdl-data-table__cell--non-numeric filename-head">File</th>
+              {% end %}
               <th class="mdl-data-table__cell--non-numeric">Session id</th>
               <th class="mdl-data-table__cell--non-numeric">Socket open</th>
               <th class="mdl-data-table__cell--non-numeric">Websocket open</th>

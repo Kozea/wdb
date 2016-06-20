@@ -175,6 +175,7 @@ class Interaction(object):
     def loop(self):
         stop = False
         while not stop:
+            self.db.send('UpdateFilename|%s' % self.current_file)
             try:
                 stop = self.interact()
             except Exception:

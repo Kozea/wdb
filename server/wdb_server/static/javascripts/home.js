@@ -45,13 +45,20 @@ ws = null;
 
 wait = 25;
 
-make_uuid_line = function(uuid, socket) {
+make_uuid_line = function(uuid, socket, filename) {
   var $line;
+  filename = filename || '';
   if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
     $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid mdl-data-table__cell--non-numeric\"> <a href=\"/debug/session/" + uuid + "\">" + uuid + "</a> </td> <td class=\"socket mdl-data-table__cell--non-numeric\">No</td> <td class=\"websocket mdl-data-table__cell--non-numeric\">No</td> <td class=\"action\"> <button class=\"mdl-button mdl-js-button mdl-button--icon close mdl-button--colored\" title=\"Force close\"> <i class=\"material-icons\">close</i> </button> </td>");
+    if ($('.sessions .filename-head').length) {
+      $line.prepend("<td class=\"filename mdl-data-table__cell--non-numeric\"> <span>" + filename + "</span> </td>");
+    }
     $('.sessions tbody').append($line);
   }
-  return $line.find("." + socket).text('Yes');
+  $line.find("." + socket).text('Yes');
+  if (filename) {
+    return $line.find('.filename span').text(filename);
+  }
 };
 
 rm_uuid_line = function(uuid, socket) {
@@ -217,7 +224,7 @@ ws_message = function(event) {
     case 'AddWebSocket':
       return make_uuid_line(data, 'websocket');
     case 'AddSocket':
-      return make_uuid_line(data, 'socket');
+      return make_uuid_line(data.uuid, 'socket', data.filename);
     case 'RemoveWebSocket':
       return rm_uuid_line(data, 'websocket');
     case 'RemoveSocket':

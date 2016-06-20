@@ -57,8 +57,6 @@ class BaseSockets(object):
             self.close(uuid)
 
         self._sockets[uuid] = sck
-        syncwebsockets.broadcast(
-            'Add' + self.__class__.__name__.rstrip('s'), uuid)
 
     def remove(self, uuid):
         sck = self._sockets.pop(uuid, None)
@@ -79,6 +77,30 @@ class BaseSockets(object):
 
 
 class Sockets(BaseSockets):
+    def __init__(self):
+        super(Sockets, self).__init__()
+        self._filenames = {}
+
+    def add(self, uuid, sck):
+        super(Sockets, self).add(uuid, sck)
+        syncwebsockets.broadcast('AddSocket', {
+            'uuid': uuid
+        })
+
+    def remove(self, uuid):
+        super(Sockets, self).remove(uuid)
+        self._filenames.pop(uuid, None)
+
+    def get_filename(self, uuid):
+        return self._filenames.get(uuid, '')
+
+    def set_filename(self, uuid, filename):
+        self._filenames[uuid] = filename
+        syncwebsockets.broadcast('AddSocket', {
+            'uuid': uuid,
+            'filename': filename
+        })
+
     def _send(self, sck, data):
         sck.write(pack("!i", len(data)))
         sck.write(data)
@@ -91,10 +113,15 @@ class WebSockets(BaseSockets):
         else:
             log.warn('Websocket is closed')
 
+    def add(self, uuid, sck):
+        super(WebSockets, self).add(uuid, sck)
+        syncwebsockets.broadcast('AddWebSocket', uuid)
+
 
 class SyncWebSockets(WebSockets):
     # Not really need an uuid here but it avoids duplication
-    pass
+    def add(self, uuid, sck):
+        super(WebSockets, self).add(uuid, sck)
 
 
 class Breakpoints(object):
