@@ -130,7 +130,14 @@ if python_version == 2:
     import time
     import select
 
-    if sys.platform == 'win32':
+    has_winapi = False
+    try:
+        import _winapi
+        has_winapi = True
+    except:
+        pass
+
+    if sys.platform == 'win32' and has_winapi:
         from _winapi import WAIT_OBJECT_0, WAIT_TIMEOUT, INFINITE
         import _winapi
         try:
