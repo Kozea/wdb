@@ -47,7 +47,7 @@ def read_frame(stream, uuid, frame):
         sockets.send(uuid, json.dumps(breakpoints.get()))
     elif decoded_frame == 'PING':
         log.info('%s PONG' % uuid)
-    elif decoded_frame.startswith('UpdateFilename'):
+    elif decoded_frame.startswith('UPDATE_FILENAME'):
         filename = decoded_frame.split('|', 1)[1]
         sockets.set_filename(uuid, filename)
     else:

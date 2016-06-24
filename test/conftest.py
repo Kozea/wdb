@@ -2,7 +2,7 @@ from multiprocessing import Process
 from multiprocessing.connection import Listener
 from log_colorizer import get_color_logger
 from pytest import fixture
-from pytest import mark
+from pytest import hookimpl
 import pickle
 import logging
 import signal
@@ -183,7 +183,7 @@ class Socket(object):
 
     def receive(self, uuid=None):
         got = self.connection(uuid).recv_bytes().decode('utf-8')
-        if got == 'PING':
+        if got == 'PING' or got.startswith('UPDATE_FILENAME'):
             return self.receive(uuid)
         return Message(got)
 
@@ -248,9 +248,9 @@ def socket(request):
     return socket
 
 
-@mark.tryfirst
-def pytest_runtest_makereport(item, call, __multicall__):
+@hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
     """Give test status information to finalizer"""
-    rep = __multicall__.execute()
+    outcome = yield
+    rep = outcome.get_result()
     setattr(item, "rep_" + rep.when, rep)
-    return rep

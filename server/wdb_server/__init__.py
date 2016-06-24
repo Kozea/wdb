@@ -181,7 +181,8 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             for uuid in sockets.uuids:
                 syncwebsockets.send(self.uuid, 'AddSocket', {
                     'uuid': uuid,
-                    'filename': sockets.get_filename(uuid)
+                    'filename': sockets.get_filename(
+                        uuid) if tornado.options.options.show_filename else ''
                 })
         elif cmd == 'ListWebsockets':
             for uuid in websockets.uuids:
@@ -260,12 +261,14 @@ tornado.options.define("socket_port", default=19840,
                        help="Port used to communicate with wdb instances")
 tornado.options.define("server_port", default=1984,
                        help="Port used to serve debugging pages")
-tornado.options.define("show-filename", default=False, help="Whether to show filename in session list")
+tornado.options.define("show_filename", default=False,
+                       help="Whether to show filename in session list")
 tornado.options.define("extra_search_path", default=False, help=(
     "Try harder to find the 'libpython*' shared library "
     "at the cost of a slower server startup."))
 
 tornado.options.parse_command_line()
+
 from wdb_server.utils import refresh_process, LibPythonWatcher
 
 StyleHandler.theme = tornado.options.options.theme

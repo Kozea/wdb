@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import tornado.options
 from tornado.util import unicode_type
 from struct import pack
 import logging
@@ -98,7 +99,8 @@ class Sockets(BaseSockets):
         self._filenames[uuid] = filename
         syncwebsockets.broadcast('AddSocket', {
             'uuid': uuid,
-            'filename': filename
+            'filename': (
+                filename if tornado.options.options.show_filename else '')
         })
 
     def _send(self, sck, data):
