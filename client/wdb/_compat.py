@@ -139,7 +139,7 @@ if python_version == 2:
 
     if sys.platform == 'win32' and has_winapi:
         from _winapi import WAIT_OBJECT_0, WAIT_TIMEOUT, INFINITE
-        import _winapi
+
         try:
             from _winapi import WAIT_ABANDONED_0
         except ImportError:
