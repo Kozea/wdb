@@ -1,7 +1,13 @@
+3.0.5
+=====
+
+ * Add --show-filename option to show filename in session list (thanks @wong2)
+ * Support msys2 (thanks @manuelnaranjo)
+
 3.0.4
 =====
 
- * Fix long subtitle style (thanks wong2)
+ * Fix long subtitle style (thanks @wong2)
  * Fix wdb-lite setup.py
  * Use release script
 
