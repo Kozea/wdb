@@ -252,12 +252,93 @@ WDB_WEB_SERVER            # WDB server host for browser openning
 WDB_WEB_PORT              # WDB server http port
 WDB_NO_BROWSER_AUTO_OPEN  # To disable the automagic browser openning (which can't be done if the browser is not on the same machine)
 ```
+### Docker
 
+If you are developing locally with [Docker](http://www.docker.com/), you can
+also use wdb to debug a code running inside a container. The basic setup looks
+like this:
+
+1. Start `wdb.server.py ` running in a container and expose port `1984` to your
+   host computer, this will server the debugging web server.
+2. Start debugging in your app container, making sure to set `WDB_SOCKET_SERVER`
+   to the address of the server container, and point it to the expoed port
+   `19840` on that server.
+3. When a trace is reached, open up `http://<your-docker-hostname>:1984`
+
+I will walk through this process in detail, using
+[Docker Compose](https://docs.docker.com/compose/) to set up the containers.
+
+Let's say your `docker-compose.yml` looks like
+[their example for using with Django](https://docs.docker.com/compose/django/):
+
+```yaml
+db:
+  image: postgres
+web:
+  build: .
+  command: python manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  links:
+    - db
+```
+
+Next lets add the wdb server part now and tell the web to link to it:
+
+```yaml
+db:
+  image: postgres
+web:
+  build: .
+  command: python manage.py runserver 0.0.0.0:8000
+  volumes:
+    - .:/code
+  ports:
+    - "8000:8000"
+  links:
+    - db
+    - wdb
+  environment:
+    WDB_SOCKET_SERVER: wdb
+    WDB_NO_BROWSER_AUTO_OPEN: True
+wdb:
+  image: kozea/wdb-server
+  ports:
+    - "1984:1984"
+```
+
+And add `wdb` to your `requirements.txt` in your web app:
+
+```bash
+$ echo 'wdb' >> requirements.txt
+```
+
+Now we can use `wdb.set_trace()` in our python app.
+
+```python
+# ... some code
+import wdb
+wdb.set_trace()
+```
+Then you have to rebuild your web application and start everything up again
+
+```bash
+$ docker-compose stop
+$ docker-compose build web
+$ docker-compose up
+```
+
+
+Now you can access `http://<local docker server>:1984`, to
+see the traces as they come up in your app.
 
 ## In browser usage
 
 Once you are in a breakpoint or in an exception, you can eval all you want in the prompt under the code.
 Multi-lines are partially supported using `[Shift] + [Enter]`.
+There is now help available by clicking on the top help button.
 
 As of now the following special commands are supported during breakpoint:
 
