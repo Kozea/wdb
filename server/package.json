@@ -1,6 +1,6 @@
 {
   "name": "wdb",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "An improbable python web debugger through WebSockets",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
   "devDependencies": {
     "coffeelint": "^1.15.7",
     "grunt": "^1.0.1",
-    "grunt-autoprefixer": "^3.0.5",
+    "grunt-autoprefixer": "^3.0.6",
     "grunt-bower-task": "^0.4.0",
     "grunt-coffeelint": "0.0.15",
     "grunt-contrib-coffee": "^1.0.0",
