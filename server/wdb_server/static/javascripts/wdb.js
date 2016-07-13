@@ -1325,11 +1325,11 @@ Wdb = (function(superClass) {
   };
 
   Wdb.prototype.working = function() {
-    return $('.activity').addClass('is-active');
+    return $('body,.activity').addClass('is-active');
   };
 
   Wdb.prototype.chilling = function() {
-    return $('.activity').removeClass('is-active');
+    return $('body,.activity').removeClass('is-active');
   };
 
   Wdb.prototype.done = function() {
@@ -1887,7 +1887,7 @@ Wdb = (function(superClass) {
       subtitle: 'Program has exited'
     });
     this.ws.ws.close();
-    $('body').addClass('dead');
+    $('body').addClass('is-dead');
     return setTimeout((function() {
       return window.close();
     }), 10);

@@ -47,10 +47,10 @@ class Wdb extends Log
     @switch.open_term()
 
   working: ->
-    $('.activity').addClass('is-active')
+    $('body,.activity').addClass('is-active')
 
   chilling: ->
-    $('.activity').removeClass('is-active')
+    $('body,.activity').removeClass('is-active')
 
   done: ->
     @interpreter.scroll()
@@ -451,7 +451,7 @@ class Wdb extends Log
   die: ->
     @title(title: 'Dead', subtitle: 'Program has exited')
     @ws.ws.close()
-    $('body').addClass 'dead'
+    $('body').addClass 'is-dead'
     setTimeout (-> window.close()), 10
 
   global_key: (e) ->

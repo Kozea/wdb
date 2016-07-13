@@ -291,10 +291,14 @@
       background: rgba(0, 0, 0, 0.13); }
 
 body {
-  transition: -webkit-filter 2s, filter 2s; }
-  body.dead {
-    -webkit-filter: grayscale(75%);
-    filter: grayscale(75%); }
+  transition: -webkit-filter .25s ease-out, filter .25s ease-out; }
+  body.is-active {
+    transition: -webkit-filter 1.5s ease-in, filter 1.5s ease-in;
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%); }
+  body.is-dead {
+    -webkit-filter: sepia(100%);
+    filter: sepia(100%); }
 
 main {
   background: white; }

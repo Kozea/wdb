@@ -1,3 +1,9 @@
+3.0.6
+=====
+
+* Greyscale while working (The spinner might be too subtle)
+
+
 3.0.5
 =====
 
