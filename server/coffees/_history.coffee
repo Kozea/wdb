@@ -131,3 +131,12 @@ class History extends Log
 
   getSessionHistory: ->
     @history.slice 0, @history.length - @sessionIndexStart
+
+  getHistory: (direction) ->
+    begin = 0
+    end = @history.length - @sessionIndexStart
+    if direction is 'down'
+      end = @index + 1
+    else if direction is 'up'
+      begin = @index
+    @history.slice begin, end

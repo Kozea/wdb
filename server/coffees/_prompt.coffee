@@ -112,6 +112,8 @@ class Prompt extends Log
       'Ctrl-Enter': 'newlineAndIndent'
       'Alt-Backspace': 'delGroupBefore'
       'Ctrl-Space': @triggerAutocomplete.bind @
+      'Ctrl-Up': => @insertHistory 'up'
+      'Ctrl-Down': => @insertHistory 'down'
       # Use page up/down for going up/down in multiline
       'PageUp': 'goLineUp'
       'PageDown': 'goLineDown'
@@ -302,3 +304,8 @@ class Prompt extends Log
 
   changes: ->
     @wdb.interpreter.scroll()
+
+  insertHistory: (direction) ->
+    h = @history.getHistory(direction).reverse().join('\n')
+    @history.reset()
+    @set h

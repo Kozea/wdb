@@ -452,7 +452,8 @@ class Wdb extends Log
     @title(title: 'Dead', subtitle: 'Program has exited')
     @ws.ws.close()
     $('body').addClass 'is-dead'
-    setTimeout (-> window.close()), 10
+    unless $('body').attr('data-debug')
+      setTimeout (-> window.close()), 10
 
   global_key: (e) ->
     return true if @source.rw

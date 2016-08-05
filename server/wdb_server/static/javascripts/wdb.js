@@ -571,6 +571,18 @@ History = (function(superClass) {
     return this.history.slice(0, this.history.length - this.sessionIndexStart);
   };
 
+  History.prototype.getHistory = function(direction) {
+    var begin, end;
+    begin = 0;
+    end = this.history.length - this.sessionIndexStart;
+    if (direction === 'down') {
+      end = this.index + 1;
+    } else if (direction === 'up') {
+      begin = this.index;
+    }
+    return this.history.slice(begin, end);
+  };
+
   return History;
 
 })(Log);
@@ -860,6 +872,16 @@ Prompt = (function(superClass) {
       'Ctrl-Enter': 'newlineAndIndent',
       'Alt-Backspace': 'delGroupBefore',
       'Ctrl-Space': this.triggerAutocomplete.bind(this),
+      'Ctrl-Up': (function(_this) {
+        return function() {
+          return _this.insertHistory('up');
+        };
+      })(this),
+      'Ctrl-Down': (function(_this) {
+        return function() {
+          return _this.insertHistory('down');
+        };
+      })(this),
       'PageUp': 'goLineUp',
       'PageDown': 'goLineDown',
       'PageDown': 'goLineDown',
@@ -1148,6 +1170,13 @@ Prompt = (function(superClass) {
 
   Prompt.prototype.changes = function() {
     return this.wdb.interpreter.scroll();
+  };
+
+  Prompt.prototype.insertHistory = function(direction) {
+    var h;
+    h = this.history.getHistory(direction).reverse().join('\n');
+    this.history.reset();
+    return this.set(h);
   };
 
   return Prompt;
@@ -1888,9 +1917,11 @@ Wdb = (function(superClass) {
     });
     this.ws.ws.close();
     $('body').addClass('is-dead');
-    return setTimeout((function() {
-      return window.close();
-    }), 10);
+    if (!$('body').attr('data-debug')) {
+      return setTimeout((function() {
+        return window.close();
+      }), 10);
+    }
   };
 
   Wdb.prototype.global_key = function(e) {
