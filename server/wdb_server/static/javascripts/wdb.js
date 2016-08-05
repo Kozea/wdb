@@ -686,7 +686,13 @@ Interpreter = (function(superClass) {
   function Interpreter(wdb) {
     this.wdb = wdb;
     Interpreter.__super__.constructor.apply(this, arguments);
-    this.$terminal = $('.terminal').on('click', this.focus.bind(this)).on('click', 'a.inspect', this.inspect.bind(this));
+    this.$terminal = $('.terminal').on('click', (function(_this) {
+      return function() {
+        if (!getSelection().toString()) {
+          return _this.focus();
+        }
+      };
+    })(this)).on('click', 'a.inspect', this.inspect.bind(this));
     this.$scrollback = $('.scrollback').on('click', '.short.close', this.short_open.bind(this)).on('click', '.short.open', this.short_close.bind(this)).on('click', '.toggle', this.toggle_visibility.bind(this));
   }
 

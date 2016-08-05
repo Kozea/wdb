@@ -18,7 +18,9 @@ class Interpreter extends Log
   constructor: (@wdb) ->
     super
     @$terminal = $('.terminal')
-      .on 'click', @focus.bind @
+      .on 'click', =>
+        unless getSelection().toString()
+          @focus()
       .on 'click', 'a.inspect', @inspect.bind @
     @$scrollback = $('.scrollback')
       .on 'click', '.short.close', @short_open.bind @
