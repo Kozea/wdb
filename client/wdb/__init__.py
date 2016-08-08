@@ -655,7 +655,7 @@ class Wdb(object):
 
         for i, (stack_frame, lno) in enumerate(stack):
             code = stack_frame.f_code
-            filename = code.co_filename
+            filename = code.co_filename or '<unspecified>'
             line = None
             if filename[0] == '<' and filename[-1] == '>':
                 line = get_source_from_byte_code(code)
