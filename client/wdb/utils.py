@@ -91,7 +91,11 @@ def get_args(frame):
     code = frame.f_code
     varnames = code.co_varnames
     nargs = code.co_argcount
-    kwonly = code.co_kwonlyargcount
+    if hasattr(code, 'co_kwonlyargcount'):
+        kwonly = code.co_kwonlyargcount
+    else:
+        # Python 2
+        kwonly = 0
     locals = frame.f_locals
 
     # Regular args

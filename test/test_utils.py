@@ -109,6 +109,9 @@ def test_method():
     obj.f(None)
 
 
+if sys.version_info[0] >= 3:
+    # ...
+    exec('''
 def test_method_reverse():
     from wdb.utils import get_args
 
@@ -241,3 +244,4 @@ def test_complicated():
     l(1, 2, 3, 4, 5, 6, 7, 8, 9, h=10, i=11, j=12)
     m(1, 2, 3, 4, 5, 10, 11, 12)
     m(1, 2, 3, 4, 5, h=10, i=11, j=12)
+''')

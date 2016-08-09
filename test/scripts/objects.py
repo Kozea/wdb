@@ -18,7 +18,7 @@ def combine(a, b):
     return [a, b, A(a.n + b.n)]
 
 
-def display(a, *b, c=None, **d):
+def display(a, b=None, *c, **d):
     print(locals())
 
 
