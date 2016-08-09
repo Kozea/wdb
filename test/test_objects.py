@@ -44,8 +44,7 @@ def test_repr(socket):
             id(var), var
         )
 
-    step('def create_a(n):',
-        call='create_a(n=%s)' % link(5))
+    step('def create_a(n):', call='create_a(n=%s)' % link(5))
     next('a = A(n)')
     next('return a')
     next('return a', return_='&lt;A object with n=5&gt;')

@@ -160,7 +160,7 @@ if python_version == 2:
                 else:
                     raise RuntimeError('Should not get here')
                 ready.append(L[res])
-                L = L[res+1:]
+                L = L[res + 1:]
                 timeout = 0
             return ready
 

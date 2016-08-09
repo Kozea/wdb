@@ -39,7 +39,7 @@ log = logger('wdb.ui')
 
 
 def eval_(src, *args, **kwargs):
-    return eval(compile(src,  '<stdin>', 'eval'), *args, **kwargs)
+    return eval(compile(src, '<stdin>', 'eval'), *args, **kwargs)
 
 
 class ReprEncoder(JSONEncoder):

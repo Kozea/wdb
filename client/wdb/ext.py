@@ -163,7 +163,7 @@ class WdbMiddleware(object):
                             exc_info=exc_info)
                         yield '\n'.join(
                             traceback.format_exception(*exc_info)
-                            ).replace('\n', '\n<br>\n').encode('utf-8')
+                        ).replace('\n', '\n<br>\n').encode('utf-8')
                     else:
                         yield _handle_off()
                 finally:
@@ -189,7 +189,7 @@ class WdbMiddleware(object):
                         exc_info=exc_info)
                     yield '\n'.join(
                         traceback.format_exception(*exc_info)
-                        ).replace('\n', '\n<br>\n').encode('utf-8')
+                    ).replace('\n', '\n<br>\n').encode('utf-8')
                 else:
                     yield _handle_off()
             finally:

@@ -100,11 +100,11 @@ def get_args(frame):
 
     # Var args (*args)
     if frame.f_code.co_flags & 0x4:
-        vars['*' + varnames[nargs+kwonly]] = locals[varnames[nargs+kwonly]]
+        vars['*' + varnames[nargs + kwonly]] = locals[varnames[nargs + kwonly]]
         nargs += 1
 
     for n in range(kwonly):
-        vars[varnames[nargs+n-1]] = locals[varnames[nargs+n-1]]
+        vars[varnames[nargs + n - 1]] = locals[varnames[nargs + n - 1]]
 
     nargs += kwonly
 

@@ -511,10 +511,10 @@ class Wdb(object):
                         self.safe_better_repr(
                             val, context, html, level, full) +
                         '</td></tr>'
-                        ) if not isinstance(key, IterableEllipsis) else (
-                            '<tr><td colspan="2" class="ellipse">' +
-                            get_too_long_repr(key) + '</td></tr>'
-                        )
+                    ) if not isinstance(key, IterableEllipsis) else (
+                        '<tr><td colspan="2" class="ellipse">' +
+                        get_too_long_repr(key) + '</td></tr>'
+                    )
                         for key, val in abbreviate(dict_sorted(
                             obj.items(),
                             key=lambda x: x[0]), level, tuple_=True)])
@@ -565,9 +565,9 @@ class Wdb(object):
             iter_repr += splitter.join(
                 [self.safe_better_repr(
                     val, context, html, level, full
-                 ) if not isinstance(val, IterableEllipsis)
-                 else get_too_long_repr(val)
-                 for val in abbreviate(obj, level)])
+                ) if not isinstance(val, IterableEllipsis)
+                    else get_too_long_repr(val)
+                    for val in abbreviate(obj, level)])
 
             iter_repr += closer
             return iter_repr
@@ -840,7 +840,7 @@ class Wdb(object):
         _value = value
         if not isinstance(_value, BaseException):
             _value = type_(value)
-        fake_exc_info = type_,  _value, tb
+        fake_exc_info = type_, _value, tb
         log.error('Exception during trace', exc_info=fake_exc_info)
         self.obj_cache[id(exc_info)] = exc_info
         self.extra_vars['__exception__'] = exc_info

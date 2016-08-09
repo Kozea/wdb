@@ -34,7 +34,7 @@ class Slave(Process):
         if use.with_main:
             self.argv = ['', self.file]
             self.file = os.path.join(
-                os.path.dirname(__file__), '..',  'client',
+                os.path.dirname(__file__), '..', 'client',
                 'wdb', '__main__.py')
 
         self.host = host

@@ -130,6 +130,7 @@ def test_method_reverse():
 
 def test_complicated():
     from wdb.utils import get_args
+
     def f(a, b, c, d=5, e=12, *args, h=1, i=8, j=None, **kwargs):
         assert get_args(sys._getframe()) == OrderedDict((
             ('a', a),
