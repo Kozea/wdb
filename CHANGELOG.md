@@ -1,3 +1,13 @@
+3.0.7
+=====
+
+* Add prompt ctrl+up/down command to include surrounding history
+* Prevent prompt autofocus when there is a selection
+* Avoid crash on empty code filename
+* Fix python 3 kwonly keyword args
+* Escape and linkify call/return args
+
+
 3.0.6
 =====
 
