@@ -803,7 +803,9 @@ class Wdb(object):
 
         init = 'Echo|%s' % dump({
             'for': '__call__',
-            'val': '%s(%s)' % (fun, get_args(frame))})
+            'val': '%s(%s)' % (fun, ', '.join(
+                ['%s=%s' % (key, self.safe_better_repr(value))
+                 for key, value in get_args(frame).items()]))})
         self.interaction(
             frame, init=init,
             exception_description='Calling %s' % fun)
@@ -820,9 +822,10 @@ class Wdb(object):
         fun = frame.f_code.co_name
         log.info('Returning from %r with value: %r' % (
             fun, return_value))
+
         init = 'Echo|%s' % dump({
             'for': '__return__',
-            'val': self.safe_repr(return_value)
+            'val': self.safe_better_repr(return_value)
         })
         self.interaction(
             frame, init=init,

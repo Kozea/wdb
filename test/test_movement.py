@@ -63,11 +63,11 @@ def test_step(socket):
     step('l.append(3)')
     step('l += [8, 12]')
     step('l = modify_list(l)')
-    step('def modify_list(ll):', call="modify_list(ll=[3, 8, 12])")
+    step('def modify_list(ll):', call="modify_list(ll=[\n  <a href=")
     step('ll[1] = 7')
     step('ll.insert(0, 3)')
     step('return ll')
-    step('return ll', return_="[3, 3, 7, 12]")
+    step('return ll', return_="[\n  <a href=")
 
     for i in range(3):
         step('for i, e in enumerate(l[:]):')
@@ -101,9 +101,9 @@ def test_return(socket):
     step('l.append(3)')
     step('l += [8, 12]')
     step('l = modify_list(l)')
-    step('def modify_list(ll):', call="modify_list(ll=[3, 8, 12])")
+    step('def modify_list(ll):', call="modify_list(ll=[\n  <a href=")
     step('ll[1] = 7')
-    ret('return ll', return_="[3, 3, 7, 12]")
+    ret('return ll', return_="[\n  <a href=")
 
     for i in range(3):
         step('for i, e in enumerate(l[:]):')

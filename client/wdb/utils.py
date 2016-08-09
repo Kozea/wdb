@@ -6,7 +6,7 @@ import io
 import os
 from contextlib import contextmanager
 from difflib import HtmlDiff, _mdiff
-from ._compat import StringIO, existing_module
+from ._compat import StringIO, existing_module, OrderedDict
 
 
 def pretty_frame(frame):
@@ -91,21 +91,27 @@ def get_args(frame):
     code = frame.f_code
     varnames = code.co_varnames
     nargs = code.co_argcount
+    kwonly = code.co_kwonlyargcount
     locals = frame.f_locals
 
     # Regular args
-    vars = ['%s=%r' % (var, locals[var]) for var in varnames[:nargs]]
+    vars = OrderedDict([
+        (var, locals[var]) for var in varnames[:nargs]])
 
     # Var args (*args)
     if frame.f_code.co_flags & 0x4:
-        vars.append('*%s=%r' % (
-            varnames[nargs], locals[varnames[nargs]]))
+        vars['*' + varnames[nargs+kwonly]] = locals[varnames[nargs+kwonly]]
         nargs += 1
 
+    for n in range(kwonly):
+        vars[varnames[nargs+n-1]] = locals[varnames[nargs+n-1]]
+
+    nargs += kwonly
+
     if frame.f_code.co_flags & 0x8:
-        vars.append('**%s=%r' % (
-            varnames[nargs], locals[varnames[nargs]]))
-    return ', '.join(vars)
+        vars['**' + varnames[nargs]] = locals[varnames[nargs]]
+
+    return vars
 
 
 def importable_module(module):
