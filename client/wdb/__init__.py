@@ -487,7 +487,7 @@ class Wdb(object):
             return r
 
         if isinstance(obj, dict):
-            if OrderedDict is not None and isinstance(obj, OrderedDict):
+            if isinstance(obj, OrderedDict):
                 dict_sorted = lambda it, f: it
             else:
                 dict_sorted = sorted

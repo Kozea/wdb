@@ -21,6 +21,7 @@ requires = [
 
 if sys.version_info[:2] <= (2, 6):
     requires.append('argparse')
+    requires.append('ordereddict')
 else:
     requires.append('importmagic')
 

@@ -28,8 +28,7 @@ except ImportError:
 try:
     from collections import OrderedDict
 except ImportError:
-    # Don't polyfill it's just for a test
-    OrderedDict = None
+    from ordereddict import OrderedDict
 
 if python_version == 2:
     from StringIO import StringIO
