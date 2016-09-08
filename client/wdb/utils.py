@@ -38,7 +38,8 @@ def get_source_from_byte_code(code):
         return
     version = sys.version_info[0] + (sys.version_info[1] / 10.0)
     try:
-        return uncompyle6.deparse_code(version, code).text
+        with open(os.devnull, 'w') as dn:
+            return uncompyle6.deparse_code(version, code, dn).text
     except Exception:
         return
 
