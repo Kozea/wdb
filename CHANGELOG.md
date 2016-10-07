@@ -1,3 +1,10 @@
+3.1.0 UNRELEASED
+================
+
+* Finally quiet uncompyle6
+* Change default behavior for wdb script/__main__ now doesn't trace script by default but implement sys excepthook instead. Use --trace for old behavior.
+
+
 3.0.7
 =====
 
