@@ -36,7 +36,8 @@ def main():
         if args.trace:
             Wdb.get().run_file(file)
         else:
-            def wdb_pm(type, value, traceback):
+            def wdb_pm(xtype, value, traceback):
+                sys.__excepthook__(xtype, value, traceback)
                 wdb = Wdb.get()
                 wdb.reset()
                 wdb.interaction(None, traceback, post_mortem=True)
