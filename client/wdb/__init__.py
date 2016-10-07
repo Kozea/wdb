@@ -753,7 +753,7 @@ class Wdb(object):
             self, frame, tb=None,
             exception='Wdb', exception_description='Stepping',
             init=None, shell=False, shell_vars=None, source=None,
-            iframe_mode=False, timeout=None):
+            iframe_mode=False, timeout=None, post_mortem=False):
         """User interaction handling blocking on socket receive"""
         log.info('Interaction %r %r %r %r' % (
             frame, tb, exception, exception_description))
@@ -764,6 +764,8 @@ class Wdb(object):
             opts = {}
             if shell:
                 opts['type_'] = 'shell'
+            if post_mortem:
+                opts['type_'] = 'pm'
             self.open_browser(**opts)
 
         lvl = len(self.interaction_stack)
@@ -971,7 +973,7 @@ def post_mortem(t=None, server=None, port=None):
 
     wdb = Wdb.get(server=server, port=port)
     wdb.reset()
-    wdb.interaction(None, t)
+    wdb.interaction(None, t, post_mortem=True)
 
 
 def pm(server=None, port=None):
