@@ -261,28 +261,41 @@ class Wdb(object):
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
 
+    def _get_under_code_ref(self):
+        code = getattr(self.under, '__code__', None)
+        # if not code and hasattr(self.under, '__call__'):
+        #     # Many WSGI handlers are callable objects, eg Django
+        #     code = getattr(self.under.__call__, '__code__', None)
+
+        return code
+
+    def _walk_frame_ancestry(self, frame):
+        iframe = frame
+        while iframe is not None:
+            yield iframe
+            iframe = iframe.f_back
+
     def check_below(self, frame):
         stop_frame = self.state.frame
 
-        if not self.below and not self.under:
+        if not any((self.below, self.under)):
             return frame == stop_frame, False
 
-        if self.under:
+        under_code = self._get_under_code_ref()
+        if under_code:
             stop_frame = None
-            iframe = frame
-            while iframe is not None:
-                if iframe.f_code == getattr(self.under, '__code__', None):
+            for iframe in self._walk_frame_ancestry(frame):
+                if iframe.f_code == under_code:
                     stop_frame = iframe
-                iframe = iframe.f_back
-        iframe = frame
+
         if not stop_frame:
             return False, False
+
         below = 0
-        while iframe is not None:
+        for iframe in self._walk_frame_ancestry(frame):
             if stop_frame == iframe:
                 break
             below += 1
-            iframe = iframe.f_back
 
         return below == self.below, below == self.below
 
