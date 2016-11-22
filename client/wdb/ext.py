@@ -25,7 +25,7 @@ from threading import current_thread
 from uuid import uuid4
 import sys
 
-log = logger('wdb.ext')
+log = logger(__name__)
 _exc_cache = {}
 
 

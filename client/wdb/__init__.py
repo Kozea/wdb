@@ -132,6 +132,7 @@ class Wdb(object):
         self.port = port or SOCKET_PORT
         self.interaction_stack = []
         self._importmagic_index = None
+        self._importmagic_index_lock = threading.RLock()
         self.index_imports()
         self._socket = None
         self.connect()
@@ -241,16 +242,21 @@ class Wdb(object):
         if not importmagic or self._importmagic_index:
             return
 
+        self._importmagic_index_lock.acquire()
+
         def index(self):
             log.info('Indexing imports')
-            self._importmagic_index = importmagic.SymbolIndex()
-            self._importmagic_index.build_index(sys.path)
+            index = importmagic.SymbolIndex()
+            index.build_index(sys.path)
+            self._importmagic_index = index
             log.info('Indexing imports done')
 
-        index_thread = Thread(target=index, args=(self,))
+        index_thread = Thread(target=index, args=(self,), name='wdb_importmagic_build_index')
         # Don't wait for completion, let it die alone:
         index_thread.daemon = True
         index_thread.start()
+
+        self._importmagic_index_lock.release()
 
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
