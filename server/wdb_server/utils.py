@@ -24,7 +24,6 @@ from tornado.ioloop import IOLoop
 from tornado.options import options
 import psutil
 
-
 log = getLogger('wdb_server')
 log.setLevel(10 if options.debug else 30)
 
@@ -35,7 +34,9 @@ try:
 except ImportError:
     LibPythonWatcher = None
 else:
+
     class LibPythonWatcher(object):
+
         def __init__(self, extra_search_path=None):
             inotify = pyinotify.WatchManager()
             self.files = glob('/usr/lib/libpython*')
@@ -49,12 +50,11 @@ else:
                         self.files.append(os.path.join(root, filename))
 
             log.debug('Watching for %s' % self.files)
-            self.notifier = pyinotify.TornadoAsyncNotifier(
-                inotify, ioloop, self.notified, pyinotify.ProcessEvent())
+            self.notifier = pyinotify.TornadoAsyncNotifier(inotify, ioloop, self.notified, pyinotify.ProcessEvent())
             inotify.add_watch(
-                self.files,
-                pyinotify.EventsCodes.ALL_FLAGS['IN_OPEN'] |
-                pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_NOWRITE'])
+                self.files, pyinotify.EventsCodes.ALL_FLAGS['IN_OPEN'] |
+                pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_NOWRITE']
+            )
 
         def notified(self, notifier):
             log.debug('Got notified for %s' % self.files)
@@ -77,37 +77,31 @@ def refresh_process(uuid=None):
     for proc in psutil.process_iter():
         try:
             cl = proc.cmdline()
-        except (psutil.ZombieProcess,
-                psutil.AccessDenied,
-                psutil.NoSuchProcess):
+        except (psutil.ZombieProcess, psutil.AccessDenied, psutil.NoSuchProcess):
             continue
         else:
             if len(cl) == 0:
                 continue
 
         binary = cl[0].split('/')[-1]
-        if (
-                ('python' in binary or 'pypy' in binary) and
-                proc.is_running() and
-                proc.status() != psutil.STATUS_ZOMBIE):
+        if (('python' in binary or 'pypy' in binary) and proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE):
             try:
                 try:
                     cpu = proc.cpu_percent(interval=.01)
-                    send('AddProcess', {
-                        'pid': proc.pid,
-                        'user': proc.username(),
-                        'cmd': ' '.join(proc.cmdline()),
-                        'threads': proc.num_threads(),
-                        'time': proc.create_time(),
-                        'mem': proc.memory_percent(),
-                        'cpu': cpu
-                    })
+                    send(
+                        'AddProcess', {
+                            'pid': proc.pid,
+                            'user': proc.username(),
+                            'cmd': ' '.join(proc.cmdline()),
+                            'threads': proc.num_threads(),
+                            'time': proc.create_time(),
+                            'mem': proc.memory_percent(),
+                            'cpu': cpu
+                        }
+                    )
                     remaining_pids.append(proc.pid)
                     for thread in proc.threads():
-                        send('AddThread', {
-                            'id': thread.id,
-                            'of': proc.pid
-                        })
+                        send('AddThread', {'id': thread.id, 'of': proc.pid})
                         remaining_tids.append(thread.id)
                 except psutil.NoSuchProcess:
                     pass

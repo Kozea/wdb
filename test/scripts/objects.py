@@ -2,6 +2,7 @@ import wdb
 
 
 class A(object):
+
     def __init__(self, n):
         self.n = n
 
@@ -28,5 +29,6 @@ def work():
     b = create_a(2)
     a, b, c = combine(a, b)
     display(a, b, wdb, c=c, cls=A, obj=object)
+
 
 work()

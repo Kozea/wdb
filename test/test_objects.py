@@ -40,9 +40,7 @@ def test_repr(socket):
     assert msg.data.name == file
 
     def link(var):
-        return '<a href="%d" class="inspect">%r</a>' % (
-            id(var), var
-        )
+        return '<a href="%d" class="inspect">%r</a>' % (id(var), var)
 
     step('def create_a(n):', call='create_a(n=%s)' % link(5))
     next('a = A(n)')
@@ -50,14 +48,12 @@ def test_repr(socket):
     next('return a', return_='&lt;A object with n=5&gt;')
     next('b = create_a(2)')
     next('a, b, c = combine(a, b)')
-    step('def combine(a, b):',
-         call='&lt;A object with n=5&gt;')
+    step('def combine(a, b):', call='&lt;A object with n=5&gt;')
 
     next('return [a, b, A(a.n + b.n)]')
     next('return [a, b, A(a.n + b.n)]', return_='&lt;A object with n=7&gt;')
     next('display(a, b, wdb, c=c, cls=A, obj=object)')
-    step('def display(a, b=None, *c, **d):',
-         call=' class="inspect">&lt;class ')
+    step('def display(a, b=None, *c, **d):', call=' class="inspect">&lt;class ')
     next('print(locals())')
     next('print(locals())', return_='None')
 

@@ -18,19 +18,15 @@ from __future__ import with_statement
 __version__ = '3.0.7'
 _initial_globals = dict(globals())
 
-from ._compat import (
-    execute, StringIO, to_unicode_string, escape, loads, Socket, logger,
-    OrderedDict)
+from ._compat import (execute, StringIO, to_unicode_string, escape, loads, Socket, logger, OrderedDict)
 
-from .breakpoint import (
-    Breakpoint, LineBreakpoint,
-    ConditionalBreakpoint, FunctionBreakpoint)
+from .breakpoint import (Breakpoint, LineBreakpoint, ConditionalBreakpoint, FunctionBreakpoint)
 
 from collections import defaultdict
 from .ui import Interaction, dump
 from .utils import (
-    pretty_frame, executable_line, get_args, get_source_from_byte_code,
-    cut_if_too_long, IterableEllipsis)
+    pretty_frame, executable_line, get_args, get_source_from_byte_code, cut_if_too_long, IterableEllipsis
+)
 from .state import Running, Step, Next, Until, Return
 from contextlib import contextmanager
 from uuid import uuid4
@@ -66,9 +62,7 @@ trace_log = logging.getLogger('wdb.trace')
 
 for log_name in ('main', 'trace', 'ui', 'ext', 'bp'):
     logger_name = 'wdb.%s' % log_name if log_name != 'main' else 'wdb'
-    level = os.getenv(
-        'WDB_%s_LOG' % log_name.upper(),
-        os.getenv('WDB_LOG', 'WARNING')).upper()
+    level = os.getenv('WDB_%s_LOG' % log_name.upper(), os.getenv('WDB_LOG', 'WARNING')).upper()
     logging.getLogger(logger_name).setLevel(getattr(logging, level, 'WARNING'))
 
 
@@ -81,8 +75,7 @@ class Wdb(object):
     watchers = defaultdict(set)
 
     @staticmethod
-    def get(no_create=False, server=None, port=None,
-            force_uuid=None):
+    def get(no_create=False, server=None, port=None, force_uuid=None):
         """Get the thread local singleton"""
         pid = os.getpid()
         thread = threading.current_thread()
@@ -94,8 +87,7 @@ class Wdb(object):
             wdb.thread = thread
             Wdb._instances[(pid, thread)] = wdb
         elif wdb:
-            if (server is not None and wdb.server != server or
-                    port is not None and wdb.port != port):
+            if (server is not None and wdb.server != server or port is not None and wdb.port != port):
                 log.warn('Different server/port set, ignoring')
             else:
                 wdb.reconnect_if_needed()
@@ -132,6 +124,7 @@ class Wdb(object):
         self.port = port or SOCKET_PORT
         self.interaction_stack = []
         self._importmagic_index = None
+        self._importmagic_index_lock = threading.RLock()
         self.index_imports()
         self._socket = None
         self.connect()
@@ -212,8 +205,8 @@ class Wdb(object):
                 tries += 1
                 log.warning(
                     'You must start/install wdb.server '
-                    '(Retrying on %s:%d) [Try #%d/10]' % (
-                        self.server, self.port, tries))
+                    '(Retrying on %s:%d) [Try #%d/10]' % (self.server, self.port, tries)
+                )
                 self._socket = None
 
         if not self._socket:
@@ -231,9 +224,7 @@ class Wdb(object):
         self._init_breakpoints = breaks
 
         for brk in breaks:
-            self.set_break(
-                brk['fn'], brk['lno'], False,
-                brk['cond'], brk['fun'])
+            self.set_break(brk['fn'], brk['lno'], False, brk['cond'], brk['fun'])
 
         log.info('Server breakpoints added')
 
@@ -241,42 +232,60 @@ class Wdb(object):
         if not importmagic or self._importmagic_index:
             return
 
+        self._importmagic_index_lock.acquire()
+
         def index(self):
             log.info('Indexing imports')
-            self._importmagic_index = importmagic.SymbolIndex()
-            self._importmagic_index.build_index(sys.path)
+            index = importmagic.SymbolIndex()
+            index.build_index(sys.path)
+            self._importmagic_index = index
             log.info('Indexing imports done')
 
-        index_thread = Thread(target=index, args=(self,))
+        index_thread = Thread(target=index, args=(self,), name='wdb_importmagic_build_index')
         # Don't wait for completion, let it die alone:
         index_thread.daemon = True
         index_thread.start()
 
+        self._importmagic_index_lock.release()
+
     def breakpoints_to_json(self):
         return [brk.to_dict() for brk in self.breakpoints]
+
+    def _get_under_code_ref(self):
+        code = getattr(self.under, '__code__', None)
+        # if not code and hasattr(self.under, '__call__'):
+        #     # Many WSGI handlers are callable objects, eg Django
+        #     code = getattr(self.under.__call__, '__code__', None)
+
+        return code
+
+    def _walk_frame_ancestry(self, frame):
+        iframe = frame
+        while iframe is not None:
+            yield iframe
+            iframe = iframe.f_back
 
     def check_below(self, frame):
         stop_frame = self.state.frame
 
-        if not self.below and not self.under:
+        if not any((self.below, self.under)):
             return frame == stop_frame, False
 
-        if self.under:
+        under_code = self._get_under_code_ref()
+        if under_code:
             stop_frame = None
-            iframe = frame
-            while iframe is not None:
-                if iframe.f_code == getattr(self.under, '__code__', None):
+            for iframe in self._walk_frame_ancestry(frame):
+                if iframe.f_code == under_code:
                     stop_frame = iframe
-                iframe = iframe.f_back
-        iframe = frame
+
         if not stop_frame:
             return False, False
+
         below = 0
-        while iframe is not None:
+        for iframe in self._walk_frame_ancestry(frame):
             if stop_frame == iframe:
                 break
             below += 1
-            iframe = iframe.f_back
 
         return below == self.below, below == self.below
 
@@ -320,18 +329,18 @@ class Wdb(object):
 
     def trace_debug_dispatch(self, frame, event, arg):
         """Utility function to add debug to tracing"""
-        trace_log.info('Frame:%s. Event: %s. Arg: %r' % (
-            pretty_frame(frame), event, arg))
-        trace_log.debug('state %r breaks ? %s stops ? %s' % (
-            self.state,
-            self.breaks(frame, no_remove=True),
-            self.state.stops(frame, event)
-        ))
+        trace_log.info('Frame:%s. Event: %s. Arg: %r' % (pretty_frame(frame), event, arg))
+        trace_log.debug(
+            'state %r breaks ? %s stops ? %s' %
+            (self.state, self.breaks(
+                frame, no_remove=True
+            ), self.state.stops(frame, event))
+        )
         if event == 'return':
             trace_log.debug(
-                'Return: frame: %s, state: %s, state.f_back: %s' % (
-                    pretty_frame(frame), pretty_frame(self.state.frame),
-                    pretty_frame(self.state.frame.f_back)))
+                'Return: frame: %s, state: %s, state.f_back: %s' %
+                (pretty_frame(frame), pretty_frame(self.state.frame), pretty_frame(self.state.frame.f_back))
+            )
         if self.trace_dispatch(frame, event, arg):
             return self.trace_debug_dispatch
         trace_log.debug("No trace %s" % pretty_frame(frame))
@@ -353,14 +362,14 @@ class Wdb(object):
     def set_trace(self, frame=None, break_=True):
         """Break at current state"""
         # We are already tracing, do nothing
-        trace_log.info('Setting trace %s (stepping %s) (current_trace: %s)' % (
-            pretty_frame(frame or sys._getframe().f_back), self.stepping,
-            sys.gettrace()))
+        trace_log.info(
+            'Setting trace %s (stepping %s) (current_trace: %s)' %
+            (pretty_frame(frame or sys._getframe().f_back), self.stepping, sys.gettrace())
+        )
         if self.stepping or self.closed:
             return
         self.reset()
-        trace = (self.trace_dispatch
-                 if trace_log.level >= 30 else self.trace_debug_dispatch)
+        trace = (self.trace_dispatch if trace_log.level >= 30 else self.trace_debug_dispatch)
         trace_frame = frame = frame or sys._getframe().f_back
         while frame:
             frame.f_trace = trace
@@ -407,35 +416,27 @@ class Wdb(object):
         if lineno and not cond:
             return LineBreakpoint(filename, lineno, temporary)
         elif cond:
-            return ConditionalBreakpoint(
-                filename, lineno, cond, temporary)
+            return ConditionalBreakpoint(filename, lineno, cond, temporary)
         elif funcname:
             return FunctionBreakpoint(filename, funcname, temporary)
         else:
             return Breakpoint(filename, temporary)
 
-    def set_break(self, filename, lineno=None, temporary=False, cond=None,
-                  funcname=None):
+    def set_break(self, filename, lineno=None, temporary=False, cond=None, funcname=None):
         """Put a breakpoint for filename"""
-        log.info('Setting break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
-            filename, lineno, temporary, cond, funcname))
-        breakpoint = self.get_break(
-            filename, lineno, temporary, cond, funcname)
+        log.info('Setting break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (filename, lineno, temporary, cond, funcname))
+        breakpoint = self.get_break(filename, lineno, temporary, cond, funcname)
         self.breakpoints.add(breakpoint)
         log.info('Breakpoint %r added' % breakpoint)
         return breakpoint
 
-    def clear_break(self, filename, lineno=None, temporary=False, cond=None,
-                    funcname=None):
+    def clear_break(self, filename, lineno=None, temporary=False, cond=None, funcname=None):
         """Remove a breakpoint"""
-        log.info('Removing break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (
-            filename, lineno, temporary, cond, funcname))
+        log.info('Removing break fn:%s lno:%s tmp:%s cond:%s fun:%s' % (filename, lineno, temporary, cond, funcname))
 
-        breakpoint = self.get_break(
-            filename, lineno, temporary or False, cond, funcname)
+        breakpoint = self.get_break(filename, lineno, temporary or False, cond, funcname)
         if temporary is None and breakpoint not in self.breakpoints:
-            breakpoint = self.get_break(
-                filename, lineno, True, cond, funcname)
+            breakpoint = self.get_break(filename, lineno, True, cond, funcname)
 
         try:
             self.breakpoints.remove(breakpoint)
@@ -450,8 +451,7 @@ class Wdb(object):
         except Exception as e:
             return '??? Broken repr (%s: %s)' % (type(e).__name__, e)
 
-    def safe_better_repr(self,
-                         obj, context=None, html=True, level=0, full=False):
+    def safe_better_repr(self, obj, context=None, html=True, level=0, full=False):
         """Repr with inspect links on objects"""
         context = context and dict(context) or {}
         recursion = id(obj) in context
@@ -467,12 +467,9 @@ class Wdb(object):
         self.obj_cache[id(obj)] = obj
         if html:
             return '<a href="%d" class="inspect">%s%s</a>' % (
-                id(obj),
-                'Recursion of ' if recursion else '',
-                escape(self.safe_repr(obj)))
-        return '%s%s' % (
-            'Recursion of ' if recursion else '',
-            self.safe_repr(obj))
+                id(obj), 'Recursion of ' if recursion else '', escape(self.safe_repr(obj))
+            )
+        return '%s%s' % ('Recursion of ' if recursion else '', self.safe_repr(obj))
 
     def better_repr(self, obj, context=None, html=True, level=1, full=False):
         """Repr with html decorations or indentation"""
@@ -482,8 +479,7 @@ class Wdb(object):
             r = '[%d more…]' % ie.size
             if html:
                 self.obj_cache[id(obj)] = obj
-                return '<a href="dump/%d" class="inspect">%s</a>' % (
-                    id(obj), r)
+                return '<a href="dump/%d" class="inspect">%s</a>' % (id(obj), r)
             return r
 
         if isinstance(obj, dict):
@@ -505,43 +501,48 @@ class Wdb(object):
                     dict_repr += '''<table class="
                         mdl-data-table mdl-js-data-table
                         mdl-data-table--selectable mdl-shadow--2dp">'''
-                    dict_repr += ''.join([(
-                        '<tr><td class="key">' + self.safe_repr(key) + ':</td>'
-                        '<td class="val mdl-data-table__cell--non-numeric">' +
-                        self.safe_better_repr(
-                            val, context, html, level, full) +
-                        '</td></tr>'
-                    ) if not isinstance(key, IterableEllipsis) else (
-                        '<tr><td colspan="2" class="ellipse">' +
-                        get_too_long_repr(key) + '</td></tr>'
+                    dict_repr += ''.join(
+                        [
+                            (
+                                '<tr><td class="key">' + self.safe_repr(key) + ':</td>'
+                                '<td class="val mdl-data-table__cell--non-numeric">' +
+                                self.safe_better_repr(val, context, html, level, full) + '</td></tr>'
+                            ) if not isinstance(key, IterableEllipsis) else
+                            ('<tr><td colspan="2" class="ellipse">' + get_too_long_repr(key) + '</td></tr>')
+                            for key, val in abbreviate(
+                                dict_sorted(
+                                    obj.items(), key=lambda x: x[0]
+                                ), level, tuple_=True
+                            )
+                        ]
                     )
-                        for key, val in abbreviate(dict_sorted(
-                            obj.items(),
-                            key=lambda x: x[0]), level, tuple_=True)])
                     dict_repr += '</table>'
                 else:
-                    dict_repr += ('\n' + '  ' * level).join([
-                        self.safe_repr(key) + ': ' + self.safe_better_repr(
-                            val, context, html, level, full
-                        ) if not isinstance(key, IterableEllipsis)
-                        else get_too_long_repr(key)
-                        for key, val in abbreviate(dict_sorted(
-                            obj.items(),
-                            key=lambda x: x[0]), level, tuple_=True)])
+                    dict_repr += ('\n' + '  ' * level).join(
+                        [
+                            self.safe_repr(key) + ': ' + self.safe_better_repr(val, context, html, level, full)
+                            if not isinstance(key, IterableEllipsis) else get_too_long_repr(key)
+                            for key, val in abbreviate(
+                                dict_sorted(
+                                    obj.items(), key=lambda x: x[0]
+                                ), level, tuple_=True
+                            )
+                        ]
+                    )
                 closer = '\n' + '  ' * (level - 1) + closer
             else:
-                dict_repr += ', '.join([
-                    self.safe_repr(key) + ': ' + self.safe_better_repr(
-                        val, context, html, level, full)
-                    for key, val in dict_sorted(
-                        obj.items(), key=lambda x: x[0])])
+                dict_repr += ', '.join(
+                    [
+                        self.safe_repr(key) + ': ' + self.safe_better_repr(val, context, html, level, full)
+                        for key, val in dict_sorted(
+                            obj.items(), key=lambda x: x[0]
+                        )
+                    ]
+                )
             dict_repr += closer
             return dict_repr
 
-        if any([
-                isinstance(obj, list),
-                isinstance(obj, set),
-                isinstance(obj, tuple)]):
+        if any([isinstance(obj, list), isinstance(obj, set), isinstance(obj, tuple)]):
             iter_repr = '  ' * (level - 1)
             if type(obj) == list:
                 iter_repr = '['
@@ -563,11 +564,12 @@ class Wdb(object):
                 closer = '\n' + '  ' * (level - 1) + closer
 
             iter_repr += splitter.join(
-                [self.safe_better_repr(
-                    val, context, html, level, full
-                ) if not isinstance(val, IterableEllipsis)
-                    else get_too_long_repr(val)
-                    for val in abbreviate(obj, level)])
+                [
+                    self.safe_better_repr(val, context, html, level, full)
+                    if not isinstance(val, IterableEllipsis) else get_too_long_repr(val)
+                    for val in abbreviate(obj, level)
+                ]
+            )
 
             iter_repr += closer
             return iter_repr
@@ -607,16 +609,13 @@ class Wdb(object):
             try:
                 return getattr(thing, key)
             except Exception as e:
-                return 'Error getting attr "%s" from "%s" (%s: %s)' % (
-                    key, thing,
-                    type(e).__name__, e)
+                return 'Error getting attr "%s" from "%s" (%s: %s)' % (key, thing, type(e).__name__, e)
 
         return dict(
             (escape(key), {
                 'val': self.safe_better_repr(safe_getattr(key)),
                 'type': type(safe_getattr(key)).__name__
-            })
-            for key in dir(thing)
+            }) for key in dir(thing)
         )
 
     def get_file(self, filename):
@@ -624,10 +623,8 @@ class Wdb(object):
         import linecache
         # Hack for frozen importlib bootstrap
         if filename == '<frozen importlib._bootstrap>':
-            filename = os.path.join(os.path.dirname(linecache.__file__),
-                                    'importlib', '_bootstrap.py')
-        return to_unicode_string(
-            ''.join(linecache.getlines(filename)), filename)
+            filename = os.path.join(os.path.dirname(linecache.__file__), 'importlib', '_bootstrap.py')
+        return to_unicode_string(''.join(linecache.getlines(filename)), filename)
 
     def get_stack(self, f, t):
         """Build the stack from frame and traceback"""
@@ -673,16 +670,18 @@ class Wdb(object):
             lastlineno = list(startlnos)[-1][1]
             if frame == stack_frame:
                 current = i
-            frames.append({
-                'file': fn,
-                'function': code.co_name,
-                'flno': code.co_firstlineno,
-                'llno': lastlineno,
-                'lno': lno,
-                'code': line,
-                'level': i,
-                'current': frame == stack_frame
-            })
+            frames.append(
+                {
+                    'file': fn,
+                    'function': code.co_name,
+                    'flno': code.co_firstlineno,
+                    'llno': lastlineno,
+                    'lno': lno,
+                    'code': line,
+                    'level': i,
+                    'current': frame == stack_frame
+                }
+            )
 
         # While in exception always put the context to the top
         return stack, frames, current
@@ -718,45 +717,45 @@ class Wdb(object):
     def open_browser(self, type_='debug'):
         if not self.connected:
             log.debug('Launching browser and wait for connection')
-            web_url = 'http://%s:%d/%s/session/%s' % (
-                WEB_SERVER or 'localhost',
-                WEB_PORT or 1984,
-                type_,
-                self.uuid)
+            web_url = 'http://%s:%d/%s/session/%s' % (WEB_SERVER or 'localhost', WEB_PORT or 1984, type_, self.uuid)
 
             server = WEB_SERVER or '[wdb.server]'
             if WEB_PORT:
                 server += ':%s' % WEB_PORT
 
             if WDB_NO_BROWSER_AUTO_OPEN:
-                log.warning('You can now launch your browser at '
-                            'http://%s/%s/session/%s' % (
-                                server,
-                                type_,
-                                self.uuid))
+                log.warning(
+                    'You can now launch your browser at '
+                    'http://%s/%s/session/%s' % (server, type_, self.uuid)
+                )
 
             elif not webbrowser.open(web_url):
-                log.warning('Unable to open browser, '
-                            'please go to http://%s/%s/session/%s' % (
-                                server,
-                                type_,
-                                self.uuid))
+                log.warning(
+                    'Unable to open browser, '
+                    'please go to http://%s/%s/session/%s' % (server, type_, self.uuid)
+                )
 
             self.connected = True
 
     def shell(self, source=None, vars=None):
-        self.interaction(
-            sys._getframe(), exception_description='Shell',
-            shell=True, shell_vars=vars, source=source)
+        self.interaction(sys._getframe(), exception_description='Shell', shell=True, shell_vars=vars, source=source)
 
     def interaction(
-            self, frame, tb=None,
-            exception='Wdb', exception_description='Stepping',
-            init=None, shell=False, shell_vars=None, source=None,
-            iframe_mode=False, timeout=None, post_mortem=False):
+        self,
+        frame,
+        tb=None,
+        exception='Wdb',
+        exception_description='Stepping',
+        init=None,
+        shell=False,
+        shell_vars=None,
+        source=None,
+        iframe_mode=False,
+        timeout=None,
+        post_mortem=False
+    ):
         """User interaction handling blocking on socket receive"""
-        log.info('Interaction %r %r %r %r' % (
-            frame, tb, exception, exception_description))
+        log.info('Interaction %r %r %r %r' % (frame, tb, exception, exception_description))
         self.reconnect_if_needed()
         self.stepping = not shell
 
@@ -770,16 +769,20 @@ class Wdb(object):
 
         lvl = len(self.interaction_stack)
         if lvl:
-            exception_description += ' [recursive%s]' % (
-                '^%d' % lvl
-                if lvl > 1
-                else ''
-            )
+            exception_description += ' [recursive%s]' % ('^%d' % lvl if lvl > 1 else '')
 
         interaction = Interaction(
-            self, frame, tb, exception, exception_description,
-            init=init, shell=shell, shell_vars=shell_vars, source=source,
-            timeout=timeout)
+            self,
+            frame,
+            tb,
+            exception,
+            exception_description,
+            init=init,
+            shell=shell,
+            shell_vars=shell_vars,
+            source=source,
+            timeout=timeout
+        )
 
         self.interaction_stack.append(interaction)
 
@@ -803,14 +806,17 @@ class Wdb(object):
         fun = frame.f_code.co_name
         log.info('Calling: %r' % fun)
 
-        init = 'Echo|%s' % dump({
-            'for': '__call__',
-            'val': '%s(%s)' % (fun, ', '.join(
-                ['%s=%s' % (key, self.safe_better_repr(value))
-                 for key, value in get_args(frame).items()]))})
-        self.interaction(
-            frame, init=init,
-            exception_description='Calling %s' % fun)
+        init = 'Echo|%s' % dump(
+            {
+                'for': '__call__',
+                'val': '%s(%s)' % (
+                    fun, ', '.join(
+                        ['%s=%s' % (key, self.safe_better_repr(value)) for key, value in get_args(frame).items()]
+                    )
+                )
+            }
+        )
+        self.interaction(frame, init=init, exception_description='Calling %s' % fun)
 
     def handle_line(self, frame, arg):
         """This function is called when we stop or break at this line."""
@@ -822,17 +828,12 @@ class Wdb(object):
         self.obj_cache[id(return_value)] = return_value
         self.extra_vars['__return__'] = return_value
         fun = frame.f_code.co_name
-        log.info('Returning from %r with value: %r' % (
-            fun, return_value))
+        log.info('Returning from %r with value: %r' % (fun, return_value))
 
-        init = 'Echo|%s' % dump({
-            'for': '__return__',
-            'val': self.safe_better_repr(return_value)
-        })
+        init = 'Echo|%s' % dump({'for': '__return__', 'val': self.safe_better_repr(return_value)})
         self.interaction(
-            frame, init=init,
-            exception_description='Returning from %s with value %s' % (
-                fun, return_value))
+            frame, init=init, exception_description='Returning from %s with value %s' % (fun, return_value)
+        )
 
     def handle_exception(self, frame, exc_info):
         """This function is called if an exception occurs,
@@ -848,14 +849,10 @@ class Wdb(object):
         self.extra_vars['__exception__'] = exc_info
         exception = type_.__name__
         exception_description = str(value)
-        init = 'Echo|%s' % dump({
-            'for': '__exception__',
-            'val': escape('%s: %s') % (
-                exception, exception_description)})
+        init = 'Echo|%s' % dump({'for': '__exception__', 'val': escape('%s: %s') % (exception, exception_description)})
         # User exception is 4 frames away from exception
         frame = frame or sys._getframe().f_back.f_back.f_back.f_back
-        self.interaction(
-            frame, tb, exception, exception_description, init=init)
+        self.interaction(frame, tb, exception, exception_description, init=init)
 
     def breaks(self, frame, no_remove=False):
         """Return True if there's a breakpoint at frame"""
@@ -868,16 +865,16 @@ class Wdb(object):
 
     def get_file_breaks(self, filename):
         """List all file `filename` breakpoints"""
-        return [breakpoint for breakpoint in self.breakpoints
-                if breakpoint.on_file(filename)]
+        return [breakpoint for breakpoint in self.breakpoints if breakpoint.on_file(filename)]
 
     def get_breaks_lno(self, filename):
         """List all line numbers that have a breakpoint"""
         return list(
-            filter(lambda x: x is not None,
-                   [getattr(breakpoint, 'line', None)
-                    for breakpoint in self.breakpoints
-                    if breakpoint.on_file(filename)]))
+            filter(
+                lambda x: x is not None,
+                [getattr(breakpoint, 'line', None) for breakpoint in self.breakpoints if breakpoint.on_file(filename)]
+            )
+        )
 
     def die(self):
         """Time to quit"""
@@ -904,8 +901,7 @@ def set_trace(frame=None, skip=0, server=None, port=None):
     return wdb
 
 
-def start_trace(full=False, frame=None, below=0, under=None,
-                server=None, port=None):
+def start_trace(full=False, frame=None, below=0, under=None, server=None, port=None):
     """Start tracing program at callee level
        breaking on exception/breakpoints"""
     wdb = Wdb.get(server=server, port=port)
@@ -927,6 +923,7 @@ def stop_trace(frame=None, close_on_exit=False):
 
 
 class trace(object):
+
     def __init__(self, **kwargs):
         """Make a tracing context with `with trace():`"""
         self.kwargs = kwargs
@@ -960,16 +957,14 @@ def shell(source=None, vars=None, server=None, port=None):
     """Start a shell sourcing source or using vars as locals"""
     Wdb.get(server=server, port=port).shell(source=source, vars=vars)
 
-
 # Pdb compatibility
+
 
 def post_mortem(t=None, server=None, port=None):
     if t is None:
         t = sys.exc_info()[2]
         if t is None:
-            raise ValueError(
-                "A valid traceback must be passed if no "
-                "exception is being handled")
+            raise ValueError("A valid traceback must be passed if no " "exception is being handled")
 
     wdb = Wdb.get(server=server, port=port)
     wdb.reset()

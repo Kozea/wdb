@@ -30,7 +30,7 @@ def bad_function():
     a = 2
     b = -2
     c = 1 / (a + b) < 0  # <strong> Err œ
-    print(c <b> a)
+    print(c < b > a)
     relay_error()
     return "Hello World!"
 
@@ -56,25 +56,29 @@ def wtf_error():
 
 @app.route("/post")
 def post():
-    return ('<form action="/post/test" method="post">'
-            ' <input type="text" name="key1" value="Val11" />'
-            ' <input type="text" name="key1" value="Val12" />'
-            ' <input type="text" name="key2" value="Val21" />'
-            ' <input type="text" name="key2" value="Val22" />'
-            ' <input type="submit" value="Post" />'
-            '</form>')
+    return (
+        '<form action="/post/test" method="post">'
+        ' <input type="text" name="key1" value="Val11" />'
+        ' <input type="text" name="key1" value="Val12" />'
+        ' <input type="text" name="key2" value="Val21" />'
+        ' <input type="text" name="key2" value="Val22" />'
+        ' <input type="submit" value="Post" />'
+        '</form>'
+    )
 
 
 @app.route("/multipart/post")
 def multipart_post():
-    return ('<form action="/post/test" method="post"'
-            ' enctype="multipart/form-data">'
-            ' <input type="text" name="key1" value="Val11" />'
-            ' <input type="text" name="key1" value="Val12" />'
-            ' <input type="text" name="key2" value="Val21" />'
-            ' <input type="text" name="key2" value="Val22" />'
-            ' <input type="submit" value="Post" />'
-            '</form>')
+    return (
+        '<form action="/post/test" method="post"'
+        ' enctype="multipart/form-data">'
+        ' <input type="text" name="key1" value="Val11" />'
+        ' <input type="text" name="key1" value="Val12" />'
+        ' <input type="text" name="key2" value="Val21" />'
+        ' <input type="text" name="key2" value="Val22" />'
+        ' <input type="submit" value="Post" />'
+        '</form>'
+    )
 
 
 @app.route("/post/test", methods=('POST',))
@@ -137,7 +141,6 @@ def lambda_():
 def import_():
     import importtest
 
-
 # @app.route("/favicon.ico")
 # def fav():
 #     1/0
@@ -165,6 +168,7 @@ def init():
 
         def log(httpserver):
             app.logger.debug('WSReloaded after server restart')
+
         wsreload.client.monkey_patch_http_server({'url': url}, callback=log)
         app.logger.debug('HTTPServer monkey patched for url %s' % url)
 
@@ -172,9 +176,8 @@ def init():
 def run():
     init()
     app.wsgi_app = WdbMiddleware(app.wsgi_app, start_disabled=True)
-    app.run(
-        debug=True, host='0.0.0.0', port=1985, use_debugger=False,
-        use_reloader=True)
+    app.run(debug=True, host='0.0.0.0', port=1985, use_debugger=False, use_reloader=True)
+
 
 if __name__ == '__main__':
     run()

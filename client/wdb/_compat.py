@@ -4,7 +4,6 @@ import re
 
 python_version = sys.version_info[0]
 
-
 try:
     from json import loads, dumps, JSONEncoder
 except ImportError:
@@ -36,11 +35,14 @@ else:
     from io import StringIO
 
 if python_version == 2:
+
     def execute(cmd, globals_, locals_):
         exec('exec cmd in globals_, locals_')
 else:
+
     def execute(cmd, globals_, locals_):
         exec(cmd, globals_, locals_)
+
 
 _cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
 
@@ -164,8 +166,7 @@ if python_version == 2:
                 timeout = 0
             return ready
 
-        _ready_errors = set((
-            _winapi.ERROR_BROKEN_PIPE, _winapi.ERROR_NETNAME_DELETED))
+        _ready_errors = set((_winapi.ERROR_BROKEN_PIPE, _winapi.ERROR_NETNAME_DELETED))
 
         def wait(object_list, timeout=None):
             '''
@@ -210,8 +211,7 @@ if python_version == 2:
                             ready_objects.add(o)
                             timeout = 0
 
-                ready_handles = _exhaustive_wait(
-                    waithandle_to_obj.keys(), timeout)
+                ready_handles = _exhaustive_wait(waithandle_to_obj.keys(), timeout)
             finally:
                 # request that overlapped reads stop
                 for ov in ov_list:
@@ -238,6 +238,7 @@ if python_version == 2:
             return [p for p in object_list if p in ready_objects]
     else:
         if hasattr(select, 'poll'):
+
             def _poll(fds, timeout):
                 if timeout is not None:
                     timeout = int(timeout * 1000)  # timeout is in milliseconds
@@ -256,6 +257,7 @@ if python_version == 2:
                     ls.append(fd_map[fd])
                 return ls
         else:
+
             def _poll(fds, timeout):
                 return select.select(fds, [], [], timeout)[0]
 
@@ -282,6 +284,7 @@ if python_version == 2:
     class Socket(object):
         """A Socket compatible with multiprocessing.connection.Client, that
         uses socket objects."""
+
         # https://github.com/akheron/cpython/blob/3.3/Lib/multiprocessing/connection.py#L349
         def __init__(self, address):
             self._handle = socket.socket()
@@ -344,7 +347,6 @@ if python_version == 2:
 else:
     from multiprocessing.connection import Client as Socket
 
-
 try:
     from importlib.util import find_spec
     from importlib import import_module
@@ -366,7 +368,6 @@ except ImportError:
         if module not in sys.modules:
             raise ImportError(module)
         return sys.modules[module]
-
 
 # Not really compat but convenient
 try:

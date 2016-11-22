@@ -8,6 +8,7 @@ def u(s):
         return s.decode('latin-1')
     return s
 
+
 print(u('יאח'))
 
 import wdb

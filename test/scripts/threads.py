@@ -3,6 +3,7 @@ from wdb import set_trace as wtf
 
 
 class Thread1(Thread):
+
     def run(self):
         print('Thread 1 start')
         wtf()
@@ -10,10 +11,12 @@ class Thread1(Thread):
 
 
 class Thread2(Thread):
+
     def run(self):
         print('Thread 2 start')
         wtf()
         print('Thread 2 end')
+
 
 t1 = Thread1()
 t2 = Thread2()

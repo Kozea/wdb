@@ -33,7 +33,6 @@ def uninteresting_function_catching(below):
 def one_more_step(fun, below):
     return fun(below)
 
-
 # This should not stop
 # below = 1 so in trace exception should be ignored
 with trace(below=1):
@@ -59,7 +58,6 @@ with trace(below=1):
 # below = 1 the function 2 layer under raised an exception
 with trace(below=1):
     uninteresting_function_catching(1)
-
 
 # This should not stop neither
 with trace(below=2):

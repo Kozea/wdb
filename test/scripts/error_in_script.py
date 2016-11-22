@@ -14,6 +14,7 @@ def with_trace_fun():
     print(d)
     print('The end')
 
+
 wdb.start_trace()
 try:
     with_trace_fun()

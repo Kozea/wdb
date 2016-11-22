@@ -24,7 +24,6 @@ from struct import unpack
 from tornado.options import options
 import json
 
-
 log = getLogger('wdb_server')
 log.setLevel(10 if options.debug else 30)
 

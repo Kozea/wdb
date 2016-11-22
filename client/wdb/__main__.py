@@ -5,15 +5,12 @@ import sys
 from wdb import Wdb
 from wdb._compat import execute
 
-
 parser = argparse.ArgumentParser(description='Wdb, the web python debugger.')
-parser.add_argument(
-    '--source', dest='source',
-    help='Source the specified file before openning the shell')
+parser.add_argument('--source', dest='source', help='Source the specified file before openning the shell')
 
 parser.add_argument(
-    '--trace', dest='trace', action='store_true',
-    help='Activate trace (otherwise just inspect tracebacks).')
+    '--trace', dest='trace', action='store_true', help='Activate trace (otherwise just inspect tracebacks).'
+)
 parser.add_argument('file', nargs='?', help='the path to the file to debug.')
 parser.add_argument('args', nargs='*', help='arguments to the debugged file.')
 
@@ -36,6 +33,7 @@ def main():
         if args.trace:
             Wdb.get().run_file(file)
         else:
+
             def wdb_pm(xtype, value, traceback):
                 sys.__excepthook__(xtype, value, traceback)
                 wdb = Wdb.get()

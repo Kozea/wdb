@@ -7,6 +7,7 @@ def make_error(i):
     except ZeroDivisionError:
         return 2
 
+
 with trace():
     a = 2
     b = 4
@@ -22,6 +23,5 @@ with trace(full=True):
     print(c)
     d = make_error(c)
     print(d + a)
-
 
 print('The end')
