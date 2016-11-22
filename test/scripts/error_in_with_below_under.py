@@ -55,7 +55,6 @@ def one_more_step(fun, below):
 
     return fun(below)
 
-
 # This should stop for both
 with trace(under=uninteresting_function_catching):
     uninteresting_function_catching(0)

@@ -6,6 +6,7 @@ pytest_plugins = 'pytester',
 
 
 class FakeWdbServer(Process):
+
     def __init__(self, stops=False):
         wdb.SOCKET_SERVER = 'localhost'
         wdb.SOCKET_PORT = 18273
@@ -50,9 +51,7 @@ def test_ok(testdir):
     ''')
     with FakeWdbServer():
         result = testdir.runpytest_inprocess('--wdb', p)
-    result.stdout.fnmatch_lines([
-        'plugins:*wdb*'
-    ])
+    result.stdout.fnmatch_lines(['plugins:*wdb*'])
     assert result.ret == 0
 
 
@@ -65,23 +64,23 @@ def test_ok_run_once(testdir):
     with FakeWdbServer():
         result = testdir.runpytest_inprocess('--wdb', '-s', p)
 
-    assert len([line for line in result.stdout.lines
-                if line == 'test_ok_run_once.py Test has been run']) == 1
+    assert len([line for line in result.stdout.lines if line == 'test_ok_run_once.py Test has been run']) == 1
     assert result.ret == 0
-
 
 # Todo implement fake wdb server
 
+
 def test_fail_run_once(testdir):
-    p = testdir.makepyfile('''
+    p = testdir.makepyfile(
+        '''
         def test_run():
             print('Test has been run')
             assert 0
-    ''')
+    '''
+    )
     with FakeWdbServer(stops=True):
         result = testdir.runpytest_inprocess('--wdb', '-s', p)
-    assert len([line for line in result.stdout.lines
-                if line == 'test_fail_run_once.py Test has been run']) == 1
+    assert len([line for line in result.stdout.lines if line == 'test_fail_run_once.py Test has been run']) == 1
     assert result.ret == 1
 
 
@@ -93,6 +92,5 @@ def test_error_run_once(testdir):
     ''')
     with FakeWdbServer(stops=True):
         result = testdir.runpytest_inprocess('--wdb', '-s', p)
-    assert len([line for line in result.stdout.lines
-                if line == 'test_error_run_once.py Test has been run']) == 1
+    assert len([line for line in result.stdout.lines if line == 'test_error_run_once.py Test has been run']) == 1
     assert result.ret == 1

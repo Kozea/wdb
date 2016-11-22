@@ -28,14 +28,11 @@ class Slave(Process):
 
     def __init__(self, use, host='localhost', port=19999):
         self.argv = None
-        self.file = os.path.join(
-            os.path.dirname(__file__), 'scripts', use.file)
+        self.file = os.path.join(os.path.dirname(__file__), 'scripts', use.file)
 
         if use.with_main:
             self.argv = ['', self.file]
-            self.file = os.path.join(
-                os.path.dirname(__file__), '..', 'client',
-                'wdb', '__main__.py')
+            self.file = os.path.join(os.path.dirname(__file__), '..', 'client', 'wdb', '__main__.py')
 
         self.host = host
         self.port = port
@@ -50,17 +47,18 @@ class Slave(Process):
 
         with open(self.file, 'rb') as file:
             LOCALS['__name__'] = '__main__'
-            exec(compile(file.read(), self.file, 'exec'),
-                 GLOBALS, LOCALS)
+            exec(compile(file.read(), self.file, 'exec'), GLOBALS, LOCALS)
 
 
 class AttrDict(dict):
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
 
 class Message(object):
+
     def __init__(self, message):
         log.info('Received %s' % message)
         pickled = False
@@ -125,10 +123,21 @@ class Socket(object):
             echo_watched = self.receive().command
         assert echo_watched == 'Watched'
 
-    def assert_position(self, title=None, subtitle=None, file=None,
-                        code=None, function=None, line=None,
-                        breaks=None, call=None, return_=None, exception=None,
-                        bottom_code=None, bottom_line=None):
+    def assert_position(
+        self,
+        title=None,
+        subtitle=None,
+        file=None,
+        code=None,
+        function=None,
+        line=None,
+        breaks=None,
+        call=None,
+        return_=None,
+        exception=None,
+        bottom_code=None,
+        bottom_line=None
+    ):
         titlemsg = self.receive()
         assert titlemsg.command == 'Title'
         if title is not None:
@@ -211,6 +220,7 @@ class Socket(object):
 
 
 class use(object):
+
     def __init__(self, file, with_main=False):
         self.file = file
         self.with_main = with_main
@@ -223,15 +233,16 @@ class use(object):
 def timeout_handler(signum, frame):
     raise Exception('Timeout')
 
+
 signal.signal(signal.SIGALRM, timeout_handler)
 
 
 @fixture(scope="function")
 def socket(request):
     log.info('Fixture')
-    socket = Socket(request.function._wdb_use,
-                    port=sys.hexversion % 60000 + 1024 + (
-                        1 if hasattr(sys, 'pypy_version_info') else 0))
+    socket = Socket(
+        request.function._wdb_use, port=sys.hexversion % 60000 + 1024 + (1 if hasattr(sys, 'pypy_version_info') else 0)
+    )
 
     # If it takes more than 5 seconds, it must be an error
     if not os.getenv('NO_WDB_TIMEOUT'):

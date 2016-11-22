@@ -1,5 +1,3 @@
-
-
 def fun1(a):
     b = 4
     c = a + b

@@ -3,6 +3,7 @@ from wdb import set_trace as wtf
 
 
 class Process1(Process):
+
     def run(self):
         print('Process 1 start')
         wtf()
@@ -10,10 +11,12 @@ class Process1(Process):
 
 
 class Process2(Process):
+
     def run(self):
         print('Process 2 start')
         wtf()
         print('Process 2 end')
+
 
 t1 = Process1()
 t2 = Process2()
