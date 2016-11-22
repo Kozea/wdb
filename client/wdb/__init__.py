@@ -265,7 +265,7 @@ class Wdb(object):
             stop_frame = None
             iframe = frame
             while iframe is not None:
-                if iframe.f_code == self.under.__code__:
+                if iframe.f_code == getattr(self.under, '__code__', None):
                     stop_frame = iframe
                 iframe = iframe.f_back
         iframe = frame
