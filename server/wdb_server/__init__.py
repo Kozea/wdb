@@ -308,6 +308,7 @@ def callback(response):
     if version != __version__:
         server.new_version = version
 
+
 log.debug('Feching wdb_server simple pypi page')
 http.fetch(
     'https://pypi.python.org/pypi/wdb.server/json',
