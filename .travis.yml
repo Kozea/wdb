@@ -7,13 +7,10 @@ python:
   # - pypy
 
 install:
+  - pip install --upgrade pip setuptools pytest pytest-flake8 pytest-cov coveralls
   - pip install -e client
   - pip install -e server
-  - pip install pytest
   - pip install -e pytest_wdb
-  - pip install pytest-flake8
-  - pip install pytest-cov
-  - pip install coveralls
 
 script: py.test server/wdb_server/ client/wdb test pytest_wdb --flake8 --cov-report= --cov=client/wdb --cov=test --cov-config=.coveragerc
 
