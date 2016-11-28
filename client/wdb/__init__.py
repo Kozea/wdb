@@ -251,7 +251,8 @@ class Wdb(object):
             self._importmagic_index = index
             log.info('Indexing imports done')
 
-        index_thread = Thread(target=index, args=(self,), name='wdb_importmagic_build_index')
+        index_thread = Thread(
+            target=index, args=(self,), name='wdb_importmagic_build_index')
         # Don't wait for completion, let it die alone:
         index_thread.daemon = True
         index_thread.start()
