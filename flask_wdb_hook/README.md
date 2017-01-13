@@ -1,11 +1,10 @@
 # Flask WDB Hook
-
+## Replace flask werkzeug debugger with wdb
 
 [![](https://raw.github.com/Kozea/wdb/master/flask_wdb_hook/demo.gif)](https://raw.github.com/Kozea/wdb/master/flask_wdb_hook/demo.gif)
 
 
 ### Installation
-
 
 ```bash
     $ sudo pip install flask-wdb-hook
