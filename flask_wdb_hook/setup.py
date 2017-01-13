@@ -6,7 +6,7 @@ from distutils.sysconfig import get_python_lib
 site_packages_path = get_python_lib().replace(sys.prefix + os.path.sep, '')
 
 setup(
-    name="flask-wdb",
+    name="flask-wdb-hook",
     version='0.1.0',
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
@@ -14,5 +14,5 @@ setup(
     license='GPLv3',
     install_requires=['wdb', 'werkzeug'],
     data_files=[(site_packages_path, ['flask-wdb.pth'])],
-    description="Replace flask werkzeug debugger with wdb."
+    description="Hook to replace flask werkzeug debugger with wdb."
 )
