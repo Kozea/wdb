@@ -1,1 +1,1 @@
-import wdb; from wdb.ext import WdbMiddleware; from werkzeug import debug; debug.DebuggedApplication = WdbMiddleware  # This is so much a hack
+import wdb.ext; wdb.ext.patch_werkzeug()

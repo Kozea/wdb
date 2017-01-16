@@ -280,3 +280,12 @@ def add_w_builtin():
             trace(sys._getframe().f_back)
 
     __builtins__['w'] = w()
+
+
+def patch_werkzeug():
+    """Replace werkzeug debug middleware"""
+    try:
+        from werkzeug import debug
+    except ImportError:
+        return
+    debug.DebuggedApplication = WdbMiddleware

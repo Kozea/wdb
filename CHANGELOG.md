@@ -1,9 +1,10 @@
-3.1.0 UNRELEASED
-================
+3.1.0
+=====
 
 * Finally quiet uncompyle6
 * Change default behavior for wdb script/__main__ now doesn't trace script by default but implement sys excepthook instead. Use --trace for old behavior.
-
+* Dont fail out when ran under say a C-based WSGIHandler #87, #88 and Atomically set importmagic to avoid stampede #89 thanks @akatrevorjay
+* Add patch_werkzeug method for use with hook
 
 3.0.7
 =====
