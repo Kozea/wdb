@@ -1464,7 +1464,7 @@ Wdb = (function(superClass) {
       }
       parent.append($node);
       $node.add($node.find('*')).contents().filter(function() {
-        return this.nodeType === 3 && this.nodeValue.length > 0 && !$(this.parentElement).closest('thead').size();
+        return this.nodeType === 3 && this.nodeValue.length > 0 && !$(this.parentElement).closest('thead').length;
       }).wrap('<code>').parent().each((function(_this) {
         return function(i, elt) {
           var $code, cls, j, len;
@@ -1747,15 +1747,15 @@ Wdb = (function(superClass) {
         "class": 'mdl-data-table__cell--non-numeric val'
       }).html(val.val)));
     }
-    if ($core_tbody.find('tr').size() === 0) {
+    if ($core_tbody.find('tr').length === 0) {
       $core_head.remove();
       $core_tbody.remove();
     }
-    if ($attr_tbody.find('tr').size() === 0) {
+    if ($attr_tbody.find('tr').length === 0) {
       $attr_head.remove();
       $attr_tbody.remove();
     }
-    if ($method_tbody.find('tr').size() === 0) {
+    if ($method_tbody.find('tr').length === 0) {
       $method_head.remove();
       $method_tbody.remove();
     }

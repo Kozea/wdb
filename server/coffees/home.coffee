@@ -19,7 +19,7 @@ wait = 25
 
 make_uuid_line = (uuid, socket, filename) ->
   filename = filename or ''
-  unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).size()
+  unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).length
     $line = $("<tr data-uuid=\"#{uuid}\">
       <td class=\"uuid mdl-data-table__cell--non-numeric\">
         <a href=\"/debug/session/#{uuid}\">#{uuid}</a>
@@ -46,7 +46,7 @@ make_uuid_line = (uuid, socket, filename) ->
 
 
 rm_uuid_line = (uuid, socket) ->
-  return unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).size()
+  return unless ($line = $(".sessions tr[data-uuid=#{uuid}]")).length
   if (socket is 'socket' and $line.find('.websocket').text() is 'No') or
      (socket is 'websocket' and $line.find('.socket').text() is 'No')
     $line.remove()
@@ -116,7 +116,7 @@ get_proc_thread_val = (obj, elt) ->
   val
 
 make_process_line = (proc) ->
-  if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).size()
+  if ($tr = $(".processes tbody tr[data-pid=#{proc.pid}]")).length
     for elt in ['pid', 'user', 'cmd', 'time', 'mem', 'cpu']
       $tr.find(".#{elt}").html(get_proc_thread_val proc, elt)
   else
@@ -144,9 +144,9 @@ make_process_line = (proc) ->
 
 make_thread_line = (thread) ->
   $proc = $(".processes tbody tr[data-pid=#{thread.of}]")
-  return unless $proc.size()
+  return unless $proc.length
 
-  if ($tr = $(".processes tbody tr[data-tid=#{thread.id}]")).size()
+  if ($tr = $(".processes tbody tr[data-tid=#{thread.id}]")).length
     for elt in ['id', 'of']
       $tr.find(".#{elt}").text(get_proc_thread_val thread, elt)
   else
@@ -163,7 +163,7 @@ make_thread_line = (thread) ->
       </tr>
     """
     $next = $proc.nextAll('[data-pid]')
-    if $next.size()
+    if $next.length
       $next.before line
     else
       $(".processes tbody").append line
@@ -279,7 +279,7 @@ $ ->
     .on('click', '.plus', (e) ->
       $button = $(this)
       $tr = $button.closest('tr')
-      rowspan = $("[data-of=#{$tr.attr('data-pid')}]").show().size()
+      rowspan = $("[data-of=#{$tr.attr('data-pid')}]").show().length
       $tr.find('.rowspan').attr 'rowspan', rowspan + 1
       $button.removeClass('plus').addClass('minus').find('i').text 'remove'
       false)

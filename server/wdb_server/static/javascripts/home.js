@@ -48,7 +48,7 @@ wait = 25;
 make_uuid_line = function(uuid, socket, filename) {
   var $line;
   filename = filename || '';
-  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
+  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).length) {
     $line = $("<tr data-uuid=\"" + uuid + "\"> <td class=\"uuid mdl-data-table__cell--non-numeric\"> <a href=\"/debug/session/" + uuid + "\">" + uuid + "</a> </td> <td class=\"socket mdl-data-table__cell--non-numeric\">No</td> <td class=\"websocket mdl-data-table__cell--non-numeric\">No</td> <td class=\"action\"> <button class=\"mdl-button mdl-js-button mdl-button--icon close mdl-button--colored\" title=\"Force close\"> <i class=\"material-icons\">close</i> </button> </td>");
     if ($('.sessions .filename-head').length) {
       $line.prepend("<td class=\"filename mdl-data-table__cell--non-numeric\"> <span>" + filename + "</span> </td>");
@@ -63,7 +63,7 @@ make_uuid_line = function(uuid, socket, filename) {
 
 rm_uuid_line = function(uuid, socket) {
   var $line;
-  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).size()) {
+  if (!($line = $(".sessions tr[data-uuid=" + uuid + "]")).length) {
     return;
   }
   if ((socket === 'socket' && $line.find('.websocket').text() === 'No') || (socket === 'websocket' && $line.find('.socket').text() === 'No')) {
@@ -163,7 +163,7 @@ get_proc_thread_val = function(obj, elt) {
 
 make_process_line = function(proc) {
   var $tr, elt, i, j, len, len1, line, ref, ref1, results;
-  if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).size()) {
+  if (($tr = $(".processes tbody tr[data-pid=" + proc.pid + "]")).length) {
     ref = ['pid', 'user', 'cmd', 'time', 'mem', 'cpu'];
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -186,10 +186,10 @@ make_process_line = function(proc) {
 make_thread_line = function(thread) {
   var $next, $proc, $tr, elt, i, len, line, ref, results;
   $proc = $(".processes tbody tr[data-pid=" + thread.of + "]");
-  if (!$proc.size()) {
+  if (!$proc.length) {
     return;
   }
-  if (($tr = $(".processes tbody tr[data-tid=" + thread.id + "]")).size()) {
+  if (($tr = $(".processes tbody tr[data-tid=" + thread.id + "]")).length) {
     ref = ['id', 'of'];
     results = [];
     for (i = 0, len = ref.length; i < len; i++) {
@@ -200,7 +200,7 @@ make_thread_line = function(thread) {
   } else {
     line = "<tr data-tid=\"" + thread.id + "\" data-of=\"" + thread.of + "\"\n  style=\"display: none\">\n  <td class=\"id\">" + (get_proc_thread_val(thread, 'id')) + "</td>\n  <td class=\"action\">\n    <button class=\"mdl-button mdl-js-button mdl-button--icon pause mdl-button--colored\" title=\"Pause\">\n      <i class=\"material-icons\">pause</i>\n    </button>\n  </td>\n</tr>";
     $next = $proc.nextAll('[data-pid]');
-    if ($next.size()) {
+    if ($next.length) {
       return $next.before(line);
     } else {
       return $(".processes tbody").append(line);
@@ -341,7 +341,7 @@ $(function() {
     var $button, $tr, rowspan;
     $button = $(this);
     $tr = $button.closest('tr');
-    rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().size();
+    rowspan = $("[data-of=" + ($tr.attr('data-pid')) + "]").show().length;
     $tr.find('.rowspan').attr('rowspan', rowspan + 1);
     $button.removeClass('plus').addClass('minus').find('i').text('remove');
     return false;

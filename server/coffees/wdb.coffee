@@ -119,7 +119,7 @@ class Wdb extends Log
       parent.append $node
       $node.add($node.find('*')).contents().filter(->
         @nodeType == 3 and @nodeValue.length > 0 and
-        not $(@parentElement).closest('thead').size()
+        not $(@parentElement).closest('thead').length
       )
       .wrap('<code>')
       .parent()
@@ -309,15 +309,15 @@ class Wdb extends Log
         .append($('<td>', class:
           'mdl-data-table__cell--non-numeric val').html(val.val)))
 
-    if $core_tbody.find('tr').size() is 0
+    if $core_tbody.find('tr').length is 0
       $core_head.remove()
       $core_tbody.remove()
 
-    if $attr_tbody.find('tr').size() is 0
+    if $attr_tbody.find('tr').length is 0
       $attr_head.remove()
       $attr_tbody.remove()
 
-    if $method_tbody.find('tr').size() is 0
+    if $method_tbody.find('tr').length is 0
       $method_head.remove()
       $method_tbody.remove()
 
