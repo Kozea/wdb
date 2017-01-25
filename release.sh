@@ -9,16 +9,11 @@ echo "$OLD_VERSION -> $NEW_VERSION"
 git ls-files | grep -E ".+\.coffee|.+\.json|.+\.py" | xargs sed -i -e "s/$OLD_VERSION_RE/$NEW_VERSION/g"
 pushd server
 grunt
-python setup.py sdist bdist_wheel upload
+python setup.py sdist bdist_wheel --universal --plat-name=linux-x86_64 upload
 popd
 
 pushd client
-python setup.py sdist bdist_wheel upload
-mv setup.py setup-full.py
-mv setup-lite.py setup.py
-python setup.py sdist bdist_wheel upload
-mv setup.py setup-lite.py
-mv setup-full.py setup.py
+python setup.py sdist bdist_wheel --universal --plat-name=linux-x86_64 upload
 popd
 
 git commit -am "Bump Version $OLD_VERSION -> $NEW_VERSION"

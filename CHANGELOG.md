@@ -1,3 +1,8 @@
+3.1.1
+=====
+
+* Platform specific wheel to prevent pyinotify install by accident. #91 #78
+
 3.1.0
 =====
 
