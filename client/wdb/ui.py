@@ -11,6 +11,7 @@ from tokenize import generate_tokens, TokenError
 from subprocess import Popen
 import token as tokens
 from base64 import b64encode
+from logging import WARNING
 
 try:
     from cutter import cut
@@ -593,7 +594,8 @@ class Interaction(object):
 
     def do_complete(self, data):
         completion = loads(data)
-        if completion.pop('manual', False):
+        manual = completion.pop('manual', False)
+        if manual:
             timeout = 5
         else:
             timeout = .1
@@ -606,19 +608,21 @@ class Interaction(object):
         try:
             script = Interpreter(source, [
                 self.current_locals, self.get_globals()], **completion)
-            with timeout_of(timeout):
+            with timeout_of(timeout, not manual):
                 completions = script.completions()
         except Exception:
             self.db.send('Suggest')
-            self.notify_exc('Completion failed for %s' % data)
+            if log.level < WARNING:
+                self.notify_exc('Completion failed for %s' % data)
             return
 
         try:
-            with timeout_of(timeout / 2):
+            with timeout_of(timeout / 2, not manual):
                 funs = script.call_signatures() or []
         except Exception:
             self.db.send('Suggest')
-            self.notify_exc('Completion of function failed for %s' % data)
+            if log.level < WARNING:
+                self.notify_exc('Completion of function failed for %s' % data)
             return
 
         before = source[:pos]

@@ -385,12 +385,14 @@ def search_value_in_obj(fun, obj, matches=None, path='', context=None):
 
 
 class timeout_of(object):
-    def __init__(self, time):
+    def __init__(self, time, strict=False):
         self.time = time
         try:
             # Ignoring when not active + disabling if no alarm signal (Windows)
             signal.signal(signal.SIGALRM, signal.SIG_IGN)
         except Exception:
+            if strict:
+                raise Exception('Not running because timeout is not available')
             self.active = False
         else:
             self.active = True
