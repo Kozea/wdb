@@ -15,7 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from __future__ import with_statement
-__version__ = '3.1.3'
+
+try:
+    import pkg_resources
+except ImportError:
+    __version__ = "pkg_resources not found on PYTHON_PATH"
+else:
+    try:
+        __version__ = pkg_resources.require('wdb')[0].version
+    except pkg_resources.DistributionNotFound:
+        __version__ = "wdb is not installed"
+
 _initial_globals = dict(globals())
 
 from ._compat import (

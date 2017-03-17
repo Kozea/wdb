@@ -4,14 +4,10 @@
 """
 wdb
 """
-import os
 import sys
-import re
 from setuptools import setup
 
-ROOT = os.path.dirname(__file__)
-with open(os.path.join(ROOT, 'wdb', '__init__.py')) as fd:
-    __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
+__version__ = '3.1.3'
 
 requires = [
     "log_colorizer>=1.8.3",

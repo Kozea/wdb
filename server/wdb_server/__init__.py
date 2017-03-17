@@ -29,7 +29,15 @@ from wdb_server.state import (
 from multiprocessing import Process
 from uuid import uuid4
 
-__version__ = '3.1.3'
+try:
+    import pkg_resources
+except ImportError:
+    __version__ = "pkg_resources not found on PYTHON_PATH"
+else:
+    try:
+        __version__ = pkg_resources.require('wdb.server')[0].version
+    except pkg_resources.DistributionNotFound:
+        __version__ = "wdb.server is not installed"
 
 log = logging.getLogger('wdb_server')
 static_path = os.path.join(os.path.dirname(__file__), "static")

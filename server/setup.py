@@ -4,14 +4,10 @@
 """
 wdb.server
 """
-import os
-import re
 import sys
 from setuptools import setup
 
-ROOT = os.path.dirname(__file__)
-with open(os.path.join(ROOT, 'wdb_server', '__init__.py')) as fd:
-    __version__ = re.search("__version__ = '([^']+)'", fd.read()).group(1)
+__version__ = '3.1.3'
 
 requires = [
     "wdb==%s" % __version__, "tornado>=4.2",

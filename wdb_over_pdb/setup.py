@@ -8,7 +8,7 @@ if single_version in sys.argv:
 
 setup(
     name='wdb_over_pdb',
-    version='0.1',
+    version='0.1.1',
     author="Florian Mounier @ kozea",
     author_email="florian.mounier@kozea.fr",
     py_modules=['pdb'],
