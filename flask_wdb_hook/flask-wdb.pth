@@ -1,1 +1,1 @@
-import wdb.ext; wdb.ext.patch_werkzeug()
+import flask_wdb_hook; flask_wdb_hook.hook()
