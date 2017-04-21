@@ -1,7 +1,15 @@
+3.1.5
+=====
+ * Fix websocket send method. . Make it work with tornado 4.5. Fix #97
+
+3.1.4
+=====
+ * Use setuptools to set the __version__. Fix #96
+
 3.1.3
 =====
  * Don't execute suggestions when timeout is not available (windows/threads) and when it's not asked manually. Should fix #94 or at least work around it.
- 
+
 3.1.2
 =====
 

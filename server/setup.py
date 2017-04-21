@@ -7,7 +7,7 @@ wdb.server
 import sys
 from setuptools import setup
 
-__version__ = '3.1.4'
+__version__ = '3.1.5'
 
 requires = [
     "wdb==%s" % __version__, "tornado>=4.2",

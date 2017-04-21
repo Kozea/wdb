@@ -7,7 +7,7 @@ wdb
 import sys
 from setuptools import setup
 
-__version__ = '3.1.4'
+__version__ = '3.1.5'
 
 requires = [
     "log_colorizer>=1.8.3",
