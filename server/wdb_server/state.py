@@ -111,7 +111,7 @@ class Sockets(BaseSockets):
 class WebSockets(BaseSockets):
     def _send(self, sck, data):
         if sck.ws_connection:
-            sck.write(data)
+            sck.write_message(data)
         else:
             log.warn('Websocket is closed')
 
