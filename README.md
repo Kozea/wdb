@@ -434,6 +434,30 @@ Wdb has dynamic code completion in eval prompt thanks to [jedi](https://github.c
 It's a firefox config flag, visit `about:config` and set:
 `dom.allow_scripts_to_close_windows` to `true`
 
+### The logs are spammed with 'parsing Python module'
+
+If your logging configuration is set to display DEBUG logs, you may see a log for every imported file in your project any time WDB is active, like so:
+
+```
+DEBUG 2017-07-16 13:15:03,772 index 49835 123145573191680 parsing Python module /project/.virtualenv/python-3.6.1/lib/python3.6/site-packages/package/file.py for indexing
+```
+
+
+To silence only this message, add a config for the importmagic module. For example: 
+
+```    
+LOGGING = {
+    ...
+    'loggers': {
+        ...
+        'importmagic.index': {
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+```
+
 
 ## Contribute
 
