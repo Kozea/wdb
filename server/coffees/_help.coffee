@@ -146,7 +146,7 @@ help = """
     <tr>
       <td class="cmd"><samp>.w</samp> expression</td>
       <td class="mdl-data-table__cell--non-numeric dfn">
-        Watch expression in curent file (Click on the name to remove)
+        Watch expression in current file (Click on the name to remove)
       </td>
     </tr>
     <tr>
