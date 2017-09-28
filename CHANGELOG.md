@@ -1,6 +1,7 @@
 3.1.6
 =====
  * Resolve NameError problem. Fix #101
+ * Fix prompt scroll. Fix #103
  * Code style with yapf
 
 3.1.5
