@@ -82,6 +82,9 @@ def _handle_off(silent=False):
         <html>
             <head>
                 <title>WDB Post Mortem</title>
+                <!--
+                    %s
+                -->
                 <style>
                   html, body, iframe {
                     margin: 0;
@@ -113,7 +116,7 @@ def _handle_off(silent=False):
                 </iframe>
             </body>
         </html>
-    ''' % web_url)
+    ''' % (traceback.format_exc(), web_url))
 
 
 class WdbMiddleware(object):
