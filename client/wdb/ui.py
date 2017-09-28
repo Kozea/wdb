@@ -1,11 +1,12 @@
 # *-* coding: utf-8 *-*
 from ._compat import (
-    loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape,
-    from_bytes, force_bytes, is_str,
-    _detect_lines_encoding, logger)
+    loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape, from_bytes,
+    force_bytes, is_str, _detect_lines_encoding, logger
+)
 from .utils import (
     get_source, get_doc, executable_line, importable_module, Html5Diff,
-    search_key_in_obj, search_value_in_obj, timeout_of, inplace)
+    search_key_in_obj, search_value_in_obj, timeout_of, inplace
+)
 from . import __version__, _initial_globals
 from tokenize import generate_tokens, TokenError
 from subprocess import Popen
@@ -28,7 +29,6 @@ try:
     from jedi import Interpreter
 except ImportError:
     Interpreter = None
-
 
 import os
 import re
@@ -62,12 +62,11 @@ def tokenize_redir(raw_data):
     last_token = ''
 
     for token_type, token, src, erc, line in generate_tokens(raw_io.readline):
-        if (token_type == tokens.ERRORTOKEN and
-                token == '!' and
-                last_token in ('>', '>>')):
-            return (line[:src[1] - 1],
-                    line[erc[1]:].lstrip(),
-                    last_token == '>>')
+        if (token_type == tokens.ERRORTOKEN and token == '!'
+                and last_token in ('>', '>>')):
+            return (
+                line[:src[1] - 1], line[erc[1]:].lstrip(), last_token == '>>'
+            )
         last_token = token
     return
 
@@ -76,13 +75,23 @@ class Interaction(object):
 
     hooks = {
         'update_watchers': [
-            'start', 'eval', 'watch', 'init', 'select', 'unwatch']
+            'start', 'eval', 'watch', 'init', 'select', 'unwatch'
+        ]
     }
 
     def __init__(
-            self, db, frame, tb, exception, exception_description,
-            init=None, shell=False, shell_vars=None, source=None,
-            timeout=None):
+            self,
+            db,
+            frame,
+            tb,
+            exception,
+            exception_description,
+            init=None,
+            shell=False,
+            shell_vars=None,
+            source=None,
+            timeout=None
+    ):
         self.db = db
         self.shell = shell
         self.init_message = init
@@ -102,10 +111,7 @@ class Interaction(object):
                 compiled_code = compile(f.read(), '<source>', 'exec')
             # Executing in locals to keep local scope
             # (http://bugs.python.org/issue16781)
-            execute(
-                compiled_code,
-                self.current_locals,
-                self.current_locals)
+            execute(compiled_code, self.current_locals, self.current_locals)
 
     def hook(self, kind):
         for hook, events in self.hooks.items():
@@ -147,21 +153,27 @@ class Interaction(object):
         return globals_
 
     def init(self):
-        self.db.send('Title|%s' % dump({
-            'title': self.exception,
-            'subtitle': self.exception_description
-        }))
+        self.db.send(
+            'Title|%s' % dump({
+                'title': self.exception,
+                'subtitle': self.exception_description
+            })
+        )
         if self.shell:
             self.db.send('Shell')
         else:
-            self.db.send('Trace|%s' % dump({
-                'trace': self.trace,
-                'cwd': os.getcwd()
-            }))
-            self.db.send('SelectCheck|%s' % dump({
-                'frame': self.current,
-                'name': self.current_file
-            }))
+            self.db.send(
+                'Trace|%s' % dump({
+                    'trace': self.trace,
+                    'cwd': os.getcwd()
+                })
+            )
+            self.db.send(
+                'SelectCheck|%s' % dump({
+                    'frame': self.current,
+                    'name': self.current_file
+                })
+            )
         if self.init_message:
             self.db.send(self.init_message)
             self.init_message = None
@@ -187,21 +199,29 @@ class Interaction(object):
                     link = (
                         '<a href="https://github.com/Kozea/wdb/issues/new?'
                         'title=%s&body=%s&labels=defect" class="nogood">'
-                        'Please click here to report it on Github</a>') % (
+                        'Please click here to report it on Github</a>'
+                    ) % (
                         quote('%s: %s' % (type_.__name__, str(value))),
-                        quote('```\n%s\n```\n' %
-                              traceback.format_exc()))
-                    self.db.send('Echo|%s' % dump({
-                        'for': 'Error in Wdb, this is bad',
-                        'val': exc + '<br>' + link
-                    }))
+                        quote('```\n%s\n```\n' % traceback.format_exc())
+                    )
+                    self.db.send(
+                        'Echo|%s' % dump({
+                            'for': 'Error in Wdb, this is bad',
+                            'val': exc + '<br>' + link
+                        })
+                    )
                 except Exception:
                     log.exception('Error in loop exception handling')
-                    self.db.send('Echo|%s' % dump({
-                        'for': 'Too many errors',
-                        'val': ("Don't really know what to say. "
-                                "Maybe it will work tomorrow.")
-                    }))
+                    self.db.send(
+                        'Echo|%s' % dump({
+                            'for':
+                                'Too many errors',
+                            'val': (
+                                "Don't really know what to say. "
+                                "Maybe it will work tomorrow."
+                            )
+                        })
+                    )
 
     def interact(self):
         try:
@@ -227,8 +247,9 @@ class Interaction(object):
         watched = {}
         for watcher in self.db.watchers[self.current_file]:
             try:
-                watched[watcher] = self.db.safe_better_repr(eval_(
-                    watcher, self.get_globals(), self.current_locals))
+                watched[watcher] = self.db.safe_better_repr(
+                    eval_(watcher, self.get_globals(), self.current_locals)
+                )
             except Exception as e:
                 watched[watcher] = type(e).__name__
 
@@ -236,37 +257,43 @@ class Interaction(object):
 
     def notify_exc(self, msg):
         log.info(msg, exc_info=True)
-        self.db.send('Log|%s' % dump({
-            'message': '%s\n%s' % (msg, traceback.format_exc())
-        }))
+        self.db.send(
+            'Log|%s' % dump({
+                'message': '%s\n%s' % (msg, traceback.format_exc())
+            })
+        )
 
     def do_start(self, data):
         self.started = True
         # Getting breakpoints
         log.debug('Getting breakpoints')
 
-        self.db.send('Init|%s' % dump({
-            'cwd': os.getcwd(),
-            'version': __version__,
-            'breaks': self.db.breakpoints_to_json()
-        }))
-        self.db.send('Title|%s' % dump({
-            'title': self.exception,
-            'subtitle': self.exception_description
-        }))
+        self.db.send(
+            'Init|%s' % dump({
+                'cwd': os.getcwd(),
+                'version': __version__,
+                'breaks': self.db.breakpoints_to_json()
+            })
+        )
+        self.db.send(
+            'Title|%s' % dump({
+                'title': self.exception,
+                'subtitle': self.exception_description
+            })
+        )
         if self.shell:
             self.db.send('Shell')
         else:
-            self.db.send('Trace|%s' % dump({
-                'trace': self.trace
-            }))
+            self.db.send('Trace|%s' % dump({'trace': self.trace}))
 
             # In case of exception always be at top frame to start
             self.index = len(self.stack) - 1
-            self.db.send('SelectCheck|%s' % dump({
-                'frame': self.current,
-                'name': self.current_file
-            }))
+            self.db.send(
+                'SelectCheck|%s' % dump({
+                    'frame': self.current,
+                    'name': self.current_file
+                })
+            )
 
         if self.init_message:
             self.db.send(self.init_message)
@@ -274,19 +301,23 @@ class Interaction(object):
 
     def do_select(self, data):
         self.index = int(data)
-        self.db.send('SelectCheck|%s' % dump({
-            'frame': self.current,
-            'name': self.current_file
-        }))
+        self.db.send(
+            'SelectCheck|%s' % dump({
+                'frame': self.current,
+                'name': self.current_file
+            })
+        )
 
     def do_file(self, data):
         fn = data
         file = self.db.get_file(fn)
-        self.db.send('Select|%s' % dump({
-            'frame': self.current,
-            'name': fn,
-            'file': file
-        }))
+        self.db.send(
+            'Select|%s' % dump({
+                'frame': self.current,
+                'name': fn,
+                'file': file
+            })
+        )
 
     def do_inspect(self, data):
         if '/' in data:
@@ -300,12 +331,12 @@ class Interaction(object):
             self.fail('Inspect')
             return
         if mode == 'dump':
-            self.db.send('Print|%s' % dump({
-                'for': self.db.safe_better_repr(
-                    thing, html=False),
-                'result': self.db.safe_better_repr(
-                    thing, full=True)
-            }))
+            self.db.send(
+                'Print|%s' % dump({
+                    'for': self.db.safe_better_repr(thing, html=False),
+                    'result': self.db.safe_better_repr(thing, full=True)
+                })
+            )
             return
 
         if (isinstance(thing, tuple) and len(thing) == 3):
@@ -317,37 +348,37 @@ class Interaction(object):
             self.db.extra_vars['__recursive_exception__'] = value
 
             self.db.interaction(
-                iter_tb.tb_frame, tb,
-                type_.__name__,
-                str(value)
+                iter_tb.tb_frame, tb, type_.__name__, str(value)
             )
             return
 
-        self.db.send('Dump|%s' % dump({
-            'for': self.db.safe_repr(thing),
-            'val': self.db.dmp(thing),
-            'doc': get_doc(thing),
-            'source': get_source(thing)
-        }))
+        self.db.send(
+            'Dump|%s' % dump({
+                'for': self.db.safe_repr(thing),
+                'val': self.db.dmp(thing),
+                'doc': get_doc(thing),
+                'source': get_source(thing)
+            })
+        )
 
     def do_dump(self, data):
         try:
-            thing = eval_(
-                data, self.get_globals(), self.current_locals)
+            thing = eval_(data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Dump')
             return
 
-        self.db.send('Dump|%s' % dump({
-            'for': u('%s ⟶ %s ') % (data, self.db.safe_repr(thing)),
-            'val': self.db.dmp(thing),
-            'doc': get_doc(thing),
-            'source': get_source(thing)}))
+        self.db.send(
+            'Dump|%s' % dump({
+                'for': u('%s ⟶ %s ') % (data, self.db.safe_repr(thing)),
+                'val': self.db.dmp(thing),
+                'doc': get_doc(thing),
+                'source': get_source(thing)
+            })
+        )
 
     def do_trace(self, data):
-        self.db.send('Trace|%s' % dump({
-            'trace': self.trace
-        }))
+        self.db.send('Trace|%s' % dump({'trace': self.trace}))
 
     def do_eval(self, data):
         redir = None
@@ -420,14 +451,16 @@ class Interaction(object):
                         name = m.groups()[0]
                         if self.db._importmagic_index:
                             scores = self.db._importmagic_index.symbol_scores(
-                                name)
+                                name
+                            )
                             for _, module, variable in scores:
                                 if variable is None:
                                     imports.append('import %s' % module)
                                 else:
                                     imports.append(
-                                        'from %s import %s' % (
-                                            module, variable))
+                                        'from %s import %s' %
+                                        (module, variable)
+                                    )
                         elif importable_module(name):
                             imports.append('import %s' % name)
 
@@ -443,11 +476,17 @@ class Interaction(object):
             except Exception:
                 self.fail('Eval', 'Unable to write to file %s' % redir)
                 return
-            self.db.send('Print|%s' % dump({
-                'for': raw_data,
-                'result': escape('%s to file %s' % (
-                    'Appended' if append else 'Written', redir),)
-            }))
+            self.db.send(
+                'Print|%s' % dump({
+                    'for':
+                        raw_data,
+                    'result':
+                        escape(
+                            '%s to file %s' %
+                            ('Appended' if append else 'Written', redir),
+                        )
+                })
+            )
         else:
             rv = escape('\n'.join(out) + '\n'.join(err))
             try:
@@ -462,15 +501,15 @@ class Interaction(object):
             else:
                 result = self.db.hooked
 
-            self.db.send('Print|%s' % dump({
-                'for': raw_data,
-                'result': result,
-                'duration': duration
-            }))
+            self.db.send(
+                'Print|%s' % dump({
+                    'for': raw_data,
+                    'result': result,
+                    'duration': duration
+                })
+            )
             if imports:
-                self.db.send('Suggest|%s' % dump({
-                    'imports': imports
-                }))
+                self.db.send('Suggest|%s' % dump({'imports': imports}))
 
     def do_ping(self, data):
         self.db.send('Pong')
@@ -524,16 +563,17 @@ class Interaction(object):
             except Exception:
                 break_fail(
                     'Wrong breakpoint format must be '
-                    '[file][:lineno][#function][,condition].')
+                    '[file][:lineno][#function][,condition].'
+                )
                 return
 
-            line = getline(
-                brk['fn'], lno, self.current_frame.f_globals)
+            line = getline(brk['fn'], lno, self.current_frame.f_globals)
             if not line:
                 for path in sys.path:
                     line = getline(
-                        os.path.join(path, brk['fn']),
-                        brk['lno'], self.current_frame.f_globals)
+                        os.path.join(path, brk['fn']), brk['lno'],
+                        self.current_frame.f_globals
+                    )
                     if line:
                         break
             if not line:
@@ -545,7 +585,8 @@ class Interaction(object):
                 return
 
         breakpoint = self.db.set_break(
-            brk['fn'], brk['lno'], brk['temporary'], brk['cond'], brk['fun'])
+            brk['fn'], brk['lno'], brk['temporary'], brk['cond'], brk['fun']
+        )
         break_set = breakpoint.to_dict()
         break_set['temporary'] = brk['temporary']
         self.db.send('BreakSet|%s' % dump(break_set))
@@ -554,15 +595,18 @@ class Interaction(object):
         brk = loads(data)
         lno = brk['lno'] and int(brk['lno'])
         self.db.clear_break(
-            brk['fn'], lno, brk['temporary'], brk['cond'], brk['fun'])
+            brk['fn'], lno, brk['temporary'], brk['cond'], brk['fun']
+        )
 
         self.db.send('BreakUnset|%s' % data)
 
     def do_breakpoints(self, data):
-        self.db.send('Print|%s' % dump({
-            'for': 'Breakpoints',
-            'result': self.db.breakpoints
-        }))
+        self.db.send(
+            'Print|%s' % dump({
+                'for': 'Breakpoints',
+                'result': self.db.breakpoints
+            })
+        )
 
     def do_watch(self, data):
         self.db.watchers[self.current_file].add(data)
@@ -584,13 +628,13 @@ class Interaction(object):
             return
 
         self.current['lno'] = lno
-        self.db.send('Trace|%s' % dump({
-            'trace': self.trace
-        }))
-        self.db.send('SelectCheck|%s' % dump({
-            'frame': self.current,
-            'name': self.current_file
-        }))
+        self.db.send('Trace|%s' % dump({'trace': self.trace}))
+        self.db.send(
+            'SelectCheck|%s' % dump({
+                'frame': self.current,
+                'name': self.current_file
+            })
+        )
 
     def do_complete(self, data):
         completion = loads(data)
@@ -606,8 +650,10 @@ class Interaction(object):
             self.db.send('Suggest')
             return
         try:
-            script = Interpreter(source, [
-                self.current_locals, self.get_globals()], **completion)
+            script = Interpreter(
+                source, [self.current_locals,
+                         self.get_globals()], **completion
+            )
             with timeout_of(timeout, not manual):
                 completions = script.completions()
         except Exception:
@@ -630,8 +676,8 @@ class Interaction(object):
         like = ''
         if len(completions):
             completion = completions[0]
-            base = completion.name[
-                :len(completion.name) - len(completion.complete)]
+            base = completion.name[:len(completion.name) -
+                                   len(completion.complete)]
             if len(base):
                 like = before[-len(base):]
                 if len(like):
@@ -644,18 +690,21 @@ class Interaction(object):
                     'like': like
                 },
                 'params': [{
-                    'params': [p.description.replace('\n', '')
-                               for p in fun.params],
-                    'index': fun.index,
-                    'module': fun.module_name,
-                    'call_name': fun.name} for fun in funs],
+                    'params': [
+                        p.description.replace('\n', '') for p in fun.params
+                    ],
+                    'index':
+                        fun.index,
+                    'module':
+                        fun.module_name,
+                    'call_name':
+                        fun.name
+                } for fun in funs],
                 'completions': [{
-                    'base': comp.name[
-                        :len(comp.name) - len(comp.complete)],
+                    'base': comp.name[:len(comp.name) - len(comp.complete)],
                     'complete': comp.complete,
                     'description': comp.description
-                } for comp in completions if comp.name.endswith(
-                    comp.complete)]
+                } for comp in completions if comp.name.endswith(comp.complete)]
             }
             self.db.send('Suggest|%s' % dump(suggest_obj))
         except Exception:
@@ -671,15 +720,19 @@ class Interaction(object):
             with inplace(fn, encoding=encoding) as (_, w):
                 w.write(src)
         except Exception as e:
-            self.db.send('Echo|%s' % dump({
-                'for': 'Error during save',
-                'val': str(e)
-            }))
+            self.db.send(
+                'Echo|%s' % dump({
+                    'for': 'Error during save',
+                    'val': str(e)
+                })
+            )
         else:
-            self.db.send('Echo|%s' % dump({
-                'for': 'Save succesful',
-                'val': 'Wrote %s' % fn
-            }))
+            self.db.send(
+                'Echo|%s' % dump({
+                    'for': 'Save succesful',
+                    'val': 'Wrote %s' % fn
+                })
+            )
 
     def do_external(self, data):
         default = {
@@ -706,8 +759,7 @@ class Interaction(object):
             forced = False
 
         try:
-            thing = eval_(
-                data, self.get_globals(), self.current_locals)
+            thing = eval_(data, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Display')
             return
@@ -716,10 +768,13 @@ class Interaction(object):
             if magic and not forced:
                 with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
                     mime = m.id_buffer(thing)
-            self.db.send('Display|%s' % dump({
-                'for': u('%s (%s)') % (data, mime),
-                'val': from_bytes(b64encode(thing)),
-                'type': mime}))
+            self.db.send(
+                'Display|%s' % dump({
+                    'for': u('%s (%s)') % (data, mime),
+                    'val': from_bytes(b64encode(thing)),
+                    'type': mime
+                })
+            )
 
     def do_disable(self, data):
         self.db.__class__.enabled = False
@@ -744,56 +799,66 @@ class Interaction(object):
 
     def do_diff(self, data):
         if '?' not in data and '<>' not in data:
-            self.fail('Diff', 'Diff error',
-                      'You must provide two expression '
-                      'separated by "?" or "<>" to make a diff')
+            self.fail(
+                'Diff', 'Diff error', 'You must provide two expression '
+                'separated by "?" or "<>" to make a diff'
+            )
             return
         pretty = '?' in data
         expressions = [
             expression.strip()
             for expression in
-            (data.split('?') if '?' in data
-             else data.split('<>'))]
+            (data.split('?') if '?' in data else data.split('<>'))
+        ]
         strings = []
         for expression in expressions:
             try:
-                strings.append(eval_(
-                    expression, self.get_globals(), self.current_locals))
+                strings.append(
+                    eval_(expression, self.get_globals(), self.current_locals)
+                )
             except Exception:
                 self.fail(
-                    'Diff',
-                    "Diff failed: Expression %s "
-                    "failed to evaluate to a string" % expression)
+                    'Diff', "Diff failed: Expression %s "
+                    "failed to evaluate to a string" % expression
+                )
                 return
 
         render = (
             (lambda x: self.db.better_repr(
                 x, html=False) or self.db.safe_repr(x))
         ) if pretty else str
-        strings = [render(string) if not is_str(string) else string
-                   for string in strings]
-        self.db.send('RawHTML|%s' % dump({
-            'for': u('Difference between %s') % (' and '.join(expressions)),
-            'val': self.htmldiff.make_table(
-                strings[0].splitlines(keepends=True),
-                strings[1].splitlines(keepends=True),
-                expressions[0],
-                expressions[1]
-            )}))
+        strings = [
+            render(string) if not is_str(string) else string
+            for string in strings
+        ]
+        self.db.send(
+            'RawHTML|%s' % dump({
+                'for':
+                    u('Difference between %s') % (' and '.join(expressions)),
+                'val':
+                    self.htmldiff.make_table(
+                        strings[0].splitlines(keepends=True),
+                        strings[1].splitlines(keepends=True),
+                        expressions[0],
+                        expressions[1]
+                    )
+            })
+        )
 
     def do_find(self, data):
         if ' in ' not in data and ' of ' not in data:
-            self.fail('Find', 'Find error',
-                      'Syntax for find is: "key in expression" '
-                      'or "value testing function of expression"')
+            self.fail(
+                'Find', 'Find error',
+                'Syntax for find is: "key in expression" '
+                'or "value testing function of expression"'
+            )
         if ' in ' in data:
             key, expr = data.split(' in ')
         else:
             key, expr = data.split(' of ')
 
         try:
-            value = eval_(
-                expr, self.get_globals(), self.current_locals)
+            value = eval_(expr, self.get_globals(), self.current_locals)
         except Exception:
             self.fail('Find')
             return
@@ -802,13 +867,17 @@ class Interaction(object):
         else:
             matches = search_value_in_obj(key, value, path='%s.' % expr)
 
-        self.db.send('Print|%s' % dump({
-            'for': 'Finding %s in %s' % (key, expr),
-            'result': 'Found:\n%s' % '\n'.join(
-                ['%s: -> %s' % (k, escape(self.db.safe_repr(val)))
-                 for k, val in matches]
-            ) if matches else 'Not found'
-        }))
+        self.db.send(
+            'Print|%s' % dump({
+                'for':
+                    'Finding %s in %s' % (key, expr),
+                'result':
+                    'Found:\n%s' % '\n'.join([
+                        '%s: -> %s' % (k, escape(self.db.safe_repr(val)))
+                        for k, val in matches
+                    ]) if matches else 'Not found'
+            })
+        )
 
     def handle_exc(self):
         """Return a formated exception traceback for wdb.js use"""
@@ -817,8 +886,8 @@ class Interaction(object):
         self.db.obj_cache[id(exc_info)] = exc_info
 
         return '<a href="%d" class="inspect">%s: %s</a>' % (
-            id(exc_info),
-            escape(type_.__name__), escape(str(value)))
+            id(exc_info), escape(type_.__name__), escape(str(value))
+        )
 
     def fail(self, cmd, title=None, message=None):
         """Send back captured exceptions"""
@@ -826,7 +895,9 @@ class Interaction(object):
             message = self.handle_exc()
         else:
             message = escape(message)
-        self.db.send('Echo|%s' % dump({
-            'for': escape(title or '%s failed' % cmd),
-            'val': message
-        }))
+        self.db.send(
+            'Echo|%s' % dump({
+                'for': escape(title or '%s failed' % cmd),
+                'val': message
+            })
+        )

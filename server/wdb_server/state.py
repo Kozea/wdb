@@ -63,7 +63,8 @@ class BaseSockets(object):
         sck = self._sockets.pop(uuid, None)
         if sck:
             syncwebsockets.broadcast(
-                'Remove' + self.__class__.__name__.rstrip('s'), uuid)
+                'Remove' + self.__class__.__name__.rstrip('s'), uuid
+            )
 
     def close(self, uuid):
         sck = self.get(uuid)
@@ -84,9 +85,7 @@ class Sockets(BaseSockets):
 
     def add(self, uuid, sck):
         super(Sockets, self).add(uuid, sck)
-        syncwebsockets.broadcast('AddSocket', {
-            'uuid': uuid
-        })
+        syncwebsockets.broadcast('AddSocket', {'uuid': uuid})
 
     def remove(self, uuid):
         super(Sockets, self).remove(uuid)
@@ -97,11 +96,15 @@ class Sockets(BaseSockets):
 
     def set_filename(self, uuid, filename):
         self._filenames[uuid] = filename
-        syncwebsockets.broadcast('AddSocket', {
-            'uuid': uuid,
-            'filename': (
-                filename if tornado.options.options.show_filename else '')
-        })
+        syncwebsockets.broadcast(
+            'AddSocket', {
+                'uuid':
+                    uuid,
+                'filename': (
+                    filename if tornado.options.options.show_filename else ''
+                )
+            }
+        )
 
     def _send(self, sck, data):
         sck.write(pack("!i", len(data)))
@@ -133,14 +136,12 @@ class Breakpoints(object):
     def add(self, brk):
         if brk not in self._breakpoints:
             self._breakpoints.append(brk)
-            syncwebsockets.broadcast(
-                'AddBreak|' + json.dumps(brk))
+            syncwebsockets.broadcast('AddBreak|' + json.dumps(brk))
 
     def remove(self, brk):
         if brk in self._breakpoints:
             self._breakpoints.remove(brk)
-            syncwebsockets.broadcast(
-                'RemoveBreak|' + json.dumps(brk))
+            syncwebsockets.broadcast('RemoveBreak|' + json.dumps(brk))
 
     def get(self):
         return self._breakpoints

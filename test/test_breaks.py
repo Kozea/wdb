@@ -4,13 +4,11 @@ import json
 import os
 
 
-def make_break(fn='movement.py', lno=None, cond=None, fun=None,
-               temporary=False):
+def make_break(
+        fn='movement.py', lno=None, cond=None, fun=None, temporary=False
+):
     return json.dumps({
-        'fn': os.path.join(
-            os.path.dirname(__file__),
-            'scripts',
-            fn),
+        'fn': os.path.join(os.path.dirname(__file__), 'scripts', fn),
         'lno': lno,
         'cond': cond,
         'fun': fun,

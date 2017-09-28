@@ -70,21 +70,25 @@ class Breakpoint(object):
 
 class LineBreakpoint(Breakpoint):
     """Simple breakpoint that breaks if in file at line"""
+
     def __init__(self, file, line, temporary=False):
         self.line = line
         super(LineBreakpoint, self).__init__(file, temporary)
 
     def breaks(self, frame):
-        return (super(LineBreakpoint, self).breaks(frame) and
-                frame.f_lineno == self.line)
+        return (
+            super(LineBreakpoint, self).breaks(frame)
+            and frame.f_lineno == self.line
+        )
 
     def __repr__(self):
-        return (super(LineBreakpoint, self).__repr__() +
-                ' on line %d' % self.line)
+        return (
+            super(LineBreakpoint, self).__repr__() + ' on line %d' % self.line
+        )
 
     def __eq__(self, other):
-        return super(LineBreakpoint, self).__eq__(
-            other) and self.line == other.line
+        return super(LineBreakpoint, self
+                     ).__eq__(other) and self.line == other.line
 
     def __hash__(self):
         return super(LineBreakpoint, self).__hash__()
@@ -92,6 +96,7 @@ class LineBreakpoint(Breakpoint):
 
 class ConditionalBreakpoint(Breakpoint):
     """Breakpoint that breaks if condition is True at line in file"""
+
     def __init__(self, file, line, condition, temporary=False):
         self.line = line
         self.condition = condition
@@ -100,21 +105,24 @@ class ConditionalBreakpoint(Breakpoint):
     def breaks(self, frame):
         try:
             return (
-                super(ConditionalBreakpoint, self).breaks(frame) and
-                (self.line is None or frame.f_lineno == self.line) and
-                eval(self.condition, frame.f_globals, frame.f_locals))
+                super(ConditionalBreakpoint, self).breaks(frame)
+                and (self.line is None or frame.f_lineno == self.line)
+                and eval(self.condition, frame.f_globals, frame.f_locals)
+            )
         except Exception:
             # Break in case of
             log.warning('Error in conditional break', exc_info=True)
             return True
 
     def __repr__(self):
-        return (super(ConditionalBreakpoint, self).__repr__() +
-                ' under the condition %s' % self.condition)
+        return (
+            super(ConditionalBreakpoint, self).__repr__() +
+            ' under the condition %s' % self.condition
+        )
 
     def __eq__(self, other):
-        return super(ConditionalBreakpoint, self).__eq__(
-            other) and self.condition == other.condition
+        return super(ConditionalBreakpoint, self
+                     ).__eq__(other) and self.condition == other.condition
 
     def __hash__(self):
         return super(ConditionalBreakpoint, self).__hash__()
@@ -122,6 +130,7 @@ class ConditionalBreakpoint(Breakpoint):
 
 class FunctionBreakpoint(Breakpoint):
     """Breakpoint that breaks if in file in function"""
+
     def __init__(self, file, function, temporary=False):
         self.function = function
         if not file.endswith(('.py', '.pyc', '.pyo')):
@@ -130,16 +139,20 @@ class FunctionBreakpoint(Breakpoint):
         self.temporary = temporary
 
     def breaks(self, frame):
-        return (super(FunctionBreakpoint, self).breaks(frame) and
-                frame.f_code.co_name == self.function)
+        return (
+            super(FunctionBreakpoint, self).breaks(frame)
+            and frame.f_code.co_name == self.function
+        )
 
     def __repr__(self):
-        return (super(FunctionBreakpoint, self).__repr__() +
-                ' in function %s' % self.function)
+        return (
+            super(FunctionBreakpoint, self).__repr__() +
+            ' in function %s' % self.function
+        )
 
     def __eq__(self, other):
-        return super(FunctionBreakpoint, self).__eq__(
-            other) and self.function == other.function
+        return super(FunctionBreakpoint, self
+                     ).__eq__(other) and self.function == other.function
 
     def __hash__(self):
         return super(FunctionBreakpoint, self).__hash__()
