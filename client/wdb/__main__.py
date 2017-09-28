@@ -51,7 +51,7 @@ def main():
 
             with open(file) as f:
                 code = compile(f.read(), file, 'exec')
-                execute(code, globals(), locals())
+                execute(code, globals(), globals())
 
     else:
         source = None
