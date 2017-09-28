@@ -354,7 +354,7 @@ As of now the following special commands are supported during breakpoint:
     * .l                             : List active breakpoints
     * .f                             : Echo all typed commands in the current debugging session
     * .d expression                  : Dump the result of expression in a table
-    * .w expression                  : Watch expression in curent file (Click on the name to remove)
+    * .w expression                  : Watch expression in current file (Click on the name to remove)
     * .q                             : Quit
     * .h                             : Get some help
     * .e                             : Toggle file edition mode
