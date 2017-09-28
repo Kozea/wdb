@@ -1,3 +1,8 @@
+3.1.6
+=====
+ * Resolve NameError problem. Fix #101
+ * Code style with yapf
+
 3.1.5
 =====
  * Fix websocket send method. . Make it work with tornado 4.5. Fix #97
