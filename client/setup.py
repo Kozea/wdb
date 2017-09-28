@@ -6,7 +6,7 @@ wdb
 import sys
 from setuptools import setup
 
-__version__ = '3.1.5'
+__version__ = '3.1.6'
 
 requires = ["log_colorizer>=1.8.3", "jedi>=0.9.0", 'uncompyle6']
 
