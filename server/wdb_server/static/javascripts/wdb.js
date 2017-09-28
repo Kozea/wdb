@@ -705,7 +705,6 @@ Interpreter = (function(superClass) {
       return;
     }
     return this.wdb.prompt.$container.get(0).scrollIntoView({
-      block: "end",
       behavior: "smooth"
     });
   };
@@ -1175,7 +1174,11 @@ Prompt = (function(superClass) {
   };
 
   Prompt.prototype.changes = function() {
-    return this.wdb.interpreter.scroll();
+    return window.setTimeout((function(_this) {
+      return function() {
+        return _this.wdb.interpreter.scroll();
+      };
+    })(this));
   };
 
   Prompt.prototype.insertHistory = function(direction) {

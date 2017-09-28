@@ -303,7 +303,7 @@ class Prompt extends Log
     @code_mirror.replaceRange str, @code_mirror.getCursor()
 
   changes: ->
-    @wdb.interpreter.scroll()
+    window.setTimeout => @wdb.interpreter.scroll()
 
   insertHistory: (direction) ->
     h = @history.getHistory(direction).reverse().join('\n')

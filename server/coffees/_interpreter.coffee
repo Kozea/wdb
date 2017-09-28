@@ -35,7 +35,6 @@ class Interpreter extends Log
       return
 
     @wdb.prompt.$container.get(0).scrollIntoView
-      block: "end"
       behavior: "smooth"
 
   clear: ->
