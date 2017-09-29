@@ -9,7 +9,8 @@ python:
   # - pypy
 
 install:
-  - pip install --upgrade pip setuptools pytest pytest-flake8 pytest-cov coveralls
+  - pip install --upgrade setuptools
+  - pip install --upgrade pip pytest pytest-flake8 pytest-cov coveralls
   - pip install -e client
   - pip install -e server
   - pip install -e pytest_wdb
