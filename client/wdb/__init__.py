@@ -558,9 +558,10 @@ class Wdb(object):
                         mdl-data-table--selectable mdl-shadow--2dp">'''
                     dict_repr += ''.join([
                         (
-                            '<tr><td class="key">' + self.safe_repr(key) +
-                            ':</td>'
-                            '<td class="val mdl-data-table__cell--non-numeric">'
+                            '<tr><td class="key">' + self.safe_repr(key) + ':'
+                            + '</td>'
+                            '<td class="val '
+                            + 'mdl-data-table__cell--non-numeric">'
                             + self.safe_better_repr(
                                 val, context, html, level, full
                             ) + '</td></tr>'
