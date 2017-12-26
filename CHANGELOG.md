@@ -1,3 +1,7 @@
+3.1.7
+=====
+ * Minor dependency upgrade (importmagic -> importmagic3)
+
 3.1.6
 =====
  * Resolve NameError problem. Fix #101

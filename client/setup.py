@@ -4,6 +4,7 @@
 wdb
 """
 import sys
+
 from setuptools import setup
 
 __version__ = '3.1.6'
@@ -14,7 +15,7 @@ if sys.version_info[:2] <= (2, 6):
     requires.append('argparse')
     requires.append('ordereddict')
 else:
-    requires.append('importmagic')
+    requires.append('importmagic3')
 
 options = dict(
     name="wdb",
