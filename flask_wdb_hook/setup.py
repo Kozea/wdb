@@ -13,7 +13,7 @@ setup(
     url="http://github.com/Kozea/wdb",
     license='GPLv3',
     packages=['flask_wdb_hook'],
-    install_requires=['wdb >= 3.1.6'],
+    install_requires=['wdb >= 3.1.7'],
     data_files=[(site_packages_path, ['flask-wdb.pth'])],
     description="Hook to replace flask werkzeug debugger with wdb."
 )

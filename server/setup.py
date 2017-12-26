@@ -6,7 +6,7 @@ wdb.server
 import sys
 from setuptools import setup
 
-__version__ = '3.1.6'
+__version__ = '3.1.7'
 
 requires = [
     "wdb==%s" % __version__, "tornado>=4.2", "filemagic>=1.6", "psutil>=2.1",

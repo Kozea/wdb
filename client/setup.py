@@ -7,7 +7,7 @@ import sys
 
 from setuptools import setup
 
-__version__ = '3.1.6'
+__version__ = '3.1.7'
 
 requires = ["log_colorizer>=1.8.3", "jedi>=0.9.0", 'uncompyle6']
 
