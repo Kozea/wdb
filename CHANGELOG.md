@@ -1,3 +1,7 @@
+3.1.8
+=====
+ * Prevent uncompyle crash on unknown python version
+
 3.1.7
 =====
  * Minor dependency upgrade (importmagic -> importmagic3)
