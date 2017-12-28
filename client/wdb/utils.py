@@ -1,12 +1,13 @@
-import inspect
 import dis
-import sys
-import signal
+import inspect
 import io
 import os
+import signal
+import sys
 from contextlib import contextmanager
 from difflib import HtmlDiff, _mdiff
-from ._compat import StringIO, existing_module, OrderedDict
+
+from ._compat import OrderedDict, StringIO, existing_module
 
 
 def pretty_frame(frame):
@@ -32,7 +33,7 @@ def get_code(obj):
 def get_source_from_byte_code(code):
     try:
         import uncompyle6
-    except ImportError:
+    except Exception:
         return
     version = sys.version_info[0] + (sys.version_info[1] / 10.0)
     try:
