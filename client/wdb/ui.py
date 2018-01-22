@@ -766,8 +766,7 @@ class Interaction(object):
         else:
             thing = force_bytes(thing)
             if magic and not forced:
-                with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
-                    mime = m.id_buffer(thing)
+                mime = magic.from_buffer(thing, mime=True)
             self.db.send(
                 'Display|%s' % dump({
                     'for': u('%s (%s)') % (data, mime),

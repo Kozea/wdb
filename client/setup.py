@@ -9,7 +9,9 @@ from setuptools import setup
 
 __version__ = '3.1.8'
 
-requires = ["log_colorizer>=1.8.3", "jedi>=0.9.0", 'uncompyle6']
+requires = [
+    "log_colorizer>=1.8.3", "jedi>=0.9.0", 'uncompyle6', 'python-magic>=0.4.15'
+]
 
 if sys.version_info[:2] <= (2, 6):
     requires.append('argparse')
