@@ -1,3 +1,7 @@
+3.1.9
+=====
+* Replace filemagic with python-magic and fix dependencies
+
 3.1.8
 =====
  * Prevent uncompyle crash on unknown python version
