@@ -7,7 +7,7 @@ import sys
 
 from setuptools import setup
 
-__version__ = '3.1.8'
+__version__ = '3.1.9'
 
 requires = [
     "wdb==%s" % __version__, "tornado>=4.2", "psutil>=2.1", 'tornado_systemd'
