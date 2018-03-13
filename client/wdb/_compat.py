@@ -1,6 +1,6 @@
-import sys
 import codecs
 import re
+import sys
 
 python_version = sys.version_info[0]
 
@@ -135,7 +135,7 @@ if python_version == 2:
     try:
         import _winapi
         has_winapi = True
-    except:
+    except ImportError:
         pass
 
     if sys.platform == 'win32' and has_winapi:

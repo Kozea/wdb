@@ -9,3 +9,4 @@ coverage-py*
 .cov-py*
 .cache
 .coverage
+.pytest_cache
