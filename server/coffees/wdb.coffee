@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 class Wdb extends Log
-  __version__: '3.1.10'
+  __version__: '3.2.0'
 
   constructor: ->
     super
