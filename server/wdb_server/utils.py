@@ -15,19 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import fnmatch
-from logging import getLogger
-from wdb_server.state import syncwebsockets
+import os
 from glob import glob
+from logging import getLogger
+
+import psutil
 from tornado.ioloop import IOLoop
 from tornado.options import options
-import psutil
+from wdb_server.state import syncwebsockets
 
 log = getLogger('wdb_server')
 log.setLevel(10 if options.debug else 30)
 
-ioloop = IOLoop.instance()
+ioloop = IOLoop.current()
 
 try:
     import pyinotify

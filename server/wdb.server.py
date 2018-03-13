@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-from wdb_server import server
-from tornado.ioloop import IOLoop
-from tornado.options import options
-from tornado_systemd import SystemdHTTPServer, SYSTEMD_SOCKET_FD
-from wdb_server.streams import handle_connection
-from tornado.netutil import bind_sockets, add_accept_handler
-from logging import getLogger, DEBUG, INFO, WARNING
-import socket
 import os
+import socket
+from logging import DEBUG, INFO, WARNING, getLogger
+
+from tornado.ioloop import IOLoop
+from tornado.netutil import add_accept_handler, bind_sockets
+from tornado.options import options
+from tornado_systemd import SYSTEMD_SOCKET_FD, SystemdHTTPServer
+from wdb_server import server
+from wdb_server.streams import handle_connection
 
 log = getLogger('wdb_server')
 if options.debug:
@@ -16,8 +17,6 @@ if options.debug:
         log.setLevel(DEBUG)
 else:
     log.setLevel(WARNING)
-
-ioloop = IOLoop.instance()
 
 if os.getenv('LISTEN_PID'):
     log.info('Getting socket from systemd')
@@ -35,11 +34,11 @@ else:
 
 log.info('Accepting')
 for sck in sockets:
-    add_accept_handler(sck, handle_connection, ioloop)
+    add_accept_handler(sck, handle_connection)
 
 log.info('Listening')
 http_server = SystemdHTTPServer(server)
 http_server.listen(options.server_port)
 
 log.info('Starting loop')
-ioloop.start()
+IOLoop.current().start()

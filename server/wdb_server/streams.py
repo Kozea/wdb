@@ -15,19 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from wdb_server.state import sockets, websockets, breakpoints
-from tornado.iostream import IOStream, StreamClosedError
-from tornado.ioloop import IOLoop
+import json
 from functools import partial
 from logging import getLogger
 from struct import unpack
+
+from tornado.iostream import IOStream, StreamClosedError
 from tornado.options import options
-import json
+from wdb_server.state import breakpoints, sockets, websockets
 
 log = getLogger('wdb_server')
 log.setLevel(10 if options.debug else 30)
-
-ioloop = IOLoop.instance()
 
 
 def on_close(stream, uuid):
@@ -87,7 +85,7 @@ def read_uuid_size(stream, length):
 
 def handle_connection(connection, address):
     log.info('Connection received from %s' % str(address))
-    stream = IOStream(connection, ioloop, max_buffer_size=1024 * 1024 * 1024)
+    stream = IOStream(connection, max_buffer_size=1024 * 1024 * 1024)
     # Getting uuid
     try:
         stream.read_bytes(4, partial(read_uuid_size, stream))
