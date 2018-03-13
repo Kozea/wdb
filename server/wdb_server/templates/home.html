@@ -85,10 +85,13 @@
         </table>
         <aside class="note">
           Pausing a running process requires gdb and a ptrace enabled kernel.
-          You might enable it with:
+          <br>
+          You can enable it with:
           <code>
             $ echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
           </code>
+          <br>
+          (This is a potential security breach, please remember to disable it after.)
         </aside>
       </div>
     </section>
