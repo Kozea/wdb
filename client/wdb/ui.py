@@ -883,7 +883,7 @@ class Interaction(object):
         self.db.obj_cache[id(exc_info)] = exc_info
 
         return '<a href="%d" class="inspect">%s: %s</a>' % (
-            id(exc_info), escape(type_.__name__), escape(str(value))
+            id(exc_info), escape(type_.__name__), escape(repr(value))
         )
 
     def fail(self, cmd, title=None, message=None):
