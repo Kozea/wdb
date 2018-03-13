@@ -1,18 +1,22 @@
 # *-* coding: utf-8 *-*
-from ._compat import (
-    loads, dumps, JSONEncoder, quote, execute, u, StringIO, escape, from_bytes,
-    force_bytes, is_str, _detect_lines_encoding, logger
-)
-from .utils import (
-    get_source, get_doc, executable_line, importable_module, Html5Diff,
-    search_key_in_obj, search_value_in_obj, timeout_of, inplace
-)
-from . import __version__, _initial_globals
-from tokenize import generate_tokens, TokenError
-from subprocess import Popen
+import os
+import re
+import sys
+import time
 import token as tokens
+import traceback
 from base64 import b64encode
 from logging import WARNING
+from subprocess import Popen
+from tokenize import TokenError, generate_tokens
+
+from . import __version__, _initial_globals
+from ._compat import (
+    JSONEncoder, StringIO, _detect_lines_encoding, dumps, escape, execute,
+    force_bytes, from_bytes, is_str, loads, logger, quote, u)
+from .utils import (
+    Html5Diff, executable_line, get_doc, get_source, importable_module,
+    inplace, search_key_in_obj, search_value_in_obj, timeout_of)
 
 try:
     from cutter import cut
@@ -29,12 +33,6 @@ try:
     from jedi import Interpreter
 except ImportError:
     Interpreter = None
-
-import os
-import re
-import sys
-import time
-import traceback
 
 log = logger('wdb.ui')
 
@@ -439,12 +437,12 @@ class Interaction(object):
                     else:
                         self.db.hooked = maybe_hook
 
-            l = self.current_locals
+            loc = self.current_locals
             start = time.time()
             if compiled_code is not None:
                 self.db.compile_cache[id(compiled_code)] = data
                 try:
-                    execute(compiled_code, self.get_globals(), l)
+                    execute(compiled_code, self.get_globals(), loc)
                 except NameError as e:
                     m = re.match("name '(.+)' is not defined", str(e))
                     if m:
@@ -651,8 +649,8 @@ class Interaction(object):
             return
         try:
             script = Interpreter(
-                source, [self.current_locals,
-                         self.get_globals()], **completion
+                source,
+                [self.current_locals, self.get_globals()], **completion
             )
             with timeout_of(timeout, not manual):
                 completions = script.completions()
