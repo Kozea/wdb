@@ -1,3 +1,7 @@
+3.2.1
+=====
+* Fix some unicode handling in exception display. Fix #106
+
 3.2.0
 =====
 * Tornado 5 compatibility
