@@ -1,3 +1,11 @@
+3.2.0
+=====
+* Tornado 5 compatibility
+
+3.1.10
+=====
+* Force tornado < 5. This is the last release with pre tornado 5 compat.
+
 3.1.9
 =====
 * Replace filemagic with python-magic and fix dependencies
