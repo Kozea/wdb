@@ -8,11 +8,12 @@
 
 ```bash
     $ sudo pip install flask-wdb-hook
+    $ export FLASK_WDB=1
 ```
 
 ### How does it work
 
-This package only install a pth file in the site-packages directory which contains:
+This package only install a pth file in the site-packages directory which calls:
 ```python
 import wdb; \
 from wdb.ext import WdbMiddleware; \
