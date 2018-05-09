@@ -14,7 +14,7 @@
 /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .cover {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent), url("../hipster.jpg") center/cover; }
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)), url("../hipster.jpg") center/cover; }
   .cover .mdl-layout__header-row {
     height: 20vh; }
   .cover .mdl-layout__tab-bar, .cover .mdl-layout__tab-bar-button {
