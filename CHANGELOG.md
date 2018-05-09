@@ -1,3 +1,7 @@
+3.2.2
+=====
+* Don't crash on version request failure and lower the timeouts. Fix #112
+
 3.2.1
 =====
 * Fix some unicode handling in exception display. Fix #106
