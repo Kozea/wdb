@@ -15,18 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
+import logging
+import os
+import sys
+from multiprocessing import Process
+from uuid import uuid4
+
+import tornado.httpclient
 import tornado.options
 import tornado.process
 import tornado.web
 import tornado.websocket
-import tornado.httpclient
-import os
-import sys
-import logging
-import json
-from wdb_server.state import sockets, websockets, syncwebsockets, breakpoints
-from multiprocessing import Process
-from uuid import uuid4
+from wdb_server.state import breakpoints, sockets, syncwebsockets, websockets
 
 try:
     import pkg_resources
@@ -231,8 +232,7 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             else:
                 log.debug('Pausing %s' % data)
                 tornado.process.Subprocess(['gdb', '-p', data, '-batch'] + [
-                    "-eval-command=call %s" % hook
-                    for hook in [
+                    "-eval-command=call %s" % hook for hook in [
                         'PyGILState_Ensure()',
                         'PyRun_SimpleString('
                         '"import wdb; wdb.set_trace(skip=1)"'
@@ -303,7 +303,7 @@ tornado.options.define(
 
 tornado.options.parse_command_line()
 
-from wdb_server.utils import refresh_process, LibPythonWatcher
+from wdb_server.utils import refresh_process, LibPythonWatcher  # noqa isort:skip
 
 StyleHandler.theme = tornado.options.options.theme
 
@@ -319,9 +319,9 @@ if LibPythonWatcher:
 
 server = tornado.web.Application(
     [(r"/", HomeHandler), (r"/style.css", StyleHandler),
-     (r"/(\w+)/session/(.+)",
-      MainHandler), (r"/debug/file/(.*)",
-                     DebugHandler), (r"/websocket/(.+)", WebSocketHandler),
+     (r"/(\w+)/session/(.+)", MainHandler),
+     (r"/debug/file/(.*)", DebugHandler),
+     (r"/websocket/(.+)", WebSocketHandler),
      (r"/status", SyncWebSocketHandler)],
     debug=tornado.options.options.debug,
     static_path=static_path,
@@ -334,7 +334,10 @@ server.new_version = None
 
 def callback(response):
     log.debug('Parsing pypi page')
-    info = json.loads(response.buffer.read().decode('utf-8'))
+    try:
+        info = json.loads(response.buffer.read().decode('utf-8'))
+    except Exception:
+        return
     version = info['info']['version']
     if version != __version__:
         server.new_version = version
@@ -344,5 +347,7 @@ log.debug('Feching wdb_server simple pypi page')
 http.fetch(
     'https://pypi.python.org/pypi/wdb.server/json',
     callback,
+    connect_timeout=1,
+    request_timeout=1,
     raise_error=False
 )
