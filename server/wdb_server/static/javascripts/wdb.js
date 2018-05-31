@@ -66,9 +66,11 @@ Websocket = (function(superClass) {
   extend(Websocket, superClass);
 
   function Websocket(wdb, uuid) {
+    var proto;
     this.wdb = wdb;
     Websocket.__super__.constructor.apply(this, arguments);
-    this.url = "ws://" + document.location.host + "/websocket/" + uuid;
+    proto = document.location.protocol === "https:" ? "wss:" : "ws:";
+    this.url = "{proto}//" + document.location.host + "/websocket/" + uuid;
     this.log('Opening new socket', this.url);
     this.ws = new WebSocket(this.url);
     this.ws.onclose = this.close.bind(this);
@@ -1333,7 +1335,7 @@ help = "<div class=\"mdl-tabs mdl-js-tabs mdl-js-ripple-effect\">\n  <div class=
 Wdb = (function(superClass) {
   extend(Wdb, superClass);
 
-  Wdb.prototype.__version__ = '3.2.2';
+  Wdb.prototype.__version__ = '3.2.3';
 
   function Wdb() {
     Wdb.__super__.constructor.apply(this, arguments);
