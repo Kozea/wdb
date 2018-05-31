@@ -1,3 +1,8 @@
+3.2.3
+=====
+* Make websockets work over HTTPS #113 (thanks @akalipetis)
+* Document logging configuration (thanks @ptim)
+
 3.2.2
 =====
 * Don't crash on version request failure and lower the timeouts. Fix #112
@@ -11,7 +16,7 @@
 * Tornado 5 compatibility
 
 3.1.10
-=====
+======
 * Force tornado < 5. This is the last release with pre tornado 5 compat.
 
 3.1.9
