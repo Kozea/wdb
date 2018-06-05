@@ -221,7 +221,8 @@ ws_message = (event) ->
       ), 2000
 
 create_socket = ->
-  ws = new WebSocket "ws://#{location.host}/status"
+  proto = if (document.location.protocol == "https:") then "wss:" else "ws:"
+  ws = new WebSocket "{proto}//#{location.host}/status"
   ws.onopen = ->
     $("tbody tr").remove()
     ws.send('ListSockets')
