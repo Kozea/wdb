@@ -102,7 +102,37 @@ class MainHandler(tornado.web.RequestHandler):
         )
 
 
-class WebSocketHandler(tornado.websocket.WebSocketHandler):
+class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
+    """
+    Base class, used for doing the basic host checks before proceeding.
+    """
+    def open(self, *args, **kwargs):
+        protocol = self.request.headers.get(
+            'X-Forwarded-Proto',
+            self.request.protocol,
+        )
+        host = '{protocol}://{host}'.format(
+            protocol=protocol, host=self.request.headers['Host']
+        )
+        if self.request.headers['Origin'] != host:
+            self.warn('Origin and host are not the same, closing websocket...')
+            self.close()
+            return
+        
+        self.on_open(*args, **kwargs)
+    
+    def on_open(self, *args, **kwargs):
+        """
+        Method that should be overriden, containing the logic that should
+        happen when a new websocket connection opens. At this point, the
+        connection is already verified.
+
+        Does nothing by default.
+        """
+        pass
+
+
+class WebSocketHandler(BaseWebSocketHandler):
     def write(self, message):
         log.debug('socket -> websocket: %s' % message)
         message = message.decode('utf-8')
@@ -120,12 +150,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
         self.write_message(message)
 
-    def open(self, uuid):
-        if self.request.headers['Origin'] != 'http://%s' % (
-                self.request.headers['Host']):
-            self.close()
-            return
-
+    def on_open(self, uuid):
         self.uuid = uuid
 
         if isinstance(self.uuid, bytes):
@@ -160,23 +185,19 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             sockets.send(self.uuid, message)
 
     def on_close(self):
-        log.info('Websocket closed for %s' % self.uuid)
-        if not tornado.options.options.detached_session:
-            sockets.send(self.uuid, 'Close')
-            sockets.close(self.uuid)
+        if hasattr(self, 'uuid'):
+            log.info('Websocket closed for %s' % self.uuid)
+            if not tornado.options.options.detached_session:
+                sockets.send(self.uuid, 'Close')
+                sockets.close(self.uuid)
 
 
-class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
+class SyncWebSocketHandler(BaseWebSocketHandler):
     def write(self, message):
         log.debug('server -> syncsocket: %s' % message)
         self.write_message(message)
 
-    def open(self):
-        if self.request.headers['Origin'] != 'http://%s' % (
-                self.request.headers['Host']):
-            self.close()
-            return
-
+    def on_open(self):
         self.uuid = str(uuid4())
         syncwebsockets.add(self.uuid, self)
         if not LibPythonWatcher:
@@ -257,7 +278,8 @@ class SyncWebSocketHandler(tornado.websocket.WebSocketHandler):
             Process(target=run).start()
 
     def on_close(self):
-        syncwebsockets.remove(self.uuid)
+        if hasattr(self, 'uuid'):
+            syncwebsockets.remove(self.uuid)
 
 
 tornado.options.define(
