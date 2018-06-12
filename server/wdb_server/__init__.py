@@ -118,9 +118,9 @@ class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
             self.warn('Origin and host are not the same, closing websocket...')
             self.close()
             return
-        
+
         self.on_open(*args, **kwargs)
-    
+
     def on_open(self, *args, **kwargs):
         """
         Method that should be overriden, containing the logic that should
