@@ -18,7 +18,7 @@ pushd client
 python setup.py sdist upload
 popd
 
-sed -i '' s/$OLD_VERSION/$NEW_VERSION/g server/Dockerfile
+sed -i "s/$OLD_VERSION/$NEW_VERSION/g" server/Dockerfile
 
 git commit -am "Bump Version $OLD_VERSION -> $NEW_VERSION"
 git tag $NEW_VERSION
