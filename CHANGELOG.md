@@ -1,3 +1,11 @@
+3.2.4
+=====
+
+* Merged #117 (thanks @akalipetis):
+  * Fix crashes when websockets closed prematurely
+  * Add a base class to handle new connection verification
+  * Fix protocol interpolation in CoffeeScript
+
 3.2.3
 =====
 * Make websockets work over HTTPS #113 (thanks @akalipetis)
