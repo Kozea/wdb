@@ -276,7 +276,9 @@ ws_message = function(event) {
 };
 
 create_socket = function() {
-  ws = new WebSocket("ws://" + location.host + "/status");
+  var proto;
+  proto = document.location.protocol === "https:" ? "wss:" : "ws:";
+  ws = new WebSocket(proto + "//" + location.host + "/status");
   ws.onopen = function() {
     $("tbody tr").remove();
     ws.send('ListSockets');

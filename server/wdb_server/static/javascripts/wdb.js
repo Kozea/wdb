@@ -70,7 +70,7 @@ Websocket = (function(superClass) {
     this.wdb = wdb;
     Websocket.__super__.constructor.apply(this, arguments);
     proto = document.location.protocol === "https:" ? "wss:" : "ws:";
-    this.url = "{proto}//" + document.location.host + "/websocket/" + uuid;
+    this.url = proto + "//" + document.location.host + "/websocket/" + uuid;
     this.log('Opening new socket', this.url);
     this.ws = new WebSocket(this.url);
     this.ws.onclose = this.close.bind(this);
