@@ -31,8 +31,8 @@ options = dict(
     package_data={
         'wdb_server': [
             'static/libs/material-design-lite/*', 'static/stylesheets/*',
-            'static/img/*.png', 'static/javascripts/wdb/*.min.js',
-            'templates/*.html'
+            'static/hipster.jpg', 'static/img/*.png',
+            'static/javascripts/wdb/*.min.js', 'templates/*.html'
         ],
     },
     classifiers=[
