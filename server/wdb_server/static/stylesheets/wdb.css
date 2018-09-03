@@ -148,18 +148,21 @@
     .interpreter table tbody td.ellipse {
       text-align: center; }
     .interpreter table tbody td.val code {
-      word-break: break-all; }
+      word-break: break-all;
+      overflow-wrap: break-word; }
   .interpreter a.inspect {
     display: inline-block;
     text-decoration: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    cursor: pointer; }
-  .interpreter .prompt, .interpreter .for {
-    margin-left: 26px; }
-    .interpreter .prompt::before, .interpreter .for::before {
-      content: '>>>';
-      position: absolute;
-      left: 0; }
+    cursor: pointer;
+    max-width: 100%; }
+  .interpreter .prompt::before, .interpreter .for::before {
+    content: '>>>'; }
+  .interpreter .for::before {
+    margin-right: 8px; }
+  .interpreter .prompt::before {
+    margin-left: 4px;
+    margin-right: 4px; }
   .interpreter .diff td {
     width: 49%;
     border-top: none;
@@ -173,7 +176,8 @@
     width: 1%; }
   .interpreter .diff .diff_line {
     white-space: pre-wrap;
-    word-break: break-word; }
+    word-break: break-word;
+    overflow-wrap: break-word; }
   .interpreter .diff .diff_sub {
     background-color: #f8cbcb; }
   .interpreter .diff .diff_line_sub {
@@ -337,7 +341,8 @@ footer.mdl-mini-footer {
 
 code {
   white-space: pre-wrap;
-  word-break: break-all; }
+  word-break: break-all;
+  overflow-wrap: break-word; }
 
 .ellipsis {
   text-overflow: ellipsis;

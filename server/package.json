@@ -1,6 +1,6 @@
 {
   "name": "wdb",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "An improbable python web debugger through WebSockets",
   "repository": {
     "type": "git",

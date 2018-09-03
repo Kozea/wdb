@@ -1,6 +1,6 @@
 FROM python:3
 
-ARG WDB_VERSION="3.2.4"
+ARG WDB_VERSION="3.2.5"
 
 RUN pip install wdb.server==$WDB_VERSION
 EXPOSE 19840
