@@ -75,20 +75,25 @@
       td.val
         code
           word-break: break-all
+          overflow-wrap: break-word
 
   a.inspect
     display: inline-block
     text-decoration: none
     border-bottom: 1px solid rgba(0, 0, 0, .05)
     cursor: pointer
+    max-width: 100%
 
   .prompt, .for
-    margin-left: 26px
-
     &::before
       content: '>>>'
-      position: absolute
-      left: 0
+
+  .for::before
+    margin-right: 8px
+
+  .prompt::before
+    margin-left: 4px
+    margin-right: 4px
 
   .diff
     td
@@ -107,6 +112,7 @@
     .diff_line
       white-space: pre-wrap
       word-break: break-word
+      overflow-wrap: break-word
 
     .diff_sub
       background-color: #f8cbcb
