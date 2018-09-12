@@ -1,1 +1,1 @@
-import os; exec("try:\n  if 'FLASK_WDB' in os.environ:import wdb.ext;wdb.ext.patch_werkzeug()\nexcept:print('An error occured while automatically hooking wdb into flask.'); raise;")
+import os; exec("try:\n  if 'FLASK_WDB' in os.environ:import wdb.ext;wdb.ext.patch_werkzeug()\nexcept:print('An error occured while automatically hooking wdb into flask.');")
