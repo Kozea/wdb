@@ -350,26 +350,21 @@ server = tornado.web.Application(
     template_path=os.path.join(os.path.dirname(__file__), "templates")
 )
 
-http = tornado.httpclient.AsyncHTTPClient()
+http = tornado.httpclient.HTTPClient()
 server.new_version = None
 
 
-def callback(response):
+log.debug('Feching wdb_server simple pypi page')
+try:
+    response = http.fetch(
+        'https://pypi.python.org/pypi/wdb.server/json',
+        connect_timeout=1,
+        request_timeout=1,
+    )
     log.debug('Parsing pypi page')
-    try:
-        info = json.loads(response.buffer.read().decode('utf-8'))
-    except Exception:
-        return
+    info = json.loads(response.buffer.read().decode('utf-8'))
     version = info['info']['version']
     if version != __version__:
         server.new_version = version
-
-
-log.debug('Feching wdb_server simple pypi page')
-http.fetch(
-    'https://pypi.python.org/pypi/wdb.server/json',
-    callback,
-    connect_timeout=1,
-    request_timeout=1,
-    raise_error=False
-)
+except Exception:
+    pass
