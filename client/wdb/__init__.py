@@ -265,7 +265,7 @@ class Wdb(object):
         log.info('Getting server breakpoints')
         self.send('ServerBreaks')
         breaks = self.receive()
-        breaks = loads(breaks or {})
+        breaks = loads(breaks or '{}')
         self._init_breakpoints = breaks
 
         for brk in breaks:
