@@ -27,7 +27,7 @@ class FakeWdbServer(Process):
     def run(self):
         listener = Listener(('localhost', 18273))
         try:
-            listener._listener._socket.settimeout(1)
+            listener._listener._socket.settimeout(10)
         except Exception:
             pass
         connection = listener.accept()
