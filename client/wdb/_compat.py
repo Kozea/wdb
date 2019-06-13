@@ -44,7 +44,7 @@ else:
         exec(cmd, globals_, locals_)
 
 
-_cookie_search = re.compile("coding[:=]\s*([-\w.]+)").search
+_cookie_search = re.compile(r"coding[:=]\s*([-\w.]+)").search
 
 
 def _detect_encoding(filename):
