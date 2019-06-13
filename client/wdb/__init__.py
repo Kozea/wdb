@@ -47,6 +47,7 @@ from .breakpoint import (
 )
 
 from collections import defaultdict
+from functools import wraps
 from .ui import Interaction, dump
 from .utils import (
     pretty_frame,
@@ -1128,6 +1129,15 @@ class trace(object):
         kwargs['frame'] = self.kwargs.get('frame', sys._getframe().f_back)
         kwargs['close_on_exit'] = self.kwargs.get('close_on_exit', False)
         stop_trace(**kwargs)
+
+
+def with_trace(fun):
+    @wraps(fun)
+    def traced(*args, **kwargs):
+        with trace():
+            return fun(*args, **kwargs)
+
+    return traced
 
 
 @atexit.register
