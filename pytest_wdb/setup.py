@@ -10,5 +10,5 @@ setup(
     py_modules=['pytest_wdb'],
     install_requires=['wdb'],
     description="Trace pytest tests with wdb to halt on error with --wdb.",
-    entry_points={'pytest11': ['pytest_wdb = pytest_wdb', ]},
+    entry_points={'pytest11': ['pytest_wdb = pytest_wdb']},
 )

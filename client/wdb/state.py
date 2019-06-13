@@ -13,7 +13,8 @@ class State(object):
 
     def __repr__(self):
         return '<State is %s for %s>' % (
-            self.__class__.__name__, pretty_frame(self.frame)
+            self.__class__.__name__,
+            pretty_frame(self.frame),
         )
 
 

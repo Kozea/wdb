@@ -43,6 +43,7 @@ class Slave(Process):
 
     def run(self):
         import wdb
+
         wdb.SOCKET_SERVER = self.host
         wdb.SOCKET_PORT = self.port
         wdb.WDB_NO_BROWSER_AUTO_OPEN = True
@@ -68,7 +69,7 @@ class Message(object):
             pickled = True
         if '|' in message:
             pipe = message.index('|')
-            self.command, self.data = message[:pipe], message[pipe + 1:]
+            self.command, self.data = message[:pipe], message[pipe + 1 :]
             if pickled and self.data:
                 self.data = pickle.loads(self.data.encode('utf-8'), protocol=2)
             else:
@@ -124,19 +125,19 @@ class Socket(object):
         assert echo_watched == 'Watched'
 
     def assert_position(
-            self,
-            title=None,
-            subtitle=None,
-            file=None,
-            code=None,
-            function=None,
-            line=None,
-            breaks=None,
-            call=None,
-            return_=None,
-            exception=None,
-            bottom_code=None,
-            bottom_line=None
+        self,
+        title=None,
+        subtitle=None,
+        file=None,
+        code=None,
+        function=None,
+        line=None,
+        breaks=None,
+        call=None,
+        return_=None,
+        exception=None,
+        bottom_code=None,
+        bottom_line=None,
     ):
         titlemsg = self.receive()
         assert titlemsg.command == 'Title'
@@ -241,8 +242,9 @@ def socket(request):
     log.info('Fixture')
     socket = Socket(
         request.function._wdb_use,
-        port=sys.hexversion % 60000 + 1024 +
-        (1 if hasattr(sys, 'pypy_version_info') else 0)
+        port=sys.hexversion % 60000
+        + 1024
+        + (1 if hasattr(sys, 'pypy_version_info') else 0),
     )
 
     # If it takes more than 5 seconds, it must be an error

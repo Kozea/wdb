@@ -10,7 +10,10 @@ from setuptools import setup
 __version__ = '3.2.5'
 
 requires = [
-    "wdb==%s" % __version__, "tornado>=5.0", "psutil>=2.1", 'tornado_systemd'
+    "wdb==%s" % __version__,
+    "tornado>=5.0",
+    "psutil>=2.1",
+    'tornado_systemd',
 ]
 if sys.platform == 'linux':
     requires.append('pyinotify')
@@ -30,21 +33,25 @@ options = dict(
     install_requires=requires,
     package_data={
         'wdb_server': [
-            'static/libs/material-design-lite/*', 'static/stylesheets/*',
-            'static/hipster.jpg', 'static/img/*.png',
-            'static/javascripts/wdb/*.min.js', 'templates/*.html'
-        ],
+            'static/libs/material-design-lite/*',
+            'static/stylesheets/*',
+            'static/hipster.jpg',
+            'static/img/*.png',
+            'static/javascripts/wdb/*.min.js',
+            'templates/*.html',
+        ]
     },
     classifiers=[
-        "Development Status :: 4 - Beta", "Intended Audience :: Developers",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
-        "Topic :: Software Development :: Debuggers"
-    ]
+        "Topic :: Software Development :: Debuggers",
+    ],
 )
 
 setup(**options)

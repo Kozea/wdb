@@ -97,13 +97,13 @@ class Sockets(BaseSockets):
     def set_filename(self, uuid, filename):
         self._filenames[uuid] = filename
         syncwebsockets.broadcast(
-            'AddSocket', {
-                'uuid':
-                    uuid,
+            'AddSocket',
+            {
+                'uuid': uuid,
                 'filename': (
                     filename if tornado.options.options.show_filename else ''
-                )
-            }
+                ),
+            },
         )
 
     def _send(self, sck, data):

@@ -38,6 +38,8 @@ if python_version == 2:
 
     def execute(cmd, globals_, locals_):
         exec('exec cmd in globals_, locals_')
+
+
 else:
 
     def execute(cmd, globals_, locals_):
@@ -49,6 +51,7 @@ _cookie_search = re.compile(r"coding[:=]\s*([-\w.]+)").search
 
 def _detect_encoding(filename):
     import linecache
+
     lines = linecache.getlines(filename)
     return _detect_lines_encoding(lines)
 
@@ -93,6 +96,8 @@ if python_version == 2:
         if isinstance(bytes_, unicode):
             return bytes_.encode('utf-8')
         return bytes_
+
+
 else:
     basestr = (str, bytes)
 
@@ -134,6 +139,7 @@ if python_version == 2:
     has_winapi = False
     try:
         import _winapi
+
         has_winapi = True
     except ImportError:
         pass
@@ -162,7 +168,7 @@ if python_version == 2:
                 else:
                     raise RuntimeError('Should not get here')
                 ready.append(L[res])
-                L = L[res + 1:]
+                L = L[res + 1 :]
                 timeout = 0
             return ready
 
@@ -240,6 +246,7 @@ if python_version == 2:
 
             ready_objects.update(waithandle_to_obj[h] for h in ready_handles)
             return [p for p in object_list if p in ready_objects]
+
     else:
         if hasattr(select, 'poll'):
 
@@ -260,6 +267,7 @@ if python_version == 2:
                         raise ValueError('invalid file descriptor %i' % fd)
                     ls.append(fd_map[fd])
                 return ls
+
         else:
 
             def _poll(fds, timeout):
@@ -348,6 +356,7 @@ if python_version == 2:
             r = wait([self._handle], timeout)
             return bool(r)
 
+
 else:
     from multiprocessing.connection import Client as Socket
 
@@ -357,6 +366,8 @@ try:
 
     def existing_module(module):
         return bool(find_spec(module))
+
+
 except ImportError:
     import imp
 
@@ -379,6 +390,7 @@ try:
     from log_colorizer import get_color_logger
 except ImportError:
     import logging
+
     logger = logging.getLogger
 else:
     logger = get_color_logger

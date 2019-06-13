@@ -6,7 +6,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--wdb",
         action="store_true",
-        help="Trace tests with wdb to halt on error."
+        help="Trace tests with wdb to halt on error.",
     )
 
 

@@ -13,7 +13,9 @@ from ._compat import OrderedDict, StringIO, existing_module
 def pretty_frame(frame):
     if frame:
         return '%s <%s:%d>' % (
-            frame.f_code.co_name, frame.f_code.co_filename, frame.f_lineno
+            frame.f_code.co_name,
+            frame.f_code.co_filename,
+            frame.f_lineno,
         )
     else:
         return 'None'
@@ -82,10 +84,14 @@ def get_doc(obj):
 
 def executable_line(line):
     line = line.strip()
-    return not ((
-        not line or (line[0] == '#') or
-        (line[:3] == '"""') or line[:3] == "'''"
-    ))
+    return not (
+        (
+            not line
+            or (line[0] == '#')
+            or (line[:3] == '"""')
+            or line[:3] == "'''"
+        )
+    )
 
 
 def get_args(frame):
@@ -147,8 +153,9 @@ class Html5Diff(HtmlDiff):
             id = ''
         # replace those things that would get confused with HTML symbols
         text = (
-            text.replace("&", "&amp;").replace(">",
-                                               "&gt;").replace("<", "&lt;")
+            text.replace("&", "&amp;")
+            .replace(">", "&gt;")
+            .replace("<", "&lt;")
         )
 
         type_ = 'neutral'
@@ -166,18 +173,18 @@ class Html5Diff(HtmlDiff):
 
         return (
             '<td class="diff_lno"%s>%s</td>'
-            '<td class="diff_line diff_line_%s">%s</td>' %
-            (id, linenum, type_, text)
+            '<td class="diff_line diff_line_%s">%s</td>'
+            % (id, linenum, type_, text)
         )
 
     def make_table(
-            self,
-            fromlines,
-            tolines,
-            fromdesc='',
-            todesc='',
-            context=False,
-            numlines=5
+        self,
+        fromlines,
+        tolines,
+        fromdesc='',
+        todesc='',
+        context=False,
+        numlines=5,
     ):
         """Returns HTML table of side by side comparison with change highlights
 
@@ -213,7 +220,7 @@ class Html5Diff(HtmlDiff):
                 tolines,
                 context_lines,
                 linejunk=self._linejunk,
-                charjunk=self._charjunk
+                charjunk=self._charjunk,
             )
 
         # set up iterator to wrap lines that exceed desired width
@@ -242,23 +249,21 @@ class Html5Diff(HtmlDiff):
         if fromdesc or todesc:
             header_row = '<thead><tr>%s%s</tr></thead>' % (
                 '<th colspan="2" class="diff_header">%s</th>' % fromdesc,
-                '<th colspan="2" class="diff_header">%s</th>' % todesc
+                '<th colspan="2" class="diff_header">%s</th>' % todesc,
             )
         else:
             header_row = ''
 
         table = self._table_template % dict(
-            data_rows=''.join(s),
-            header_row=header_row,
-            prefix=self._prefix[1]
+            data_rows=''.join(s), header_row=header_row, prefix=self._prefix[1]
         )
 
         return (
-            table.replace('\0+', '<span class="diff_add">').replace(
-                '\0-', '<span class="diff_sub">'
-            ).replace('\0^', '<span class="diff_chg">').replace(
-                '\1', '</span>'
-            ).replace('\t', '&nbsp;')
+            table.replace('\0+', '<span class="diff_add">')
+            .replace('\0-', '<span class="diff_sub">')
+            .replace('\0^', '<span class="diff_chg">')
+            .replace('\1', '</span>')
+            .replace('\t', '&nbsp;')
         )
 
 
@@ -276,16 +281,23 @@ def search_key_in_obj(key, obj, matches=None, path='', context=None):
             if isinstance(v, type(sys)):
                 continue
             if key in k:
-                matches.append((
-                    "%s['%s']" % (
-                        path.rstrip('.'),
-                        k.replace(key, '<mark>%s</mark>' % key)
-                    ), v
-                ))
+                matches.append(
+                    (
+                        "%s['%s']"
+                        % (
+                            path.rstrip('.'),
+                            k.replace(key, '<mark>%s</mark>' % key),
+                        ),
+                        v,
+                    )
+                )
             try:
                 matches = search_key_in_obj(
-                    key, v, matches, "%s['%s']." % (path.rstrip('.'), k),
-                    context
+                    key,
+                    v,
+                    matches,
+                    "%s['%s']." % (path.rstrip('.'), k),
+                    context,
                 )
             except Exception:
                 pass
@@ -302,7 +314,7 @@ def search_key_in_obj(key, obj, matches=None, path='', context=None):
                 pass
 
     for k in dir(obj):
-        if k.startswith('__') and k not in ('__class__', ):
+        if k.startswith('__') and k not in ('__class__',):
             continue
         v = getattr(obj, k, None)
         v2 = getattr(obj, k, None)
@@ -377,7 +389,7 @@ def search_value_in_obj(fun, obj, matches=None, path='', context=None):
                 pass
 
     for k in dir(obj):
-        if k.startswith('__') and k not in ('__class__', ):
+        if k.startswith('__') and k not in ('__class__',):
             continue
         v = getattr(obj, k, None)
         v2 = getattr(obj, k, None)
@@ -464,13 +476,13 @@ def cut_if_too_long(iterable, level, tuple_=False):
 # as suggested by https://github.com/leorochael
 @contextmanager
 def inplace(
-        filename,
-        mode='r',
-        buffering=-1,
-        encoding=None,
-        errors=None,
-        newline=None,
-        backup_extension=None
+    filename,
+    mode='r',
+    buffering=-1,
+    encoding=None,
+    errors=None,
+    newline=None,
+    backup_extension=None,
 ):
     """Allow for a file to be replaced with new content.
 
@@ -501,7 +513,7 @@ def inplace(
         buffering=buffering,
         encoding=encoding,
         errors=errors,
-        newline=newline
+        newline=newline,
     )
     try:
         perm = os.fstat(readable.fileno()).st_mode
@@ -512,7 +524,7 @@ def inplace(
             buffering=buffering,
             encoding=encoding,
             errors=errors,
-            newline=newline
+            newline=newline,
         )
     else:
         os_mode = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
@@ -525,7 +537,7 @@ def inplace(
             buffering=buffering,
             encoding=encoding,
             errors=errors,
-            newline=newline
+            newline=newline,
         )
         try:
             if hasattr(os, 'chmod'):

@@ -64,7 +64,7 @@ class Breakpoint(object):
             'lno': getattr(self, 'line', None),
             'cond': getattr(self, 'condition', None),
             'fun': getattr(self, 'function', None),
-            'temporary': self.temporary
+            'temporary': self.temporary,
         }
 
 
@@ -87,8 +87,10 @@ class LineBreakpoint(Breakpoint):
         )
 
     def __eq__(self, other):
-        return super(LineBreakpoint, self
-                     ).__eq__(other) and self.line == other.line
+        return (
+            super(LineBreakpoint, self).__eq__(other)
+            and self.line == other.line
+        )
 
     def __hash__(self):
         return super(LineBreakpoint, self).__hash__()
@@ -116,13 +118,15 @@ class ConditionalBreakpoint(Breakpoint):
 
     def __repr__(self):
         return (
-            super(ConditionalBreakpoint, self).__repr__() +
-            ' under the condition %s' % self.condition
+            super(ConditionalBreakpoint, self).__repr__()
+            + ' under the condition %s' % self.condition
         )
 
     def __eq__(self, other):
-        return super(ConditionalBreakpoint, self
-                     ).__eq__(other) and self.condition == other.condition
+        return (
+            super(ConditionalBreakpoint, self).__eq__(other)
+            and self.condition == other.condition
+        )
 
     def __hash__(self):
         return super(ConditionalBreakpoint, self).__hash__()
@@ -146,13 +150,15 @@ class FunctionBreakpoint(Breakpoint):
 
     def __repr__(self):
         return (
-            super(FunctionBreakpoint, self).__repr__() +
-            ' in function %s' % self.function
+            super(FunctionBreakpoint, self).__repr__()
+            + ' in function %s' % self.function
         )
 
     def __eq__(self, other):
-        return super(FunctionBreakpoint, self
-                     ).__eq__(other) and self.function == other.function
+        return (
+            super(FunctionBreakpoint, self).__eq__(other)
+            and self.function == other.function
+        )
 
     def __hash__(self):
         return super(FunctionBreakpoint, self).__hash__()

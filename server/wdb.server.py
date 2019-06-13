@@ -23,7 +23,7 @@ if os.getenv('LISTEN_PID'):
     sck = socket.fromfd(
         SYSTEMD_SOCKET_FD + 1,  # Second socket in .socket file
         socket.AF_INET6 if socket.has_ipv6 else socket.AF_INET,
-        socket.SOCK_STREAM
+        socket.SOCK_STREAM,
     )
     sck.setblocking(0)
     sck.listen(128)

@@ -54,8 +54,9 @@ else:
                 inotify, ioloop, self.notified, pyinotify.ProcessEvent()
             )
             inotify.add_watch(
-                self.files, pyinotify.EventsCodes.ALL_FLAGS['IN_OPEN']
-                | pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_NOWRITE']
+                self.files,
+                pyinotify.EventsCodes.ALL_FLAGS['IN_OPEN']
+                | pyinotify.EventsCodes.ALL_FLAGS['IN_CLOSE_NOWRITE'],
             )
 
         def notified(self, notifier):
@@ -79,29 +80,36 @@ def refresh_process(uuid=None):
     for proc in psutil.process_iter():
         try:
             cl = proc.cmdline()
-        except (psutil.ZombieProcess, psutil.AccessDenied,
-                psutil.NoSuchProcess):
+        except (
+            psutil.ZombieProcess,
+            psutil.AccessDenied,
+            psutil.NoSuchProcess,
+        ):
             continue
         else:
             if len(cl) == 0:
                 continue
 
         binary = cl[0].split('/')[-1]
-        if (('python' in binary or 'pypy' in binary) and proc.is_running()
-                and proc.status() != psutil.STATUS_ZOMBIE):
+        if (
+            ('python' in binary or 'pypy' in binary)
+            and proc.is_running()
+            and proc.status() != psutil.STATUS_ZOMBIE
+        ):
             try:
                 try:
-                    cpu = proc.cpu_percent(interval=.01)
+                    cpu = proc.cpu_percent(interval=0.01)
                     send(
-                        'AddProcess', {
+                        'AddProcess',
+                        {
                             'pid': proc.pid,
                             'user': proc.username(),
                             'cmd': ' '.join(proc.cmdline()),
                             'threads': proc.num_threads(),
                             'time': proc.create_time(),
                             'mem': proc.memory_percent(),
-                            'cpu': cpu
-                        }
+                            'cpu': cpu,
+                        },
                     )
                     remaining_pids.append(proc.pid)
                     for thread in proc.threads():

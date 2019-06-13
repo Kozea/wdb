@@ -16,5 +16,5 @@ setup(
     packages=[],
     install_requires=['wdb >= 3.2.5'],
     data_files=[(site_packages_path, ['flask-wdb.pth'])],
-    description="Hook to replace flask werkzeug debugger with wdb."
+    description="Hook to replace flask werkzeug debugger with wdb.",
 )

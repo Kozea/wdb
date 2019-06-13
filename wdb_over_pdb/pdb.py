@@ -10,6 +10,7 @@ def import_from_stdlib(name):
     import os
     import types
     import code  # arbitrary module which stays in the same dir as pdb
+
     stdlibdir, _ = os.path.split(code.__file__)
     pyfile = os.path.join(stdlibdir, name + '.py')
     result = types.ModuleType(name)

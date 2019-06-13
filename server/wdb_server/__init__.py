@@ -81,6 +81,7 @@ class DebugHandler(tornado.web.RequestHandler):
     def debug(self, fn):
         def run():
             from wdb import Wdb
+
             Wdb.get().run_file(fn)
 
         Process(target=run).start()
@@ -106,10 +107,10 @@ class BaseWebSocketHandler(tornado.websocket.WebSocketHandler):
     """
     Base class, used for doing the basic host checks before proceeding.
     """
+
     def open(self, *args, **kwargs):
         protocol = self.request.headers.get(
-            'X-Forwarded-Proto',
-            self.request.protocol,
+            'X-Forwarded-Proto', self.request.protocol
         )
         host = '{protocol}://{host}'.format(
             protocol=protocol, host=self.request.headers['Host']
@@ -136,8 +137,9 @@ class WebSocketHandler(BaseWebSocketHandler):
     def write(self, message):
         log.debug('socket -> websocket: %s' % message)
         message = message.decode('utf-8')
-        if (message.startswith('BreakSet|')
-                or message.startswith('BreakUnset|')):
+        if message.startswith('BreakSet|') or message.startswith(
+            'BreakUnset|'
+        ):
             log.debug('Intercepted break')
             cmd, brk = message.split('|', 1)
             brk = json.loads(brk)
@@ -158,16 +160,16 @@ class WebSocketHandler(BaseWebSocketHandler):
 
         if self.uuid in websockets.uuids:
             log.warn(
-                'Websocket already opened for %s. Closing previous one' %
-                self.uuid
+                'Websocket already opened for %s. Closing previous one'
+                % self.uuid
             )
             websockets.send(self.uuid, 'Die')
             websockets.close(uuid)
 
         if self.uuid not in sockets.uuids:
             log.warn(
-                'Websocket opened for %s with no correponding socket' %
-                self.uuid
+                'Websocket opened for %s with no correponding socket'
+                % self.uuid
             )
             sockets.send(self.uuid, 'Die')
             self.close()
@@ -212,13 +214,14 @@ class SyncWebSocketHandler(BaseWebSocketHandler):
         if cmd == 'ListSockets':
             for uuid in sockets.uuids:
                 syncwebsockets.send(
-                    self.uuid, 'AddSocket', {
-                        'uuid':
-                            uuid,
-                        'filename':
-                            sockets.get_filename(uuid)
-                            if tornado.options.options.show_filename else ''
-                    }
+                    self.uuid,
+                    'AddSocket',
+                    {
+                        'uuid': uuid,
+                        'filename': sockets.get_filename(uuid)
+                        if tornado.options.options.show_filename
+                        else '',
+                    },
                 )
         elif cmd == 'ListWebsockets':
             for uuid in websockets.uuids:
@@ -246,26 +249,32 @@ class SyncWebSocketHandler(BaseWebSocketHandler):
                 def self_shell(variables):
                     # Debugging self
                     import wdb
+
                     wdb.set_trace()
 
-                Process(target=self_shell, args=(globals(), )).start()
+                Process(target=self_shell, args=(globals(),)).start()
 
             else:
                 log.debug('Pausing %s' % data)
-                tornado.process.Subprocess(['gdb', '-p', data, '-batch'] + [
-                    "-eval-command=call %s" % hook for hook in [
-                        'PyGILState_Ensure()',
-                        'PyRun_SimpleString('
-                        '"import wdb; wdb.set_trace(skip=1)"'
-                        ')',
-                        'PyGILState_Release($1)',
+                tornado.process.Subprocess(
+                    ['gdb', '-p', data, '-batch']
+                    + [
+                        "-eval-command=call %s" % hook
+                        for hook in [
+                            'PyGILState_Ensure()',
+                            'PyRun_SimpleString('
+                            '"import wdb; wdb.set_trace(skip=1)"'
+                            ')',
+                            'PyGILState_Release($1)',
+                        ]
                     ]
-                ])
+                )
         elif cmd == 'RunFile':
             file_name = data
 
             def run():
                 from wdb import Wdb
+
                 Wdb.get().run_file(file_name)
 
             Process(target=run).start()
@@ -273,6 +282,7 @@ class SyncWebSocketHandler(BaseWebSocketHandler):
 
             def run():
                 from wdb import Wdb
+
                 Wdb.get().shell()
 
             Process(target=run).start()
@@ -285,13 +295,13 @@ class SyncWebSocketHandler(BaseWebSocketHandler):
 tornado.options.define(
     'theme',
     default="clean",
-    help="Wdb theme to use amongst %s" % StyleHandler.themes
+    help="Wdb theme to use amongst %s" % StyleHandler.themes,
 )
 tornado.options.define("debug", default=False, help="Debug mode")
 tornado.options.define(
     "unminified",
     default=False,
-    help="Use the unminified js (for development only)"
+    help="Use the unminified js (for development only)",
 )
 tornado.options.define(
     "more", default=False, help="Set the debug more verbose"
@@ -299,12 +309,12 @@ tornado.options.define(
 tornado.options.define(
     "detached_session",
     default=False,
-    help="Whether to continue program on browser close"
+    help="Whether to continue program on browser close",
 )
 tornado.options.define(
     "socket_port",
     default=19840,
-    help="Port used to communicate with wdb instances"
+    help="Port used to communicate with wdb instances",
 )
 tornado.options.define(
     "server_port", default=1984, help="Port used to serve debugging pages"
@@ -312,7 +322,7 @@ tornado.options.define(
 tornado.options.define(
     "show_filename",
     default=False,
-    help="Whether to show filename in session list"
+    help="Whether to show filename in session list",
 )
 tornado.options.define(
     "extra_search_path",
@@ -320,18 +330,24 @@ tornado.options.define(
     help=(
         "Try harder to find the 'libpython*' shared library "
         "at the cost of a slower server startup."
-    )
+    ),
 )
 
 tornado.options.parse_command_line()
 
-from wdb_server.utils import refresh_process, LibPythonWatcher  # noqa isort:skip
+from wdb_server.utils import (
+    refresh_process,
+    LibPythonWatcher,
+)  # noqa isort:skip
 
 StyleHandler.theme = tornado.options.options.theme
 
-for l in (log, logging.getLogger('tornado.access'),
-          logging.getLogger('tornado.application'),
-          logging.getLogger('tornado.general')):
+for l in (
+    log,
+    logging.getLogger('tornado.access'),
+    logging.getLogger('tornado.application'),
+    logging.getLogger('tornado.general'),
+):
     l.setLevel(10 if tornado.options.options.debug else 30)
 
 if LibPythonWatcher:
@@ -340,14 +356,17 @@ if LibPythonWatcher:
     )
 
 server = tornado.web.Application(
-    [(r"/", HomeHandler), (r"/style.css", StyleHandler),
-     (r"/(\w+)/session/(.+)", MainHandler),
-     (r"/debug/file/(.*)", DebugHandler),
-     (r"/websocket/(.+)", WebSocketHandler),
-     (r"/status", SyncWebSocketHandler)],
+    [
+        (r"/", HomeHandler),
+        (r"/style.css", StyleHandler),
+        (r"/(\w+)/session/(.+)", MainHandler),
+        (r"/debug/file/(.*)", DebugHandler),
+        (r"/websocket/(.+)", WebSocketHandler),
+        (r"/status", SyncWebSocketHandler),
+    ],
     debug=tornado.options.options.debug,
     static_path=static_path,
-    template_path=os.path.join(os.path.dirname(__file__), "templates")
+    template_path=os.path.join(os.path.dirname(__file__), "templates"),
 )
 
 http = tornado.httpclient.HTTPClient()
@@ -368,3 +387,6 @@ try:
         server.new_version = version
 except Exception:
     pass
+
+# Prevent some weird crash on cleanup
+del http

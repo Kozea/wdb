@@ -27,11 +27,9 @@ def test_arg_with_default():
     from wdb.utils import get_args
 
     def f(x, y=12, z=2193):
-        assert get_args(sys._getframe()) == OrderedDict((
-            ('x', x),
-            ('y', y),
-            ('z', z),
-        ))
+        assert get_args(sys._getframe()) == OrderedDict(
+            (('x', x), ('y', y), ('z', z))
+        )
 
     f(5)
     f('a')
@@ -43,11 +41,12 @@ def test_varargs():
     from wdb.utils import get_args
 
     def f(x, *args):
-        assert get_args(sys._getframe()) == OrderedDict((('x', x),
-                                                         ('*args', args)))
+        assert get_args(sys._getframe()) == OrderedDict(
+            (('x', x), ('*args', args))
+        )
 
     f(2, 3, 5, 'a')
-    f(2, * [[1, 2], 3])
+    f(2, *[[1, 2], 3])
     f(2)
 
 
@@ -55,7 +54,7 @@ def test_varargs_only():
     from wdb.utils import get_args
 
     def f(*a):
-        assert get_args(sys._getframe()) == OrderedDict((('*a', a), ))
+        assert get_args(sys._getframe()) == OrderedDict((('*a', a),))
 
     f(5, 2)
     f(10)
@@ -66,8 +65,9 @@ def test_kwargs():
     from wdb.utils import get_args
 
     def f(x, **kwargs):
-        assert get_args(sys._getframe()) == OrderedDict((('x', x),
-                                                         ('**kwargs', kwargs)))
+        assert get_args(sys._getframe()) == OrderedDict(
+            (('x', x), ('**kwargs', kwargs))
+        )
 
     f(5)
     f(9, i=4, j=53)
@@ -78,7 +78,7 @@ def test_kwargs_only():
     from wdb.utils import get_args
 
     def f(**kw):
-        assert get_args(sys._getframe()) == OrderedDict((('**kw', kw), ))
+        assert get_args(sys._getframe()) == OrderedDict((('**kw', kw),))
 
     f()
     f(a='i', b=5)
@@ -92,8 +92,13 @@ def test_method():
     class cls(object):
         def f(self, a, b=2, *args, **kwargs):
             assert get_args(sys._getframe()) == OrderedDict(
-                (('self', self), ('a', a), ('b', b), ('*args', args),
-                 ('**kwargs', kwargs))
+                (
+                    ('self', self),
+                    ('a', a),
+                    ('b', b),
+                    ('*args', args),
+                    ('**kwargs', kwargs),
+                )
             )
 
     obj = cls()
