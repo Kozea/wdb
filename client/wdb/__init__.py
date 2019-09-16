@@ -34,6 +34,7 @@ from ._compat import (
     to_unicode_string,
     escape,
     loads,
+    JSONDecodeError,
     Socket,
     logger,
     OrderedDict,
@@ -265,7 +266,10 @@ class Wdb(object):
         log.info('Getting server breakpoints')
         self.send('ServerBreaks')
         breaks = self.receive()
-        breaks = loads(breaks or '{}')
+        try:
+            breaks = loads(breaks)
+        except JSONDecodeError:
+            breaks = []
         self._init_breakpoints = breaks
 
         for brk in breaks:
