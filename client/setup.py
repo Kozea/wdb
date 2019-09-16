@@ -7,7 +7,7 @@ import sys
 
 from setuptools import setup
 
-__version__ = '3.2.6'
+__version__ = '3.3.0'
 
 requires = [
     "log_colorizer>=1.8.3",

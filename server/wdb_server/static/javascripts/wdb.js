@@ -1335,7 +1335,7 @@ help = "<div class=\"mdl-tabs mdl-js-tabs mdl-js-ripple-effect\">\n  <div class=
 Wdb = (function(superClass) {
   extend(Wdb, superClass);
 
-  Wdb.prototype.__version__ = '3.2.6';
+  Wdb.prototype.__version__ = '3.3.0';
 
   function Wdb() {
     Wdb.__super__.constructor.call(this);
