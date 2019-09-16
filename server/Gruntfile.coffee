@@ -45,6 +45,8 @@ module.exports = (grunt) ->
           'wdb_server/static/javascripts/wdb/deps.min.js': jsdeps
 
     sass:
+      options:
+        implementation: require('dart-sass')
       wdb:
         expand: true
         cwd: 'sass/'

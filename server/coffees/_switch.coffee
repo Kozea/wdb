@@ -16,7 +16,7 @@
 
 class Switch extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$trace = $('.trace')
     @$switches = $('.switch').click (e) => @switch $(e.currentTarget)
     @$command = $('.command').click (e) => @command $(e.currentTarget)

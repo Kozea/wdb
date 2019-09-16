@@ -16,7 +16,7 @@
 
 class Interpreter extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$terminal = $('.terminal')
       .on 'click', =>
         unless getSelection().toString()

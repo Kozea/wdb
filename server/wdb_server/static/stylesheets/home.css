@@ -1,42 +1,46 @@
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .cover {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)), url("../hipster.jpg") center/cover; }
-  .cover .mdl-layout__header-row {
-    height: 20vh; }
-  .cover .mdl-layout__tab-bar, .cover .mdl-layout__tab-bar-button {
-    background: transparent; }
-  .cover .mdl-layout-title {
-    font-size: 3em;
-    left: 90%; }
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)), url("../hipster.jpg") center/cover;
+}
+.cover .mdl-layout__header-row {
+  height: 20vh;
+}
+.cover .mdl-layout__tab-bar, .cover .mdl-layout__tab-bar-button {
+  background: transparent;
+}
+.cover .mdl-layout-title {
+  font-size: 3em;
+  left: 90%;
+}
 
 .open-shell {
   position: fixed;
   bottom: 2em;
   right: 2em;
-  z-index: 1337; }
+  z-index: 1337;
+}
 
 .page-content table, .page-content form, .page-content aside {
-  margin: auto; }
-
+  margin: auto;
+}
 .page-content form, .page-content aside {
   /* Oh yeah! */
-  width: fit-content; }
+  width: fit-content;
+}
 
 .page-content aside.note {
   margin-top: 1em;
-  padding: .5em;
-  opacity: .8; }
+  padding: 0.5em;
+  opacity: 0.8;
+}

@@ -16,7 +16,7 @@
 
 class Websocket extends Log
   constructor: (@wdb, uuid) ->
-    super
+    super()
     # Open a websocket in case of request break
     proto = if (document.location.protocol == "https:") then "wss:" else "ws:"
     @url = "#{proto}//#{document.location.host}/websocket/#{uuid}"

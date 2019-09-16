@@ -16,7 +16,7 @@
 
 class Traceback extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$traceback = $('.traceback')
     @$traceback.on 'click', '.trace-line', @select.bind @
 

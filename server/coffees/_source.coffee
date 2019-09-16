@@ -16,7 +16,7 @@
 
 class Source extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$container = $('.source')
       .on 'mousedown', (e) =>
         return unless e.which == 2 and @code_mirror.getOption 'readOnly'

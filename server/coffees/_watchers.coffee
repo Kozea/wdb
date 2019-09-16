@@ -16,7 +16,7 @@
 
 class Watchers extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$watchers = $('.watchers')
       .on 'click', '.watching .name', @unwatch.bind @
 

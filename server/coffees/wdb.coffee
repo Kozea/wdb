@@ -18,7 +18,7 @@ class Wdb extends Log
   __version__: '3.2.6'
 
   constructor: ->
-    super
+    super()
     @started = false
     @cwd = null
     @file_cache = {}

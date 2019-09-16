@@ -1,348 +1,410 @@
 @charset "UTF-8";
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .interpreter .prompt {
-  display: flex; }
-  .interpreter .prompt:before {
-    margin-top: 4px;
-    font-family: "Roboto Mono"; }
-  .interpreter .prompt .CodeMirror {
-    flex: 1;
-    height: auto;
-    min-height: min-content;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-    .interpreter .prompt .CodeMirror.extra-dialog {
-      padding-bottom: 2em; }
-    .interpreter .prompt .CodeMirror .CodeMirror-cursor {
-      visibility: visible !important;
-      width: auto;
-      border: none;
-      outline: 1px solid rgba(0, 0, 0, 0.5); }
-    .interpreter .prompt .CodeMirror.CodeMirror-focused .CodeMirror-cursor {
-      background: rgba(0, 0, 0, 0.75);
-      animation: blink 1s ease-in-out infinite;
-      outline: 0; }
-  .interpreter .prompt .CodeMirror-dialog .not-found {
-    color: orangered; }
-  .interpreter .prompt .patience {
-    padding: 4px; }
+  display: flex;
+}
+.interpreter .prompt:before {
+  margin-top: 4px;
+  font-family: "Roboto Mono";
+}
+.interpreter .prompt .CodeMirror {
+  flex: 1;
+  height: auto;
+  min-height: min-content;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.interpreter .prompt .CodeMirror.extra-dialog {
+  padding-bottom: 2em;
+}
+.interpreter .prompt .CodeMirror .CodeMirror-cursor {
+  visibility: visible !important;
+  width: auto;
+  border: none;
+  outline: 1px solid rgba(0, 0, 0, 0.5);
+}
+.interpreter .prompt .CodeMirror.CodeMirror-focused .CodeMirror-cursor {
+  background: rgba(0, 0, 0, 0.75);
+  animation: blink 1s ease-in-out infinite;
+  outline: 0;
+}
+.interpreter .prompt .CodeMirror-dialog .not-found {
+  color: orangered;
+}
+.interpreter .prompt .patience {
+  padding: 4px;
+}
 
 .CodeMirror-hints .CodeMirror-hint {
-  max-width: 75vmin; }
-
+  max-width: 75vmin;
+}
 .CodeMirror-hints.auto {
-  opacity: .9;
-  box-shadow: -2px -3px 5px rgba(0, 0, 0, 0.2) inset; }
+  opacity: 0.9;
+  box-shadow: -2px -3px 5px rgba(0, 0, 0, 0.2) inset;
+}
 
 @keyframes blink {
   0% {
-    opacity: 1; }
+    opacity: 1;
+  }
   50% {
-    opacity: 0; }
+    opacity: 0;
+  }
   100% {
-    opacity: 1; } }
-
+    opacity: 1;
+  }
+}
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .interpreter .watchers .watching, .interpreter .watchers a.inspect, .interpreter .watchers code, .interpreter .watchers div.value {
-  display: inline-block; }
-
+  display: inline-block;
+}
 .interpreter .watchers .watching {
-  margin-right: 1em; }
-  .interpreter .watchers .watching:not(:last-child)::after {
-    content: ', '; }
-  .interpreter .watchers .watching .name {
-    cursor: not-allowed; }
+  margin-right: 1em;
+}
+.interpreter .watchers .watching:not(:last-child)::after {
+  content: ", ";
+}
+.interpreter .watchers .watching .name {
+  cursor: not-allowed;
+}
 
 .interpreter {
   outline: 0;
   display: flex;
-  flex-direction: column; }
-  .interpreter .terminal {
-    flex: 1;
-    overflow: auto;
-    display: flex;
-    flex-direction: column;
-    position: relative; }
-    .interpreter .terminal .scrollback .scroll-line {
-      padding: 4px; }
-    .interpreter .terminal .scrollback .duration {
-      float: right; }
-  .interpreter.full-height {
-    height: calc(100vh - 40px - 64px); }
-  .interpreter .long {
-    display: none; }
-  .interpreter .short.close:after {
-    content: '…"'; }
-  .interpreter table {
-    margin: 0 auto;
-    width: 90%; }
-    .interpreter table table {
-      width: 100%; }
-    .interpreter table.object {
-      margin: 2em auto; }
-      .interpreter table.object thead tr th {
-        text-align: center; }
-      .interpreter table.object tbody tr:not(:hover) {
-        background: rgba(0, 0, 0, 0.025); }
-    .interpreter table tbody.closed {
-      display: none; }
-    .interpreter table tbody td.key code {
-      white-space: nowrap; }
-    .interpreter table tbody td.ellipse {
-      text-align: center; }
-    .interpreter table tbody td.val code {
-      word-break: break-all;
-      overflow-wrap: break-word; }
-  .interpreter a.inspect {
-    display: inline-block;
-    text-decoration: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    cursor: pointer;
-    max-width: 100%; }
-  .interpreter .prompt::before, .interpreter .for::before {
-    content: '>>>'; }
-  .interpreter .for::before {
-    margin-right: 8px; }
-  .interpreter .prompt::before {
-    margin-left: 4px;
-    margin-right: 4px; }
-  .interpreter .diff td {
-    width: 49%;
-    border-top: none;
-    border-bottom: none;
-    padding-top: 0;
-    padding-bottom: 0; }
-  .interpreter .diff .diff_lno {
-    min-width: 50px;
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 1%; }
-  .interpreter .diff .diff_line {
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: break-word; }
-  .interpreter .diff .diff_sub {
-    background-color: #f8cbcb; }
-  .interpreter .diff .diff_line_sub {
-    background-color: #ffecec; }
-  .interpreter .diff .diff_add {
-    background-color: #a6f3a6; }
-  .interpreter .diff .diff_line_add {
-    background-color: #eaffea; }
-  .interpreter .diff .diff_chg {
-    background-color: #f2f1a1; }
-  .interpreter .diff .diff_line_chg {
-    background-color: #fffeeb; }
+  flex-direction: column;
+}
+.interpreter .terminal {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.interpreter .terminal .scrollback .scroll-line {
+  padding: 4px;
+}
+.interpreter .terminal .scrollback .duration {
+  float: right;
+}
+.interpreter.full-height {
+  height: calc(100vh - 40px - 64px);
+}
+.interpreter .long {
+  display: none;
+}
+.interpreter .short.close:after {
+  content: '…"';
+}
+.interpreter table {
+  margin: 0 auto;
+  width: 90%;
+}
+.interpreter table table {
+  width: 100%;
+}
+.interpreter table.object {
+  margin: 2em auto;
+}
+.interpreter table.object thead tr th {
+  text-align: center;
+}
+.interpreter table.object tbody tr:not(:hover) {
+  background: rgba(0, 0, 0, 0.025);
+}
+.interpreter table tbody.closed {
+  display: none;
+}
+.interpreter table tbody td.key code {
+  white-space: nowrap;
+}
+.interpreter table tbody td.ellipse {
+  text-align: center;
+}
+.interpreter table tbody td.val code {
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+.interpreter a.inspect {
+  display: inline-block;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  max-width: 100%;
+}
+.interpreter .prompt::before, .interpreter .for::before {
+  content: ">>>";
+}
+.interpreter .for::before {
+  margin-right: 8px;
+}
+.interpreter .prompt::before {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.interpreter .diff td {
+  width: 49%;
+  border-top: none;
+  border-bottom: none;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.interpreter .diff .diff_lno {
+  min-width: 50px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 1%;
+}
+.interpreter .diff .diff_line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.interpreter .diff .diff_sub {
+  background-color: #f8cbcb;
+}
+.interpreter .diff .diff_line_sub {
+  background-color: #ffecec;
+}
+.interpreter .diff .diff_add {
+  background-color: #a6f3a6;
+}
+.interpreter .diff .diff_line_add {
+  background-color: #eaffea;
+}
+.interpreter .diff .diff_chg {
+  background-color: #f2f1a1;
+}
+.interpreter .diff .diff_line_chg {
+  background-color: #fffeeb;
+}
 
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .CodeMirror-linebackground {
-  transition: background-color 1s; }
-  .CodeMirror-linebackground.ctx {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-left: 1px solid rgba(0, 0, 0, 0.5);
-    border-right: 1px solid rgba(0, 0, 0, 0.5); }
-    .CodeMirror-linebackground.ctx.ctx-top {
-      border-top: 1px solid rgba(0, 0, 0, 0.5); }
-    .CodeMirror-linebackground.ctx.ctx-bottom {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.5); }
-  .CodeMirror-linebackground.footstep {
-    background-color: rgba(0, 0, 0, 0.1); }
-  .CodeMirror-linebackground.breakpoint {
-    background-color: rgba(255, 0, 0, 0.1); }
-  .CodeMirror-linebackground.highlighted {
-    background-color: rgba(0, 0, 0, 0.1); }
-  .CodeMirror-linebackground.breakpoint.highlighted {
-    background-color: rgba(255, 0, 0, 0.2); }
-  .CodeMirror-linebackground.ask-breakpoint {
-    background-color: rgba(255, 0, 0, 0.05); }
+  transition: background-color 1s;
+}
+.CodeMirror-linebackground.ctx {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.5);
+  border-right: 1px solid rgba(0, 0, 0, 0.5);
+}
+.CodeMirror-linebackground.ctx.ctx-top {
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+}
+.CodeMirror-linebackground.ctx.ctx-bottom {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+.CodeMirror-linebackground.footstep {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.CodeMirror-linebackground.breakpoint {
+  background-color: rgba(255, 0, 0, 0.1);
+}
+.CodeMirror-linebackground.highlighted {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.CodeMirror-linebackground.breakpoint.highlighted {
+  background-color: rgba(255, 0, 0, 0.2);
+}
+.CodeMirror-linebackground.ask-breakpoint {
+  background-color: rgba(255, 0, 0, 0.05);
+}
 
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .mdl-layout__header-row {
-  padding-right: 20px; }
-  .mdl-layout__header-row .switch, .mdl-layout__header-row .command {
-    opacity: .75;
-    margin: 8px; }
-    .mdl-layout__header-row .switch:hover, .mdl-layout__header-row .command:hover {
-      opacity: 1; }
-  .mdl-layout__header-row .separator {
-    border-right: 1px solid rgba(255, 255, 255, 0.7);
-    height: 29px;
-    margin: 0 22px; }
-  .mdl-layout__header-row .subtitle {
-    flex-shrink: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; }
+  padding-right: 20px;
+}
+.mdl-layout__header-row .switch, .mdl-layout__header-row .command {
+  opacity: 0.75;
+  margin: 8px;
+}
+.mdl-layout__header-row .switch:hover, .mdl-layout__header-row .command:hover {
+  opacity: 1;
+}
+.mdl-layout__header-row .separator {
+  border-right: 1px solid rgba(255, 255, 255, 0.7);
+  height: 29px;
+  margin: 0 22px;
+}
+.mdl-layout__header-row .subtitle {
+  flex-shrink: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* This file is part of wdb */
-/* */
-/* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
+/* /* wdb Copyright (c) 2012-2016  Florian Mounier, Kozea */
 /* This program is free software: you can redistribute it and/or modify */
 /* it under the terms of the GNU General Public License as published by */
 /* the Free Software Foundation, either version 3 of the License, or */
 /* (at your option) any later version. */
-/* */
-/* This program is distributed in the hope that it will be useful, */
+/* /* This program is distributed in the hope that it will be useful, */
 /* but WITHOUT ANY WARRANTY; without even the implied warranty of */
 /* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the */
 /* GNU General Public License for more details. */
-/* */
-/* You should have received a copy of the GNU General Public License */
+/* /* You should have received a copy of the GNU General Public License */
 /* along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 .mdl-layout__drawer .traceback {
-  padding-top: 0; }
-  .mdl-layout__drawer .traceback .trace-line code {
-    font-size: .75em;
-    word-break: normal; }
-  .mdl-layout__drawer .traceback .trace-line .material-icons {
-    font-size: .8em;
-    margin-right: .5em;
-    vertical-align: middle; }
-  .mdl-layout__drawer .traceback .trace-line:hover {
-    background: rgba(0, 0, 0, 0.05); }
-  .mdl-layout__drawer .traceback .trace-line.real-selected {
-    background: rgba(255, 255, 255, 0.9); }
-    .mdl-layout__drawer .traceback .trace-line.real-selected:hover {
-      background: rgba(0, 0, 0, 0.1); }
-  .mdl-layout__drawer .traceback .trace-line.selected {
-    background: rgba(0, 0, 0, 0.08); }
-    .mdl-layout__drawer .traceback .trace-line.selected:hover {
-      background: rgba(0, 0, 0, 0.13); }
+  padding-top: 0;
+}
+.mdl-layout__drawer .traceback .trace-line code {
+  font-size: 0.75em;
+  word-break: normal;
+}
+.mdl-layout__drawer .traceback .trace-line .material-icons {
+  font-size: 0.8em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+.mdl-layout__drawer .traceback .trace-line:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.mdl-layout__drawer .traceback .trace-line.real-selected {
+  background: rgba(255, 255, 255, 0.9);
+}
+.mdl-layout__drawer .traceback .trace-line.real-selected:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+.mdl-layout__drawer .traceback .trace-line.selected {
+  background: rgba(0, 0, 0, 0.08);
+}
+.mdl-layout__drawer .traceback .trace-line.selected:hover {
+  background: rgba(0, 0, 0, 0.13);
+}
 
 body {
-  transition: -webkit-filter .25s ease-out, filter .25s ease-out; }
-  body.is-active {
-    transition: -webkit-filter 1.5s ease-in, filter 1.5s ease-in;
-    -webkit-filter: grayscale(100%);
-    filter: grayscale(100%); }
-  body.is-dead {
-    -webkit-filter: sepia(100%);
-    filter: sepia(100%); }
+  transition: -webkit-filter 0.25s ease-out, filter 0.25s ease-out;
+}
+body.is-active {
+  transition: -webkit-filter 1.5s ease-in, filter 1.5s ease-in;
+  -webkit-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+body.is-dead {
+  -webkit-filter: sepia(100%);
+  filter: sepia(100%);
+}
 
 main {
-  background: white; }
+  background: white;
+}
 
 .CodeMirror, code {
-  font-family: "Roboto Mono"; }
+  font-family: "Roboto Mono";
+}
 
 .split {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 64px - 40px); }
-  @media screen and (max-width: 1024px) {
-    .split {
-      min-height: calc(100vh - 56px - 40px); } }
+  min-height: calc(100vh - 64px - 40px);
+}
+@media screen and (max-width: 1024px) {
+  .split {
+    min-height: calc(100vh - 56px - 40px);
+  }
+}
+.split .flex {
+  flex: 1 1 calc(50vh - 64px - 40px);
+  /* IE */
+  /* FF scroll */
+  min-height: 0;
+}
+@media screen and (max-width: 1024px) {
   .split .flex {
-    flex: 1 1 calc(50vh - 64px - 40px);
-    /* IE */
-    /* FF scroll */
-    min-height: 0; }
-    @media screen and (max-width: 1024px) {
-      .split .flex {
-        flex: 1 1 calc(50vh - 56px - 40px); } }
-    @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
-      .split .flex {
-        height: calc(50vh - 64px - 40px); } }
+    flex: 1 1 calc(50vh - 56px - 40px);
+  }
+}
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .split .flex {
+    height: calc(50vh - 64px - 40px);
+  }
+}
 
 .title {
-  white-space: pre; }
+  white-space: pre;
+}
 
 footer.mdl-mini-footer {
   overflow: hidden;
   height: 32px;
-  padding: 4px 1em; }
-  footer.mdl-mini-footer .mdl-spinner {
-    margin: 2px 0; }
+  padding: 4px 1em;
+}
+footer.mdl-mini-footer .mdl-spinner {
+  margin: 2px 0;
+}
 
 code {
   white-space: pre-wrap;
   word-break: break-all;
-  overflow-wrap: break-word; }
+  overflow-wrap: break-word;
+}
 
 .ellipsis {
   text-overflow: ellipsis;
@@ -350,29 +412,35 @@ code {
   overflow: hidden;
   white-space: nowrap;
   word-wrap: normal;
-  width: 100%; }
+  width: 100%;
+}
 
 .modals .mdl-dialog {
   width: auto;
   max-width: 80vw;
-  max-height: 80vh; }
-  .modals .mdl-dialog .mdl-dialog__content {
-    overflow: auto; }
-    .modals .mdl-dialog .mdl-dialog__content table, .modals .mdl-dialog .mdl-dialog__content aside {
-      margin: auto;
-      width: fit-content; }
-    .modals .mdl-dialog .mdl-dialog__content table {
-      margin-bottom: 1em; }
+  max-height: 80vh;
+}
+.modals .mdl-dialog .mdl-dialog__content {
+  overflow: auto;
+}
+.modals .mdl-dialog .mdl-dialog__content table, .modals .mdl-dialog .mdl-dialog__content aside {
+  margin: auto;
+  width: fit-content;
+}
+.modals .mdl-dialog .mdl-dialog__content table {
+  margin-bottom: 1em;
+}
 
 aside.note {
   margin-top: 1em;
-  padding: .5em;
-  opacity: .8; }
+  padding: 0.5em;
+  opacity: 0.8;
+}
 
 kbd {
   margin: 0 0.1em;
   padding: 0.1em 0.6em;
-  font-size: .9em;
+  font-size: 0.9em;
   border: 1px solid #ccc;
   background-color: #f7f7f7;
   color: #333;
@@ -380,4 +448,5 @@ kbd {
   border-radius: 3px;
   text-shadow: 0 1px 0 #fff;
   line-height: 1.4;
-  white-space: nowrap; }
+  white-space: nowrap;
+}

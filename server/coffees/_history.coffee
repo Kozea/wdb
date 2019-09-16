@@ -16,7 +16,7 @@
 
 class History extends Log
   constructor: (@prompt) ->
-    super
+    super()
     @index = -1
     @current = ''
     @currentPos = CodeMirror.Pos(0, 0)

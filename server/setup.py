@@ -11,7 +11,7 @@ __version__ = '3.2.6'
 
 requires = [
     "wdb==%s" % __version__,
-    "tornado>=5.0",
+    "tornado>=5.0, <6.0",
     "psutil>=2.1",
     'tornado_systemd',
 ]

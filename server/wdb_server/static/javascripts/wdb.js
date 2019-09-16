@@ -68,7 +68,7 @@ Websocket = (function(superClass) {
   function Websocket(wdb, uuid) {
     var proto;
     this.wdb = wdb;
-    Websocket.__super__.constructor.apply(this, arguments);
+    Websocket.__super__.constructor.call(this);
     proto = document.location.protocol === "https:" ? "wss:" : "ws:";
     this.url = proto + "//" + document.location.host + "/websocket/" + uuid;
     this.log('Opening new socket', this.url);
@@ -138,7 +138,7 @@ Source = (function(superClass) {
 
   function Source(wdb) {
     this.wdb = wdb;
-    Source.__super__.constructor.apply(this, arguments);
+    Source.__super__.constructor.call(this);
     this.$container = $('.source').on('mousedown', (function(_this) {
       return function(e) {
         if (!(e.which === 2 && _this.code_mirror.getOption('readOnly'))) {
@@ -422,7 +422,7 @@ History = (function(superClass) {
   function History(prompt) {
     var e, error;
     this.prompt = prompt;
-    History.__super__.constructor.apply(this, arguments);
+    History.__super__.constructor.call(this);
     this.index = -1;
     this.current = '';
     this.currentPos = CodeMirror.Pos(0, 0);
@@ -594,7 +594,7 @@ Traceback = (function(superClass) {
 
   function Traceback(wdb) {
     this.wdb = wdb;
-    Traceback.__super__.constructor.apply(this, arguments);
+    Traceback.__super__.constructor.call(this);
     this.$traceback = $('.traceback');
     this.$traceback.on('click', '.trace-line', this.select.bind(this));
   }
@@ -687,7 +687,7 @@ Interpreter = (function(superClass) {
 
   function Interpreter(wdb) {
     this.wdb = wdb;
-    Interpreter.__super__.constructor.apply(this, arguments);
+    Interpreter.__super__.constructor.call(this);
     this.$terminal = $('.terminal').on('click', (function(_this) {
       return function() {
         if (!getSelection().toString()) {
@@ -751,7 +751,7 @@ Prompt = (function(superClass) {
 
   function Prompt(wdb) {
     this.wdb = wdb;
-    Prompt.__super__.constructor.apply(this, arguments);
+    Prompt.__super__.constructor.call(this);
     this.$container = $('.prompt');
     this.history = new History(this);
     this.code_mirror = CodeMirror((function(_this) {
@@ -1199,7 +1199,7 @@ Watchers = (function(superClass) {
 
   function Watchers(wdb) {
     this.wdb = wdb;
-    Watchers.__super__.constructor.apply(this, arguments);
+    Watchers.__super__.constructor.call(this);
     this.$watchers = $('.watchers').on('click', '.watching .name', this.unwatch.bind(this));
   }
 
@@ -1252,7 +1252,7 @@ Switch = (function(superClass) {
 
   function Switch(wdb) {
     this.wdb = wdb;
-    Switch.__super__.constructor.apply(this, arguments);
+    Switch.__super__.constructor.call(this);
     this.$trace = $('.trace');
     this.$switches = $('.switch').click((function(_this) {
       return function(e) {
@@ -1338,7 +1338,7 @@ Wdb = (function(superClass) {
   Wdb.prototype.__version__ = '3.2.6';
 
   function Wdb() {
-    Wdb.__super__.constructor.apply(this, arguments);
+    Wdb.__super__.constructor.call(this);
     this.started = false;
     this.cwd = null;
     this.file_cache = {};

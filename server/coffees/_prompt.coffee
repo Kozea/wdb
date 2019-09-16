@@ -16,7 +16,7 @@
 
 class Prompt extends Log
   constructor: (@wdb) ->
-    super
+    super()
     @$container = $('.prompt')
     @history = new History @
 
