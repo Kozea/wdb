@@ -205,6 +205,27 @@ In tornado, which is not a wsgi server, you can use the `wdb_tornado` function w
     my_app.listen(8888)
 ```
 
+#### aiohttp
+
+In aiohttp, which is not a wsgi server, you can use the `wdb_aiohttp` function which will monkey patch the execute method on RequestHandlers:
+
+```python
+    from aiohttp import web
+    from wdb.ext import wdb_aiohttp
+
+    async def handle(request):
+        name = request.match_info.get('name', "Anonymous")
+        text = "Hello, " + name
+        return web.Response(text=text)
+
+    app = web.Application()
+    wdb_aiohttp(app)
+    app.add_routes([web.get('/', handle),
+                    web.get('/{name}', handle)])
+
+    if __name__ == '__main__':
+        web.run_app(app)
+
 #### Page loading time become slow
 
 
@@ -443,9 +464,9 @@ DEBUG 2017-07-16 13:15:03,772 index 49835 123145573191680 parsing Python module 
 ```
 
 
-To silence only this message, add a config for the importmagic module. For example: 
+To silence only this message, add a config for the importmagic module. For example:
 
-```    
+```
 LOGGING = {
     ...
     'loggers': {

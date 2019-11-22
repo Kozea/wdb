@@ -304,6 +304,53 @@ def wdb_tornado(application, start_disabled=False):
     RequestHandler.write_error = _wdb_error_writter
 
 
+def wdb_aiohttp(application, start_disabled=False):
+    from aiohttp.web import route, Response
+    from aiohttp.web_protocol import RequestHandler as AiohttpRequestHandler
+
+    Wdb.enabled = not start_disabled
+
+    async def WdbOn(request):
+        Wdb.enabled = True
+        return Response('Wdb is now on')
+
+    async def WdbOff(request):
+        Wdb.enabled = False
+        return Response('Wdb is now off')
+
+    application.add_routes([
+        route('*', '/__wdb/on', WdbOn),
+        route('*', '/__wdb/off', WdbOff),
+    ])
+    old_start = AiohttpRequestHandler.start
+    under = getattr(AiohttpRequestHandler.start, '__wrapped__', None)
+
+    async def _wdb_start(*args, **kwargs):
+        from wdb import trace, Wdb, stop_trace
+
+        if Wdb.enabled:
+            wdb = Wdb.get()
+            wdb.closed = False  # Activate request ignores
+
+        interesting = True
+        if len(args) > 0 and args[0]._error_handler is None:
+            interesting = False
+
+        if Wdb.enabled and interesting:
+            with trace(close_on_exit=True, under=under):
+                await old_start(*args, **kwargs)
+        else:
+            await old_start(*args, **kwargs)
+            # Close set_trace debuggers
+            stop_trace(close_on_exit=True)
+
+        if Wdb.enabled:
+            # Reset closed state
+            wdb.closed = False
+
+    AiohttpRequestHandler.start = _wdb_start
+
+
 def add_w_builtin():
     class w(object):
         """Global shortcuts"""
