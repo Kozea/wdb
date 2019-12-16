@@ -5,7 +5,11 @@ import sys
 python_version = sys.version_info[0]
 
 try:
-    from json import loads, dumps, JSONEncoder, JSONDecodeError
+    from json import loads, dumps, JSONEncoder
+    try:
+        from json import JSONDecodeError
+    except ImportError:
+        JSONDecodeError = ValueError  # python < 3.5
 except ImportError:
     from simplejson import loads, dumps, JSONEncoder, JSONDecodeError
 
